@@ -20,9 +20,7 @@ Browse the library or use the search bar to find prompts by keyword or category.
 
 - Vanilla JavaScript (no frameworks, no dependencies)
 - Client-side only — your data never leaves your browser
-- Part of the [Zovo Tools](https://zovo.one) open network
 
-## Related Tools
 
 - [AI Workflow Builder](https://claudflow.com) — design multi-step AI workflows visually
 - [Claude API Playground](https://claudkit.com) — test Claude API calls with a visual request builder
