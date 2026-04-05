@@ -122,6 +122,7 @@ function renderPrompts() {
     html += '</div>';
     html += '<div class="description">' + escapeHtml(p.description) + '</div>';
     html += '<div class="prompt-text">' + escapeHtml(p.prompt) + '</div>';
+    html += buildTokenPanel(p);
     html += '<div class="prompt-actions">';
     html += '<button class="btn btn-accent" onclick="copyPrompt(' + p.id + ', event)">Copy Prompt</button>';
     html += '<span class="copied-feedback" id="feedback-' + p.id + '">Copied!</span>';
@@ -165,6 +166,78 @@ function initApp() {
     });
   }
   renderPrompts();
+}
+
+/* --- Token Counter + Model Recommender --- */
+
+var MODEL_PRICING = {
+  haiku: { name: "Claude 3 Haiku", inputPer1M: 0.25, outputPer1M: 1.25 },
+  sonnet: { name: "Claude 3.5 Sonnet", inputPer1M: 3.00, outputPer1M: 15.00 },
+  opus: { name: "Claude 3 Opus", inputPer1M: 15.00, outputPer1M: 75.00 }
+};
+
+function estimateTokens(text) {
+  var words = text.split(/\s+/).filter(function(w) { return w.length > 0; });
+  return Math.ceil(words.length * 1.3);
+}
+
+function classifyComplexity(text) {
+  var codeBlocks = (text.match(/```/g) || []).length / 2;
+  var bullets = (text.match(/^\s*[-*\d.]+/gm) || []).length;
+  var longWords = text.split(/\s+/).filter(function(w) { return w.length > 12; }).length;
+  var score = codeBlocks * 3 + bullets * 0.5 + longWords * 0.3;
+  if (score > 10) return "complex";
+  if (score > 3) return "moderate";
+  return "simple";
+}
+
+function getModelRecommendation(tokens, complexity) {
+  if (tokens >= 4000 || complexity === "complex") {
+    return { key: "opus", reason: "Long or complex prompt" };
+  }
+  if (tokens >= 1000 || complexity === "moderate") {
+    return { key: "sonnet", reason: "Moderate length & complexity" };
+  }
+  return { key: "haiku", reason: "Short & straightforward" };
+}
+
+function formatCost(dollars) {
+  if (dollars < 0.001) return "<$0.001";
+  return "$" + dollars.toFixed(4);
+}
+
+function buildTokenPanel(prompt) {
+  var tokens = estimateTokens(prompt.prompt);
+  var complexity = classifyComplexity(prompt.prompt);
+  var rec = getModelRecommendation(tokens, complexity);
+  var estOutputTokens = Math.min(tokens * 2, 4096);
+
+  var html = '<div class="token-panel">';
+  html += '<div class="token-header">Token & Cost Estimate</div>';
+  html += '<div class="token-stats">';
+  html += '<span class="token-badge">~' + tokens.toLocaleString() + ' input tokens</span>';
+  html += '<span class="token-badge">' + complexity + ' complexity</span>';
+  html += '</div>';
+  html += '<div class="model-rec">';
+
+  var keys = ["haiku", "sonnet", "opus"];
+  for (var i = 0; i < keys.length; i++) {
+    var m = MODEL_PRICING[keys[i]];
+    var inputCost = (tokens / 1e6) * m.inputPer1M;
+    var outputCost = (estOutputTokens / 1e6) * m.outputPer1M;
+    var totalCost = inputCost + outputCost;
+    var isRec = keys[i] === rec.key;
+    html += '<div class="model-option' + (isRec ? ' recommended' : '') + '">';
+    if (isRec) html += '<span class="rec-badge">Recommended</span>';
+    html += '<strong>' + m.name + '</strong>';
+    html += '<span class="model-cost">' + formatCost(totalCost) + '/use</span>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  html += '<div class="rec-reason">' + escapeHtml(rec.reason) + '</div>';
+  html += '</div>';
+  return html;
 }
 
 if (document.readyState === "loading") {

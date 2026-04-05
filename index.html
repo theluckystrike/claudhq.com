@@ -23,6 +23,62 @@
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are the best Claude prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The best Claude prompts are specific, structured, and include context about the desired output. Our library features 30+ tested templates across coding, writing, analysis, creative, business, and education categories."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to write effective AI prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Effective AI prompts follow a clear structure: define the role, provide context, specify the task, set constraints, and describe the desired output format. Be specific and include examples when possible."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Claude vs ChatGPT prompts — what's different?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude responds well to structured prompts with explicit instructions, system-level context, and XML tags. Claude excels at longer, nuanced tasks and following detailed instructions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Claude model should I use for my prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude 3 Haiku for short, simple prompts under 1000 tokens. Claude 3.5 Sonnet for moderate tasks of 1000-4000 tokens. Claude 3 Opus for complex prompts over 4000 tokens requiring maximum quality."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does it cost to use Claude prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude API pricing varies by model. Haiku costs $0.25/1M input tokens, Sonnet $3.00/1M, Opus $15.00/1M. A typical prompt costs between $0.001 and $0.05 per use."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are these prompt templates free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, all prompt templates on ClaudHQ are completely free. Copy, modify, and use them for any purpose. No sign-up required."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <nav>
@@ -52,6 +108,34 @@
   </div>
 
   <div class="prompt-grid" id="prompt-grid"></div>
+
+  <section class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">What are the best Claude prompts?</div>
+      <div class="faq-a">The best Claude prompts are specific, structured, and include context about the desired output. Our library features 30+ tested templates across coding, writing, analysis, creative, business, and education categories. Each prompt includes clear instructions, output formatting, and placeholders for your specific content.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">How to write effective AI prompts?</div>
+      <div class="faq-a">Effective AI prompts follow a clear structure: define the role, provide context, specify the task, set constraints, and describe the desired output format. Be specific about what you want and include examples when possible. Avoid vague instructions and always tell the model what NOT to do if relevant.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Claude vs ChatGPT prompts — what's different?</div>
+      <div class="faq-a">Claude responds well to structured prompts with explicit instructions, system-level context, and XML tags for organization. ChatGPT works similarly but has different strengths. Claude excels at longer, nuanced tasks and following detailed instructions, while both benefit from clear role definitions and output formatting.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Which Claude model should I use for my prompts?</div>
+      <div class="faq-a">It depends on complexity and budget. Claude 3 Haiku is ideal for short, simple prompts under 1000 tokens — it's fast and cheap. Claude 3.5 Sonnet handles moderate tasks of 1000-4000 tokens with the best value. Claude 3 Opus is best for complex prompts over 4000 tokens requiring maximum quality. Our tool shows token estimates and model recommendations for each prompt.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">How much does it cost to use Claude prompts?</div>
+      <div class="faq-a">Claude API pricing varies by model. Haiku costs $0.25 per million input tokens, Sonnet costs $3.00, and Opus costs $15.00. A typical prompt costs between $0.001 and $0.05 depending on length and model. Our prompt library shows estimated cost per use for each template to help you budget effectively.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Are these prompt templates free to use?</div>
+      <div class="faq-a">Yes, all prompt templates on ClaudHQ are completely free. You can copy, modify, and use them for any purpose — personal or commercial. No sign-up required. Just browse, click to expand, and copy the prompt directly to your clipboard.</div>
+    </div>
+  </section>
 
   <footer>
     Built by <a href="https://zovo.one">zovo.one</a> &middot; More tools: <a href="https://claudflow.com">ClaudFlow</a>, <a href="https://claudkit.com">ClaudKit</a>
