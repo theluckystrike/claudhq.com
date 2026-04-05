@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://claudhq.com/sitemap.xml
