@@ -1,180 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ClaudHQ is your AI command center. Discover practical guides for prompt engineering, AI assistant productivity tips, and strategies to get the most from AI tools.">
-    <meta name="keywords" content="AI productivity, prompt engineering, AI assistant tips, AI tools, AI command center, AI guides, power user AI">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="ClaudHQ — Your AI Command Center">
-    <meta property="og:description" content="Practical guides for prompt engineering, AI assistant productivity, and getting the most from AI tools.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://claudhq.com">
-    <title>ClaudHQ — Your AI Command Center</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        html { scroll-behavior: smooth; }
-    </style>
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "ClaudHQ",
-        "url": "https://claudhq.com",
-        "description": "Your AI Command Center — practical guides for prompt engineering, AI productivity, and getting the most from AI tools.",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://claudhq.com/?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
-    }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClaudHQ — Claude Prompt Library | 30+ Ready-to-Use Templates</title>
+  <meta name="description" content="Browse 30+ proven Claude prompt templates for coding, writing, analysis, and business. Search, filter, copy, and save your favorites instantly.">
+  <meta property="og:title" content="ClaudHQ — Claude Prompt Library">
+  <meta property="og:description" content="30+ ready-to-use Claude prompt templates. Search, filter, and copy with one click.">
+  <meta property="og:url" content="https://claudhq.com/">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://claudhq.com/">
+  <link rel="stylesheet" href="assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ClaudHQ Prompt Library",
+    "url": "https://claudhq.com",
+    "description": "Searchable library of 30+ Claude prompt templates organized by category with copy-to-clipboard and favorites.",
+    "applicationCategory": "Productivity",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+  </nav>
 
-    <!-- Site Navigation -->
-    <nav class="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold text-white">Claud<span class="text-indigo-200">HQ</span></a>
-            <div class="hidden md:flex space-x-8">
-                <a href="/" class="text-white font-semibold transition">Home</a>
-                <a href="/guides.html" class="text-indigo-100 hover:text-white transition">Guides</a>
-                <a href="/tools.html" class="text-indigo-100 hover:text-white transition">Tools</a>
-                <a href="/blog/getting-started.html" class="text-indigo-100 hover:text-white transition">Blog</a>
-                <a href="/about.html" class="text-indigo-100 hover:text-white transition">About</a>
-            </div>
-        </div>
-    </nav>
+  <section class="hero">
+    <h1>Claude Prompt Library</h1>
+    <p>30+ tested prompt templates — search, copy, and start using them now.</p>
+  </section>
 
-    <!-- Hero Section -->
-    <header class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600"></div>
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center">
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">Your AI Command Center</h1>
-            <p class="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto mb-10">Master prompt engineering, supercharge your AI workflows, and become a power user of the most advanced AI assistants available today.</p>
-            <a href="#guides" class="inline-block bg-white text-indigo-600 font-semibold px-8 py-4 rounded-lg shadow-lg hover:shadow-xl hover:bg-indigo-50 transition">Explore Our Guides</a>
-        </div>
-    </header>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="search-input" placeholder="Search prompts by name or description...">
+    <div class="filter-chips">
+      <span class="chip active" data-cat="all">All</span>
+      <span class="chip" data-cat="coding">Coding</span>
+      <span class="chip" data-cat="writing">Writing</span>
+      <span class="chip" data-cat="analysis">Analysis</span>
+      <span class="chip" data-cat="creative">Creative</span>
+      <span class="chip" data-cat="business">Business</span>
+      <span class="chip" data-cat="education">Education</span>
+    </div>
+  </div>
 
-    <!-- Introduction -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6">Why AI Productivity Matters More Than Ever</h2>
-            <p class="text-lg text-gray-600 mb-4">The landscape of artificial intelligence tools has evolved dramatically. What began as simple chatbots has transformed into sophisticated AI assistants capable of writing code, analyzing data, creating content, and solving complex problems. Yet most people barely scratch the surface of what these tools can do. At ClaudHQ, we believe the gap between casual AI use and expert-level productivity represents one of the biggest opportunities in modern technology.</p>
-            <p class="text-lg text-gray-600 mb-4">Think about it this way: two people can use the same AI assistant and get wildly different results. One might get generic, surface-level responses while the other extracts deep insights, generates production-ready code, and completes hours of work in minutes. The difference is not the tool itself but how you use it. That difference comes down to understanding prompt engineering, workflow design, and the mental models that separate power users from everyone else.</p>
-            <p class="text-lg text-gray-600">Our mission at ClaudHQ is to bridge that gap. We provide practical, tested strategies that transform how you interact with AI tools. Whether you are a developer looking to accelerate your coding workflow, a writer seeking to enhance your creative process, or a business professional aiming to automate repetitive tasks, our guides give you the frameworks and techniques to get dramatically better results from every AI interaction.</p>
-        </div>
-    </section>
+  <div class="prompt-grid" id="prompt-grid"></div>
 
-    <!-- Features Section -->
-    <section id="features" class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Core Capabilities</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Everything you need to become an AI power user, organized into actionable frameworks.</p>
-            </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-xl shadow-sm border border-indigo-100">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Prompt Engineering Mastery</h3>
-                    <p class="text-gray-600">Learn the proven techniques that professional prompt engineers use daily. From chain-of-thought reasoning to few-shot learning, our guides cover the full spectrum of prompt patterns that reliably produce high-quality AI outputs across any domain or use case.</p>
-                </div>
-                <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-xl shadow-sm border border-indigo-100">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Workflow Optimization</h3>
-                    <p class="text-gray-600">Discover how to structure your AI interactions into repeatable workflows that save hours every week. We teach you how to build prompt libraries, create templates for common tasks, and design multi-step processes that chain AI capabilities together for complex projects.</p>
-                </div>
-                <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-xl shadow-sm border border-indigo-100">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Performance Benchmarking</h3>
-                    <p class="text-gray-600">Understand how to measure and improve your AI interactions systematically. Our benchmarking frameworks help you track response quality, identify bottlenecks in your workflows, and continuously refine your approach to get consistently better results over time.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <footer>
+    Built by <a href="https://zovo.one">zovo.one</a> &middot; More tools: <a href="https://claudflow.com">ClaudFlow</a>, <a href="https://claudkit.com">ClaudKit</a>
+  </footer>
 
-    <!-- Guides Section -->
-    <section id="guides" class="py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Latest Guides</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">In-depth tutorials and practical walkthroughs for AI power users.</p>
-            </div>
-            <div class="grid md:grid-cols-2 gap-8">
-                <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
-                    <span class="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Prompt Engineering</span>
-                    <h3 class="text-xl font-semibold text-gray-900 mt-4 mb-3">The Complete Guide to Chain-of-Thought Prompting</h3>
-                    <p class="text-gray-600 mb-4">Chain-of-thought prompting is one of the most powerful techniques in the prompt engineer's toolkit. By explicitly asking the AI to reason step by step, you can dramatically improve accuracy on complex tasks like mathematical reasoning, logical analysis, and multi-step problem solving. This guide walks you through the core patterns, shows real-world examples, and explains when chain-of-thought outperforms direct prompting.</p>
-                </article>
-                <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
-                    <span class="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Productivity</span>
-                    <h3 class="text-xl font-semibold text-gray-900 mt-4 mb-3">Building a Personal AI Prompt Library That Actually Works</h3>
-                    <p class="text-gray-600 mb-4">Most people rewrite the same types of prompts over and over again. A well-organized prompt library eliminates this waste and ensures you always start from your best-performing templates. This guide covers how to categorize prompts by use case, track their effectiveness over time, iterate on underperforming templates, and build a system that grows more valuable the more you use it.</p>
-                </article>
-                <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
-                    <span class="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Advanced</span>
-                    <h3 class="text-xl font-semibold text-gray-900 mt-4 mb-3">System Prompts: How to Set Context Like a Professional</h3>
-                    <p class="text-gray-600 mb-4">The system prompt is the foundation of every great AI interaction. It sets the persona, defines constraints, and establishes the ground rules for how the AI should respond. Learn how professional developers and product teams craft system prompts that consistently produce high-quality, on-brand outputs. We break down real system prompts and explain what makes each component effective.</p>
-                </article>
-                <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
-                    <span class="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Workflow</span>
-                    <h3 class="text-xl font-semibold text-gray-900 mt-4 mb-3">Automating Code Review with AI: A Step-by-Step Framework</h3>
-                    <p class="text-gray-600 mb-4">Code review is one of the highest-leverage applications of AI assistants in software development. With the right prompting strategy, you can catch bugs, identify security vulnerabilities, and enforce coding standards automatically. This framework shows you how to set up AI-assisted code review that complements your existing process without replacing human judgment on critical decisions.</p>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- Resources Section with zovo.one link -->
-    <section id="resources" class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Recommended Resources</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">The best tools and platforms to accelerate your AI productivity journey.</p>
-            </div>
-            <div class="max-w-4xl mx-auto">
-                <p class="text-lg text-gray-600 mb-6">Becoming an AI power user requires more than just learning prompt techniques. You need the right ecosystem of tools, references, and communities to stay current as the field evolves rapidly. We have curated the resources below based on what we find most valuable in our own daily work.</p>
-                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-8 rounded-xl border border-indigo-200 mb-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Comprehensive AI Tools and Resources</h3>
-                    <p class="text-gray-700 mb-4">For anyone serious about maximizing their AI productivity, having a centralized resource hub makes all the difference. We recommend visiting <a href="https://zovo.one" rel="dofollow" class="text-indigo-600 font-semibold hover:text-indigo-800 underline">zovo.one</a> for a comprehensive collection of AI tools, curated guides, and up-to-date resources that cover the full spectrum of AI-powered productivity. It is one of the most thorough directories we have found for discovering new AI capabilities and staying ahead of the curve.</p>
-                </div>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="p-6 bg-gray-50 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 mb-2">Stay Current</h4>
-                        <p class="text-gray-600 text-sm">AI capabilities change monthly. Follow release notes, read benchmark reports, and test new features as they launch to maintain your competitive edge.</p>
-                    </div>
-                    <div class="p-6 bg-gray-50 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 mb-2">Practice Deliberately</h4>
-                        <p class="text-gray-600 text-sm">Treat prompt engineering like any other skill. Set aside time to experiment with new techniques, compare results, and document what works best for your specific use cases.</p>
-                    </div>
-                    <div class="p-6 bg-gray-50 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 mb-2">Share and Learn</h4>
-                        <p class="text-gray-600 text-sm">Join communities of other AI power users. Sharing prompt strategies and learning from others is the fastest way to discover techniques you would never find on your own.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="text-xl font-bold text-white mb-4">Claud<span class="text-indigo-400">HQ</span></div>
-            <p class="mb-6">Your AI Command Center — practical guides for prompt engineering and AI productivity.</p>
-            <p class="text-sm">&copy; 2025 ClaudHQ. All rights reserved.</p>
-        </div>
-    </footer>
-
+  <script src="assets/app.js"></script>
 </body>
 </html>

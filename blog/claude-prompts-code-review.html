@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10 Claude Prompts That Actually Work for Code Review</title>
+  <meta name="description" content="Practical Claude prompt templates for code review that catch real bugs, security issues, and performance problems. Tested across Python, JavaScript, and Go.">
+  <link rel="canonical" href="https://claudhq.com/blog/claude-prompts-code-review.html">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-content">
+    <h1>10 Claude Prompts That Actually Work for Code Review</h1>
+    <p style="color:var(--text-muted);margin-bottom:2rem;">April 3, 2026</p>
+
+    <p>AI-assisted code review is one of those things that sounds great in theory but often disappoints in practice. You paste your code, get back a list of nitpicks about variable naming, and wonder why you bothered. The problem is almost never the model. It is the prompt. A vague request produces vague feedback. A structured prompt that tells Claude exactly what to look for, in what order, and in what format, produces feedback that rivals a senior engineer's review.</p>
+
+    <p>Here are ten prompt templates we have tested across production Python, JavaScript, and Go codebases. Each one is designed for a specific review scenario and has been refined based on hundreds of actual code reviews.</p>
+
+    <h2>1. The General Code Review</h2>
+
+    <p>This is your all-purpose review prompt. It works for any language and any file size up to about 500 lines.</p>
+
+    <pre><code>Review this code for bugs, security issues, performance problems, and readability.
+For each issue:
+- Quote the specific line(s)
+- Explain the problem
+- Rate severity: HIGH / MEDIUM / LOW
+- Provide the corrected code
+
+Code:
+```
+[paste code]
+```</code></pre>
+
+    <p>The key detail is asking Claude to quote the specific line. Without this instruction, you get generic advice like "consider adding error handling." With it, you get "Line 47: the database query inside the for-loop will execute N+1 queries. Move it outside the loop and batch the IDs."</p>
+
+    <h2>2. Security-Focused Review</h2>
+
+    <p>When you are reviewing code that handles user input, authentication, or sensitive data, narrow the scope to security only.</p>
+
+    <pre><code>You are a security auditor. Review this code ONLY for security vulnerabilities.
+Check for: SQL injection, XSS, CSRF, auth bypass, insecure deserialization,
+path traversal, hardcoded secrets, and information leakage.
+Ignore style and performance entirely.
+
+For each vulnerability, provide:
+- The CWE number
+- Affected line(s)
+- Attack scenario (how an attacker would exploit it)
+- Fix with corrected code</code></pre>
+
+    <p>By telling Claude to ignore style and performance, you prevent it from diluting the security findings with cosmetic suggestions. The CWE number requirement forces it to map each finding to a recognized vulnerability category, which reduces false positives.</p>
+
+    <h2>3. Performance Audit</h2>
+
+    <p>This prompt is specifically designed for code that needs to handle scale.</p>
+
+    <pre><code>Analyze this code for performance issues. Focus on:
+- Time complexity of each function (state Big-O)
+- Memory allocations inside loops
+- N+1 query patterns
+- Unnecessary copies of large data structures
+- Missing caching opportunities
+
+Rank issues by estimated impact on latency at 10,000 requests/second.</code></pre>
+
+    <p>The "10,000 requests per second" framing is important. It gives Claude a concrete performance target to reason against rather than making abstract observations.</p>
+
+    <h2>4. Test Coverage Gap Finder</h2>
+
+    <pre><code>Here is my code and its test file. Identify test gaps:
+
+Source: [paste source]
+Tests: [paste tests]
+
+List every code path, edge case, and error condition that is NOT
+covered by the existing tests. For each gap, write the missing test.</code></pre>
+
+    <p>This is one of the highest-value review prompts because writing tests for edge cases is exactly the kind of tedious-but-important work that humans skip under time pressure.</p>
+
+    <h2>5. API Contract Review</h2>
+
+    <pre><code>Review this API endpoint for contract correctness:
+- Does it return the documented status codes?
+- Are error responses consistent with the schema?
+- Is input validation complete (missing fields, wrong types, boundary values)?
+- Are there any states where the API could return unexpected data?
+
+Endpoint code:
+```
+[paste code]
+```
+
+API spec:
+```
+[paste OpenAPI/docs]
+```</code></pre>
+
+    <p>Providing both the implementation and the spec lets Claude cross-reference them. It regularly catches mismatches like "the spec says this field is required but the code does not validate it."</p>
+
+    <h2>6. Concurrency Review</h2>
+
+    <pre><code>Review this code for concurrency bugs:
+- Race conditions
+- Deadlock potential
+- Missing locks or incorrect lock ordering
+- Non-atomic read-modify-write sequences
+- Goroutine/thread leaks
+
+Trace through two concurrent execution paths and show where they conflict.</code></pre>
+
+    <p>The "trace through two concurrent paths" instruction is what makes this prompt effective. It forces Claude to actually simulate interleaved execution rather than making surface-level observations about missing mutexes.</p>
+
+    <h2>7. Error Handling Review</h2>
+
+    <pre><code>Audit error handling in this code:
+- Which functions can fail but errors are silently ignored?
+- Where are errors caught too broadly (catch-all)?
+- Where are error messages unhelpful for debugging?
+- Where should retries be added?
+- Where is cleanup missing in error paths?
+
+For each issue, show the current code and the corrected version.</code></pre>
+
+    <p>Error handling is one of the most consistently under-reviewed aspects of code. This prompt catches the try/except patterns that swallow errors, the missing finally blocks, and the error messages that say "something went wrong" instead of including the actual failure context.</p>
+
+    <h2>8. Database Query Review</h2>
+
+    <pre><code>Review these database queries for:
+- Missing indexes (based on WHERE and JOIN columns)
+- N+1 query patterns
+- Queries that could return unbounded results (missing LIMIT)
+- SQL injection vulnerabilities
+- Schema design issues visible from the queries
+
+Database: [PostgreSQL/MySQL]
+ORM: [if applicable]</code></pre>
+
+    <p>Database performance problems are notoriously hard to catch in code review because they are invisible in the code itself. This prompt is useful for teams using ORMs where the generated SQL is not obvious from the application code.</p>
+
+    <h2>9. Migration Safety Review</h2>
+
+    <pre><code>Review this database migration for production safety:
+- Will it lock tables? For how long on a table with [N] rows?
+- Is it backwards-compatible with the current application code?
+- Can it be rolled back?
+- Are there data loss risks?
+- Should it be split into smaller migrations?
+
+Migration:
+```
+[paste migration SQL]
+```
+
+Current application code that uses these tables:
+```
+[paste relevant code]
+```</code></pre>
+
+    <p>We use this prompt at <a href="https://lockml.com">LockML</a> before every production migration. It has caught table locks that would have caused minutes of downtime, and non-reversible column drops that would have lost data.</p>
+
+    <h2>10. PR Description Generator</h2>
+
+    <pre><code>Based on this diff, write a PR description that includes:
+- One-line summary of what changed
+- WHY this change was made (infer from the code context)
+- What was changed (bullet list of key modifications)
+- What to test (specific scenarios a reviewer should verify)
+- Risks (anything that could break)
+
+Diff:
+```
+[paste diff]
+```</code></pre>
+
+    <p>This is not technically a review prompt, but it is the most popular prompt in our library. Good PR descriptions make code review dramatically faster for everyone on the team.</p>
+
+    <h2>Making These Work for Your Team</h2>
+
+    <p>The prompts above are templates. Customize them for your codebase by adding context about your tech stack, coding standards, and common pitfalls. The more specific your prompt, the more specific the feedback.</p>
+
+    <p>Two practical tips: First, review files individually rather than pasting an entire PR at once. Claude gives more thorough feedback on 200 lines than on 2,000. Second, include the relevant type definitions or interfaces even if they are in a different file. Without type context, Claude has to guess at data shapes, which reduces accuracy.</p>
+
+    <p>If you want to try these prompts right now, head to the <a href="/">ClaudHQ prompt library</a> where you can copy any of them with a single click.</p>
+  </div>
+
+  <footer>
+    Built by <a href="https://zovo.one">zovo.one</a> &middot; More tools: <a href="https://claudflow.com">ClaudFlow</a>, <a href="https://claudkit.com">ClaudKit</a>
+  </footer>
+</body>
+</html>
