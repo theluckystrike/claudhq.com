@@ -245,3 +245,52 @@ if (document.readyState === "loading") {
 } else {
   initApp();
 }
+
+
+// === Zovo V5 Pro Nudge System ===
+(function() {
+  var V5_LIMIT = 20;
+  var V5_FEATURE = 'Full prompt library';
+  var v5Count = 0;
+  var v5Shown = false;
+
+  function v5ShowNudge() {
+    if (v5Shown || sessionStorage.getItem('v5_pro_nudge')) return;
+    v5Shown = true;
+    sessionStorage.setItem('v5_pro_nudge', '1');
+    var host = location.hostname;
+    var el = document.createElement('div');
+    el.className = 'pro-nudge';
+    el.innerHTML = '<div class="pro-nudge-inner">' +
+      '<span class="pro-nudge-icon">\u2726</span>' +
+      '<div class="pro-nudge-text">' +
+      '<strong>' + V5_FEATURE + '</strong> is a Pro feature. ' +
+      '<a href="https://zovo.one/pricing?utm_source=' + host +
+      '&utm_medium=satellite&utm_campaign=pro-nudge" target="_blank">' +
+      'Get Zovo Lifetime \u2014 $99 once, access everything forever.</a>' +
+      '</div></div>';
+    var target = document.querySelector('main') ||
+      document.querySelector('.tool-section') ||
+      document.querySelector('.container') ||
+      document.querySelector('section') ||
+      document.body;
+    if (target) target.appendChild(el);
+  }
+
+  // Track meaningful user actions (button clicks, form submits)
+  document.addEventListener('click', function(e) {
+    var t = e.target;
+    if (t.closest('button, [onclick], .btn, input[type="submit"], input[type="button"]')) {
+      v5Count++;
+      if (v5Count >= V5_LIMIT) v5ShowNudge();
+    }
+  }, true);
+
+  // Track file drops/selections (for file-based tools)
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.type === 'file') {
+      v5Count++;
+      if (v5Count >= V5_LIMIT) v5ShowNudge();
+    }
+  }, true);
+})();
