@@ -5,9 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>10 Claude Prompts That Actually Work for Code Review</title>
   <meta name="description" content="Practical Claude prompt templates for code review that catch real bugs, security issues, and performance problems. Tested across Python, JavaScript, and Go.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="10 Claude Prompts That Actually Work for Code Review">
+  <meta property="og:description" content="Practical Claude prompt templates for code review that catch real bugs, security issues, and performance problems. Tested across Python, JavaScript, and Go.">
+  <meta property="og:url" content="https://claudhq.com/blog/claude-prompts-code-review.html">
+  <meta property="og:image" content="https://claudhq.com/assets/og-image.png">
+  <meta property="og:site_name" content="Zovo Tools">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="10 Claude Prompts That Actually Work for Code Review">
+  <meta name="twitter:description" content="Practical Claude prompt templates for code review that catch real bugs, security issues, and performance problems.">
+  <meta name="twitter:image" content="https://claudhq.com/assets/og-image.png">
   <link rel="canonical" href="https://claudhq.com/blog/claude-prompts-code-review.html">
-    <link rel="alternate" type="application/atom+xml" title="ClaudHQ — Claude Prompt Library Blog Feed" href="/blog/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://claudhq.com/blog/claude-prompts-code-review.html">
+  <link rel="alternate" hreflang="x-default" href="https://claudhq.com/blog/claude-prompts-code-review.html">
+  <link rel="alternate" type="application/atom+xml" title="ClaudHQ — Claude Prompt Library Blog Feed" href="/blog/feed.xml">
   <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "10 Claude Prompts That Actually Work for Code Review",
+    "description": "Practical Claude prompt templates for code review that catch real bugs, security issues, and performance problems. Tested across Python, JavaScript, and Go.",
+    "author": { "@type": "Person", "name": "Michael Lip", "url": "https://zovo.one" },
+    "publisher": { "@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com" },
+    "datePublished": "2026-04-03",
+    "dateModified": "2026-04-06"
+  }
+  </script>
 </head>
 <body>
   <nav>
@@ -24,7 +48,8 @@
 
   <div class="page-content">
     <h1>10 Claude Prompts That Actually Work for Code Review</h1>
-    <p style="color:var(--text-muted);margin-bottom:2rem;">April 3, 2026</p>
+    <p style="color:var(--text-muted);margin-bottom:0.5rem;">April 3, 2026</p>
+    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:2rem;">By <a href="/about.html" style="color:var(--accent);">Michael Lip</a></p>
 
     <p>AI-assisted code review is one of those things that sounds great in theory but often disappoints in practice. You paste your code, get back a list of nitpicks about variable naming, and wonder why you bothered. The problem is almost never the model. It is the prompt. A vague request produces vague feedback. A structured prompt that tells Claude exactly what to look for, in what order, and in what format, produces feedback that rivals a senior engineer's review.</p>
 
@@ -171,7 +196,7 @@ Current application code that uses these tables:
 [paste relevant code]
 ```</code></pre>
 
-    <p>We use this prompt at <a href="https://lockml.com" rel="nofollow">LockML</a> before every production migration. It has caught table locks that would have caused minutes of downtime, and non-reversible column drops that would have lost data.</p>
+    <p>We use this prompt at <a href="https://lockml.com">LockML</a> before every production migration. It has caught table locks that would have caused minutes of downtime, and non-reversible column drops that would have lost data.</p>
 
     <h2>10. PR Description Generator</h2>
 
@@ -193,10 +218,10 @@ Diff:
 
     <p>The prompts above are templates. Customize them for your codebase by adding context about your tech stack, coding standards, and common pitfalls. The more specific your prompt, the more specific the feedback.</p>
 
-    <p>Two practical tips: First, review files individually rather than pasting an entire PR at once. Claude gives more thorough feedback on 200 lines than on 2,000. Second, include the relevant type definitions or interfaces even if they are in a different file. Without type context, Claude has to guess at data shapes, which reduces accuracy.</p>
+    <p>Two practical tips: First, review files individually rather than pasting an entire PR at once. Claude gives more thorough feedback on 200 lines than on 2,000. Second, include the relevant type definitions or interfaces even if they are in a different file. Without type context, Claude has to guess at data shapes, which reduces accuracy. If you want to automate this process, <a href="https://claudflow.com">ClaudFlow</a> lets you chain multiple review prompts into a single workflow that runs them in sequence.</p>
 
     <p>If you want to try these prompts right now, head to the <a href="/">ClaudHQ prompt library</a> where you can copy any of them with a single click.</p>
-  
+
     <section class="resources">
       <h2>Resources</h2>
       <ul>

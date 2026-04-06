@@ -5,12 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClaudHQ — Claude Prompt Library | 30+ Ready-to-Use Templates</title>
   <meta name="description" content="Browse 30+ proven Claude prompt templates for coding, writing, analysis, and business. Search, filter, copy, and save your favorites instantly.">
-  <meta property="og:title" content="ClaudHQ — Claude Prompt Library">
-  <meta property="og:description" content="30+ ready-to-use Claude prompt templates. Search, filter, and copy with one click.">
-  <meta property="og:url" content="https://claudhq.com/">
   <meta property="og:type" content="website">
+  <meta property="og:title" content="ClaudHQ — Claude Prompt Library | 30+ Ready-to-Use Templates">
+  <meta property="og:description" content="Browse 30+ proven Claude prompt templates for coding, writing, analysis, and business. Search, filter, copy, and save your favorites instantly.">
+  <meta property="og:url" content="https://claudhq.com/">
+  <meta property="og:image" content="https://claudhq.com/assets/og-image.png">
+  <meta property="og:site_name" content="Zovo Tools">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ClaudHQ — Claude Prompt Library | 30+ Ready-to-Use Templates">
+  <meta name="twitter:description" content="Browse 30+ proven Claude prompt templates for coding, writing, analysis, and business. Search, filter, copy, and save your favorites instantly.">
+  <meta name="twitter:image" content="https://claudhq.com/assets/og-image.png">
   <link rel="canonical" href="https://claudhq.com/">
-    <link rel="alternate" type="application/atom+xml" title="ClaudHQ — Claude Prompt Library Blog Feed" href="/blog/feed.xml">
+  <link rel="alternate" hreflang="en" href="https://claudhq.com/">
+  <link rel="alternate" hreflang="x-default" href="https://claudhq.com/">
+  <link rel="alternate" type="application/atom+xml" title="ClaudHQ — Claude Prompt Library Blog Feed" href="/blog/feed.xml">
   <link rel="stylesheet" href="assets/style.css">
   <script type="application/ld+json">
   {
@@ -21,7 +29,20 @@
     "description": "Searchable library of 30+ Claude prompt templates organized by category with copy-to-clipboard and favorites.",
     "applicationCategory": "Productivity",
     "operatingSystem": "Web",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Michael Lip", "url": "https://zovo.one" },
+    "datePublished": "2026-04-05",
+    "dateModified": "2026-04-06",
+    "featureList": [
+      "30+ tested Claude prompt templates",
+      "Search and filter by category",
+      "One-click copy to clipboard",
+      "Save favorite prompts locally",
+      "Coding, writing, analysis, creative, business, and education categories",
+      "Token count estimates and model recommendations",
+      "No sign-up required",
+      "100% browser-based, no data sent to servers"
+    ]
   }
   </script>
   <script type="application/ld+json">
@@ -76,6 +97,22 @@
           "@type": "Answer",
           "text": "Yes, all prompt templates on ClaudHQ are completely free. Copy, modify, and use them for any purpose. No sign-up required."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use ClaudHQ prompts with other AI models?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "While our prompts are optimized for Claude, many work well with other large language models like GPT-4. The core principles of structured prompting apply across models, though Claude-specific features like XML tag handling may not transfer directly."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I save my favorite prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Click the heart icon on any prompt card to save it as a favorite. Favorites are stored locally in your browser — no account needed. They persist across sessions and can be filtered using the favorites view."
+        }
       }
     ]
   }
@@ -97,6 +134,7 @@
   <section class="hero">
     <h1>Claude Prompt Library</h1>
     <p>30+ tested prompt templates — search, copy, and start using them now.</p>
+    <p style="font-size:0.9rem;color:var(--text-muted);">Built by <a href="/about.html" style="color:var(--accent);">Michael Lip</a></p>
   </section>
 
   <div class="toolbar">
@@ -114,32 +152,72 @@
 
   <div class="prompt-grid" id="prompt-grid"></div>
 
-  <section class="faq-section">
+  <div class="last-updated"><time datetime="2026-04-06">Last updated: April 6, 2026</time></div>
+
+  <section class="explainer" style="max-width:800px;margin:2rem auto;padding:0 1.5rem;line-height:1.7;">
+    <h2>How ClaudHQ Works</h2>
+
+    <p>ClaudHQ is a curated library of prompt templates designed specifically for Anthropic's Claude AI. Every prompt in the collection has been written, tested, and refined across real-world tasks to ensure it produces consistent, high-quality results. The library organizes prompts into six categories — coding, writing, analysis, creative, business, and education — so you can find the right template for your task in seconds.</p>
+
+    <p>Using ClaudHQ is straightforward: browse or search for a prompt that matches your task, click to expand it, and copy the full template to your clipboard with one click. Each prompt includes placeholders where you insert your specific content, context, or code. Paste the completed prompt into Claude (via the web interface, API, or any tool that supports Claude) and get results that are dramatically better than ad-hoc prompting. The difference between a structured prompt and a vague request is often the difference between usable output and garbage.</p>
+
+    <p>The entire application runs in your browser. There are no server calls, no accounts, no tracking, and no data collection. Your prompts, favorites, and search history never leave your device. The source code is open and available on <a href="https://github.com/theluckystrike/claudhq.com">GitHub</a> for anyone to inspect, fork, or contribute to.</p>
+
+    <h3>Features</h3>
+
+    <p>ClaudHQ includes a real-time search engine that filters prompts as you type, matching against both titles and descriptions. Category filter chips let you narrow results to a specific domain like coding or business. Every prompt card shows a token count estimate and a recommended Claude model (Haiku, Sonnet, or Opus) based on the prompt's complexity and length, so you can estimate API costs before you run anything. The favorites system stores your preferred prompts locally using browser storage, letting you build a personal collection without creating an account. Each prompt includes structured formatting with role definitions, context sections, output specifications, and example outputs where applicable.</p>
+
+    <h3>Who Uses This</h3>
+
+    <p>ClaudHQ is built for developers, technical writers, analysts, and anyone who uses Claude regularly and wants to get better results with less trial and error. Software engineers use the coding prompts for code review, debugging, and test generation. Content teams use the writing templates for blog posts, documentation, and emails. Data analysts use the analysis prompts for structured breakdowns and report generation. Students and educators use the education prompts for explaining concepts and generating practice problems. If you need to chain multiple prompts into automated workflows, <a href="https://claudflow.com">ClaudFlow</a> provides a visual workflow builder that complements these templates. For teams working with Claude's API directly, <a href="https://claudkit.com">ClaudKit</a> offers a developer toolkit with request builders and response analyzers that pair well with the prompts you find here.</p>
+
+    <h3>Privacy</h3>
+
+    <p>Everything runs locally in your browser. ClaudHQ does not send any data to any server, does not use cookies for tracking, does not require authentication, and does not store any information about you or your prompts. The application is a static HTML, CSS, and JavaScript site hosted on GitHub Pages. The complete source code is open source on <a href="https://github.com/theluckystrike/claudhq.com">GitHub</a>, so you can verify every claim. Your favorites are stored in localStorage on your own device and are never transmitted anywhere.</p>
+  </section>
+
+  <section class="faq-section" style="max-width:800px;margin:2rem auto;padding:0 1.5rem;">
     <h2>Frequently Asked Questions</h2>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">What are the best Claude prompts?</div>
-      <div class="faq-a">The best Claude prompts are specific, structured, and include context about the desired output. Our library features 30+ tested templates across coding, writing, analysis, creative, business, and education categories. Each prompt includes clear instructions, output formatting, and placeholders for your specific content.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">How to write effective AI prompts?</div>
-      <div class="faq-a">Effective AI prompts follow a clear structure: define the role, provide context, specify the task, set constraints, and describe the desired output format. Be specific about what you want and include examples when possible. Avoid vague instructions and always tell the model what NOT to do if relevant.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Claude vs ChatGPT prompts — what's different?</div>
-      <div class="faq-a">Claude responds well to structured prompts with explicit instructions, system-level context, and XML tags for organization. ChatGPT works similarly but has different strengths. Claude excels at longer, nuanced tasks and following detailed instructions, while both benefit from clear role definitions and output formatting.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Which Claude model should I use for my prompts?</div>
-      <div class="faq-a">It depends on complexity and budget. Claude 3 Haiku is ideal for short, simple prompts under 1000 tokens — it's fast and cheap. Claude 3.5 Sonnet handles moderate tasks of 1000-4000 tokens with the best value. Claude 3 Opus is best for complex prompts over 4000 tokens requiring maximum quality. Our tool shows token estimates and model recommendations for each prompt.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">How much does it cost to use Claude prompts?</div>
-      <div class="faq-a">Claude API pricing varies by model. Haiku costs $0.25 per million input tokens, Sonnet costs $3.00, and Opus costs $15.00. A typical prompt costs between $0.001 and $0.05 depending on length and model. Our prompt library shows estimated cost per use for each template to help you budget effectively.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Are these prompt templates free to use?</div>
-      <div class="faq-a">Yes, all prompt templates on ClaudHQ are completely free. You can copy, modify, and use them for any purpose — personal or commercial. No sign-up required. Just browse, click to expand, and copy the prompt directly to your clipboard.</div>
-    </div>
+
+    <details>
+      <summary>What are the best Claude prompts?</summary>
+      <p>The best Claude prompts are specific, structured, and include context about the desired output. Our library features 30+ tested templates across coding, writing, analysis, creative, business, and education categories. Each prompt includes clear instructions, output formatting, and placeholders for your specific content.</p>
+    </details>
+
+    <details>
+      <summary>How to write effective AI prompts?</summary>
+      <p>Effective AI prompts follow a clear structure: define the role, provide context, specify the task, set constraints, and describe the desired output format. Be specific about what you want and include examples when possible. Avoid vague instructions and always tell the model what NOT to do if relevant.</p>
+    </details>
+
+    <details>
+      <summary>Claude vs ChatGPT prompts — what's different?</summary>
+      <p>Claude responds well to structured prompts with explicit instructions, system-level context, and XML tags for organization. ChatGPT works similarly but has different strengths. Claude excels at longer, nuanced tasks and following detailed instructions, while both benefit from clear role definitions and output formatting.</p>
+    </details>
+
+    <details>
+      <summary>Which Claude model should I use for my prompts?</summary>
+      <p>It depends on complexity and budget. Claude 3 Haiku is ideal for short, simple prompts under 1000 tokens — it's fast and cheap. Claude 3.5 Sonnet handles moderate tasks of 1000-4000 tokens with the best value. Claude 3 Opus is best for complex prompts over 4000 tokens requiring maximum quality.</p>
+    </details>
+
+    <details>
+      <summary>How much does it cost to use Claude prompts?</summary>
+      <p>Claude API pricing varies by model. Haiku costs $0.25 per million input tokens, Sonnet costs $3.00, and Opus costs $15.00. A typical prompt costs between $0.001 and $0.05 depending on length and model. Our prompt library shows estimated cost per use for each template to help you budget effectively.</p>
+    </details>
+
+    <details>
+      <summary>Are these prompt templates free to use?</summary>
+      <p>Yes, all prompt templates on ClaudHQ are completely free. You can copy, modify, and use them for any purpose — personal or commercial. No sign-up required. Just browse, click to expand, and copy the prompt directly to your clipboard.</p>
+    </details>
+
+    <details>
+      <summary>Can I use ClaudHQ prompts with other AI models?</summary>
+      <p>While our prompts are optimized for Claude, many work well with other large language models like GPT-4. The core principles of structured prompting apply across models, though Claude-specific features like XML tag handling may not transfer directly.</p>
+    </details>
+
+    <details>
+      <summary>How do I save my favorite prompts?</summary>
+      <p>Click the heart icon on any prompt card to save it as a favorite. Favorites are stored locally in your browser — no account needed. They persist across sessions and can be filtered using the favorites view.</p>
+    </details>
   </section>
 
   <footer>
