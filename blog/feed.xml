@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>ClaudHQ — Claude Prompt Library Blog</title>
+  <link href="https://claudhq.com/blog/" rel="alternate"/>
+  <link href="https://claudhq.com/blog/feed.xml" rel="self"/>
+  <id>https://claudhq.com/blog/</id>
+  <updated>2026-04-06T00:00:00Z</updated>
+  <author><name>ClaudHQ — Claude Prompt Library</name></author>
+  <entry>
+    <title>10 Claude Prompts That Actually Work for Code Review</title>
+    <link href="https://claudhq.com/blog/claude-prompts-code-review.html" rel="alternate"/>
+    <id>https://claudhq.com/blog/claude-prompts-code-review.html</id>
+    <updated>2026-04-06T00:00:00Z</updated>
+    <summary>Practical Claude prompt templates for code review that catch real bugs, security issues, and performance problems. Tested across Python, JavaScript, and Go.</summary>
+  </entry>
+  <entry>
+    <title>Claude vs GPT-4 for Different Tasks: Honest Comparison</title>
+    <link href="https://claudhq.com/blog/claude-vs-gpt4-comparison.html" rel="alternate"/>
+    <id>https://claudhq.com/blog/claude-vs-gpt4-comparison.html</id>
+    <updated>2026-04-06T00:00:00Z</updated>
+    <summary>Side-by-side comparison of Claude and GPT-4 across coding, writing, analysis, and creative tasks with real examples and honest assessments.</summary>
+  </entry>
+</feed>
