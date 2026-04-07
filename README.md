@@ -1,34 +1,36 @@
-# Claude Prompt Library — 30+ Ready-to-Use AI Prompts for ChatGPT, Claude & GPT-4
+# ClaudHQ -- Claude Prompt Library with 30+ Ready-to-Use Templates
 
-**[Browse Prompts →](https://claudhq.com)** | [About](https://claudhq.com/about.html) | [Blog](https://claudhq.com/blog/)
+**[-> Use ClaudHQ (live tool)](https://claudhq.com/)**
 
-Claude Prompt Library is a curated collection of 30+ high-quality prompts for AI assistants including Claude, ChatGPT, and GPT-4. Whether you're a developer, marketer, writer, or researcher, find battle-tested prompts you can copy and use instantly. Search by category, save your favorites, and build better AI conversations without starting from scratch.
+ClaudHQ is a curated library of 30+ tested prompt templates designed for Anthropic's Claude AI. Browse prompts organized by category (coding, writing, analysis, creative, business, education), search and filter in real-time, copy with one click, and save favorites locally. Each prompt includes token estimates and model recommendations.
 
 ## Features
 
-- **30+ curated AI prompts** — covering coding, writing, analysis, marketing, and more
-- **Search and filter by category** — find the right prompt in seconds
-- **Favorites system** — bookmark prompts you use often for quick access
-- **One-click copy to clipboard** — paste directly into any AI chat interface
-- **Community-tested prompts** — each prompt refined for consistent, high-quality output
+- 30+ tested Claude prompt templates across 6 categories
+- Real-time search engine filtering by title and description
+- Category filter chips: Coding, Writing, Analysis, Creative, Business, Education
+- One-click copy to clipboard for any prompt
+- Token count estimates and recommended Claude model per prompt
+- Favorites system stored locally in browser (no account needed)
+- 100% client-side -- your data never leaves your browser
+- Open source -- inspect the code yourself
 
-## How It Works
+## Tech Stack
 
-Browse the library or use the search bar to find prompts by keyword or category. Each prompt card shows the title, description, and target use case. Click any prompt to expand it, then hit the copy button to send it straight to your clipboard. Your favorites are saved locally in your browser — no account needed, no data collected.
+- Vanilla JavaScript (no frameworks, no build step)
+- Static HTML hosted on GitHub Pages
+- Cloudflare DNS + SSL
+- Zero dependencies, zero tracking, zero cookies
 
-## Built With
+## Part of Zovo Tools
 
-- Vanilla JavaScript (no frameworks, no dependencies)
-- Client-side only — your data never leaves your browser
+ClaudHQ is part of [Zovo Tools](https://zovo.one/tools) -- a collection of free developer tools.
 
-
-- [AI Workflow Builder](https://claudflow.com) — design multi-step AI workflows visually
-- [Claude API Playground](https://claudkit.com) — test Claude API calls with a visual request builder
-- [Prompt Injection Checker](https://lochbot.com) — test your prompts against 30+ injection attacks
-
-## Contributing
-
-Found a bug or have a feature request? [Open an issue](https://github.com/theluckystrike/claudhq.com/issues).
+**Other tools in the network:**
+- [EpochPilot](https://epochpilot.com) -- 30+ timestamp and timezone tools
+- [HeyTensor](https://heytensor.com) -- PyTorch tensor shape calculator
+- [LochBot](https://lochbot.com) -- Prompt injection vulnerability checker
+- [KappaKit](https://kappakit.com) -- Developer toolkit (Base64, JWT, hash, UUID)
 
 ## License
 
