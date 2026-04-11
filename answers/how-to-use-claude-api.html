@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>How Do I Use the Claude API? Quick-Start Guide | ClaudHQ</title>
+  <meta name="description" content="Quick-start guide to the Claude API. Python (anthropic SDK) and JavaScript examples. pip install anthropic, messages.create, and streaming. Copy-paste code included.">
+  <link rel="canonical" href="https://claudhq.com/answers/how-to-use-claude-api.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How Do I Use the Claude API? Quick-Start Guide">
+  <meta property="og:description" content="Python and JavaScript quick-start code for the Claude API. Install, authenticate, and send your first message.">
+  <meta property="og:url" content="https://claudhq.com/answers/how-to-use-claude-api.html">
+  <meta property="og:image" content="https://claudhq.com/assets/og-image.png">
+  <meta property="og:site_name" content="Zovo Tools">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How Do I Use the Claude API? Quick-Start Guide">
+  <meta name="twitter:description" content="Python and JavaScript quick-start code for the Claude API. Copy-paste examples.">
+  <meta name="twitter:image" content="https://claudhq.com/assets/og-image.png">
+  <link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I use the Claude API?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Install the SDK (pip install anthropic for Python), set your API key, and call client.messages.create() with model, max_tokens, and messages parameters. You can get an API key from console.anthropic.com. The minimum code is about 8 lines in Python."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I stream Claude API responses?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use client.messages.stream() instead of client.messages.create(). This returns chunks as they are generated, reducing time-to-first-token. In Python, iterate over the stream with a for loop. In JavaScript, use the fetch API with response.body.getReader() for streaming."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does the Claude API cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude API pricing per 1M tokens: Haiku — $0.25 input / $1.25 output, Sonnet 3.5 — $3 input / $15 output, Opus — $15 input / $75 output. A typical 500-word request costs roughly $0.002 with Sonnet. You pay for both input and output tokens."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=nav-link" class="nav-pro" target="_blank">Go Pro &#10022;</a>
+      <a href="https://zovo.one/tools" class="nav-zovo">Zovo Tools</a>
+    </div>
+  </nav>
+
+  <main style="max-width:800px;margin:0 auto;padding:2rem 1.5rem;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:1.5rem;font-size:0.9rem;">
+      <a href="/">Home</a> &rsaquo; <a href="/answers/">Answers</a> &rsaquo; <span>Claude API Quick-Start</span>
+    </nav>
+
+    <article>
+      <h1>How Do I Use the Claude API?</h1>
+
+      <p><strong>Install the SDK (<code>pip install anthropic</code> for Python), set your API key from console.anthropic.com, and call <code>client.messages.create()</code> with model, max_tokens, and messages parameters. The minimum working code is about 8 lines.</strong></p>
+
+      <h2>Step 1: Get an API Key</h2>
+      <ol>
+        <li>Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a></li>
+        <li>Create an account or sign in</li>
+        <li>Navigate to API Keys and create a new key</li>
+        <li>Set it as an environment variable: <code>export ANTHROPIC_API_KEY="sk-ant-..."</code></li>
+      </ol>
+
+      <h2>Step 2: Python Quick-Start</h2>
+      <pre style="background:var(--bg-secondary,#1a1a2e);padding:1rem;border-radius:8px;overflow-x:auto;line-height:1.6;"><code># Install: pip install anthropic
+import anthropic
+
+client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY env var
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Explain recursion in one paragraph."}
+    ]
+)
+
+print(message.content[0].text)</code></pre>
+
+      <h2>Step 3: Python Streaming</h2>
+      <pre style="background:var(--bg-secondary,#1a1a2e);padding:1rem;border-radius:8px;overflow-x:auto;line-height:1.6;"><code>import anthropic
+
+client = anthropic.Anthropic()
+
+with client.messages.stream(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Write a haiku about Python."}
+    ]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)</code></pre>
+
+      <h2>JavaScript (fetch) Example</h2>
+      <pre style="background:var(--bg-secondary,#1a1a2e);padding:1rem;border-radius:8px;overflow-x:auto;line-height:1.6;"><code>const response = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01'
+  },
+  body: JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [
+      { role: 'user', content: 'Explain recursion in one paragraph.' }
+    ]
+  })
+});
+
+const data = await response.json();
+console.log(data.content[0].text);</code></pre>
+
+      <h2>API Pricing</h2>
+      <table style="width:100%;border-collapse:collapse;margin:1rem 0;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border,#333);">
+            <th style="text-align:left;padding:8px;">Model</th>
+            <th style="text-align:left;padding:8px;">Input (1M tokens)</th>
+            <th style="text-align:left;padding:8px;">Output (1M tokens)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border,#333);">
+            <td style="padding:8px;">Claude 3 Haiku</td>
+            <td style="padding:8px;">$0.25</td>
+            <td style="padding:8px;">$1.25</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border,#333);">
+            <td style="padding:8px;">Claude 3.5 Sonnet</td>
+            <td style="padding:8px;">$3.00</td>
+            <td style="padding:8px;">$15.00</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border,#333);">
+            <td style="padding:8px;">Claude 3 Opus</td>
+            <td style="padding:8px;">$15.00</td>
+            <td style="padding:8px;">$75.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Key Parameters</h2>
+      <ul>
+        <li><strong>model</strong>: Which Claude model to use (required)</li>
+        <li><strong>max_tokens</strong>: Maximum output length (required)</li>
+        <li><strong>messages</strong>: Array of conversation turns (required)</li>
+        <li><strong>system</strong>: System prompt that persists across turns (optional)</li>
+        <li><strong>temperature</strong>: 0.0-1.0, lower = more deterministic (optional, default 1.0)</li>
+      </ul>
+
+      <p>Find ready-to-use prompts for the Claude API in the <a href="/">ClaudHQ prompt library</a>, or use <a href="https://claudkit.com">ClaudKit</a> for a visual API request builder.</p>
+
+      <h2>Related Questions</h2>
+      <ul>
+        <li><a href="/answers/claude-system-prompt-template.html">What is a good Claude system prompt template?</a></li>
+        <li><a href="/answers/best-claude-prompt-for-code-review.html">What is the best Claude prompt for code review?</a></li>
+        <li><a href="/research/claude-api-usage-patterns.html">Claude API usage patterns research</a></li>
+      </ul>
+
+      <div class="last-updated"><time datetime="2026-04-11">Last updated: April 11, 2026</time></div>
+    </article>
+  </main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">Zovo Tools</div>
+        <div class="footer-tagline">Free developer tools by a solo dev. No tracking.</div>
+        <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=footer-link" class="footer-cta">Zovo Lifetime — $99 once, free forever &rarr;</a>
+        <div class="footer-copy">&copy; 2026 <a href="https://zovo.one">Zovo</a> &middot; 47/500 founding spots</div>
+    </div>
+</footer>
+
+<nav class="zovo-network" aria-label="Zovo Tools Network">
+    <div class="zovo-network-inner">
+        <h3 class="zovo-network-title">Explore More Tools</h3>
+        <div class="zovo-network-links">
+            <a href="https://abwex.com">ABWex — A/B Testing</a>
+            <a href="https://claudflow.com">ClaudFlow — Workflows</a>
+            <a href="https://claudkit.com">ClaudKit — API</a>
+            <a href="https://enhio.com">Enhio — Text Tools</a>
+            <a href="https://epochpilot.com">EpochPilot — Timestamps</a>
+            <a href="https://gen8x.com">Gen8X — Color Tools</a>
+            <a href="https://gpt0x.com">GPT0X — AI Models</a>
+            <a href="https://heytensor.com">HeyTensor — ML Tools</a>
+            <a href="https://invokebot.com">InvokeBot — Webhooks</a>
+            <a href="https://kappafy.com">Kappafy — JSON</a>
+            <a href="https://kappakit.com">KappaKit — Dev Toolkit</a>
+            <a href="https://kickllm.com">KickLLM — LLM Costs</a>
+            <a href="https://krzen.com">Krzen — Image Tools</a>
+            <a href="https://lochbot.com">LochBot — Security</a>
+            <a href="https://lockml.com">LockML — ML Compare</a>
+            <a href="https://ml3x.com">ML3X — Matrix Math</a>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

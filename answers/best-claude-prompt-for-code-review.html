@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>What Is the Best Claude Prompt for Code Review? | ClaudHQ</title>
+  <meta name="description" content="Copy-paste Claude prompt template for code review: analyze bugs, security vulnerabilities, performance issues, and readability. References line numbers and suggests exact fixes.">
+  <link rel="canonical" href="https://claudhq.com/answers/best-claude-prompt-for-code-review.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="What Is the Best Claude Prompt for Code Review?">
+  <meta property="og:description" content="Ready-to-use Claude prompt template for thorough code review with bug detection and security analysis.">
+  <meta property="og:url" content="https://claudhq.com/answers/best-claude-prompt-for-code-review.html">
+  <meta property="og:image" content="https://claudhq.com/assets/og-image.png">
+  <meta property="og:site_name" content="Zovo Tools">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What Is the Best Claude Prompt for Code Review?">
+  <meta name="twitter:description" content="Ready-to-use Claude prompt template for thorough code review with bug detection and security analysis.">
+  <meta name="twitter:image" content="https://claudhq.com/assets/og-image.png">
+  <link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the best Claude prompt for code review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use this prompt: 'You are a senior software engineer reviewing code. Analyze the following code for: (1) bugs and logic errors, (2) security vulnerabilities, (3) performance issues, (4) readability improvements. Be specific — reference line numbers and suggest exact fixes. For each issue, rate severity as Critical, Warning, or Suggestion.' Then paste your code after the prompt."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get Claude to find bugs in my code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ask Claude to role-play as a senior engineer and provide specific categories to check: off-by-one errors, null/undefined handling, race conditions, unhandled edge cases, and incorrect type assumptions. Include the full function with surrounding context for best results."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which Claude model is best for code review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude 3.5 Sonnet offers the best balance of quality and cost for code review. For complex architectural reviews or security audits, Claude 3 Opus provides deeper analysis. Claude 3 Haiku works for quick syntax checks and simple reviews."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=nav-link" class="nav-pro" target="_blank">Go Pro &#10022;</a>
+      <a href="https://zovo.one/tools" class="nav-zovo">Zovo Tools</a>
+    </div>
+  </nav>
+
+  <main style="max-width:800px;margin:0 auto;padding:2rem 1.5rem;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:1.5rem;font-size:0.9rem;">
+      <a href="/">Home</a> &rsaquo; <a href="/answers/">Answers</a> &rsaquo; <span>Code Review Prompt</span>
+    </nav>
+
+    <article>
+      <h1>What Is the Best Claude Prompt for Code Review?</h1>
+
+      <p><strong>Use this prompt: "You are a senior software engineer reviewing code. Analyze the following code for: (1) bugs and logic errors, (2) security vulnerabilities, (3) performance issues, (4) readability improvements. Be specific -- reference line numbers and suggest exact fixes."</strong></p>
+
+      <h2>The Full Prompt Template</h2>
+      <pre style="background:var(--bg-secondary,#1a1a2e);padding:1rem;border-radius:8px;overflow-x:auto;line-height:1.6;"><code>You are a senior software engineer performing a thorough code review.
+
+Analyze the following code for:
+
+1. **Bugs and Logic Errors**
+   - Off-by-one errors
+   - Null/undefined handling
+   - Race conditions
+   - Unhandled edge cases
+   - Incorrect type assumptions
+
+2. **Security Vulnerabilities**
+   - Injection risks (SQL, XSS, command)
+   - Authentication/authorization flaws
+   - Sensitive data exposure
+   - Insecure dependencies
+
+3. **Performance Issues**
+   - Unnecessary loops or re-renders
+   - Missing memoization
+   - N+1 query patterns
+   - Memory leaks
+
+4. **Readability Improvements**
+   - Unclear variable names
+   - Missing error handling
+   - Functions that do too much
+   - Missing or misleading comments
+
+For each issue:
+- Reference the specific line number(s)
+- Explain WHY it is a problem
+- Provide the EXACT fix (show corrected code)
+- Rate severity: Critical / Warning / Suggestion
+
+Code to review:
+```
+[PASTE YOUR CODE HERE]
+```</code></pre>
+
+      <h2>Why This Prompt Works</h2>
+      <ul>
+        <li><strong>Role definition</strong>: "Senior software engineer" sets the expertise level and review depth.</li>
+        <li><strong>Structured categories</strong>: Four specific areas prevent Claude from giving vague feedback.</li>
+        <li><strong>Actionable output</strong>: Requiring line numbers and exact fixes means you get copy-paste solutions, not hand-wavy suggestions.</li>
+        <li><strong>Severity rating</strong>: Helps you prioritize which issues to fix first.</li>
+      </ul>
+
+      <h2>Tips for Better Results</h2>
+      <ol>
+        <li>Include the <strong>full function</strong> with imports and surrounding context, not just the problematic snippet.</li>
+        <li>Add the <strong>language and framework</strong> to the prompt: "This is a Next.js API route using Prisma ORM."</li>
+        <li>If reviewing a PR, paste the <strong>diff</strong> and ask Claude to focus on the changed lines.</li>
+        <li>For security-critical code, add: "Assume all user input is untrusted."</li>
+      </ol>
+
+      <h2>Which Claude Model to Use</h2>
+      <table style="width:100%;border-collapse:collapse;margin:1rem 0;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border,#333);">
+            <th style="text-align:left;padding:8px;">Model</th>
+            <th style="text-align:left;padding:8px;">Best For</th>
+            <th style="text-align:left;padding:8px;">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border,#333);">
+            <td style="padding:8px;">Haiku</td>
+            <td style="padding:8px;">Quick syntax checks, simple reviews</td>
+            <td style="padding:8px;">$0.25/1M tokens</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border,#333);">
+            <td style="padding:8px;">Sonnet 3.5</td>
+            <td style="padding:8px;">General code review (best value)</td>
+            <td style="padding:8px;">$3/1M tokens</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border,#333);">
+            <td style="padding:8px;">Opus</td>
+            <td style="padding:8px;">Security audits, architectural review</td>
+            <td style="padding:8px;">$15/1M tokens</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Browse more tested prompts in the <a href="/">ClaudHQ prompt library</a>.</p>
+
+      <h2>Related Questions</h2>
+      <ul>
+        <li><a href="/answers/claude-system-prompt-template.html">What is a good Claude system prompt template?</a></li>
+        <li><a href="/answers/how-to-use-claude-api.html">How do I use the Claude API?</a></li>
+        <li><a href="/blog/claude-prompts-code-review.html">Deep dive: Claude prompts for code review</a></li>
+      </ul>
+
+      <div class="last-updated"><time datetime="2026-04-11">Last updated: April 11, 2026</time></div>
+    </article>
+  </main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">Zovo Tools</div>
+        <div class="footer-tagline">Free developer tools by a solo dev. No tracking.</div>
+        <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=footer-link" class="footer-cta">Zovo Lifetime — $99 once, free forever &rarr;</a>
+        <div class="footer-copy">&copy; 2026 <a href="https://zovo.one">Zovo</a> &middot; 47/500 founding spots</div>
+    </div>
+</footer>
+
+<nav class="zovo-network" aria-label="Zovo Tools Network">
+    <div class="zovo-network-inner">
+        <h3 class="zovo-network-title">Explore More Tools</h3>
+        <div class="zovo-network-links">
+            <a href="https://abwex.com">ABWex — A/B Testing</a>
+            <a href="https://claudflow.com">ClaudFlow — Workflows</a>
+            <a href="https://claudkit.com">ClaudKit — API</a>
+            <a href="https://enhio.com">Enhio — Text Tools</a>
+            <a href="https://epochpilot.com">EpochPilot — Timestamps</a>
+            <a href="https://gen8x.com">Gen8X — Color Tools</a>
+            <a href="https://gpt0x.com">GPT0X — AI Models</a>
+            <a href="https://heytensor.com">HeyTensor — ML Tools</a>
+            <a href="https://invokebot.com">InvokeBot — Webhooks</a>
+            <a href="https://kappafy.com">Kappafy — JSON</a>
+            <a href="https://kappakit.com">KappaKit — Dev Toolkit</a>
+            <a href="https://kickllm.com">KickLLM — LLM Costs</a>
+            <a href="https://krzen.com">Krzen — Image Tools</a>
+            <a href="https://lochbot.com">LochBot — Security</a>
+            <a href="https://lockml.com">LockML — ML Compare</a>
+            <a href="https://ml3x.com">ML3X — Matrix Math</a>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

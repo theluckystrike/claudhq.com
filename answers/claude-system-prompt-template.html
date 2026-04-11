@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>What Is a Good Claude System Prompt Template? | ClaudHQ</title>
+  <meta name="description" content="Starter Claude system prompt template with role definition, constraints, output format, and examples sections. Copy-paste ready for the Claude API.">
+  <link rel="canonical" href="https://claudhq.com/answers/claude-system-prompt-template.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="What Is a Good Claude System Prompt Template?">
+  <meta property="og:description" content="Starter system prompt template with role, constraints, output format, and examples. Copy-paste ready.">
+  <meta property="og:url" content="https://claudhq.com/answers/claude-system-prompt-template.html">
+  <meta property="og:image" content="https://claudhq.com/assets/og-image.png">
+  <meta property="og:site_name" content="Zovo Tools">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What Is a Good Claude System Prompt Template?">
+  <meta name="twitter:description" content="Starter system prompt template with role, constraints, output format, and examples.">
+  <meta name="twitter:image" content="https://claudhq.com/assets/og-image.png">
+  <link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a good Claude system prompt template?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A good Claude system prompt has four sections: (1) Role — who Claude is acting as, (2) Constraints — what to do and what to avoid, (3) Output Format — exact structure of the response, and (4) Examples — one or two input/output pairs showing the expected behavior. This structure produces consistent, high-quality outputs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between a system prompt and a user prompt?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The system prompt sets persistent behavior and rules for the entire conversation — it defines WHO Claude is and HOW it should respond. The user prompt is the specific question or task for each turn. System prompts are set once via the API's system parameter; user prompts change with each message."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should a Claude system prompt be?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most effective system prompts are 200-500 tokens. Shorter prompts may lack enough guidance. Longer prompts (1000+ tokens) work for complex tasks but increase cost. Include only instructions that improve output quality — every token in the system prompt is charged on every API call."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=nav-link" class="nav-pro" target="_blank">Go Pro &#10022;</a>
+      <a href="https://zovo.one/tools" class="nav-zovo">Zovo Tools</a>
+    </div>
+  </nav>
+
+  <main style="max-width:800px;margin:0 auto;padding:2rem 1.5rem;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:1.5rem;font-size:0.9rem;">
+      <a href="/">Home</a> &rsaquo; <a href="/answers/">Answers</a> &rsaquo; <span>System Prompt Template</span>
+    </nav>
+
+    <article>
+      <h1>What Is a Good Claude System Prompt Template?</h1>
+
+      <p><strong>A good Claude system prompt has four sections: (1) Role -- who Claude is acting as, (2) Constraints -- what to do and what to avoid, (3) Output Format -- exact structure of the response, and (4) Examples -- one or two input/output pairs showing the expected behavior.</strong></p>
+
+      <h2>The Template</h2>
+      <pre style="background:var(--bg-secondary,#1a1a2e);padding:1rem;border-radius:8px;overflow-x:auto;line-height:1.6;"><code># Role
+You are a [specific role, e.g., "senior technical writer"].
+You work at [context, e.g., "a B2B SaaS company"].
+
+# Constraints
+- Always [key behavior, e.g., "use active voice"]
+- Never [restriction, e.g., "use jargon without defining it"]
+- When uncertain, [fallback, e.g., "say so rather than guessing"]
+- Keep responses [length guideline, e.g., "under 300 words"]
+
+# Output Format
+Respond using this structure:
+1. **Summary**: One sentence answer
+2. **Details**: 2-3 paragraphs of explanation
+3. **Action Items**: Bulleted list of next steps
+
+# Examples
+User: [example input]
+Assistant: [example output showing exact format]</code></pre>
+
+      <h2>Why This Structure Works</h2>
+      <ul>
+        <li><strong>Role</strong>: Sets expertise level, communication style, and domain knowledge. "Senior data scientist at a fintech startup" produces very different output from "friendly customer support agent."</li>
+        <li><strong>Constraints</strong>: Prevents common failure modes. "Never make up citations" or "Always include error handling in code" catches issues before they happen.</li>
+        <li><strong>Output Format</strong>: Ensures consistent, parseable responses. Critical for API integrations where you need to process Claude's output programmatically.</li>
+        <li><strong>Examples</strong>: One good example is worth 100 words of instruction. Show Claude exactly what you want and it will pattern-match.</li>
+      </ul>
+
+      <h2>Real-World Example: API Documentation Writer</h2>
+      <pre style="background:var(--bg-secondary,#1a1a2e);padding:1rem;border-radius:8px;overflow-x:auto;line-height:1.6;"><code># Role
+You are a technical writer specializing in API documentation.
+You write for developers who have 2-5 years of experience.
+
+# Constraints
+- Use second person ("you") not third person
+- Include working code examples for every endpoint
+- Never assume the reader knows your API — explain every parameter
+- Use consistent terminology: "endpoint" not "route," "request body" not "payload"
+
+# Output Format
+For each endpoint, provide:
+1. HTTP method and path
+2. One-sentence description
+3. Parameters table (name, type, required, description)
+4. Code example (curl + one SDK)
+5. Response example with status code
+
+# Example
+User: Document the POST /users endpoint
+Assistant:
+## POST /users
+Create a new user account.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| email | string | yes | User's email address |
+| name | string | yes | Display name |
+...</code></pre>
+
+      <h2>Tips</h2>
+      <ol>
+        <li>Keep system prompts under 500 tokens for most use cases -- you pay for them on every API call.</li>
+        <li>Use XML tags like <code>&lt;role&gt;</code> and <code>&lt;constraints&gt;</code> for complex prompts -- Claude parses these well.</li>
+        <li>Test with edge cases: what happens when the user asks something outside the role's scope?</li>
+      </ol>
+
+      <p>Browse 30+ tested prompt templates in the <a href="/">ClaudHQ prompt library</a>.</p>
+
+      <h2>Related Questions</h2>
+      <ul>
+        <li><a href="/answers/best-claude-prompt-for-code-review.html">What is the best Claude prompt for code review?</a></li>
+        <li><a href="/answers/how-to-use-claude-api.html">How do I use the Claude API?</a></li>
+        <li><a href="/research/prompt-engineering-patterns.html">Prompt engineering patterns research</a></li>
+      </ul>
+
+      <div class="last-updated"><time datetime="2026-04-11">Last updated: April 11, 2026</time></div>
+    </article>
+  </main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">Zovo Tools</div>
+        <div class="footer-tagline">Free developer tools by a solo dev. No tracking.</div>
+        <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=footer-link" class="footer-cta">Zovo Lifetime — $99 once, free forever &rarr;</a>
+        <div class="footer-copy">&copy; 2026 <a href="https://zovo.one">Zovo</a> &middot; 47/500 founding spots</div>
+    </div>
+</footer>
+
+<nav class="zovo-network" aria-label="Zovo Tools Network">
+    <div class="zovo-network-inner">
+        <h3 class="zovo-network-title">Explore More Tools</h3>
+        <div class="zovo-network-links">
+            <a href="https://abwex.com">ABWex — A/B Testing</a>
+            <a href="https://claudflow.com">ClaudFlow — Workflows</a>
+            <a href="https://claudkit.com">ClaudKit — API</a>
+            <a href="https://enhio.com">Enhio — Text Tools</a>
+            <a href="https://epochpilot.com">EpochPilot — Timestamps</a>
+            <a href="https://gen8x.com">Gen8X — Color Tools</a>
+            <a href="https://gpt0x.com">GPT0X — AI Models</a>
+            <a href="https://heytensor.com">HeyTensor — ML Tools</a>
+            <a href="https://invokebot.com">InvokeBot — Webhooks</a>
+            <a href="https://kappafy.com">Kappafy — JSON</a>
+            <a href="https://kappakit.com">KappaKit — Dev Toolkit</a>
+            <a href="https://kickllm.com">KickLLM — LLM Costs</a>
+            <a href="https://krzen.com">Krzen — Image Tools</a>
+            <a href="https://lochbot.com">LochBot — Security</a>
+            <a href="https://lockml.com">LockML — ML Compare</a>
+            <a href="https://ml3x.com">ML3X — Matrix Math</a>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
