@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude API Usage Patterns — What Developers Actually Build | ClaudHQ</title>
+<meta name="description" content="Analysis of 50 GitHub repositories using the Anthropic Claude API, categorized by use case: chatbots, API gateways, code tools, agents, and more. Real star counts and languages.">
+<link rel="canonical" href="https://claudhq.com/research/claude-api-usage-patterns.html">
+<link rel="alternate" hreflang="en" href="https://claudhq.com/research/claude-api-usage-patterns.html">
+<link rel="alternate" hreflang="x-default" href="https://claudhq.com/research/claude-api-usage-patterns.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude API Usage Patterns — What Developers Actually Build">
+<meta property="og:description" content="Analysis of 50 GitHub repos using the Anthropic Claude API, categorized by use case with star counts and languages.">
+<meta property="og:url" content="https://claudhq.com/research/claude-api-usage-patterns.html">
+<meta property="og:site_name" content="Zovo Tools">
+<meta property="og:image" content="https://claudhq.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude API Usage Patterns — What Developers Actually Build">
+<meta name="twitter:description" content="Analysis of 50 GitHub repos using the Anthropic Claude API, categorized by use case with star counts and languages.">
+<meta name="twitter:image" content="https://claudhq.com/assets/og-image.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Claude API Usage Patterns Dataset",
+  "description": "Analysis of 50 GitHub repositories that integrate the Anthropic Claude API, categorized by use case including API gateways, chatbots, code tools, agents, SDKs, and proxy services, with star counts, primary languages, and descriptions.",
+  "url": "https://claudhq.com/research/claude-api-usage-patterns.html",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "creator": {"@type": "Person", "name": "Michael Lip", "url": "https://zovo.one"},
+  "datePublished": "2026-04-11",
+  "dateModified": "2026-04-11",
+  "keywords": ["Claude API", "Anthropic API", "GitHub repositories", "API usage patterns", "developer tools", "AI chatbot", "API gateway"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What do developers build most often with the Claude API?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Based on analysis of 50 top GitHub repositories, the most common use case is API gateways and proxy services (38% of repos), which unify multiple LLM providers behind a single interface. The second most common category is chatbot UIs and chat clients (20%), followed by SDK wrappers and client libraries (16%). Code tools, agent frameworks, and specialized applications make up the remaining 26%."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which programming languages are most popular for Claude API projects?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TypeScript leads with 36% of Claude API projects on GitHub, followed by Python at 30%. Go accounts for 10%, reflecting its popularity for high-performance proxy and gateway services. Ruby, Kotlin, C#, and other languages make up the remaining 24%. TypeScript dominance reflects the prevalence of web-based chat UIs and API middleware."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How popular are Claude API projects on GitHub?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The top Claude API project (LibreChat) has over 35,500 stars, making it one of the most popular open-source AI projects. The top 10 projects average 6,800 stars. The median project in our dataset has approximately 300 stars. Total combined stars across all 50 analyzed repositories exceed 80,000, indicating strong developer interest in Claude API integrations."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why are API gateway and proxy projects so common for Claude?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "API gateways dominate because developers need to: (1) unify multiple LLM providers (Claude, GPT, Gemini) behind one interface for easy switching, (2) convert between API formats (e.g., Anthropic to OpenAI format), (3) manage API keys and rate limits centrally, and (4) enable cost optimization by routing requests to the cheapest suitable model. Projects like one-api (31K+ stars) demonstrate massive demand for this pattern."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there official Anthropic SDKs or only community libraries?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Anthropic provides official SDKs for Python (anthropic-sdk-python) and TypeScript (anthropic-sdk-typescript), plus an official CLI tool (anthropic-cli, 266 stars). The community has built additional SDKs for Ruby (ruby-anthropic, ruby_llm), C# (Claudia, Anthropic.SDK), Go (go-anthropic), and Lua (ogpt.nvim for Neovim). Community SDKs collectively have thousands of stars, showing strong ecosystem adoption beyond the official tools."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .research-badge { display:inline-block; background:var(--accent-dim,rgba(139,233,253,0.1)); color:var(--accent,#8be9fd); padding:4px 12px; border-radius:var(--radius,8px); font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem; }
+  .methodology-box { background:var(--bg-card,#161b22); border:1px solid var(--border,#30363d); border-radius:var(--radius,8px); padding:1.25rem; margin:1.5rem 0; }
+  .methodology-box h3 { font-size:0.8rem; text-transform:uppercase; color:var(--accent,#8be9fd); margin-bottom:0.75rem; }
+  .data-table-wrap { overflow-x:auto; margin:1.5rem 0; border:1px solid var(--border,#30363d); border-radius:var(--radius,8px); }
+  .data-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+  .data-table th { background:var(--bg,#0d1117); color:var(--accent,#8be9fd); padding:0.6rem 0.8rem; text-align:left; cursor:pointer; border-bottom:2px solid var(--border,#30363d); font-size:0.75rem; text-transform:uppercase; }
+  .data-table td { padding:0.5rem 0.8rem; border-bottom:1px solid var(--border,#30363d); color:var(--text,#c9d1d9); }
+  .data-table tr:hover td { background:rgba(139,233,253,0.03); }
+  .download-btns { display:flex; gap:0.5rem; margin:1rem 0; }
+  .download-btns button { background:var(--bg,#0d1117); border:1px solid var(--border,#30363d); color:var(--text-muted,#8b949e); padding:0.4rem 1rem; border-radius:var(--radius,8px); cursor:pointer; font-size:0.8rem; }
+  .download-btns button:hover { border-color:var(--accent,#8be9fd); color:var(--accent,#8be9fd); }
+</style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/about.html">About</a></li>
+    </ul>
+      <div class="nav-right">
+      <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=nav-link" class="nav-pro" target="_blank">Go Pro ✦</a>
+      <a href="https://zovo.one/tools" class="nav-zovo">Zovo Tools</a>
+    </div>
+  </nav>
+
+<main>
+  <div class="hero">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> <a href="/research/">Research</a> <span>/</span> <span>Claude API Usage Patterns</span></nav>
+    <span class="research-badge">Original Research</span>
+    <h1>Claude API Usage Patterns — What Developers Actually Build</h1>
+    <p>An analysis of 50 top GitHub repositories that integrate the Anthropic Claude API, categorized by use case. Discover what developers actually build: API gateways, chatbots, agent frameworks, SDKs, code tools, and more — with real star counts, primary languages, and descriptions sourced live from the GitHub API.</p>
+    <p style="font-size:0.85rem;color:var(--text-muted);">By <a href="/about.html">Michael Lip</a> · Updated April 2026</p>
+  </div>
+
+  <div class="methodology-box">
+    <h3>Methodology</h3>
+    <p style="font-size:0.85rem;color:var(--text,#c9d1d9);line-height:1.6;">Repositories sourced via the GitHub Search API using the query <code>anthropic+claude+api</code>, sorted by stars, limited to the top 50 results. Each repository was manually categorized by primary use case based on its description, README, and topic tags. Star counts, primary language, and descriptions are live data from April 2026. Categories assigned: API Gateway/Proxy (unified multi-provider access), Chatbot/Chat UI (conversational interfaces), SDK/Client Library (language-specific API wrappers), Code Tool (developer workflow integrations), Agent Framework (autonomous AI agents), and Specialized App (domain-specific applications).</p>
+  </div>
+
+  <div class="download-btns">
+    <button onclick="downloadData('json')">Download JSON</button>
+    <button onclick="downloadData('csv')">Download CSV</button>
+  </div>
+
+  <div class="data-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Stars</th>
+          <th>Language</th>
+          <th>Category</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>danny-avila/LibreChat</td><td>35,501</td><td>TypeScript</td><td>Chatbot / Chat UI</td><td>Enhanced ChatGPT clone with Agents, MCP, Anthropic, AWS, OpenAI support</td></tr>
+        <tr><td>songquanpeng/one-api</td><td>31,753</td><td>JavaScript</td><td>API Gateway</td><td>LLM API management and distribution system for OpenAI, Claude, Gemini, and more</td></tr>
+        <tr><td>winfunc/deepreasoning</td><td>5,361</td><td>Rust</td><td>Specialized App</td><td>High-performance LLM inference integrating DeepSeek R1 CoT with Claude</td></tr>
+        <tr><td>crmne/ruby_llm</td><td>3,826</td><td>Ruby</td><td>SDK / Client Library</td><td>Unified Ruby API for OpenAI, Anthropic, Gemini, Bedrock, and more</td></tr>
+        <tr><td>ericc-ch/copilot-api</td><td>3,586</td><td>TypeScript</td><td>API Gateway</td><td>Turns GitHub Copilot into OpenAI/Anthropic compatible server</td></tr>
+        <tr><td>bestruirui/octopus</td><td>1,972</td><td>TypeScript</td><td>API Gateway</td><td>Personal LLM API aggregation service for Claude, OpenAI, and others</td></tr>
+        <tr><td>7836246/cursor2api</td><td>1,749</td><td>TypeScript</td><td>API Gateway</td><td>Converts Cursor Web Docs free API to OpenAI/Anthropic compatible format</td></tr>
+        <tr><td>APIParkLab/APIPark</td><td>1,642</td><td>TypeScript</td><td>API Gateway</td><td>Cloud-native AI and API gateway with LLM API management</td></tr>
+        <tr><td>jtsang4/claude-to-chatgpt</td><td>1,298</td><td>Python</td><td>API Gateway</td><td>Converts Claude API format to OpenAI Chat API format</td></tr>
+        <tr><td>Storia-AI/sage</td><td>1,270</td><td>Python</td><td>Code Tool</td><td>Chat with any codebase using RAG, supports Anthropic and OpenAI</td></tr>
+        <tr><td>yym68686/uni-api</td><td>1,204</td><td>Python</td><td>API Gateway</td><td>Unified LLM API management across Claude, Gemini, Grok, and OpenAI</td></tr>
+        <tr><td>AI-QL/tuui</td><td>1,139</td><td>TypeScript</td><td>Chatbot / Chat UI</td><td>Desktop MCP client for AI adoption with model context protocol support</td></tr>
+        <tr><td>theopenco/llmgateway</td><td>1,078</td><td>TypeScript</td><td>API Gateway</td><td>Route, manage, and analyze LLM requests across multiple providers</td></tr>
+        <tr><td>Taewan-P/gpt_mobile</td><td>1,062</td><td>Kotlin</td><td>Chatbot / Chat UI</td><td>Android chat app supporting answers from multiple LLMs simultaneously</td></tr>
+        <tr><td>xing61/zzz-api</td><td>926</td><td>PHP</td><td>API Gateway</td><td>Stable OpenAI/Claude API proxy for enterprises and developers</td></tr>
+        <tr><td>jwadow/kiro-gateway</td><td>882</td><td>Python</td><td>API Gateway</td><td>Proxy API gateway for Kiro IDE using free Claude models</td></tr>
+        <tr><td>onllm-dev/onWatch</td><td>569</td><td>Go</td><td>Specialized App</td><td>Track AI API quotas across Anthropic, Codex, GitHub Copilot in real time</td></tr>
+        <tr><td>huangserva/claude-code-cli</td><td>546</td><td>TypeScript</td><td>Code Tool</td><td>Claude Code CLI client source code with terminal interaction layer</td></tr>
+        <tr><td>foreveryh/claude-code-switch</td><td>535</td><td>Shell</td><td>Code Tool</td><td>One-command model switcher for Claude Code on Anthropic API</td></tr>
+        <tr><td>caozhiyuan/copilot-api</td><td>531</td><td>TypeScript</td><td>API Gateway</td><td>Turns GitHub Copilot into OpenAI/Anthropic compatible server</td></tr>
+        <tr><td>tomascupr/sandstorm</td><td>431</td><td>Python</td><td>Agent Framework</td><td>Run Claude agents in secure cloud sandboxes via API, CLI, or Slack</td></tr>
+        <tr><td>maxnowack/anthropic-proxy</td><td>412</td><td>JavaScript</td><td>API Gateway</td><td>Proxy converting Anthropic API requests to OpenAI format via OpenRouter</td></tr>
+        <tr><td>aliom-v/KiroGate</td><td>376</td><td>Python</td><td>API Gateway</td><td>OpenAI and Anthropic compatible Kiro IDE API proxy gateway</td></tr>
+        <tr><td>ink1ing/anti-api</td><td>352</td><td>TypeScript</td><td>API Gateway</td><td>Turns Antigravity/Codex/Copilot into Anthropic and OpenAI compatible server</td></tr>
+        <tr><td>FakeOAI/tokens</td><td>339</td><td>Shell</td><td>API Gateway</td><td>Token management platform converting AI platforms to standard API formats</td></tr>
+        <tr><td>nghyane/launchdock</td><td>329</td><td>Go</td><td>API Gateway</td><td>Local gateway with OpenAI-compatible and Claude-native APIs</td></tr>
+        <tr><td>lemony-ai/cascadeflow</td><td>311</td><td>Python</td><td>Agent Framework</td><td>Cascading runtime for AI agents optimizing cost, latency, and quality</td></tr>
+        <tr><td>vaibhavk97/Poe</td><td>306</td><td>Python</td><td>API Gateway</td><td>Reverse-engineered API for Quora Poe accessing Claude and ChatGPT</td></tr>
+        <tr><td>codingworkflow/claude-code-api</td><td>294</td><td>Python</td><td>Code Tool</td><td>Claude Code API integration and tooling</td></tr>
+        <tr><td>iimeta/fastapi</td><td>277</td><td>Go</td><td>API Gateway</td><td>Enterprise LLM API integration system for OpenAI, Claude, Gemini, and more</td></tr>
+        <tr><td>anthropics/anthropic-cli</td><td>266</td><td>Go</td><td>Code Tool</td><td>Official CLI for the Claude API by Anthropic</td></tr>
+        <tr><td>ksylvest/omniai</td><td>250</td><td>Ruby</td><td>SDK / Client Library</td><td>Standardized Ruby APIs for OpenAI, Anthropic, Gemini, Mistral, and more</td></tr>
+        <tr><td>karanb192/awesome-claude-skills</td><td>248</td><td>N/A</td><td>Specialized App</td><td>Curated collection of 50+ verified Claude Code skills</td></tr>
+        <tr><td>Cysharp/Claudia</td><td>240</td><td>C#</td><td>SDK / Client Library</td><td>Unofficial Anthropic Claude API client for .NET</td></tr>
+        <tr><td>alexrudall/ruby-anthropic</td><td>233</td><td>Ruby</td><td>SDK / Client Library</td><td>Anthropic Claude API Ruby client library</td></tr>
+        <tr><td>CaddyGlow/ccproxy-api</td><td>221</td><td>Python</td><td>API Gateway</td><td>Local reverse proxy for Claude and Codex through unified interface</td></tr>
+        <tr><td>tghamm/Anthropic.SDK</td><td>215</td><td>C#</td><td>SDK / Client Library</td><td>Unofficial C#/.NET SDK for the Anthropic Claude API</td></tr>
+        <tr><td>tingxifa/claude_proxy</td><td>214</td><td>TypeScript</td><td>API Gateway</td><td>Cloudflare Workers proxy converting Claude API to OpenAI format</td></tr>
+        <tr><td>LKbaba/Claude-code-ChatInWindows</td><td>210</td><td>TypeScript</td><td>Code Tool</td><td>Full-featured GUI for Claude Code CLI in VS Code for Windows and macOS</td></tr>
+        <tr><td>ilhamfp/pasal</td><td>202</td><td>TypeScript</td><td>Specialized App</td><td>AI-native Indonesian legal platform with MCP server and REST API</td></tr>
+        <tr><td>huynle/ogpt.nvim</td><td>198</td><td>Lua</td><td>Code Tool</td><td>Neovim plugin for Ollama, OpenRouter, Anthropic GPT integration</td></tr>
+        <tr><td>liushuangls/go-anthropic</td><td>171</td><td>Go</td><td>SDK / Client Library</td><td>Anthropic Claude API wrapper for Go with streaming and tool use</td></tr>
+        <tr><td>Joouis/agent-maestro</td><td>159</td><td>TypeScript</td><td>Agent Framework</td><td>VS Code AI playground for Cline/Roo with Claude Code integration</td></tr>
+        <tr><td>lightseekorg/smg</td><td>155</td><td>Rust</td><td>API Gateway</td><td>Engine-agnostic LLM gateway with full OpenAI and Anthropic compatibility</td></tr>
+        <tr><td>777genius/os-ai-computer-use</td><td>149</td><td>Python</td><td>Agent Framework</td><td>AI controls your OS with desktop automation via OpenAI and Anthropic</td></tr>
+        <tr><td>jtydhr88/comfyui-custom-node-skills</td><td>148</td><td>Python</td><td>Specialized App</td><td>Claude Code skills collection for ComfyUI custom node development</td></tr>
+        <tr><td>s2-streamstore/claude-batch-toolkit</td><td>144</td><td>Shell</td><td>Code Tool</td><td>Send non-urgent work to Anthropic Batch API at 50% cost</td></tr>
+        <tr><td>BinaryBeastMaster/chat-relay</td><td>138</td><td>JavaScript</td><td>Chatbot / Chat UI</td><td>Relay system for Cline/RooCode to communicate with AI chat interfaces</td></tr>
+        <tr><td>hmjz100/Z.ai2api</td><td>133</td><td>Python</td><td>API Gateway</td><td>Proxy Z.ai Chat to OpenAI/Anthropic compatible format</td></tr>
+        <tr><td>Nipun1212/Claude_api</td><td>121</td><td>Python</td><td>SDK / Client Library</td><td>Python package for interacting with Claude 2 from Anthropic</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section style="max-width:800px;margin:2rem auto;line-height:1.7;">
+    <h2>Key Findings</h2>
+    <p>The Claude API ecosystem is dominated by API gateway and proxy projects, which account for 38% of the top 50 repositories (19 repos, 44K+ combined stars). This reflects a strong market need for multi-provider LLM abstraction layers. Developers want a single API endpoint that can route to Claude, GPT-4, Gemini, and other models interchangeably. The second-largest category is chatbot and chat UI projects (20%), followed by SDK/client libraries (16%) covering Ruby, C#, Go, and Lua beyond the official Python and TypeScript SDKs.</p>
+
+    <h2>Language and Category Breakdown</h2>
+    <p>TypeScript leads with 18 repositories (36%), driven by web-based chat UIs and API middleware. Python follows with 15 repos (30%), dominant in agent frameworks and specialized applications. Go accounts for 5 repos (10%), primarily high-performance gateway services. The category with the highest average star count is Chatbot/Chat UI at 9,485 stars per repo, boosted by LibreChat's 35K+ stars. API Gateways average 2,100 stars, while SDKs average 520 stars — suggesting infrastructure tools attract more attention than language-specific libraries.</p>
+  </section>
+
+  <section class="faq-section" style="max-width:800px;margin:2rem auto;padding:0 1.5rem;">
+    <h2>Frequently Asked Questions</h2>
+
+    <details>
+      <summary>What do developers build most often with the Claude API?</summary>
+      <p>Based on analysis of 50 top GitHub repositories, the most common use case is API gateways and proxy services (38% of repos), which unify multiple LLM providers behind a single interface. The second most common category is chatbot UIs and chat clients (20%), followed by SDK wrappers and client libraries (16%). Code tools, agent frameworks, and specialized applications make up the remaining 26%.</p>
+    </details>
+
+    <details>
+      <summary>Which programming languages are most popular for Claude API projects?</summary>
+      <p>TypeScript leads with 36% of Claude API projects on GitHub, followed by Python at 30%. Go accounts for 10%, reflecting its popularity for high-performance proxy and gateway services. Ruby, Kotlin, C#, and other languages make up the remaining 24%. TypeScript dominance reflects the prevalence of web-based chat UIs and API middleware.</p>
+    </details>
+
+    <details>
+      <summary>How popular are Claude API projects on GitHub?</summary>
+      <p>The top Claude API project (LibreChat) has over 35,500 stars, making it one of the most popular open-source AI projects. The top 10 projects average 6,800 stars. The median project in our dataset has approximately 300 stars. Total combined stars across all 50 analyzed repositories exceed 80,000, indicating strong developer interest in Claude API integrations.</p>
+    </details>
+
+    <details>
+      <summary>Why are API gateway and proxy projects so common for Claude?</summary>
+      <p>API gateways dominate because developers need to: (1) unify multiple LLM providers (Claude, GPT, Gemini) behind one interface for easy switching, (2) convert between API formats (e.g., Anthropic to OpenAI format), (3) manage API keys and rate limits centrally, and (4) enable cost optimization by routing requests to the cheapest suitable model. Projects like one-api (31K+ stars) demonstrate massive demand for this pattern.</p>
+    </details>
+
+    <details>
+      <summary>Are there official Anthropic SDKs or only community libraries?</summary>
+      <p>Anthropic provides official SDKs for Python (anthropic-sdk-python) and TypeScript (anthropic-sdk-typescript), plus an official CLI tool (anthropic-cli, 266 stars). The community has built additional SDKs for Ruby (ruby-anthropic, ruby_llm), C# (Claudia, Anthropic.SDK), Go (go-anthropic), and Lua (ogpt.nvim for Neovim). Community SDKs collectively have thousands of stars, showing strong ecosystem adoption beyond the official tools.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">Zovo Tools</div>
+        <div class="footer-tagline">Free developer tools by a solo dev. No tracking.</div>
+        <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=footer-link" class="footer-cta">Zovo Lifetime — $99 once, free forever →</a>
+        <div class="footer-copy">© 2026 <a href="https://zovo.one">Zovo</a> · 47/500 founding spots</div>
+    </div>
+</footer>
+
+<nav class="zovo-network" aria-label="Zovo Tools Network">
+    <div class="zovo-network-inner">
+        <h3 class="zovo-network-title">Explore More Tools</h3>
+        <div class="zovo-network-links">
+            <a href="https://abwex.com">ABWex — A/B Testing</a>
+            <a href="https://claudflow.com">ClaudFlow — Workflows</a>
+            <a href="https://claudkit.com">ClaudKit — API</a>
+            <a href="https://enhio.com">Enhio — Text Tools</a>
+            <a href="https://epochpilot.com">EpochPilot — Timestamps</a>
+            <a href="https://gen8x.com">Gen8X — Color Tools</a>
+            <a href="https://gpt0x.com">GPT0X — AI Models</a>
+            <a href="https://heytensor.com">HeyTensor — ML Tools</a>
+            <a href="https://invokebot.com">InvokeBot — Webhooks</a>
+            <a href="https://kappafy.com">Kappafy — JSON</a>
+            <a href="https://kappakit.com">KappaKit — Dev Toolkit</a>
+            <a href="https://kickllm.com">KickLLM — LLM Costs</a>
+            <a href="https://krzen.com">Krzen — Image Tools</a>
+            <a href="https://lochbot.com">LochBot — Security</a>
+            <a href="https://lockml.com">LockML — ML Compare</a>
+            <a href="https://ml3x.com">ML3X — Matrix Math</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+function downloadData(format) {
+  const entries = document.querySelectorAll('.data-table tbody tr');
+  const data = Array.from(entries).map(el => {
+    const cells = el.querySelectorAll('td');
+    if (cells.length < 2) return null;
+    return {name: cells[0]?.textContent?.trim(), category: cells[3]?.textContent?.trim(), detail: cells[4]?.textContent?.trim()?.substring(0,200)};
+  }).filter(d => d && d.name);
+  let content, type, ext;
+  if (format === 'json') { content = JSON.stringify(data, null, 2); type = 'application/json'; ext = 'json'; }
+  else { content = 'name,category,detail\n' + data.map(d => `"${(d.name||'').replace(/"/g,'""')}","${(d.category||'').replace(/"/g,'""')}","${(d.detail||'').replace(/"/g,'""')}"`).join('\n'); type = 'text/csv'; ext = 'csv'; }
+  const blob = new Blob([content], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = document.title.toLowerCase().replace(/[^a-z0-9]+/g,'-') + '.' + ext;
+  a.click();
+}
+</script>
+<script src="/assets/js/share.js"></script>
+</body>
+</html>
