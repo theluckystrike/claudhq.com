@@ -564,3 +564,103 @@ nav {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ================================================
+   Mobile Overflow Prevention — V33 Fix
+   Resolves horizontal overflow at 375px viewport
+   ================================================ */
+
+/* Global overflow containment */
+pre, code, samp, kbd {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tool outputs and result containers */
+.output-box,
+.hash-output,
+.result-box,
+.tool-output,
+.code-block,
+.tensor-box,
+.scan-result,
+.token-output {
+  overflow-x: auto;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+/* Main content containers */
+main,
+.tool-container,
+.research-content,
+.answer-content,
+.article-content,
+.blog-post,
+.article {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  pre, code, samp {
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  .output-box,
+  .hash-output,
+  .result-box,
+  .tool-output,
+  .tensor-box {
+    font-size: 0.8rem;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Related links grid — V35 standard */
+.related-links h2 {
+  margin-bottom: 1rem;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.related-card {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.related-card:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+}

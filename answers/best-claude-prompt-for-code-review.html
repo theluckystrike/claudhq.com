@@ -36,7 +36,7 @@
       "name": "How do I get Claude to find bugs in my code?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Ask Claude to role-play as a senior engineer and provide specific categories to check: off-by-one errors, null/undefined handling, race conditions, unhandled edge cases, and incorrect type assumptions. Include the full function with surrounding context for best results."
+        "text": "Ask Claude to role-play as a senior engineer and provide specific categories to check: off-by-one errors, null/missing-value handling, race conditions, unhandled edge cases, and incorrect type assumptions. Include the full function with surrounding context for best results."
       }
     },
     {
@@ -50,6 +50,7 @@
   ]
 }
 </script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://claudhq.com/"},{"@type":"ListItem","position":2,"name":"Answers","item":"https://claudhq.com/answers/"},{"@type":"ListItem","position":3,"name":"Code Review Prompt"}]}</script>
 </head>
 <body>
   <nav>
@@ -81,7 +82,7 @@ Analyze the following code for:
 
 1. **Bugs and Logic Errors**
    - Off-by-one errors
-   - Null/undefined handling
+   - Null/missing-value handling
    - Race conditions
    - Unhandled edge cases
    - Incorrect type assumptions
@@ -161,12 +162,14 @@ Code to review:
 
       <p>Browse more tested prompts in the <a href="/">ClaudHQ prompt library</a>.</p>
 
-      <h2>Related Questions</h2>
-      <ul>
-        <li><a href="/answers/claude-system-prompt-template.html">What is a good Claude system prompt template?</a></li>
-        <li><a href="/answers/how-to-use-claude-api.html">How do I use the Claude API?</a></li>
-        <li><a href="/blog/claude-prompts-code-review.html">Deep dive: Claude prompts for code review</a></li>
-      </ul>
+      <section class="related-links">
+        <h2>Related Questions</h2>
+        <div class="related-grid">
+          <a href="/answers/claude-system-prompt-template.html" class="related-card">What is a good Claude system prompt template?</a>
+          <a href="/answers/how-to-use-claude-api.html" class="related-card">How do I use the Claude API?</a>
+          <a href="/blog/claude-prompts-code-review.html" class="related-card">Deep dive: Claude prompts for code review</a>
+        </div>
+      </section>
 
       <div class="last-updated"><time datetime="2026-04-11">Last updated: April 11, 2026</time></div>
     </article>
