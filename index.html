@@ -124,6 +124,8 @@
   <nav>
     <a href="/" class="brand">ClaudHQ</a>
     <ul class="nav-links">
+      <li><a href="/answers/">Answers</a></li>
+      <li><a href="/research/">Research</a></li>
       <li><a href="/blog/">Blog</a></li>
       <li><a href="/about.html">About</a></li>
     </ul>
@@ -219,6 +221,46 @@
       <summary>How do I save my favorite prompts?</summary>
       <p>Click the heart icon on any prompt card to save it as a favorite. Favorites are stored locally in your browser — no account needed. They persist across sessions and can be filtered using the favorites view.</p>
     </details>
+  </section>
+
+  <!-- Internal Content Discovery -->
+  <section class="content-discovery" style="max-width:960px;margin:3rem auto;padding:0 1rem;">
+    <style>
+      .content-discovery h2 { text-align:center; margin-bottom:2rem; }
+      .content-discovery .disc-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2.5rem; }
+      .content-discovery .disc-group h3 { font-size:1.1rem; margin-bottom:0.75rem; color:var(--accent, #14B8A6); border-bottom:1px solid var(--border, #333); padding-bottom:0.5rem; }
+      .content-discovery .disc-group ul { list-style:none; padding:0; margin:0; }
+      .content-discovery .disc-group li { margin-bottom:0.4rem; }
+      .content-discovery .disc-group a { color:var(--text, #e0e0e0); text-decoration:none; font-size:0.9rem; }
+      .content-discovery .disc-group a:hover { color:var(--accent, #14B8A6); text-decoration:underline; }
+    </style>
+    <h2>Explore ClaudHQ</h2>
+    <div class="disc-grid">
+      <div class="disc-group">
+        <h3>Latest Answers</h3>
+        <ul>
+          <li><a href="/answers/best-claude-prompt-for-code-review.html">Best Claude Prompt for Code Review</a></li>
+          <li><a href="/answers/claude-system-prompt-template.html">Claude System Prompt Template</a></li>
+          <li><a href="/answers/how-to-use-claude-api.html">How to Use Claude API</a></li>
+        </ul>
+      </div>
+      <div class="disc-group">
+        <h3>Research</h3>
+        <ul>
+          <li><a href="/research/prompt-engineering-patterns.html">Prompt Engineering Patterns</a></li>
+          <li><a href="/research/ai-prompt-benchmark.html">AI Prompt Benchmark</a></li>
+          <li><a href="/research/claude-api-usage-patterns.html">Claude API Usage Patterns</a></li>
+          <li><a href="/research/prompt-length-effectiveness.html">Prompt Length Effectiveness</a></li>
+        </ul>
+      </div>
+      <div class="disc-group">
+        <h3>From the Blog</h3>
+        <ul>
+          <li><a href="/blog/claude-prompts-code-review.html">Claude Prompts for Code Review</a></li>
+          <li><a href="/blog/claude-vs-gpt4-comparison.html">Claude vs GPT-4 Comparison</a></li>
+        </ul>
+      </div>
+    </div>
   </section>
 
 <footer class="site-footer">
