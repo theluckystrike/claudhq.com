@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Error Diagnostic Tool (2026) | ClaudHQ</title>
+<meta name="description" content="Instant Claude Code error diagnosis. Paste your error message, get the exact fix, prevention rules, and CLAUDE.md configuration. 50+ errors covered.">
+<link rel="canonical" href="https://claudhq.com/diagnose/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Claude Code Error Diagnostic Tool — Free">
+<meta name="twitter:title" content="Claude Code Error Diagnostic Tool (2026)">
+<meta property="og:description" content="Paste your Claude Code error and get an instant diagnosis with fix instructions. Covers 50+ common errors.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://claudhq.com/diagnose/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:oklch(0.155 0.007 60);color:oklch(0.80 0.008 70);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;min-height:100vh}
+a{color:oklch(0.72 0.11 38);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.container{max-width:820px;margin:0 auto;padding:24px 16px}
+
+/* Header */
+.tool-header{text-align:center;padding:40px 0 32px}
+.tool-header h1{font-family:'Instrument Serif','Times New Roman',serif;font-weight:400;letter-spacing:-0.02em;font-size:clamp(1.5rem,4vw,2.2rem);color:oklch(0.97 0.006 80);margin-bottom:8px;line-height:1.25}
+.tool-header .subtitle{color:oklch(0.58 0.010 70);font-size:clamp(0.9rem,2.5vw,1.05rem);max-width:600px;margin:0 auto}
+.breadcrumb{font-size:13px;color:oklch(0.58 0.010 70);margin-bottom:16px;text-align:center}
+.breadcrumb a{color:oklch(0.72 0.11 38);font-size:13px}
+
+/* Badge */
+.uses-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:12px}
+.uses-badge.green{background:oklch(0.72 0.11 38 / 0.12);color:oklch(0.72 0.11 38);border:1px solid oklch(0.72 0.11 38 / 0.25)}
+.uses-badge.yellow{background:rgba(250,204,21,0.12);color:#facc15;border:1px solid rgba(250,204,21,0.25)}
+.uses-badge.red{background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.25)}
+
+/* Input area */
+.input-section{background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;padding:24px;margin-bottom:24px}
+.input-section label{display:block;font-weight:600;color:oklch(0.97 0.006 80);margin-bottom:8px;font-size:15px}
+.input-section textarea{width:100%;min-height:140px;background:oklch(0.155 0.007 60);border:1px solid oklch(0.30 0.010 60);border-radius:8px;color:oklch(0.80 0.008 70);padding:14px;font-family:'SF Mono',Monaco,'Cascadia Code',Consolas,monospace;font-size:14px;resize:vertical;line-height:1.5;transition:border-color 0.2s}
+.input-section textarea:focus{outline:none;border-color:oklch(0.72 0.11 38);box-shadow:0 0 0 2px oklch(0.72 0.11 38 / 0.15)}
+.input-section textarea::placeholder{color:oklch(0.42 0.010 70)}
+.divider-or{text-align:center;color:oklch(0.42 0.010 70);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:16px 0;position:relative}
+.divider-or::before,.divider-or::after{content:'';position:absolute;top:50%;width:calc(50% - 24px);height:1px;background:oklch(0.30 0.010 60)}
+.divider-or::before{left:0}
+.divider-or::after{right:0}
+
+.input-section select{width:100%;background:oklch(0.155 0.007 60);border:1px solid oklch(0.30 0.010 60);border-radius:8px;color:oklch(0.80 0.008 70);padding:12px 14px;font-size:14px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23c9d1d9'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.input-section select:focus{outline:none;border-color:oklch(0.72 0.11 38)}
+
+.btn-diagnose{display:block;width:100%;padding:14px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);font-size:16px;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:20px;transition:background 0.2s,transform 0.1s}
+.btn-diagnose:hover{background:oklch(0.64 0.10 38)}
+.btn-diagnose:active{transform:scale(0.98)}
+.btn-diagnose:disabled{background:oklch(0.30 0.010 60);color:oklch(0.42 0.010 70);cursor:not-allowed}
+
+.char-count{text-align:right;font-size:12px;color:oklch(0.42 0.010 70);margin-top:4px}
+
+/* Results */
+.results-container{margin-top:8px}
+.no-result{text-align:center;padding:32px;color:oklch(0.58 0.010 70)}
+
+.result-card{background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;padding:24px;margin-bottom:20px;position:relative}
+.result-card .match-rank{position:absolute;top:12px;right:16px;font-size:12px;color:oklch(0.42 0.010 70);font-weight:600}
+.result-card h3{color:oklch(0.97 0.006 80);font-size:18px;margin-bottom:8px;padding-right:60px}
+.severity-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-left:8px;vertical-align:middle}
+.severity-high{background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3)}
+.severity-medium{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)}
+.severity-low{background:oklch(0.72 0.11 38 / 0.15);color:oklch(0.72 0.11 38);border:1px solid oklch(0.72 0.11 38 / 0.3)}
+
+.result-section{margin-top:16px}
+.result-section h4{color:oklch(0.58 0.010 70);font-size:13px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.result-section p{color:oklch(0.80 0.008 70);font-size:14px;line-height:1.6}
+
+.code-block-wrapper{position:relative;margin:8px 0 0}
+.code-block{background:oklch(0.155 0.007 60);border:1px solid oklch(0.30 0.010 60);border-radius:8px;padding:14px 16px;font-family:'SF Mono',Monaco,'Cascadia Code',Consolas,monospace;font-size:13px;color:oklch(0.97 0.006 80);overflow-x:auto;white-space:pre-wrap;word-break:break-word;line-height:1.5}
+.btn-copy{position:absolute;top:8px;right:8px;background:oklch(0.235 0.009 60);border:1px solid oklch(0.30 0.010 60);border-radius:6px;color:oklch(0.58 0.010 70);font-size:12px;padding:4px 10px;cursor:pointer;transition:all 0.2s}
+.btn-copy:hover{background:oklch(0.30 0.010 60);color:oklch(0.97 0.006 80)}
+.btn-copy.copied{color:oklch(0.72 0.11 38);border-color:oklch(0.72 0.11 38)}
+
+.related-links{margin-top:16px;padding-top:12px;border-top:1px solid oklch(0.235 0.009 60)}
+.related-links h4{color:oklch(0.58 0.010 70);font-size:13px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.related-links a{display:inline-block;color:oklch(0.72 0.11 38);font-size:13px;margin-right:16px;margin-bottom:4px}
+
+/* Paywall Overlay */
+#paywall-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:oklch(0.155 0.007 60 / 0.92);z-index:1000;align-items:center;justify-content:center;flex-direction:column}
+#paywall-overlay .pw-inner{max-width:480px;text-align:center;padding:40px 24px}
+#paywall-overlay h2{color:oklch(0.72 0.11 38);font-size:24px;margin-bottom:16px;line-height:1.3}
+#paywall-overlay p{color:oklch(0.80 0.008 70);margin-bottom:24px;line-height:1.6;font-size:15px}
+#paywall-overlay .pw-cta{display:inline-block;padding:14px 32px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);font-weight:700;border-radius:8px;text-decoration:none;font-size:16px;transition:background 0.2s}
+#paywall-overlay .pw-cta:hover{background:oklch(0.64 0.10 38);text-decoration:none}
+#paywall-overlay .pw-fine{color:oklch(0.42 0.010 70);font-size:13px;margin-top:16px}
+
+/* SEO Content */
+.seo-content{margin-top:48px;padding-top:40px;border-top:1px solid oklch(0.235 0.009 60)}
+.seo-content h2{font-family:'Instrument Serif','Times New Roman',serif;font-weight:400;color:oklch(0.97 0.006 80);font-size:clamp(1.2rem,3vw,1.6rem);margin:32px 0 16px;line-height:1.3}
+.seo-content h2:first-child{margin-top:0}
+.seo-content p{color:oklch(0.80 0.008 70);font-size:15px;line-height:1.7;margin-bottom:16px}
+.seo-content ul,.seo-content ol{padding-left:24px;margin-bottom:16px}
+.seo-content li{color:oklch(0.80 0.008 70);font-size:15px;line-height:1.7;margin-bottom:6px}
+
+.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:16px 0 24px}
+.category-item{background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:8px;padding:12px 16px;font-size:14px;color:oklch(0.80 0.008 70)}
+.category-item strong{color:oklch(0.72 0.11 38);display:block;margin-bottom:4px;font-size:13px}
+
+details{background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:8px;margin-bottom:8px;overflow:hidden}
+details summary{padding:14px 18px;cursor:pointer;font-weight:600;color:oklch(0.97 0.006 80);font-size:15px;list-style:none;display:flex;align-items:center;gap:8px}
+details summary::before{content:'▶';font-size:10px;color:oklch(0.72 0.11 38);transition:transform 0.2s}
+details[open] summary::before{transform:rotate(90deg)}
+details summary::-webkit-details-marker{display:none}
+details .faq-answer{padding:0 18px 16px;color:oklch(0.80 0.008 70);font-size:14px;line-height:1.7}
+
+.cta-box{background:linear-gradient(135deg,oklch(0.72 0.11 38 / 0.08),oklch(0.72 0.11 38 / 0.02));border:1px solid oklch(0.72 0.11 38 / 0.2);border-radius:12px;padding:28px 24px;text-align:center;margin:32px 0}
+.cta-box h3{color:oklch(0.72 0.11 38);font-size:18px;margin-bottom:8px}
+.cta-box p{color:oklch(0.80 0.008 70);font-size:15px;margin-bottom:16px;max-width:540px;margin-left:auto;margin-right:auto}
+.cta-box a.cta-link{display:inline-block;padding:12px 28px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);font-weight:700;border-radius:8px;font-size:15px;transition:background 0.2s}
+.cta-box a.cta-link:hover{background:oklch(0.64 0.10 38);text-decoration:none}
+
+.footer{text-align:center;padding:40px 0 24px;color:oklch(0.42 0.010 70);font-size:13px;border-top:1px solid oklch(0.235 0.009 60);margin-top:48px}
+
+@media(max-width:600px){
+  .container{padding:16px 12px}
+  .tool-header{padding:24px 0 20px}
+  .input-section{padding:16px}
+  .result-card{padding:16px}
+  .category-grid{grid-template-columns:1fr}
+  #paywall-overlay .pw-inner{padding:32px 16px}
+}
+
+/* ========== LEARN MORE ========== */
+.learn-more {
+  margin: 48px 0 0;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--line);
+}
+.learn-more .lm-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+.learn-more .lm-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+.learn-more .lm-title em {
+  font-family: var(--serif-alt);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+.learn-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.learn-more-grid a {
+  background: var(--bg-2);
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
+}
+.learn-more-grid a:hover {
+  background: var(--bg-3);
+  color: var(--accent);
+}
+.learn-more-grid a::before {
+  content: '\2192';
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color .15s ease;
+}
+.learn-more-grid a:hover::before {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .learn-more-grid { grid-template-columns: 1fr; }
+  .learn-more .lm-title { font-size: 24px; }
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does this tool send my error messages to any server?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The entire diagnostic runs in your browser using JavaScript pattern matching. No data is sent anywhere. No API calls are made. Your error messages stay on your machine."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is the error matching?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The tool uses regex patterns written from real terminal output. It returns the top 3 matches ranked by confidence, so even if the first result is not exactly right, the second or third usually covers your specific variation. Accuracy is highest when you paste the full error message including any stack trace."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my error is not in the database?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If none of the 50+ patterns match your error, the tool will tell you no matches were found and suggest checking the Claude Code Errors Atlas for a comprehensive reference. You can also browse errors by category using the dropdown selector."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use the prevention rules in my CLAUDE.md?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Every diagnostic result includes a \"Prevention rule for CLAUDE.md\" section with copy-ready text. Paste it directly into your project's CLAUDE.md file. These rules tell Claude Code to avoid the patterns that trigger the error in the first place."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do I get a stream idle timeout?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Stream idle timeouts happen when Claude Code waits too long for the next chunk of a response from the Anthropic API. The default timeout is 120 seconds. Long code generations, complex reasoning, or slow network connections can trigger this. Fix it by setting ANTHROPIC_TIMEOUT_SECONDS=300 in your environment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix \"API key invalid\" errors?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First verify your key starts with sk-ant- and has not expired. Run echo $ANTHROPIC_API_KEY to check it is set. If it is blank, add export ANTHROPIC_API_KEY=sk-ant-your-key to your ~/.bashrc or ~/.zshrc and restart your terminal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between this tool and the Errors Atlas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This tool gives you instant, targeted diagnostics: paste an error, get the fix. The Errors Atlas is a comprehensive reference of every documented error with full context, edge cases, and OS-specific variations. Use the diagnostic for quick fixes, the Atlas for deep dives."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this work for MCP server errors?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The database includes patterns for MCP server connection failures, tool registration errors, skill installation failures, and hook execution problems. These are common when setting up custom MCP servers or configuring Claude Code extensions."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="site-nav" aria-label="Main navigation" style="position:sticky;top:0;z-index:40;background:rgba(30,28,24,0.82);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid oklch(0.30 0.010 60);padding:0.75rem 1rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">
+  <a href="/" class="nav-home" style="color:oklch(0.72 0.11 38);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;font-weight:600;">ClaudHQ</a>
+  <a href="/errors/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Errors</a>
+  <a href="/diagnose/" style="color:oklch(0.18 0.04 38);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;background:oklch(0.72 0.11 38);font-weight:600;">Diagnose</a>
+  <a href="/calculator/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Calculator</a>
+  <a href="/generator/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Generator</a>
+</nav>
+
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="/">Home</a> &rsaquo; Error Diagnostic
+  </nav>
+
+  <header class="tool-header">
+    <h1>Claude Code Error Diagnostic</h1>
+    <p class="subtitle">Paste your error message or pick from 50+ common errors. Get the exact fix, prevention rule, and CLAUDE.md configuration instantly.</p>
+    <div id="uses-badge"></div>
+  </header>
+
+  <div class="input-section">
+    <label for="error-input">Paste your Claude Code error message</label>
+    <textarea id="error-input" placeholder="Paste your Claude Code error message here...&#10;&#10;Example: Error: stream idle timeout after 120 seconds" maxlength="10000" aria-label="Error message input"></textarea>
+    <div class="char-count"><span id="char-count">0</span> / 10,000</div>
+
+    <div class="divider-or">or</div>
+
+    <label for="error-select">Select a common error</label>
+    <select id="error-select" aria-label="Common error selector">
+      <option value="">-- Select a common error --</option>
+    </select>
+
+    <button class="btn-diagnose" id="btn-diagnose" type="button" aria-label="Diagnose error">Diagnose Error</button>
+  </div>
+
+  <div class="results-container" id="results-container"></div>
+</div>
+
+<div id="paywall-overlay">
+  <div class="pw-inner">
+    <h2>You've used your 2 free diagnostics</h2>
+    <p>Unlock unlimited access to all 5 CCG tools + 200 production-ready CLAUDE.md templates, error fixes, and cost optimization configs.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=paywall" class="pw-cta">Get Lifetime Access &mdash; $99</a>
+    <p class="pw-fine">One-time payment. All tools. All templates. Forever.</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="seo-content">
+
+    <h2>How the Claude Code Error Diagnostic Works</h2>
+    <p>The Claude Code Error Diagnostic uses pattern matching against a database of 50+ real-world error messages encountered by Claude Code users. When you paste an error message, the tool runs it against every known error pattern, scores each match, and returns the top 3 most relevant results ranked by confidence.</p>
+    <p>Each result gives you four things: the exact terminal commands or configuration changes to fix the error right now, a plain-language explanation of why the error occurred in the first place, a prevention rule you can paste into your CLAUDE.md file so it never happens again, and links to detailed guides covering edge cases and advanced troubleshooting.</p>
+    <p>The diagnostic covers errors from Claude Code's core CLI, the MCP server protocol, API connectivity, file system operations, build toolchains, and environment configuration. Whether you are hitting a <code>stream idle timeout</code> during a long generation or a <code>permission denied</code> when Claude tries to edit files, this tool surfaces the fix in seconds instead of hours of Stack Overflow searching.</p>
+    <p>The error database is maintained from real support tickets, GitHub issues, and community reports. Patterns are written as regular expressions that match the exact text you see in your terminal, including partial matches and variations across operating systems.</p>
+
+    <h2>50+ Errors Covered</h2>
+    <div class="category-grid">
+      <div class="category-item">
+        <strong>API &amp; Authentication</strong>
+        API key invalid, rate limits, 429 errors, proxy auth, model not found
+      </div>
+      <div class="category-item">
+        <strong>Connection &amp; Network</strong>
+        ECONNREFUSED, SSL failures, timeouts, CORS, stream idle timeout
+      </div>
+      <div class="category-item">
+        <strong>File System &amp; Permissions</strong>
+        EACCES, file not found, disk space, too many open files, chmod issues
+      </div>
+      <div class="category-item">
+        <strong>MCP &amp; Extensions</strong>
+        Server connection failed, tool not found, skill install failed, hooks
+      </div>
+      <div class="category-item">
+        <strong>Build &amp; Dev Tools</strong>
+        TypeScript, ESLint, webpack/vite, npm install, Docker, cargo, go mod
+      </div>
+      <div class="category-item">
+        <strong>Memory &amp; Performance</strong>
+        Heap out of memory, context window exceeded, diff too large, segfault
+      </div>
+      <div class="category-item">
+        <strong>Git &amp; Version Control</strong>
+        Not initialized, merge conflicts, SSH keys, spawn ENOENT
+      </div>
+      <div class="category-item">
+        <strong>Configuration</strong>
+        CLAUDE.md not found, invalid JSON settings, env vars, PATH issues
+      </div>
+    </div>
+
+    <h2>Frequently Asked Questions</h2>
+
+    <details>
+      <summary>Does this tool send my error messages to any server?</summary>
+      <div class="faq-answer">No. The entire diagnostic runs in your browser using JavaScript pattern matching. No data is sent anywhere. No API calls are made. Your error messages stay on your machine.</div>
+    </details>
+
+    <details>
+      <summary>How accurate is the error matching?</summary>
+      <div class="faq-answer">The tool uses regex patterns written from real terminal output. It returns the top 3 matches ranked by confidence, so even if the first result is not exactly right, the second or third usually covers your specific variation. Accuracy is highest when you paste the full error message including any stack trace.</div>
+    </details>
+
+    <details>
+      <summary>What if my error is not in the database?</summary>
+      <div class="faq-answer">If none of the 50+ patterns match your error, the tool will tell you no matches were found and suggest checking the <a href="/errors/">Claude Code Errors Atlas</a> for a comprehensive reference. You can also browse errors by category using the dropdown selector.</div>
+    </details>
+
+    <details>
+      <summary>Can I use the prevention rules in my CLAUDE.md?</summary>
+      <div class="faq-answer">Yes. Every diagnostic result includes a "Prevention rule for CLAUDE.md" section with copy-ready text. Paste it directly into your project's CLAUDE.md file. These rules tell Claude Code to avoid the patterns that trigger the error in the first place.</div>
+    </details>
+
+    <details>
+      <summary>Why do I get a stream idle timeout?</summary>
+      <div class="faq-answer">Stream idle timeouts happen when Claude Code waits too long for the next chunk of a response from the Anthropic API. The default timeout is 120 seconds. Long code generations, complex reasoning, or slow network connections can trigger this. Fix it by setting <code>ANTHROPIC_TIMEOUT_SECONDS=300</code> in your environment. See our <a href="/claude-api-timeout-error-handling-retry-guide/">full stream idle timeout guide</a> for details.</div>
+    </details>
+
+    <details>
+      <summary>How do I fix "API key invalid" errors?</summary>
+      <div class="faq-answer">First verify your key starts with <code>sk-ant-</code> and has not expired. Run <code>echo $ANTHROPIC_API_KEY</code> to check it is set. If it is blank, add <code>export ANTHROPIC_API_KEY=sk-ant-your-key</code> to your <code>~/.bashrc</code> or <code>~/.zshrc</code> and restart your terminal. See our <a href="/errors/">API key authentication guide</a>.</div>
+    </details>
+
+    <details>
+      <summary>What is the difference between this tool and the Errors Atlas?</summary>
+      <div class="faq-answer">This tool gives you instant, targeted diagnostics: paste an error, get the fix. The <a href="/errors/">Errors Atlas</a> is a comprehensive reference of every documented error with full context, edge cases, and OS-specific variations. Use the diagnostic for quick fixes, the Atlas for deep dives.</div>
+    </details>
+
+    <details>
+      <summary>Does this work for MCP server errors?</summary>
+      <div class="faq-answer">Yes. The database includes patterns for MCP server connection failures, tool registration errors, skill installation failures, and hook execution problems. These are common when setting up custom MCP servers or configuring Claude Code extensions.</div>
+    </details>
+
+    <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+      <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;font-family:'Instrument Serif','Times New Roman',serif;font-weight:400;">Related Guides</h2>
+      <ul style="list-style:none;padding:0;margin:0;">
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/claude-api-timeout-error-handling-retry-guide/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude API Timeout Error Handling and Retry Guide</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/claude-code-ssl-certificate-verification-failed-error/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">SSL Certificate Verification Failed Error</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/claude-code-not-working-vscode/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Not Working in VS Code</a>
+        </li>
+        <li style="padding:8px 0;">
+          <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Skill Timeout Error: How to Increase the Limit</a>
+        </li>
+      </ul>
+    </section>
+
+<section class="learn-more">
+  <div class="lm-eyebrow">&sect; Related &middot; Troubleshooting</div>
+  <h2 class="lm-title">Keep <em>reading.</em></h2>
+  <div class="learn-more-grid">
+    <a href="/errors/">Claude Code Error Hub</a>
+    <a href="/calculator/">Claude Code Cost Calculator</a>
+    <a href="/generator/">CLAUDE.md Generator</a>
+    <a href="/claude-api-timeout-error-handling-retry-guide/">Claude API Timeout Error Handling</a>
+    <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Certificate Verification Failed</a>
+    <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+    <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">Skill Timeout Error Fix</a>
+    <a href="/claude-code-gitignore-best-practices/">Claude Code .gitignore Best Practices</a>
+  </div>
+</section>
+
+    <div class="cta-box">
+      <h3>Need More Than Quick Fixes?</h3>
+      <p>This tool covers the basics. For 50 production-ready error fixes with prevention rules and CLAUDE.md configurations, cost optimization templates, and workflow automation guides:</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta" class="cta-link">Get the Claude Code Playbook &mdash; $99 Lifetime</a>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    &copy; 2026 ClaudHQ. All rights reserved.<br>
+    <a href="/">Home</a> &middot; <a href="/errors/">Errors</a> &middot; <a href="/diagnose/">Diagnose</a> &middot; <a href="/calculator/">Calculator</a> &middot; <a href="/generator/">Generator</a>
+  </footer>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ====================================================================
+   * ERROR DATABASE — 50 patterns
+   * ==================================================================== */
+  const ERROR_DB = [
+    {
+      id: 1,
+      title: "Stream Idle Timeout",
+      severity: "high",
+      regex: /stream\s+idle\s+timeout|idle\s+timeout\s+after\s+\d+\s*s/i,
+      keywords: ["stream", "idle", "timeout"],
+      fix: "# Set a longer timeout (default is 120s)\nexport ANTHROPIC_TIMEOUT_SECONDS=300\n\n# Or set per-session\nANTHROPIC_TIMEOUT_SECONDS=300 claude",
+      why: "Claude Code waits for API response chunks. Complex generations or slow networks can exceed the default 120-second idle timeout between chunks.",
+      prevention: "# CLAUDE.md — Prevent stream idle timeout\n# Environment: Set ANTHROPIC_TIMEOUT_SECONDS=300 before starting sessions\n# For long-running tasks, break them into smaller steps to avoid single-response timeouts",
+      links: [
+        { text: "Stream Idle Timeout Fix", url: "/claude-api-timeout-error-handling-retry-guide/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 2,
+      title: "SSL Certificate Verification Failed",
+      severity: "high",
+      regex: /ssl\s*cert|certificate\s+verif|UNABLE_TO_VERIFY_LEAF_SIGNATURE|CERT_HAS_EXPIRED|unable\s+to\s+get\s+local\s+issuer/i,
+      keywords: ["ssl", "certificate", "verify", "tls"],
+      fix: "# Option 1: Update CA certificates\nsudo update-ca-certificates        # Linux\nbrew install ca-certificates        # macOS\n\n# Option 2: Temporary workaround (development only)\nexport NODE_TLS_REJECT_UNAUTHORIZED=0\n\n# Option 3: Set custom CA bundle\nexport NODE_EXTRA_CA_CERTS=/path/to/corporate-ca.pem",
+      why: "Your system's CA certificate store is outdated or a corporate proxy is injecting its own SSL certificate that Node.js does not trust.",
+      prevention: "# CLAUDE.md — SSL certificate handling\n# If behind corporate proxy, set NODE_EXTRA_CA_CERTS to the corporate CA bundle path\n# Never use NODE_TLS_REJECT_UNAUTHORIZED=0 in production",
+      links: [
+        { text: "SSL Certificate Fix Guide", url: "/claude-code-ssl-certificate-verification-failed-error/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 3,
+      title: "Rate Limit Exceeded (429)",
+      severity: "high",
+      regex: /rate\s*limit|429|too\s+many\s+requests|RateLimitError|rate_limit_exceeded/i,
+      keywords: ["rate", "limit", "429", "throttle"],
+      fix: "# Wait and retry — typical cooldown is 60 seconds\n# Check your current plan limits\nclaude config get\n\n# If persistent, check usage dashboard\n# https://console.anthropic.com/settings/usage\n\n# For CI/CD, add retry logic with exponential backoff\nexport ANTHROPIC_MAX_RETRIES=5",
+      why: "You have exceeded the API request rate for your current plan tier. This happens during rapid successive calls, parallel agents, or when approaching monthly usage caps.",
+      prevention: "# CLAUDE.md — Rate limit prevention\n# Space out API calls in scripts — minimum 1s between requests\n# Use /compact regularly to reduce token usage per request\n# Monitor usage at console.anthropic.com before hitting limits",
+      links: [
+        { text: "Rate Limit Guide", url: "/errors/" },
+        { text: "Cost Optimization", url: "/calculator/" }
+      ]
+    },
+    {
+      id: 4,
+      title: "Context Window Exceeded",
+      severity: "high",
+      regex: /context\s*window|too\s+many\s+tokens|maximum\s+context|token\s+limit|max_tokens_exceeded|prompt\s+is\s+too\s+long/i,
+      keywords: ["context", "window", "tokens", "exceeded", "limit"],
+      fix: "# Compact the current conversation\n/compact\n\n# Or start fresh with smaller context\n/clear\n\n# Reduce files loaded into context\n# Use .claudeignore to exclude large files/dirs\necho 'node_modules/\\n*.log\\ndist/' > .claudeignore",
+      why: "The combined size of your conversation history, loaded files, and system prompt exceeds the model's context window. This grows over long sessions with many file reads.",
+      prevention: "# CLAUDE.md — Context management\n# Run /compact after every 10 interactions\n# Keep .claudeignore updated to exclude build artifacts, logs, and vendor directories\n# Break large tasks into separate sessions",
+      links: [
+        { text: "Context Window Management", url: "/errors/" },
+        { text: "Cost Optimization", url: "/calculator/" }
+      ]
+    },
+    {
+      id: 5,
+      title: "Connection Refused (ECONNREFUSED)",
+      severity: "high",
+      regex: /ECONNREFUSED|connection\s+refused|connect\s+ECONNREFUSED|Failed\s+to\s+connect/i,
+      keywords: ["econnrefused", "connection", "refused", "connect"],
+      fix: "# Check if the API endpoint is reachable\ncurl -I https://api.anthropic.com/v1/messages\n\n# Check proxy settings\necho $HTTP_PROXY $HTTPS_PROXY\n\n# If using a custom API base\nexport ANTHROPIC_API_BASE=https://api.anthropic.com\n\n# Check firewall rules\nsudo ufw status          # Linux\npfctl -sr                # macOS",
+      why: "The connection to the Anthropic API (or your proxy) was actively refused. This means the target server is not running, a firewall is blocking the port, or the API endpoint URL is wrong.",
+      prevention: "# CLAUDE.md — Connection configuration\n# Verify network connectivity before starting long sessions\n# If behind proxy: set HTTP_PROXY and HTTPS_PROXY environment variables\n# Test API reachability: curl -I https://api.anthropic.com/v1/messages",
+      links: [
+        { text: "Connection Troubleshooting", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 6,
+      title: "Permission Denied (Tool Use)",
+      severity: "medium",
+      regex: /permission\s+denied.*tool|tool\s+use.*denied|not\s+allowed\s+to\s+use|tool\s+blocked|User\s+rejected/i,
+      keywords: ["permission", "denied", "tool", "blocked", "rejected"],
+      fix: "# Update permissions in settings\nclaude config set allowedTools 'Edit,Write,Bash,Read'\n\n# Or allow all tools for current project\nclaude config set --project allowedTools '*'\n\n# Check current permissions\nclaude config get allowedTools\n\n# Or approve in settings.json\n# ~/.claude/settings.json → \"allowedTools\": [\"Edit\", \"Write\", \"Bash\"]",
+      why: "Claude Code's tool-use permissions restrict which operations it can perform. By default, some tools require explicit approval. Your settings may be blocking the tool Claude needs.",
+      prevention: "# CLAUDE.md — Tool permissions\n# Ensure project settings allow necessary tools: Edit, Write, Bash, Read, Glob, Grep\n# Review ~/.claude/settings.json and .claude/settings.json for permission conflicts",
+      links: [
+        { text: "Permission Configuration", url: "/errors/" },
+        { text: "CLAUDE.md Guide", url: "/generator/" }
+      ]
+    },
+    {
+      id: 7,
+      title: "Model Not Found",
+      severity: "medium",
+      regex: /model\s+not\s+found|invalid\s+model|model.*does\s+not\s+exist|unknown\s+model|model_not_found/i,
+      keywords: ["model", "not found", "invalid"],
+      fix: "# Check available models\nclaude config list-models\n\n# Set the correct model\nclaude config set model claude-sonnet-4-20250514\n\n# Valid model names (2026):\n# claude-opus-4-20250514\n# claude-sonnet-4-20250514\n# claude-haiku-3-20250307",
+      why: "The model name in your configuration is misspelled or refers to a deprecated model version. Model IDs include specific date suffixes.",
+      prevention: "# CLAUDE.md — Model configuration\n# Use exact model IDs from documentation, including date suffix\n# Run 'claude config list-models' to see available models before changing",
+      links: [
+        { text: "Model Selection Guide", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 8,
+      title: "API Key Invalid / Authentication Failed",
+      severity: "high",
+      regex: /api\s*key\s*invalid|authentication\s+failed|invalid.*api[_\s]*key|unauthorized|401.*auth|auth.*401|invalid_api_key|could\s+not\s+authenticate/i,
+      keywords: ["api", "key", "invalid", "auth", "unauthorized", "401"],
+      fix: "# Check if key is set\necho $ANTHROPIC_API_KEY | head -c 10\n\n# Re-export the key\nexport ANTHROPIC_API_KEY=sk-ant-your-key-here\n\n# Make it permanent\necho 'export ANTHROPIC_API_KEY=sk-ant-your-key-here' >> ~/.zshrc\nsource ~/.zshrc\n\n# Verify key works\ncurl -H \"x-api-key: $ANTHROPIC_API_KEY\" \\\n  https://api.anthropic.com/v1/messages -I",
+      why: "Your API key is missing, expired, incorrectly formatted, or belongs to a deactivated account. Keys must start with 'sk-ant-' for direct API access.",
+      prevention: "# CLAUDE.md — API key management\n# Store API key in shell profile (~/.zshrc or ~/.bashrc), not in project files\n# Never commit API keys to git — add .env to .gitignore\n# Rotate keys quarterly via console.anthropic.com",
+      links: [
+        { text: "API Key Authentication Guide", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 9,
+      title: "CLAUDE.md Not Found",
+      severity: "low",
+      regex: /CLAUDE\.md\s+not\s+found|no\s+CLAUDE\.md|missing\s+CLAUDE\.md|could\s+not\s+find\s+CLAUDE/i,
+      keywords: ["claude.md", "not found", "missing"],
+      fix: "# Create a CLAUDE.md in your project root\ntouch CLAUDE.md\n\n# Add basic configuration\ncat > CLAUDE.md << 'EOF'\n# Project Configuration\n\n## Build & Test\n- Build: `npm run build`\n- Test: `npm test`\n- Lint: `npm run lint`\n\n## Conventions\n- Use TypeScript strict mode\n- All functions under 60 lines\n- Error handling on all async operations\nEOF\n\n# Verify Claude Code picks it up\nclaude --print 'What does my CLAUDE.md say?'",
+      why: "Claude Code looks for a CLAUDE.md file in your project root and parent directories to understand project conventions. Without it, Claude uses generic defaults.",
+      prevention: "# Every project should have a CLAUDE.md at the root\n# Include: build commands, test commands, coding conventions, project structure\n# See claudhq.com/generator/ for templates",
+      links: [
+        { text: "CLAUDE.md Configuration Guide", url: "/generator/" },
+        { text: "Free CLAUDE.md Template", url: "/generator/" }
+      ]
+    },
+    {
+      id: 10,
+      title: "Git Not Initialized",
+      severity: "low",
+      regex: /git\s+not\s+init|not\s+a\s+git\s+repo|fatal:\s+not\s+a\s+git|git\s+init|\.git.*not\s+found/i,
+      keywords: ["git", "init", "not a git", "repository"],
+      fix: "# Initialize git repository\ngit init\n\n# Create .gitignore\ncat > .gitignore << 'EOF'\nnode_modules/\ndist/\n.env\n*.log\n.DS_Store\nEOF\n\n# Initial commit\ngit add -A\ngit commit -m 'Initial commit'",
+      why: "Claude Code uses git for change tracking, diff generation, and safe file operations. Many features require an initialized git repository.",
+      prevention: "# CLAUDE.md — Git requirement\n# This project requires git — always work in an initialized repository\n# Claude Code uses git history for context and safe rollbacks",
+      links: [
+        { text: "Git Setup Guide", url: "/claude-code-gitignore-best-practices/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 11,
+      title: "Out of Memory / Heap Overflow",
+      severity: "high",
+      regex: /out\s+of\s+memory|heap\s+out\s+of\s+memory|FATAL\s+ERROR.*allocation|JavaScript\s+heap|OOMKilled|memory\s+limit/i,
+      keywords: ["memory", "heap", "oom", "allocation"],
+      fix: "# Increase Node.js memory limit\nexport NODE_OPTIONS='--max-old-space-size=8192'\n\n# Or set for single run\nNODE_OPTIONS='--max-old-space-size=8192' claude\n\n# Check current memory usage\nnode -e 'console.log(process.memoryUsage())'\n\n# For persistent fix, add to shell profile\necho \"export NODE_OPTIONS='--max-old-space-size=8192'\" >> ~/.zshrc",
+      why: "Claude Code's Node.js process exceeded its memory allocation. This happens with very large codebases, many files loaded in context, or memory leaks in MCP servers.",
+      prevention: "# CLAUDE.md — Memory management\n# Set NODE_OPTIONS='--max-old-space-size=8192' in your environment\n# Use .claudeignore to exclude large directories (node_modules, .git objects, build outputs)\n# Run /compact regularly during long sessions",
+      links: [
+        { text: "Memory Optimization", url: "/errors/" },
+        { text: "Cost Optimization", url: "/calculator/" }
+      ]
+    },
+    {
+      id: 12,
+      title: "EPIPE / Broken Pipe",
+      severity: "medium",
+      regex: /EPIPE|broken\s+pipe|write\s+EPIPE|pipe\s+broken/i,
+      keywords: ["epipe", "broken", "pipe"],
+      fix: "# Update Claude Code to latest version\nnpm update -g @anthropic-ai/claude-code\n\n# If persists, check terminal emulator\n# Resize terminal to standard dimensions\n\n# Clear any stale pipe state\nreset\n\n# Restart Claude Code\nclaude",
+      why: "A broken pipe occurs when Claude Code tries to write to a connection that the other end has already closed. Often caused by terminal resize during output, network disconnection, or outdated CLI versions.",
+      prevention: "# CLAUDE.md — Pipe stability\n# Keep Claude Code updated to latest version\n# Avoid resizing terminal during active output\n# Use a stable terminal emulator (iTerm2, Windows Terminal, Alacritty)",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 13,
+      title: "Spawn ENOENT — Command Not Found",
+      severity: "medium",
+      regex: /spawn\s+ENOENT|ENOENT.*spawn|command\s+not\s+found|spawn.*not\s+found/i,
+      keywords: ["spawn", "enoent", "command", "not found"],
+      fix: "# Check if the command exists in PATH\nwhich <command-name>\n\n# List current PATH\necho $PATH\n\n# Common fix: add missing tool to PATH\n# For Homebrew (macOS)\nexport PATH=\"/opt/homebrew/bin:$PATH\"\n\n# For nvm/node\nexport PATH=\"$HOME/.nvm/versions/node/$(node -v)/bin:$PATH\"\n\n# Make permanent\necho 'export PATH=\"/opt/homebrew/bin:$PATH\"' >> ~/.zshrc",
+      why: "Node.js tried to spawn a child process for a command that does not exist in your PATH. This often happens when Claude Code tries to run build tools, linters, or compilers that are installed but not in the current shell's PATH.",
+      prevention: "# CLAUDE.md — PATH configuration\n# Ensure all required tools are in PATH before starting Claude Code\n# List required tools: node, npm, git, and any project-specific CLI tools\n# Verify with: which node npm git",
+      links: [
+        { text: "PATH Configuration", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 14,
+      title: "EACCES Permission Denied (File System)",
+      severity: "medium",
+      regex: /EACCES|permission\s+denied.*file|cannot\s+open|access\s+denied|EACCES.*permission/i,
+      keywords: ["eacces", "permission", "denied", "file", "access"],
+      fix: "# Check file ownership and permissions\nls -la /path/to/file\n\n# Fix ownership\nsudo chown -R $(whoami) /path/to/directory\n\n# Fix permissions\nchmod 644 /path/to/file       # Files\nchmod 755 /path/to/directory   # Directories\n\n# For npm global installs\nsudo chown -R $(whoami) ~/.npm\nsudo chown -R $(whoami) /usr/local/lib/node_modules",
+      why: "The current user does not have read or write permission to the target file or directory. Common with system directories, npm global installs, or files created by a different user or process.",
+      prevention: "# CLAUDE.md — File permissions\n# Never run Claude Code as root/sudo\n# Ensure project directory is owned by current user\n# Check permissions before automated file operations: ls -la target",
+      links: [
+        { text: "Permission Denied Fixes", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 15,
+      title: "JSON Parse Error",
+      severity: "medium",
+      regex: /JSON\s*parse|Unexpected\s+token.*JSON|SyntaxError.*JSON|invalid\s+JSON|JSON\.parse/i,
+      keywords: ["json", "parse", "syntax", "unexpected token"],
+      fix: "# Validate your JSON file\ncat .claude/settings.json | python3 -m json.tool\n\n# Or use node\nnode -e \"console.log(JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8')))\"\n\n# Common issues:\n# - Trailing commas (not allowed in JSON)\n# - Single quotes (must use double quotes)\n# - Comments (not allowed in standard JSON)\n# - Missing closing brackets",
+      why: "A JSON configuration file (settings.json, package.json, tsconfig.json) contains invalid syntax. JSON is strict: no trailing commas, no comments, double quotes only.",
+      prevention: "# CLAUDE.md — JSON file handling\n# Always validate JSON files after editing: python3 -m json.tool < file.json\n# Use a JSON-aware editor with syntax highlighting\n# Never manually edit minified JSON",
+      links: [
+        { text: "Settings Configuration", url: "/generator/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 16,
+      title: "MCP Server Connection Failed",
+      severity: "high",
+      regex: /MCP\s+server.*fail|MCP.*connection\s+failed|failed\s+to\s+connect.*MCP|MCP.*refused|MCP.*timeout|could\s+not\s+connect\s+to\s+MCP/i,
+      keywords: ["mcp", "server", "connection", "failed"],
+      fix: "# Check MCP server configuration\ncat ~/.claude/settings.json | python3 -m json.tool\n\n# Verify server is running\ncurl http://localhost:3000/health    # adjust port\n\n# Restart MCP server\n# Kill existing\npkill -f 'mcp-server'\n\n# Check server logs\ntail -50 ~/.claude/mcp-server.log\n\n# Reconfigure\nclaude mcp add <server-name> -- <command>",
+      why: "Claude Code cannot establish a connection to the configured MCP (Model Context Protocol) server. The server may not be running, the port may be wrong, or the server process crashed during startup.",
+      prevention: "# CLAUDE.md — MCP server setup\n# Always test MCP server independently before connecting to Claude Code\n# Include health check endpoint in custom MCP servers\n# Log MCP server output to a file for debugging",
+      links: [
+        { text: "MCP Server Troubleshooting", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 17,
+      title: "MCP Tool Not Found",
+      severity: "medium",
+      regex: /MCP\s+tool.*not\s+found|tool.*not\s+registered|unknown\s+tool|tool\s+does\s+not\s+exist.*MCP/i,
+      keywords: ["mcp", "tool", "not found", "registered"],
+      fix: "# List registered MCP tools\nclaude mcp list\n\n# Verify tool registration in server config\ncat ~/.claude/settings.json\n\n# Re-register the tool\nclaude mcp remove <server-name>\nclaude mcp add <server-name> -- <command>\n\n# Restart Claude Code to pick up changes\nclaude",
+      why: "The MCP tool you're trying to use is not registered in the current server configuration. This happens when the server definition changed, the tool name is misspelled, or the MCP server does not expose the expected tools.",
+      prevention: "# CLAUDE.md — MCP tools\n# Document all required MCP tools and their server names\n# Verify tool availability after server updates: claude mcp list\n# Pin MCP server versions to avoid breaking changes",
+      links: [
+        { text: "MCP Server Troubleshooting", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 18,
+      title: "Skill Installation Failed",
+      severity: "medium",
+      regex: /skill.*install.*fail|failed\s+to\s+install\s+skill|skill.*not\s+found|npx.*skill.*error/i,
+      keywords: ["skill", "install", "failed"],
+      fix: "# Check npm/npx is working\nnpm --version\nnpx --version\n\n# Clear npm cache\nnpm cache clean --force\n\n# Try installing skill directly\nnpx @anthropic-ai/claude-code-skill@latest install <skill-name>\n\n# Check network connectivity\ncurl -I https://registry.npmjs.org\n\n# Verify skill source exists\nnpm view <skill-package-name>",
+      why: "The skill package could not be downloaded or installed from npm. Network issues, npm cache corruption, or an invalid skill name are the most common causes.",
+      prevention: "# CLAUDE.md — Skill management\n# Verify skill names before installation\n# Keep npm cache clean: npm cache clean --force periodically\n# Pin skill versions in project configuration",
+      links: [
+        { text: "Skill Finder", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 19,
+      title: "Hook Execution Failed",
+      severity: "medium",
+      regex: /hook.*fail|hook.*error|pre-?commit.*fail|post-?commit.*fail|hook\s+execution|hook\s+script.*fail/i,
+      keywords: ["hook", "execution", "failed", "pre-commit"],
+      fix: "# Check hook script permissions\nls -la .claude/hooks/\nchmod +x .claude/hooks/*\n\n# Test hook script manually\nbash .claude/hooks/pre-commit.sh\n\n# Check hook syntax\nbash -n .claude/hooks/pre-commit.sh\n\n# View hook configuration\ncat .claude/settings.json | python3 -m json.tool\n\n# Disable hooks temporarily for debugging\nclaude config set hooks.enabled false",
+      why: "A Claude Code hook script failed during execution. The script may have a syntax error, missing execute permissions, or the commands it runs may be failing.",
+      prevention: "# CLAUDE.md — Hook scripts\n# Always test hook scripts manually before enabling\n# Ensure all hooks have execute permission: chmod +x .claude/hooks/*\n# Validate hook syntax: bash -n <script-path>\n# Keep hooks fast (under 5 seconds)",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 20,
+      title: "Subagent Spawn Failed",
+      severity: "medium",
+      regex: /subagent.*fail|agent.*spawn.*fail|failed\s+to\s+spawn.*agent|worker.*spawn|child\s+agent.*error/i,
+      keywords: ["subagent", "spawn", "failed", "agent", "worker"],
+      fix: "# Check system resource limits\nulimit -a\n\n# Increase process limit if needed\nulimit -u 4096\n\n# Check available memory\nfree -h          # Linux\nvm_stat          # macOS\n\n# Reduce parallel agents\nclaude config set maxSubagents 3\n\n# Restart with clean state\nclaude --no-cache",
+      why: "Claude Code could not spawn a subagent process. This typically happens when system resources (memory, process count, file descriptors) are exhausted or when resource limits are too restrictive.",
+      prevention: "# CLAUDE.md — Subagent configuration\n# Set reasonable subagent limits: maxSubagents 3-5\n# Monitor system resources during multi-agent sessions\n# Ensure ulimit -u allows enough processes (minimum 2048)",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 21,
+      title: "Diff Too Large",
+      severity: "medium",
+      regex: /diff\s+too\s+large|large\s+diff|diff.*exceed|too\s+many\s+changes|diff\s+limit/i,
+      keywords: ["diff", "large", "too many", "changes"],
+      fix: "# Split your changes into smaller commits\ngit add -p               # Stage changes interactively\n\n# Or commit by file\ngit add src/file1.ts\ngit commit -m 'Refactor file1'\n\ngit add src/file2.ts\ngit commit -m 'Refactor file2'\n\n# If working with Claude, break the task\n# into smaller subtasks across multiple prompts",
+      why: "The accumulated changes since last commit are too large for Claude Code to process in a single diff. This often happens during large refactoring operations or when auto-generated files are modified.",
+      prevention: "# CLAUDE.md — Change management\n# Commit frequently — every logical change should be its own commit\n# For large refactors, break work into files or modules\n# Add generated files to .claudeignore to reduce diff size",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 22,
+      title: "File Not Found in Context",
+      severity: "low",
+      regex: /file\s+not\s+found|no\s+such\s+file|ENOENT(?!.*spawn)|cannot\s+find\s+module|module\s+not\s+found/i,
+      keywords: ["file", "not found", "enoent", "module"],
+      fix: "# Verify the file exists\nls -la /path/to/expected/file\n\n# Check if it's in .gitignore\ngit check-ignore /path/to/file\n\n# Check .claudeignore\ncat .claudeignore\n\n# Search for the file\nfind . -name 'filename' -not -path './node_modules/*'\n\n# If module not found, install dependencies\nnpm install",
+      why: "The file path referenced does not exist, is excluded by .gitignore or .claudeignore, or the file was deleted/moved since Claude last read the file tree.",
+      prevention: "# CLAUDE.md — File references\n# Always use relative paths from project root\n# Keep .claudeignore updated — don't exclude files Claude needs to read\n# Run 'npm install' before starting sessions to ensure node_modules exist",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 23,
+      title: "Circular Dependency Detected",
+      severity: "medium",
+      regex: /circular\s+dep|cyclic\s+dep|circular\s+import|require\s+cycle|import\s+cycle/i,
+      keywords: ["circular", "dependency", "cycle", "import"],
+      fix: "# Find circular dependencies\nnpx madge --circular src/\n\n# Visualize dependency graph\nnpx madge --image graph.svg src/\n\n# Common fix: extract shared code into a new module\n# Before: A imports B, B imports A\n# After:  A imports C, B imports C\n\n# For barrel exports, restructure index.ts\n# Avoid re-exporting between feature modules",
+      why: "Two or more modules import each other, creating a cycle. This causes undefined values at runtime and unpredictable initialization order. Common with barrel exports (index.ts files) and tightly coupled modules.",
+      prevention: "# CLAUDE.md — Import conventions\n# No circular dependencies — verify with: npx madge --circular src/\n# Use dependency injection instead of direct imports for cross-module deps\n# Keep barrel exports (index.ts) flat — never re-export between feature folders",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 24,
+      title: "Build Failed After Changes",
+      severity: "medium",
+      regex: /build\s+fail|compilation\s+fail|build\s+error|make.*error|tsc.*error|build\s+broke/i,
+      keywords: ["build", "failed", "compilation", "error"],
+      fix: "# Check build output for specific errors\nnpm run build 2>&1 | head -50\n\n# Common fixes:\n# 1. TypeScript errors\nnpx tsc --noEmit\n\n# 2. Clear build cache\nrm -rf dist/ .next/ build/ .cache/\nnpm run build\n\n# 3. Reinstall dependencies\nrm -rf node_modules\nnpm install\nnpm run build",
+      why: "The project build (TypeScript, webpack, Next.js, etc.) failed after Claude Code made changes. This is usually a syntax error, type error, or missing import in the modified files.",
+      prevention: "# CLAUDE.md — Build verification\n# After every code change, run: npm run build\n# Fix all TypeScript errors before committing\n# Claude must verify build succeeds before marking task complete",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 25,
+      title: "Test Timeout",
+      severity: "medium",
+      regex: /test.*timeout|timeout.*test|jest.*timeout|mocha.*timeout|exceeded\s+timeout|Timeout\s+-\s+Async/i,
+      keywords: ["test", "timeout", "jest", "async"],
+      fix: "# Increase test timeout\n# Jest\njest --testTimeout=30000\n\n# Or in jest.config.js\n# testTimeout: 30000\n\n# Mocha\nmocha --timeout 30000\n\n# Check for hanging promises\n# Add --detectOpenHandles flag\njest --detectOpenHandles\n\n# Common cause: unresolved promise or missing done() callback",
+      why: "A test case did not complete within the configured timeout. Usually caused by an unresolved promise, a missing done() callback in async tests, or an actual performance regression.",
+      prevention: "# CLAUDE.md — Test conventions\n# Set reasonable timeouts: 10s for unit, 30s for integration\n# Always await async operations in tests\n# Use jest --detectOpenHandles to find hanging tests\n# Mock network calls to prevent real HTTP requests in tests",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 26,
+      title: "ESLint Errors Blocking Commit",
+      severity: "low",
+      regex: /eslint.*error|lint.*fail|linting\s+error|prettier.*error|lint-staged.*fail/i,
+      keywords: ["eslint", "lint", "prettier", "lint-staged"],
+      fix: "# Run linter to see all errors\nnpx eslint src/ --ext .ts,.tsx\n\n# Auto-fix what can be fixed\nnpx eslint src/ --fix\n\n# Fix prettier issues\nnpx prettier --write src/\n\n# If lint-staged is blocking\n# Fix errors manually, then re-commit\ngit add .\ngit commit -m 'Fix lint errors'\n\n# Check ESLint config\ncat .eslintrc.json",
+      why: "A pre-commit hook (lint-staged, husky) ran ESLint or Prettier and found errors. The hook prevents committing until all linting errors are resolved.",
+      prevention: "# CLAUDE.md — Code style\n# Run 'npx eslint src/ --fix' before committing\n# Run 'npx prettier --write src/' for formatting\n# Never use --no-verify to skip linting — fix the errors instead",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 27,
+      title: "TypeScript Compilation Error",
+      severity: "medium",
+      regex: /TS\d{4}|typescript.*error|type\s+error|tsc.*error|Cannot\s+find\s+name|Property.*does\s+not\s+exist\s+on\s+type/i,
+      keywords: ["typescript", "tsc", "type", "TS2", "compilation"],
+      fix: "# Run type checker\nnpx tsc --noEmit\n\n# See all errors with details\nnpx tsc --noEmit --pretty\n\n# Common fixes:\n# TS2304: Cannot find name → add import or install @types/\nnpm i -D @types/node @types/react\n\n# TS2339: Property does not exist → update type definition\n# TS2345: Argument type mismatch → fix type casting\n\n# Check tsconfig\ncat tsconfig.json",
+      why: "TypeScript found type errors during compilation. These are type safety violations that prevent building: missing types, wrong argument types, undeclared variables, or incompatible type assignments.",
+      prevention: "# CLAUDE.md — TypeScript rules\n# Use strict mode in tsconfig.json\n# Run 'npx tsc --noEmit' after every file change\n# Never use 'any' type without explicit comment explaining why\n# Install @types/ packages for all dependencies",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 28,
+      title: "Docker Container Not Running",
+      severity: "medium",
+      regex: /docker.*not\s+running|container.*not\s+running|cannot\s+connect.*docker|docker\s+daemon|Is\s+the\s+docker\s+daemon\s+running/i,
+      keywords: ["docker", "container", "daemon", "running"],
+      fix: "# Check Docker daemon\ndocker info\n\n# Start Docker\n# macOS: open Docker Desktop app\n# Linux:\nsudo systemctl start docker\n\n# List containers\ndocker ps -a\n\n# Start specific container\ndocker start <container-name>\n\n# Or recreate with compose\ndocker compose up -d",
+      why: "The Docker daemon is not running, or the specific container needed for the project (database, API service, etc.) has stopped. Docker Desktop may not have started, or the container crashed.",
+      prevention: "# CLAUDE.md — Docker requirements\n# This project requires Docker — start Docker Desktop before coding\n# Required containers: [list services]\n# Start with: docker compose up -d\n# Verify with: docker ps",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 29,
+      title: "Database Connection Failed",
+      severity: "high",
+      regex: /database.*connect|connection.*refuse.*database|ECONNREFUSED.*(5432|3306|27017)|cannot\s+connect.*database|SequelizeConnectionError|MongoNetworkError/i,
+      keywords: ["database", "connection", "postgres", "mysql", "mongo"],
+      fix: "# Check database is running\n# PostgreSQL\npg_isready -h localhost -p 5432\n\n# MySQL\nmysqladmin -h localhost ping\n\n# MongoDB\nmongosh --eval 'db.runCommand({ping:1})'\n\n# Check connection string\necho $DATABASE_URL\n\n# Common fixes:\n# - Start the database service\n# - Check host/port in connection string\n# - Verify credentials\n# - Check if firewall blocks the port",
+      why: "The application cannot establish a connection to the database. The database service may not be running, the connection string may be wrong, or network/firewall rules are blocking the connection.",
+      prevention: "# CLAUDE.md — Database setup\n# Required: [PostgreSQL/MySQL/MongoDB] running on localhost\n# Connection string: stored in DATABASE_URL environment variable\n# Start database before coding: [start command]\n# Verify: [health check command]",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 30,
+      title: "Environment Variable Not Set",
+      severity: "medium",
+      regex: /env.*not\s+set|undefined.*env|missing\s+env|environment\s+variable.*missing|\.env.*not\s+found|process\.env\.\w+\s+is\s+undefined/i,
+      keywords: ["env", "environment", "variable", "undefined", ".env"],
+      fix: "# Check if .env file exists\nls -la .env\n\n# Create from template\ncp .env.example .env\n\n# Export variable\nexport MY_VARIABLE=value\n\n# Or add to .env file\necho 'MY_VARIABLE=value' >> .env\n\n# Load .env in Node.js\n# npm install dotenv\n# require('dotenv').config()\n\n# Verify\nnode -e \"require('dotenv').config(); console.log(process.env.MY_VARIABLE)\"",
+      why: "A required environment variable is not set in the current shell session or .env file. The application tried to read it and got undefined.",
+      prevention: "# CLAUDE.md — Environment variables\n# Copy .env.example to .env before starting\n# Required variables: [list them]\n# Never commit .env to git — verify .gitignore includes .env",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 31,
+      title: "CORS Error",
+      severity: "medium",
+      regex: /CORS|cross-?origin|Access-Control-Allow-Origin|blocked\s+by\s+CORS|No\s+'Access-Control-Allow-Origin'/i,
+      keywords: ["cors", "cross-origin", "access-control"],
+      fix: "# Backend fix (Express.js)\nnpm install cors\n# app.use(cors({ origin: 'http://localhost:3000' }))\n\n# Backend fix (raw headers)\n# res.setHeader('Access-Control-Allow-Origin', '*')\n# res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')\n# res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')\n\n# Dev proxy (Vite)\n# vite.config.ts → server.proxy: { '/api': 'http://localhost:8080' }\n\n# Dev proxy (Next.js)\n# next.config.js → rewrites: [{ source: '/api/:path*', destination: 'http://localhost:8080/:path*' }]",
+      why: "The browser blocked a cross-origin request because the server did not include the required CORS headers. This is a browser security feature that prevents unauthorized cross-domain requests.",
+      prevention: "# CLAUDE.md — CORS configuration\n# API server must include Access-Control-Allow-Origin headers\n# For development, use a proxy in vite/next config instead of CORS wildcards\n# Never use Access-Control-Allow-Origin: * in production",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 32,
+      title: "Webpack/Vite Build Error",
+      severity: "medium",
+      regex: /webpack.*error|vite.*error|Module\s+build\s+failed|Failed\s+to\s+resolve|rollup.*error|esbuild.*error/i,
+      keywords: ["webpack", "vite", "rollup", "esbuild", "module", "build"],
+      fix: "# Clear build cache\nrm -rf node_modules/.cache\nrm -rf .vite\nrm -rf dist/\n\n# Reinstall dependencies\nrm -rf node_modules\nnpm install\n\n# Check for conflicting versions\nnpm ls webpack\nnpm ls vite\n\n# Rebuild\nnpm run build\n\n# Vite-specific: check vite.config.ts\n# Webpack-specific: check webpack.config.js",
+      why: "The bundler (webpack, Vite, Rollup, esbuild) failed to process your code. Common causes: missing loaders, unresolved imports, invalid configuration, or incompatible plugin versions.",
+      prevention: "# CLAUDE.md — Build system\n# Bundler: [webpack/vite/rollup]\n# Clear cache before debugging build issues: rm -rf node_modules/.cache\n# Lock dependency versions — use package-lock.json or pnpm-lock.yaml",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 33,
+      title: "npm Install Failed",
+      severity: "medium",
+      regex: /npm\s+install.*fail|npm\s+ERR|ERESOLVE|peer\s+dep|npm.*WARN.*deprecated.*error|pnpm.*fail|yarn.*error.*install/i,
+      keywords: ["npm", "install", "eresolve", "peer", "pnpm", "yarn"],
+      fix: "# Clear caches\nrm -rf node_modules\nnpm cache clean --force\n\n# Retry install\nnpm install\n\n# If peer dependency conflict\nnpm install --legacy-peer-deps\n\n# If using pnpm\npnpm install --no-frozen-lockfile\n\n# If permission error\nsudo chown -R $(whoami) ~/.npm\n\n# Check npm registry\nnpm config get registry",
+      why: "npm (or pnpm/yarn) failed to install packages. Common causes: peer dependency conflicts, corrupted cache, network issues, incompatible Node.js version, or permission problems with the npm cache directory.",
+      prevention: "# CLAUDE.md — Package management\n# Package manager: [npm/pnpm/yarn]\n# Node version: [specify with .nvmrc]\n# After cloning: run 'npm install' before any code changes\n# Lock file must be committed to git",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 34,
+      title: "Port Already in Use",
+      severity: "low",
+      regex: /port.*in\s+use|EADDRINUSE|address\s+already\s+in\s+use|listen\s+EADDRINUSE/i,
+      keywords: ["port", "in use", "eaddrinuse", "address"],
+      fix: "# Find what's using the port\nlsof -i :3000\n\n# Kill the process\nkill -9 $(lsof -ti :3000)\n\n# Or use a different port\nPORT=3001 npm start\n\n# For multiple ports\nfor port in 3000 3001 8080; do\n  lsof -ti :$port | xargs kill -9 2>/dev/null\ndone",
+      why: "Another process is already listening on the port your application wants to use. This happens when you restart a dev server without stopping the previous instance, or when another application uses the same default port.",
+      prevention: "# CLAUDE.md — Port usage\n# Dev server port: [3000/8080/etc]\n# Before starting: verify port is free with 'lsof -i :[port]'\n# Stop dev servers properly with Ctrl+C, not by closing terminal",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 35,
+      title: "SSH Key Not Found",
+      severity: "medium",
+      regex: /ssh\s+key.*not\s+found|no\s+such.*id_rsa|Permission\s+denied\s*\(publickey\)|git@github\.com.*denied|could\s+not\s+read.*ssh/i,
+      keywords: ["ssh", "key", "publickey", "id_rsa", "denied"],
+      fix: "# Check for existing keys\nls -la ~/.ssh/\n\n# Generate a new key\nssh-keygen -t ed25519 -C \"your@email.com\"\n\n# Add to ssh-agent\neval \"$(ssh-agent -s)\"\nssh-add ~/.ssh/id_ed25519\n\n# Copy public key\ncat ~/.ssh/id_ed25519.pub | pbcopy    # macOS\ncat ~/.ssh/id_ed25519.pub | xclip     # Linux\n\n# Test GitHub connection\nssh -T git@github.com",
+      why: "Git tried to authenticate via SSH but no valid SSH key was found, or the key is not added to the ssh-agent. This blocks git operations (clone, push, pull) to private repositories.",
+      prevention: "# CLAUDE.md — Git authentication\n# Use SSH keys for git (not HTTPS with password)\n# Add ssh-add to shell profile for automatic key loading\n# Test connection: ssh -T git@github.com",
+      links: [
+        { text: "Git Workflow Guide", url: "/claude-code-gitignore-best-practices/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 36,
+      title: "Git Merge Conflict",
+      severity: "medium",
+      regex: /merge\s+conflict|CONFLICT.*Merge|conflict\s+in|Automatic\s+merge\s+failed|fix\s+conflicts\s+and|both\s+modified/i,
+      keywords: ["merge", "conflict", "both modified"],
+      fix: "# See conflicting files\ngit status\n\n# View conflict markers in a file\n# Look for <<<<<<< ======= >>>>>>>\n\n# Resolve manually, then:\ngit add <resolved-file>\n\n# Or accept theirs/ours\ngit checkout --theirs <file>    # accept incoming\ngit checkout --ours <file>      # keep current\n\n# After resolving all conflicts\ngit add .\ngit commit -m 'Resolve merge conflicts'\n\n# Abort merge if needed\ngit merge --abort",
+      why: "Git found conflicting changes in the same lines of a file during a merge, rebase, or pull. Both branches modified the same code, and git cannot automatically determine which version to keep.",
+      prevention: "# CLAUDE.md — Merge strategy\n# Pull from main before starting new work: git pull origin main\n# Keep branches short-lived to minimize conflicts\n# Communicate with team about which files are being modified",
+      links: [
+        { text: "Git Workflow Guide", url: "/claude-code-gitignore-best-practices/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 37,
+      title: "Max Tokens Exceeded in Response",
+      severity: "medium",
+      regex: /max_tokens|maximum.*output.*token|response.*too\s+long|output.*truncat|generation\s+stopped.*length/i,
+      keywords: ["max_tokens", "output", "truncated", "response", "length"],
+      fix: "# Increase max output tokens\nclaude config set maxTokens 16384\n\n# Or for a single prompt\nclaude --max-tokens 16384 'your prompt'\n\n# For very long outputs, break into parts\n# Prompt: 'Generate part 1 of 3: functions A-F'\n# Then: 'Generate part 2 of 3: functions G-N'",
+      why: "The model's response was cut off because it reached the maximum output token limit. Default limits vary by model and plan. Long code generations and detailed explanations are most likely to hit this.",
+      prevention: "# CLAUDE.md — Output length\n# For long code generation tasks, break into smaller subtasks\n# Each function or component should be its own prompt\n# Set maxTokens to 16384 for code generation sessions",
+      links: [
+        { text: "Cost Optimization", url: "/calculator/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 38,
+      title: "Network Timeout",
+      severity: "medium",
+      regex: /network\s+timeout|ETIMEDOUT|request\s+timeout|connect\s+ETIMEDOUT|socket\s+hang\s+up|ESOCKETTIMEDOUT/i,
+      keywords: ["network", "timeout", "etimedout", "socket"],
+      fix: "# Check internet connectivity\ncurl -I https://api.anthropic.com\n\n# Check DNS resolution\nnslookup api.anthropic.com\n\n# Increase timeout\nexport ANTHROPIC_TIMEOUT_SECONDS=300\n\n# Check proxy settings\necho $HTTP_PROXY $HTTPS_PROXY\n\n# Try different DNS\n# macOS: networksetup -setdnsservers Wi-Fi 8.8.8.8 8.8.4.4\n# Linux: echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf",
+      why: "The network request to the API timed out before receiving a response. Caused by slow internet, DNS resolution failures, proxy issues, or API service degradation.",
+      prevention: "# CLAUDE.md — Network resilience\n# Set ANTHROPIC_TIMEOUT_SECONDS=300 for unreliable networks\n# Use a wired connection for long sessions\n# Check API status at status.anthropic.com before starting critical work",
+      links: [
+        { text: "Connection Troubleshooting", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 39,
+      title: "Invalid JSON in Settings",
+      severity: "medium",
+      regex: /invalid.*settings\.json|settings\.json.*invalid|parse.*settings\.json|\.claude\/settings.*error|settings\s+file.*corrupt/i,
+      keywords: ["settings.json", "invalid", "parse", "corrupt"],
+      fix: "# Validate settings file\ncat ~/.claude/settings.json | python3 -m json.tool\n\n# If corrupt, backup and reset\ncp ~/.claude/settings.json ~/.claude/settings.json.bak\n\n# Create fresh settings\ncat > ~/.claude/settings.json << 'EOF'\n{\n  \"allowedTools\": [\"Edit\", \"Write\", \"Bash\", \"Read\", \"Glob\", \"Grep\"]\n}\nEOF\n\n# Also check project settings\ncat .claude/settings.json | python3 -m json.tool",
+      why: "The Claude Code settings file contains invalid JSON. This can happen from manual editing, merge conflicts inside the settings file, or a corrupted write operation.",
+      prevention: "# CLAUDE.md — Settings management\n# Use 'claude config set' instead of manually editing settings.json\n# If manually editing, validate with: python3 -m json.tool < settings.json\n# Keep a backup: cp ~/.claude/settings.json ~/.claude/settings.json.bak",
+      links: [
+        { text: "CLAUDE.md Configuration", url: "/generator/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 40,
+      title: "Command Not Found: claude",
+      severity: "high",
+      regex: /command\s+not\s+found.*claude|claude.*not\s+found|claude:\s+command|which.*claude.*no\s+claude|zsh.*claude.*not\s+found/i,
+      keywords: ["command", "not found", "claude", "install"],
+      fix: "# Install Claude Code\nnpm install -g @anthropic-ai/claude-code\n\n# Or update if already installed\nnpm update -g @anthropic-ai/claude-code\n\n# If installed but not in PATH\nexport PATH=\"$(npm prefix -g)/bin:$PATH\"\n\n# Verify installation\nwhich claude\nclaude --version\n\n# Make PATH permanent\necho 'export PATH=\"$(npm prefix -g)/bin:$PATH\"' >> ~/.zshrc\nsource ~/.zshrc",
+      why: "The Claude Code CLI is not installed or not in your shell's PATH. The 'claude' command needs to be globally installed via npm and its binary location must be in PATH.",
+      prevention: "# After installing Claude Code globally, verify:\n# 1. which claude → shows a path\n# 2. claude --version → shows version number\n# 3. Add npm global bin to shell profile if not auto-detected",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 41,
+      title: "ANTHROPIC_API_KEY Not Set",
+      severity: "high",
+      regex: /ANTHROPIC_API_KEY.*not\s+set|ANTHROPIC_API_KEY.*undefined|ANTHROPIC_API_KEY.*missing|no\s+api\s+key|api\s+key\s+not\s+configured/i,
+      keywords: ["anthropic_api_key", "not set", "missing", "undefined"],
+      fix: "# Set the API key\nexport ANTHROPIC_API_KEY=sk-ant-your-key-here\n\n# Make permanent (zsh)\necho 'export ANTHROPIC_API_KEY=sk-ant-your-key-here' >> ~/.zshrc\nsource ~/.zshrc\n\n# Make permanent (bash)\necho 'export ANTHROPIC_API_KEY=sk-ant-your-key-here' >> ~/.bashrc\nsource ~/.bashrc\n\n# Verify\necho $ANTHROPIC_API_KEY | head -c 10",
+      why: "The ANTHROPIC_API_KEY environment variable is not set in your shell session. Claude Code requires this to authenticate with the Anthropic API.",
+      prevention: "# CLAUDE.md — API key setup\n# Store ANTHROPIC_API_KEY in shell profile (~/.zshrc or ~/.bashrc)\n# Never store API keys in project files or CLAUDE.md\n# Verify key is set before starting: echo $ANTHROPIC_API_KEY | head -c 10",
+      links: [
+        { text: "API Key Guide", url: "/errors/" },
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 42,
+      title: "Proxy Authentication Required (407)",
+      severity: "medium",
+      regex: /407|proxy\s+auth|proxy.*credentials|Proxy-Authenticate|proxy.*denied|HTTP\/1\.1\s+407/i,
+      keywords: ["proxy", "407", "authentication", "credentials"],
+      fix: "# Set proxy credentials\nexport HTTP_PROXY=http://user:password@proxy.corp.com:8080\nexport HTTPS_PROXY=http://user:password@proxy.corp.com:8080\n\n# For npm\nnpm config set proxy http://user:password@proxy.corp.com:8080\nnpm config set https-proxy http://user:password@proxy.corp.com:8080\n\n# For git\ngit config --global http.proxy http://user:password@proxy.corp.com:8080\n\n# Verify\ncurl -I --proxy $HTTP_PROXY https://api.anthropic.com",
+      why: "A corporate proxy server requires authentication before allowing outbound requests. The proxy credentials are missing or incorrect in your environment configuration.",
+      prevention: "# CLAUDE.md — Corporate proxy setup\n# Set HTTP_PROXY and HTTPS_PROXY with credentials in shell profile\n# Also configure npm and git proxy settings\n# Contact IT for proxy credentials if needed",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 43,
+      title: "Disk Space Insufficient",
+      severity: "high",
+      regex: /disk\s+space|no\s+space\s+left|ENOSPC|insufficient\s+space|disk\s+full|out\s+of\s+disk/i,
+      keywords: ["disk", "space", "enospc", "full"],
+      fix: "# Check disk usage\ndf -h\n\n# Find large files\ndu -sh * | sort -rh | head -20\n\n# Clean common space hogs\n# npm cache\nnpm cache clean --force\n\n# Docker\ndocker system prune -a\n\n# macOS caches\nrm -rf ~/Library/Caches/*\n\n# Old node_modules\nfind ~ -name 'node_modules' -type d -maxdepth 4 -exec du -sh {} \\;",
+      why: "The filesystem has run out of available space. Write operations (file creation, npm install, builds) will fail. Common space consumers: Docker images, node_modules, build caches, and log files.",
+      prevention: "# CLAUDE.md — Disk management\n# Maintain at least 5GB free disk space\n# Clean npm cache monthly: npm cache clean --force\n# Prune Docker regularly: docker system prune\n# Monitor with: df -h /",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 44,
+      title: "Too Many Open Files",
+      severity: "medium",
+      regex: /too\s+many\s+open\s+files|EMFILE|ulimit.*open|file\s+descriptor|fd\s+limit/i,
+      keywords: ["too many", "open files", "emfile", "ulimit", "descriptor"],
+      fix: "# Check current limit\nulimit -n\n\n# Increase for current session\nulimit -n 65536\n\n# Make permanent (macOS)\nsudo launchctl limit maxfiles 65536 200000\n\n# Make permanent (Linux)\necho '* soft nofile 65536' | sudo tee -a /etc/security/limits.conf\necho '* hard nofile 65536' | sudo tee -a /etc/security/limits.conf\n\n# Check what's using file descriptors\nlsof -p $(pgrep -f claude) | wc -l",
+      why: "The process has opened more files than the OS allows. Default limits (often 256 on macOS) are too low for large projects. File watchers, node_modules scanning, and parallel operations consume file descriptors quickly.",
+      prevention: "# CLAUDE.md — System limits\n# Set ulimit -n 65536 in shell profile\n# macOS: also run 'sudo launchctl limit maxfiles 65536 200000'\n# Reduce file watchers by excluding node_modules in .claudeignore",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 45,
+      title: "Segmentation Fault",
+      severity: "high",
+      regex: /segmentation\s+fault|segfault|SIGSEGV|signal\s+11|core\s+dumped/i,
+      keywords: ["segfault", "segmentation", "sigsegv", "core dump"],
+      fix: "# Update Node.js to latest LTS\nnvm install --lts\nnvm use --lts\n\n# Rebuild native modules\nnpm rebuild\n\n# Clear all caches\nrm -rf node_modules\nnpm cache clean --force\nnpm install\n\n# If specific native module crashes\nnpm rebuild <module-name>\n\n# Check Node.js version compatibility\nnode --version\nnpm ls | grep native",
+      why: "A native Node.js addon (compiled C/C++ module) crashed. This usually happens when native modules were compiled for a different Node.js version, the module has a bug, or there's a memory corruption issue.",
+      prevention: "# CLAUDE.md — Native modules\n# Use Node.js LTS version (check .nvmrc)\n# After Node.js upgrades, run 'npm rebuild' to recompile native modules\n# Prefer pure JS alternatives over native modules when possible",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 46,
+      title: "Unhandled Promise Rejection",
+      severity: "medium",
+      regex: /unhandled\s+promise\s+rejection|UnhandledPromiseRejection|unhandledRejection|promise.*reject.*unhandled/i,
+      keywords: ["unhandled", "promise", "rejection"],
+      fix: "# Find the failing async code\n# Node.js will show a stack trace — follow it\n\n# Common patterns to fix:\n\n# Bad: no error handling\n# const data = await fetchData();\n\n# Good: try/catch\n# try {\n#   const data = await fetchData();\n# } catch (error) {\n#   console.error('Fetch failed:', error);\n# }\n\n# Good: .catch()\n# fetchData().catch(err => console.error(err));\n\n# Enable strict mode for debugging\nnode --unhandled-rejections=strict app.js",
+      why: "An async operation (Promise) failed and there was no .catch() handler or try/catch block around the await. Node.js throws this warning, and in strict mode, it crashes the process.",
+      prevention: "# CLAUDE.md — Error handling\n# Always wrap await calls in try/catch blocks\n# Add .catch() to every Promise chain\n# Use --unhandled-rejections=strict in development to catch early",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 47,
+      title: "ETIMEOUT on npm Install",
+      severity: "medium",
+      regex: /ETIMEOUT.*npm|npm.*ETIMEOUT|ETIMEOUT.*registry|registry.*timeout|npmjs.*timeout/i,
+      keywords: ["etimeout", "npm", "registry", "timeout"],
+      fix: "# Check current registry\nnpm config get registry\n\n# Try different registry\nnpm config set registry https://registry.npmmirror.com\n\n# Or use with specific install\nnpm install --registry https://registry.npmmirror.com\n\n# Reset to default\nnpm config set registry https://registry.npmjs.org\n\n# Increase timeout\nnpm config set fetch-retry-maxtimeout 120000\n\n# Check network\ncurl -I https://registry.npmjs.org",
+      why: "The npm registry is unreachable or responding too slowly. Network issues, DNS problems, corporate firewalls, or npm registry outages can all cause this.",
+      prevention: "# CLAUDE.md — npm reliability\n# If behind corporate firewall, configure npm registry mirror\n# Use package-lock.json and npm ci for deterministic installs\n# Keep a local npm cache: npm cache verify",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 48,
+      title: "Python Virtual Environment Not Activated",
+      severity: "low",
+      regex: /venv.*not\s+activated|virtual\s*env|ModuleNotFoundError.*pip|No\s+module\s+named|pip.*not\s+found.*venv/i,
+      keywords: ["venv", "virtualenv", "python", "activate"],
+      fix: "# Create virtual environment (if it doesn't exist)\npython3 -m venv venv\n\n# Activate it\nsource venv/bin/activate     # macOS/Linux\n.\\venv\\Scripts\\activate      # Windows\n\n# Verify activation\nwhich python\npip list\n\n# Install dependencies\npip install -r requirements.txt\n\n# Deactivate when done\ndeactivate",
+      why: "Python packages were installed in a virtual environment, but the venv is not activated in the current shell. The system Python cannot find the project's dependencies.",
+      prevention: "# CLAUDE.md — Python environment\n# Always activate venv before running Python commands: source venv/bin/activate\n# Required packages listed in requirements.txt\n# Use python3, not python, for compatibility",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 49,
+      title: "Cargo Build Failed (Rust)",
+      severity: "medium",
+      regex: /cargo\s+build.*fail|rustc.*error|cannot\s+find.*crate|unresolved\s+import.*rust|cargo.*error\[E/i,
+      keywords: ["cargo", "rust", "rustc", "crate", "build"],
+      fix: "# Update Rust toolchain\nrustup update\n\n# Check Rust version\nrustc --version\ncargo --version\n\n# Clean and rebuild\ncargo clean\ncargo build\n\n# If missing dependencies\ncargo update\n\n# If specific crate fails\ncargo build -p <crate-name> 2>&1 | head -30\n\n# Check for common issues\ncargo check",
+      why: "The Rust compiler or Cargo build system encountered an error. This could be a syntax error, missing crate dependency, incompatible Rust version, or a linker error with native libraries.",
+      prevention: "# CLAUDE.md — Rust build\n# Use stable Rust toolchain: rustup default stable\n# Run 'cargo check' before full builds for faster feedback\n# Pin Rust version with rust-toolchain.toml in project root",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    },
+    {
+      id: 50,
+      title: "Go Module Error",
+      severity: "medium",
+      regex: /go\s+mod.*fail|go\s+mod\s+tidy.*error|cannot\s+find\s+module|go\.sum.*mismatch|missing\s+go\.sum/i,
+      keywords: ["go", "module", "mod", "tidy", "sum"],
+      fix: "# Tidy module dependencies\ngo mod tidy\n\n# Download dependencies\ngo mod download\n\n# If go.sum mismatch\ngo clean -modcache\ngo mod tidy\n\n# Verify module\ngo mod verify\n\n# If module not found, check GOPATH\necho $GOPATH\ngo env GOPATH\n\n# Initialize module (if missing go.mod)\ngo mod init <module-name>",
+      why: "Go module management failed. The go.sum file may be out of sync, a dependency is missing or has a checksum mismatch, or the module has not been initialized with go.mod.",
+      prevention: "# CLAUDE.md — Go modules\n# Run 'go mod tidy' after adding new imports\n# Commit both go.mod and go.sum to git\n# Use 'go mod verify' in CI to catch checksum issues",
+      links: [
+        { text: "Errors Atlas", url: "/errors/" }
+      ]
+    }
+  ];
+  Object.freeze(ERROR_DB);
+
+  /* ====================================================================
+   * PAYWALL LOGIC
+   * ==================================================================== */
+  const TOOL_KEY = 'ccg_diagnose_uses';
+  const MAX_FREE = 2;
+
+  function getUseCount() {
+    console.assert(typeof TOOL_KEY === 'string' && TOOL_KEY.length > 0, 'getUseCount: TOOL_KEY must be a non-empty string');
+    let result;
+    try {
+      result = parseInt(localStorage.getItem(TOOL_KEY) || '0', 10);
+    } catch (e) {
+      result = 0;
+    }
+    console.assert(typeof result === 'number' && !isNaN(result) && result >= 0, 'getUseCount: result must be a non-negative number');
+    return result;
+  }
+
+  function checkPaywall() {
+    console.assert(typeof MAX_FREE === 'number' && MAX_FREE > 0, 'checkPaywall: MAX_FREE must be a positive number');
+    const result = getUseCount() >= MAX_FREE;
+    console.assert(typeof result === 'boolean', 'checkPaywall: result must be a boolean');
+    return result;
+  }
+
+  function incrementUse() {
+    console.assert(typeof TOOL_KEY === 'string' && TOOL_KEY.length > 0, 'incrementUse: TOOL_KEY must be a non-empty string');
+    let result;
+    try {
+      const uses = getUseCount() + 1;
+      localStorage.setItem(TOOL_KEY, uses.toString());
+      result = uses;
+    } catch (e) {
+      result = MAX_FREE + 1;
+    }
+    console.assert(typeof result === 'number' && result > 0, 'incrementUse: result must be a positive number');
+    return result;
+  }
+
+  function showPaywall() {
+    console.assert(document.getElementById('paywall-overlay') !== null, 'showPaywall: paywall-overlay element must exist in DOM');
+    const resultEl = document.getElementById('results-container');
+    if (resultEl) {
+      resultEl.style.filter = 'blur(8px)';
+      resultEl.style.userSelect = 'none';
+      resultEl.style.pointerEvents = 'none';
+    }
+    const overlay = document.getElementById('paywall-overlay');
+    if (overlay) {
+      overlay.style.display = 'flex';
+    }
+    console.assert(!overlay || overlay.style.display === 'flex', 'showPaywall: overlay must be visible after call');
+  }
+
+  function updateUsesBadge() {
+    console.assert(typeof MAX_FREE === 'number', 'updateUsesBadge: MAX_FREE must be a number');
+    const badge = document.getElementById('uses-badge');
+    if (!badge) { return; }
+    const uses = getUseCount();
+    const remaining = MAX_FREE - uses;
+
+    if (remaining > 1) {
+      badge.className = 'uses-badge green';
+      badge.textContent = remaining + ' free uses remaining';
+    } else if (remaining === 1) {
+      badge.className = 'uses-badge yellow';
+      badge.textContent = '1 free use remaining';
+    } else {
+      badge.className = 'uses-badge red';
+      badge.textContent = '0 free uses remaining \u2014 next use requires Playbook access';
+    }
+    console.assert(badge.textContent.length > 0, 'updateUsesBadge: badge text must not be empty after update');
+  }
+
+  /* ====================================================================
+   * MATCHING ENGINE
+   * ==================================================================== */
+  function scoreMatch(error, input) {
+    console.assert(error && typeof error.regex !== 'undefined' && Array.isArray(error.keywords), 'scoreMatch: error must have regex and keywords');
+    console.assert(typeof input === 'string', 'scoreMatch: input must be a string');
+    let score = 0;
+    const lowerInput = input.toLowerCase();
+
+    /* Regex match (highest weight) */
+    if (error.regex.test(input)) {
+      score += 100;
+    }
+
+    /* Keyword matches */
+    let keywordHits = 0;
+    for (let k = 0; k < error.keywords.length; k++) {
+      if (lowerInput.indexOf(error.keywords[k].toLowerCase()) !== -1) {
+        keywordHits++;
+      }
+    }
+    score += keywordHits * 15;
+
+    /* Title word matches */
+    const titleWords = error.title.toLowerCase().split(/\s+/);
+    for (let t = 0; t < titleWords.length; t++) {
+      if (titleWords[t].length > 2 && lowerInput.indexOf(titleWords[t]) !== -1) {
+        score += 5;
+      }
+    }
+
+    return score;
+  }
+
+  function findTopMatches(input, count) {
+    console.assert(typeof input === 'string', 'findTopMatches: input must be a string');
+    console.assert(typeof count === 'number' && count > 0, 'findTopMatches: count must be a positive number');
+    if (!input || input.trim().length < 3) { return []; }
+
+    const scored = [];
+    for (let i = 0; i < ERROR_DB.length; i++) {
+      const s = scoreMatch(ERROR_DB[i], input);
+      if (s > 0) {
+        scored.push({ error: ERROR_DB[i], score: s });
+      }
+    }
+
+    scored.sort(function(a, b) { return b.score - a.score; });
+    return scored.slice(0, count);
+  }
+
+  /* ====================================================================
+   * RENDERING
+   * ==================================================================== */
+  function escapeHtml(text) {
+    console.assert(typeof text === 'string', 'escapeHtml: text must be a string');
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    const result = div.innerHTML;
+    console.assert(typeof result === 'string', 'escapeHtml: result must be a string');
+    return result;
+  }
+
+  function severityClass(severity) {
+    console.assert(typeof severity === 'string', 'severityClass: severity must be a string');
+    console.assert(['high', 'medium', 'low'].indexOf(severity) !== -1, 'severityClass: severity must be high, medium, or low');
+    if (severity === 'high') { return 'severity-high'; }
+    if (severity === 'medium') { return 'severity-medium'; }
+    return 'severity-low';
+  }
+
+  function renderCodeBlock(code, blockId) {
+    console.assert(typeof code === 'string' && code.length > 0, 'renderCodeBlock: code must be a non-empty string');
+    console.assert(typeof blockId === 'string' && blockId.length > 0, 'renderCodeBlock: blockId must be a non-empty string');
+    return '<div class="code-block-wrapper">' +
+      '<button class="btn-copy" data-target="' + blockId + '" aria-label="Copy code">Copy</button>' +
+      '<pre class="code-block" id="' + blockId + '">' + escapeHtml(code) + '</pre>' +
+      '</div>';
+  }
+
+  function renderRelatedLinks(links) {
+    console.assert(!links || Array.isArray(links), 'renderRelatedLinks: links must be null/undefined or an array');
+    if (!links || links.length === 0) { return ''; }
+    let html = '<div class="related-links"><h4>Related Guides</h4>';
+    for (let i = 0; i < links.length; i++) {
+      html += '<a href="' + escapeHtml(links[i].url) + '">' + escapeHtml(links[i].text) + '</a>';
+    }
+    html += '</div>';
+    console.assert(html.indexOf('</div>') !== -1, 'renderRelatedLinks: output must be valid HTML with closing div');
+    return html;
+  }
+
+  function renderResultCard(match, rank) {
+    console.assert(match && match.error && typeof match.error.id !== 'undefined', 'renderResultCard: match must have an error with an id');
+    console.assert(typeof rank === 'number' && rank > 0, 'renderResultCard: rank must be a positive number');
+    const e = match.error;
+    const prefix = 'result-' + e.id;
+    let html = '<div class="result-card">';
+    html += '<span class="match-rank">#' + rank + '</span>';
+    html += '<h3>' + escapeHtml(e.title) +
+      ' <span class="severity-badge ' + severityClass(e.severity) + '">' +
+      escapeHtml(e.severity) + '</span></h3>';
+
+    html += '<div class="result-section"><h4>Fix</h4>';
+    html += renderCodeBlock(e.fix, prefix + '-fix');
+    html += '</div>';
+
+    html += '<div class="result-section"><h4>Why This Happens</h4>';
+    html += '<p>' + escapeHtml(e.why) + '</p></div>';
+
+    html += '<div class="result-section"><h4>Prevention Rule for CLAUDE.md</h4>';
+    html += renderCodeBlock(e.prevention, prefix + '-prevention');
+    html += '</div>';
+
+    html += renderRelatedLinks(e.links);
+    html += '</div>';
+    return html;
+  }
+
+  function renderResults(matches) {
+    console.assert(Array.isArray(matches), 'renderResults: matches must be an array');
+    const container = document.getElementById('results-container');
+    if (!container) { return; }
+
+    if (matches.length === 0) {
+      container.innerHTML = '<div class="no-result">' +
+        '<p>No matching errors found. Try pasting the full error message including any error codes.</p>' +
+        '<p style="margin-top:12px">Browse all errors in the <a href="/errors/">Claude Code Errors Atlas</a>.</p>' +
+        '</div>';
+      return;
+    }
+
+    let html = '';
+    for (let i = 0; i < matches.length; i++) {
+      html += renderResultCard(matches[i], i + 1);
+    }
+    container.innerHTML = html;
+    console.assert(container.innerHTML.length > 0, 'renderResults: container must have content after rendering');
+  }
+
+  /* ====================================================================
+   * COPY HANDLER (event delegation)
+   * ==================================================================== */
+  function copyBlock(btn) {
+    console.assert(btn instanceof HTMLElement, 'copyBlock: btn must be an HTMLElement');
+    console.assert(btn.hasAttribute('data-target'), 'copyBlock: btn must have a data-target attribute');
+    try {
+      const targetId = btn.getAttribute('data-target');
+      const codeEl = document.getElementById(targetId);
+      if (!codeEl) { return; }
+
+      const text = codeEl.textContent || codeEl.innerText;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        }).catch(function() {
+          fallbackCopy(text, btn);
+        });
+      } else {
+        fallbackCopy(text, btn);
+      }
+    } catch (e) {
+      /* silently fail */
+    }
+  }
+
+  function fallbackCopy(text, btn) {
+    console.assert(typeof text === 'string', 'fallbackCopy: text must be a string');
+    console.assert(btn instanceof HTMLElement, 'fallbackCopy: btn must be an HTMLElement');
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    } catch (e) {
+      btn.textContent = 'Failed';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    }
+    document.body.removeChild(ta);
+  }
+
+  /* ====================================================================
+   * DROPDOWN POPULATION
+   * ==================================================================== */
+  function populateDropdown() {
+    console.assert(Array.isArray(ERROR_DB) && ERROR_DB.length > 0, 'populateDropdown: ERROR_DB must be a non-empty array');
+    const select = document.getElementById('error-select');
+    if (!select) { return; }
+
+    /* Show ALL errors - removed 30-item cap */
+    
+    for (let i = 0; i < ERROR_DB.length && i < 200; i++) {
+      const opt = document.createElement('option');
+      opt.value = ERROR_DB[i].id.toString();
+      opt.textContent = ERROR_DB[i].title;
+      select.appendChild(opt);
+    }
+    console.assert(select.options.length > 1, 'populateDropdown: select must have options after population');
+  }
+
+  /* ====================================================================
+   * DIAGNOSE ACTION
+   * ==================================================================== */
+  function diagnose() {
+    console.assert(document.getElementById('error-input') !== null, 'diagnose: error-input element must exist');
+    console.assert(document.getElementById('error-select') !== null, 'diagnose: error-select element must exist');
+    const textarea = document.getElementById('error-input');
+    const select = document.getElementById('error-select');
+    const container = document.getElementById('results-container');
+    if (!textarea || !select || !container) { return; }
+
+    /* Reset blur/overlay from previous paywall trigger */
+    container.style.filter = 'none';
+    container.style.userSelect = 'auto';
+    container.style.pointerEvents = 'auto';
+    const overlay = document.getElementById('paywall-overlay');
+    if (overlay) { overlay.style.display = 'none'; }
+
+    const input = textarea.value.trim();
+    const selectedId = select.value;
+    let matches = [];
+
+    if (selectedId) {
+      /* Dropdown selection */
+      for (let i = 0; i < ERROR_DB.length; i++) {
+        if (ERROR_DB[i].id.toString() === selectedId) {
+          matches = [{ error: ERROR_DB[i], score: 100 }];
+          break;
+        }
+      }
+    } else if (input.length >= 3 && input.length <= 10000) {
+      /* Text input */
+      matches = findTopMatches(input, 3);
+    } else if (input.length > 0 && input.length < 3) {
+      container.innerHTML = '<div class="no-result"><p>Please enter at least 3 characters for an accurate diagnosis.</p></div>';
+      return;
+    } else {
+      container.innerHTML = '<div class="no-result"><p>Paste an error message above or select from the dropdown to get started.</p></div>';
+      return;
+    }
+
+    renderResults(matches);
+
+    /* Paywall logic */
+    if (matches.length > 0) {
+      if (checkPaywall()) {
+        showPaywall();
+      } else {
+        incrementUse();
+      }
+      updateUsesBadge();
+    }
+
+    /* Scroll to results */
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ====================================================================
+   * CHARACTER COUNTER
+   * ==================================================================== */
+  function updateCharCount() {
+    console.assert(document.getElementById('error-input') !== null, 'updateCharCount: error-input element must exist');
+    const textarea = document.getElementById('error-input');
+    const counter = document.getElementById('char-count');
+    if (textarea && counter) {
+      counter.textContent = textarea.value.length.toString();
+    }
+    console.assert(!counter || counter.textContent.length > 0, 'updateCharCount: counter must have content after update');
+  }
+
+  /* ====================================================================
+   * INITIALIZATION
+   * ==================================================================== */
+  function init() {
+    console.assert(Array.isArray(ERROR_DB) && ERROR_DB.length > 0, 'init: ERROR_DB must be loaded before init');
+    populateDropdown();
+    updateUsesBadge();
+
+    /* Show paywall on load if user already exhausted free uses (read-only, no increment) */
+    if (checkPaywall()) {
+      showPaywall();
+    }
+
+    const btn = document.getElementById('btn-diagnose');
+    if (btn) {
+      btn.addEventListener('click', diagnose);
+    }
+
+    const textarea = document.getElementById('error-input');
+    if (textarea) {
+      textarea.addEventListener('input', updateCharCount);
+      /* Clear dropdown when typing */
+      textarea.addEventListener('input', function() {
+        const sel = document.getElementById('error-select');
+        if (sel) { sel.value = ''; }
+      });
+    }
+
+    const select = document.getElementById('error-select');
+    if (select) {
+      select.addEventListener('change', function() {
+        const ta = document.getElementById('error-input');
+        if (ta && select.value) { ta.value = ''; }
+        updateCharCount();
+      });
+    }
+
+    /* Event delegation for copy buttons (replaces inline onclick) */
+    document.addEventListener('click', function(e) {
+      const copyBtn = e.target.closest('.btn-copy');
+      if (copyBtn) {
+        e.preventDefault();
+        copyBlock(copyBtn);
+      }
+    });
+
+    /* Keyboard shortcut: Ctrl/Cmd + Enter to diagnose */
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        diagnose();
+      }
+    });
+
+    console.assert(document.getElementById('btn-diagnose') !== null, 'init: diagnose button must exist after init');
+  }
+
+  /* Run on DOM ready */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

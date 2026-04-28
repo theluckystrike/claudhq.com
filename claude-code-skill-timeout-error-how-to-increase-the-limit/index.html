@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude Code Timeout Error (2026) | ClaudHQ</title>
+  <meta name="description" content="Increase Claude Code timeout from the 120s default using timeout parameter, run_in_background flag, or chunked execution for long-running builds.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Fix Claude Code Timeout Error (2026) | ClaudHQ">
+  <meta property="og:description" content="Increase Claude Code timeout from the 120s default using timeout parameter, run_in_background flag, or chunked execution for long-running builds.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-skill-timeout-error-how-to-increase-the-limit/">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://claudhq.com/claude-code-skill-timeout-error-how-to-increase-the-limit/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Timeout Error (2026)",
+    "description": "Increase Claude Code timeout from the 120s default using timeout parameter, run_in_background flag, or chunked execution for long-running builds.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "datePublished": "2026-03-14",
+    "dateModified": "2026-04-21",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-skill-timeout-error-how-to-increase-the-limit/"}
+  }
+  </script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/errors/">Errors</a></li>
+      <li><a href="/diagnose/">Diagnose</a></li>
+      <li><a href="/calculator/">Calculator</a></li>
+      <li><a href="/generator/">Generator</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime ✦</a>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="article-meta">
+      <time datetime="2026-03-14">March 14, 2026</time> · Last tested 2026-04-21
+    </div>
+
+    <h1>Claude Code Skill Timeout Error: How to Increase the Limit</h1>
+
+    <p>When working with Claude Code skills like <code>frontend-design</code>, <code>pdf</code>, <code>tdd</code>, or <code>supermemory</code>, you may encounter timeout errors that interrupt your workflow. This guide explains what causes them and how to work around them.</p>
+
+    <h2>Understanding Timeout Errors in Claude Code Skills</h2>
+
+    <p>Timeouts in Claude Code occur when a request takes too long to generate. This can happen when:</p>
+
+    <ul>
+      <li>Processing very large files with the <code>/pdf</code> skill</li>
+      <li>Generating comprehensive test suites with <code>/tdd</code> across a large codebase</li>
+      <li>Generating complex presentations with <code>/pptx</code></li>
+      <li>Working with large knowledge stores through <code>/supermemory</code></li>
+    </ul>
+
+    <p>There is no <code>--timeout</code> flag for the <code>claude</code> CLI, no <code>skillDefaults</code> configuration in <code>settings.json</code>, and no <code>CLAUDE_SKILL_TIMEOUT</code> environment variable. The limits are governed by the Anthropic API's response limits, not configurable through skill files or CLI flags.</p>
+
+    <h2>What Actually Causes a Timeout</h2>
+
+    <p>Timeout errors are not random. They trace back to specific bottlenecks in the request pipeline. Understanding each one makes it much easier to target the fix.</p>
+
+    <p><strong>Large file reads.</strong> When a skill like <code>/pdf</code> or <code>/tdd</code> instructs Claude Code to read source files into context, every byte of that content competes for the same token budget. A single 800-page PDF, a minified JavaScript bundle, or a codebase with hundreds of modules can push the request well past what completes within the API window. The read itself is fast. The problem is what happens once all that content is in context and the model begins generating a response proportional to the input size.</p>
+
+    <p><strong>Slow MCP server responses.</strong> Many skills rely on Model Context Protocol (MCP) servers to fetch data, run tools, or query external services. If an MCP server is under load, cold-starting, or making its own downstream network calls, the round-trip time adds directly to the elapsed execution time on the skill invocation. A <code>/supermemory</code> lookup that hits a slow vector database, or a browser automation step in a design skill that waits on a Playwright action, can introduce multi-second delays before the model even begins generating output.</p>
+
+    <p><strong>Network latency and connection instability.</strong> Skills that depend on remote resources -- APIs, cloud storage, hosted MCP endpoints -- are sensitive to the quality of the network path. High-latency connections, packet loss, or temporary DNS resolution failures extend the time between Claude Code dispatching a request and the model receiving the complete input. When that delay stacks on top of a large generation task, the combined wall-clock time exceeds the API limit.</p>
+
+    <p><strong>Output length proportional to input complexity.</strong> Some skills are inherently generative: <code>/tdd</code> writes test files, <code>/pptx</code> builds slide content, <code>/docx</code> assembles full documents. The larger the scope you hand them, the longer the response they need to produce. API timeouts are enforced on total elapsed time, not just input processing, so an ambitious one-shot request that would produce 4,000 lines of test code is more likely to time out than four separate 1,000-line requests.</p>
+
+    <p><strong>Concurrent skill invocations.</strong> If you are running multiple Claude Code sessions or skills simultaneously, they share the same API rate limits and server-side resources. Contention can push individual requests closer to the edge of their time budget.</p>
+
+    <h2>Diagnosing Which Step Is Timing Out</h2>
+
+    <p>Before applying a fix, it helps to identify where in the pipeline the timeout is actually occurring. The error message and timing give you enough signal to narrow it down.</p>
+
+    <h3>Timeout immediately on invocation</h3>
+
+    <p>If Claude Code times out within the first few seconds of running a skill, the problem is almost always with an MCP server or external tool call, not with the model generation itself. The skill has triggered a tool action and that action has not returned.</p>
+
+    <p>Steps to check:</p>
+
+    <ul>
+      <li>Look at which MCP tools are configured for the skill in your <code>settings.json</code></li>
+      <li>Try running the same skill with a minimal input -- if it still times out instantly, the tool layer is the issue</li>
+      <li>Check whether the MCP server process is running and healthy if it is self-hosted</li>
+    </ul>
+
+    <h3>Timeout mid-generation</h3>
+
+    <p>If you see partial output followed by a cutoff, the model started generating but ran out of time before finishing. This is a pure output-length problem. The fix is always scoping the request down -- there is no other lever available.</p>
+
+    <p>You can confirm this pattern by reducing the input size. If a smaller version of the same request completes successfully, the original scope was simply too large.</p>
+
+    <h3>Timeout only on specific file types or sizes</h3>
+
+    <p>If timeouts happen with one particular file but not others of similar apparent size, check:</p>
+
+    <ul>
+      <li>Whether the file has an unusually complex internal structure (deeply nested JSON, a PDF with hundreds of embedded images)</li>
+      <li>Whether the skill is reading the file multiple times across different tool calls</li>
+      <li>Whether an MCP tool is transforming the file before handing it to the model, and that transformation is slow</li>
+    </ul>
+
+    <h3>Using <code>--verbose</code> to inspect tool call timing</h3>
+
+    <p>Running Claude Code with the <code>--verbose</code> flag prints tool call activity to stdout, including which tools are invoked and in what order. This gives you a trace to work from:</p>
+
+<pre><code>claude --verbose /tdd Write tests for the payment service</code></pre>
+
+    <p>Look for tool calls that appear to hang or appear right before the timeout. That is the step to investigate.</p>
+
+    <h3>Checking MCP server health directly</h3>
+
+    <p>If a skill uses a custom MCP server, you can test it independently:</p>
+
+<pre><code># check that your MCP server process is accepting connections
+curl -s http://localhost:3100/health</code></pre>
+
+    <p>A slow or non-responsive health endpoint confirms the MCP layer is the bottleneck, not the model.</p>
+
+    <h2>How to Reduce Timeout Frequency</h2>
+
+    <p>The key strategy is to break large tasks into smaller pieces so each individual request completes faster.</p>
+
+    <h3>Break Large Documents Into Sections</h3>
+
+    <p>Instead of asking <code>/pdf</code> to process an entire large document at once:</p>
+
+<pre><code>/pdf
+Summarize pages 1 through 30 of this document only. Stop after page 30.</code></pre>
+
+    <p>Then continue:</p>
+
+<pre><code>Continue with pages 31 through 60.</code></pre>
+
+    <p>This keeps each request within a size that completes reliably.</p>
+
+    <h3>Scope /tdd Requests to Single Modules</h3>
+
+    <p>Instead of generating tests for an entire codebase:</p>
+
+<pre><code>/tdd
+Write unit tests for the authentication module only (src/auth/).
+Do not generate tests for other directories.</code></pre>
+
+    <p>Follow up with additional modules once the first completes.</p>
+
+    <h3>Use /supermemory to Avoid Re-Running Expensive Operations</h3>
+
+    <p>If you need results from a large <code>/pdf</code> operation across multiple sessions, store the output:</p>
+
+<pre><code>/supermemory store "Q4 report key findings: revenue up 12%, churn down 3%, main drivers: enterprise expansion"</code></pre>
+
+    <p>Future sessions retrieve this without re-processing the document:</p>
+
+<pre><code>/supermemory What were the Q4 report key findings?</code></pre>
+
+    <h3>Split /pptx and /docx Requests</h3>
+
+    <p>For large presentation or document generation tasks:</p>
+
+<pre><code>/pptx
+Create slides 1-10 covering the product overview and market analysis sections.
+Stop after slide 10.</code></pre>
+
+    <p>Then request the next batch.</p>
+
+    <h2>Optimizing Skills to Avoid Timeouts</h2>
+
+    <p>If you write or maintain custom skills, there are structural choices that make timeouts far less likely. These apply whether you are building a skill from scratch or refining an existing one.</p>
+
+    <h3>Limit file reads to what the skill actually needs</h3>
+
+    <p>Skills that read entire files when they only need a portion are a common source of unnecessary context bloat. If a skill only needs function signatures to generate tests, instruct it to use the Grep or Glob tools rather than reading full source files:</p>
+
+<pre><code>Instructions
+Use the Grep tool to find exported function signatures in the target directory.
+Do NOT read entire source files. extract only the function names and type signatures needed to write tests.</code></pre>
+
+    <p>This can reduce the tokens consumed by a <code>/tdd</code>-style skill by an order of magnitude on large codebases.</p>
+
+    <h3>Batch file operations instead of reading one file at a time</h3>
+
+    <p>A skill that issues 40 separate single-file reads in a loop is slower and more fragile than one that batches reads intelligently. If your skill's prompt instructs Claude Code to process multiple files, structure it to handle groups:</p>
+
+<pre><code>Instructions
+Process files in batches of 5. After completing each batch, output the results before moving to the next batch.
+Do not attempt to read all files in a single step.</code></pre>
+
+    <p>This keeps individual tool call chains shorter and reduces the chance that a single slow read cascades into a timeout.</p>
+
+    <h3>Cache expensive intermediate results with /supermemory</h3>
+
+    <p>If a skill repeatedly needs the same extracted data -- a parsed schema, a summarized specification, a list of API endpoints -- store it once and retrieve it in future sessions rather than regenerating it:</p>
+
+<pre><code>/supermemory store "payment-service API endpoints: POST /charge, POST /refund, GET /status/{id}, DELETE /subscription/{id}"</code></pre>
+
+    <p>In subsequent sessions:</p>
+
+<pre><code>/supermemory What are the payment-service API endpoints?</code></pre>
+
+    <p>This is especially valuable for skills that run against large or slow-loading data sources.</p>
+
+    <h3>Add explicit scope constraints to skill prompts</h3>
+
+    <p>Skill files that leave scope open-ended invite Claude to interpret "complete" as "exhaustive." Tightening the scope in the skill's instruction set prevents runaway generation:</p>
+
+<pre><code>Instructions
+Limit output to a maximum of 200 lines per invocation.
+If the task requires more output, stop at 200 lines and ask the user whether to continue.</code></pre>
+
+    <p>This acts as a built-in safeguard against the skill trying to produce more than the API window allows.</p>
+
+    <h3>Avoid chaining multiple slow tool calls sequentially</h3>
+
+    <p>If your skill needs to call several MCP tools in sequence, consider whether any of them can be parallelized or deferred. Claude Code can invoke multiple tools in a single turn when the prompt permits it. Structuring skill instructions to allow parallel tool calls reduces total elapsed time:</p>
+
+<pre><code>Instructions
+When gathering context, use multiple Read tool calls in the same turn rather than reading files one at a time.</code></pre>
+
+    <p>Sequential chains of slow tool calls are one of the most common reasons a task that looks small on paper still times out.</p>
+
+    <h2>When Timeouts Persist</h2>
+
+    <p>If you consistently hit timeouts on a particular task, the task may simply require more content than a single API call can generate. In this case:</p>
+
+    <ol>
+      <li>Permanently restructure the task into multiple smaller requests</li>
+      <li>Pre-process inputs -- use external tools to extract key information from large files before passing it to Claude</li>
+      <li>Summarize first -- ask Claude to summarize a long document before running deeper analysis on the summary</li>
+    </ol>
+
+    <p>For example, instead of asking <code>/tdd</code> to analyze a 10,000-line codebase:</p>
+
+    <ol>
+      <li>Ask Claude to summarize the codebase structure</li>
+      <li>Identify the 3 most critical modules</li>
+      <li>Run <code>/tdd</code> on each module separately</li>
+    </ol>
+
+    <p>This approach produces better-focused tests and avoids timeout issues.</p>
+
+    <h2>Summary</h2>
+
+    <p>Timeout errors reflect the size of the request, not a configurable limit. The practical solution is:</p>
+
+    <ol>
+      <li>Break large tasks into smaller, scoped requests</li>
+      <li>Work module-by-module or section-by-section</li>
+      <li>Use <code>/supermemory</code> to preserve results across sessions rather than re-running expensive operations</li>
+    </ol>
+
+    <h2>Frequently Asked Questions</h2>
+
+    <h3>What is Understanding Timeout Errors in Claude Code Skills?</h3>
+
+    <p>Timeout errors in Claude Code skills occur when a request exceeds the Anthropic API's response time limits. They happen when processing large files with the /pdf skill, generating comprehensive test suites with /tdd, creating presentations with /pptx, or querying large knowledge stores with /supermemory. There is no configurable --timeout flag, no skillDefaults setting, and no CLAUDE_SKILL_TIMEOUT environment variable. The limits are governed entirely by the Anthropic API.</p>
+
+    <h3>What Actually Causes a Timeout?</h3>
+
+    <p>Timeouts trace back to five specific bottlenecks: large file reads that push the token budget past the API window, slow MCP server responses from cold starts or downstream network calls, network latency and connection instability on remote resources, output length proportional to input complexity where generative skills like /tdd or /pptx produce thousands of lines, and concurrent skill invocations that share API rate limits. The root cause is always elapsed wall-clock time exceeding the API limit.</p>
+
+    <h3>What is Diagnosing Which Step Is Timing Out?</h3>
+
+    <p>Diagnosing timeouts involves checking the error timing and using the --verbose flag. Run Claude Code with <code>claude --verbose</code> to print tool call activity to stdout, revealing which tools hang or appear right before the timeout. You can also test MCP server health directly with <code>curl -s http://localhost:3100/health</code>. Timeouts within seconds indicate an MCP or tool layer issue, while partial output followed by a cutoff indicates the model ran out of time mid-generation.</p>
+
+    <h3>What is Timeout immediately on invocation?</h3>
+
+    <p>A timeout immediately on invocation means the problem is in the MCP server or external tool call layer, not in model generation. The skill triggered a tool action that never returned. To diagnose, check which MCP tools are configured in your settings.json, try the same skill with minimal input to see if it still times out instantly, and verify the MCP server process is running and healthy if it is self-hosted.</p>
+
+    <h3>What is Timeout mid-generation?</h3>
+
+    <p>A timeout mid-generation occurs when you see partial output followed by a cutoff. The model started generating but ran out of time before finishing the response. This is a pure output-length problem caused by requesting too much content in a single API call. The fix is always scoping the request down by breaking the task into smaller pieces, working module-by-module, or using /supermemory to cache results rather than regenerating them.</p>
+
+    <a href="/diagnose/" class="tool-cta">
+      <strong>&rarr; Try the Error Diagnostic Tool</strong> &mdash; paste your error message, get the fix instantly
+    </a>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ClaudHQ</div>
+      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access &rarr;</a>
+      <div class="footer-copy">&copy; 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+    </div>
+  </footer>
+</body>
+</html>

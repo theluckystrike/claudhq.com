@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude SSL Certificate Error (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix SSL certificate verification failed errors in Claude Code with 3 commands. Covers proxy, corporate firewall, and self-signed cert scenarios.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Fix Claude SSL Certificate Error (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix SSL certificate verification failed errors in Claude Code with 3 commands. Covers proxy, corporate firewall, and self-signed cert scenarios.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-ssl-certificate-verification-failed-error/">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://claudhq.com/claude-code-ssl-certificate-verification-failed-error/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude SSL Certificate Error (2026)",
+    "description": "Fix SSL certificate verification failed errors in Claude Code with 3 commands. Covers proxy, corporate firewall, and self-signed cert scenarios.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "datePublished": "2026-03-14",
+    "dateModified": "2026-04-17",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-ssl-certificate-verification-failed-error/"}
+  }
+  </script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/errors/">Errors</a></li>
+      <li><a href="/diagnose/">Diagnose</a></li>
+      <li><a href="/calculator/">Calculator</a></li>
+      <li><a href="/generator/">Generator</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime ✦</a>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="article-meta">
+      <time datetime="2026-03-14">March 14, 2026</time> · Last tested 2026-04-21
+    </div>
+
+    <h1>Fixing SSL Certificate Verification Failed Error in Claude Code</h1>
+
+    <p>When you're building powerful workflows with Claude Code, you might encounter the dreaded "SSL certificate verification failed" error. This frustrating issue appears when Claude attempts to make HTTPS requests to servers with invalid, expired, self-signed, or otherwise problematic SSL certificates. Understanding this error and knowing how to resolve it will save you hours of debugging and keep your AI-powered workflows running smoothly.</p>
+
+    <h2>Understanding the SSL Certificate Verification Failed Error</h2>
+
+    <p>SSL (Secure Sockets Layer) and its successor TLS (Transport Layer Security) are protocols that encrypt communications between your computer and servers. When you connect to a website or API over HTTPS, your system verifies the server's SSL certificate to ensure you're actually connecting to the intended server and not an imposter.</p>
+
+    <p>The "SSL certificate verification failed" error occurs when this verification process fails. In Claude Code, this typically happens when:</p>
+
+    <ul>
+      <li>The server's SSL certificate has expired</li>
+      <li>The certificate is self-signed (not issued by a trusted Certificate Authority)</li>
+      <li>The certificate's domain name doesn't match the URL you're accessing</li>
+      <li>Your system has outdated root CA certificates</li>
+      <li>A corporate proxy or firewall is performing SSL inspection</li>
+      <li>The server is misconfigured with an incomplete certificate chain</li>
+    </ul>
+
+    <p>When Claude Code encounters this error, it will report it in the terminal output and stop the operation. The exact message varies depending on which underlying tool triggered the failure, Node.js, Python's <code>requests</code> library, <code>curl</code>, or <code>git</code> each produce slightly different wording, but the root cause is always the same: the TLS handshake could not be verified.</p>
+
+    <h2>Common Scenarios in Claude Code</h2>
+
+    <h2>API Integration Failures</h2>
+
+    <p>When you're building skills that call external APIs, you might encounter this error:</p>
+
+<pre><code>SSL certificate verification failed: certificate has expired</code></pre>
+
+    <p>This commonly happens with older APIs or development and staging environments that use self-signed certificates for testing purposes. It also appears when a service's certificate expires over a weekend and the on-call engineer hasn't renewed it yet, a situation that breaks automated workflows at the worst possible time.</p>
+
+    <h2>MCP Server Connection Issues</h2>
+
+    <p>Model Context Protocol (MCP) servers sometimes trigger SSL errors when they're configured with custom certificates or when running behind corporate proxies:</p>
+
+<pre><code>SSL verification error: unable to get local issuer certificate</code></pre>
+
+    <p>This message means the server sent a certificate, but your system cannot trace it back to a trusted root CA. This is the classic symptom of an incomplete certificate chain, the server sent its own cert but not the intermediate CA cert your system needs to complete the trust path.</p>
+
+    <h2>Git Operations Through Claude Code</h2>
+
+    <p>When Claude Code executes git commands that communicate with remote repositories over HTTPS:</p>
+
+<pre><code>SSL certificate problem: unable to get local issuer certificate
+fatal: unable to access 'https://github.example.com/': SSL certificate problem</code></pre>
+
+    <p>Internal GitHub Enterprise instances, self-hosted GitLab servers, and Bitbucket Data Center installations frequently cause this because they use certificates signed by a company's internal CA rather than a public one.</p>
+
+    <h2>Python-Based Tools and Scripts</h2>
+
+    <p>When Claude Code runs Python scripts that use the <code>requests</code> or <code>urllib</code> library:</p>
+
+<pre><code>requests.exceptions.SSLError: HTTPSConnectionPool(host='api.example.com', port=443):
+Max retries exceeded with url: /endpoint
+(Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_ERROR]
+certificate verify failed: unable to get local issuer certificate (_ssl.c:1123)')))</code></pre>
+
+    <p>On macOS in particular, Python installed via Homebrew or pyenv does not automatically use the system keychain and may need its certificates updated separately.</p>
+
+    <h2>Error Messages Quick Reference</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Error Message</th>
+          <th>Most Likely Cause</th>
+          <th>First Fix to Try</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>certificate has expired</code></td>
+          <td>Server cert past expiry date</td>
+          <td>Contact server owner; use custom CA bundle temporarily</td>
+        </tr>
+        <tr>
+          <td><code>unable to get local issuer certificate</code></td>
+          <td>Incomplete cert chain or missing CA</td>
+          <td>Update system certs or add org CA bundle</td>
+        </tr>
+        <tr>
+          <td><code>self-signed certificate</code></td>
+          <td>Dev/staging server using self-signed cert</td>
+          <td>Add cert to trust store for that environment</td>
+        </tr>
+        <tr>
+          <td><code>hostname mismatch</code></td>
+          <td>Cert issued for different domain</td>
+          <td>Verify you're using the correct URL</td>
+        </tr>
+        <tr>
+          <td><code>certificate verify failed</code></td>
+          <td>Generic verification failure</td>
+          <td>Run OpenSSL diagnostic to narrow down cause</td>
+        </tr>
+        <tr>
+          <td><code>UNABLE_TO_VERIFY_LEAF_SIGNATURE</code></td>
+          <td>Node.js: incomplete chain</td>
+          <td>Set <code>NODE_EXTRA_CA_CERTS</code> to org CA bundle</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Diagnosing the Problem</h2>
+
+    <p>Before applying fixes, you need to identify the root cause. Here are diagnostic steps:</p>
+
+    <h2>Check the Certificate Details</h2>
+
+    <p>Use OpenSSL to inspect the server's certificate:</p>
+
+<pre><code>openssl s_client -connect example.com:443 -showcerts</code></pre>
+
+    <p>This command displays the certificate chain and any issues with the server's SSL configuration. Look at the output for:</p>
+
+    <ul>
+      <li>The expiry date in the <code>notAfter</code> field</li>
+      <li>Whether the chain includes intermediate certificates</li>
+      <li>The <code>Verify return code</code> at the bottom, <code>0 (ok)</code> means the chain is valid from OpenSSL's perspective</li>
+    </ul>
+
+    <p>For a cleaner summary of just the expiry and subject:</p>
+
+<pre><code>openssl s_client -connect example.com:443 &lt;/dev/null 2&gt;/dev/null \
+ | openssl x509 -noout -subject -dates</code></pre>
+
+    <h2>Verify Your System's CA Store</h2>
+
+    <p>Check if your system's root certificates are up to date:</p>
+
+<pre><code># On macOS: verify a specific cert file
+security verify-cert -c /etc/ssl/cert.pem
+
+# On any system: use curl with verbose output to see the chain
+curl -vI https://example.com 2&gt;&amp;1 | grep -E "(issuer|subject|expire|SSL)"</code></pre>
+
+    <p>Test Without SSL Verification (Temporary Diagnosis Only)</p>
+
+    <p>You can confirm that SSL is the only issue by disabling verification temporarily:</p>
+
+<pre><code>curl -k https://example.com # -k flag disables SSL verification</code></pre>
+
+    <p>If this succeeds while the standard request fails, you have confirmed the SSL certificate is the problem. Do not leave this flag in production scripts, it removes all TLS security guarantees.</p>
+
+    <h2>Check for Corporate Proxy Interception</h2>
+
+    <p>Many enterprise networks use SSL inspection proxies that intercept HTTPS traffic, decrypt it, re-encrypt it with a company-issued certificate, and forward it. This is legitimate and intentional, but it means the certificate your tool sees is issued by the company's CA, not the original server's CA.</p>
+
+<pre><code># Check what certificate is actually being presented
+openssl s_client -connect api.github.com:443 -showcerts 2&gt;/dev/null \
+ | openssl x509 -noout -issuer</code></pre>
+
+    <p>If the issuer is something like <code>Zscaler</code> or your company name rather than a well-known CA like DigiCert or Let's Encrypt, you are behind an SSL inspection proxy and need to add your company's root CA to your trust store.</p>
+
+    <h2>Solutions for Claude Code</h2>
+
+    <p>Solution 1: Disable SSL Verification (Development Only)</p>
+
+    <p>For development and testing environments, you can disable SSL verification. Be extremely cautious with this approach in production.</p>
+
+    <p>Using environment variables:</p>
+
+<pre><code>export NODE_TLS_REJECT_UNAUTHORIZED=0
+export CURL_CA_BUNDLE=""</code></pre>
+
+    <p>Then run Claude Code with these environment variables set. Note that <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> affects all Node.js processes in that shell session, not just Claude Code. Scope it carefully:</p>
+
+<pre><code>NODE_TLS_REJECT_UNAUTHORIZED=0 claude "fetch the data from https://dev-api.internal.example.com/status"</code></pre>
+
+    <p>This sets the variable only for that single invocation rather than the entire shell session.</p>
+
+    <h2>Solution 2: Specify Custom CA Bundle</h2>
+
+    <p>If your organization uses a custom CA, point Claude Code to your organization's certificate bundle:</p>
+
+<pre><code>export REQUESTS_CA_BUNDLE=/path/to/your/ca-bundle.crt
+export SSL_CERT_FILE=/path/to/your/ca-bundle.crt
+export NODE_EXTRA_CA_CERTS=/path/to/your/ca-bundle.crt</code></pre>
+
+    <p>The three variables cover different runtimes: <code>REQUESTS_CA_BUNDLE</code> and <code>SSL_CERT_FILE</code> affect Python, while <code>NODE_EXTRA_CA_CERTS</code> adds certs to Node.js without disabling default verification entirely. Adding all three to your shell profile covers most tools Claude Code might invoke.</p>
+
+    <p>To find your organization's CA bundle, check with your IT security team or look in:</p>
+
+<pre><code># macOS: export from system keychain
+security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain \
+ &gt; ~/company-ca-bundle.pem
+
+# Linux: check common paths
+ls /etc/ssl/certs/
+ls /usr/local/share/ca-certificates/</code></pre>
+
+    <h2>Solution 3: Update System Certificates</h2>
+
+    <p>Keep your system's root certificates updated:</p>
+
+    <p>macOS:</p>
+
+<pre><code># Install the latest CA certificates via Homebrew
+brew install ca-certificates
+
+# Or update the system keychain (requires admin)
+sudo security update-ca-certificates</code></pre>
+
+    <p>Ubuntu/Debian:</p>
+
+<pre><code>sudo apt update &amp;&amp; sudo apt install --reinstall ca-certificates
+sudo update-ca-certificates</code></pre>
+
+    <p>RHEL/CentOS/Fedora:</p>
+
+<pre><code>sudo yum update ca-certificates
+# or
+sudo dnf update ca-certificates</code></pre>
+
+    <p>Python-specific on macOS (a common gotcha with pyenv or Homebrew Python):</p>
+
+<pre><code># For Python installed via Homebrew
+/Applications/Python\ 3.12/Install\ Certificates.command
+
+# Or via pip
+pip install --upgrade certifi</code></pre>
+
+    <h2>Solution 4: Add a Certificate to the System Trust Store</h2>
+
+    <p>If you have the certificate file for an internal server, you can add it directly to your system's trust store so all applications on the machine trust it:</p>
+
+    <p>macOS:</p>
+
+<pre><code># Add to system keychain (prompts for admin password)
+sudo security add-trusted-cert -d -r trustRoot \
+ -k /Library/Keychains/System.keychain /path/to/cert.pem</code></pre>
+
+    <p>Ubuntu/Debian:</p>
+
+<pre><code>sudo cp /path/to/cert.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates</code></pre>
+
+    <p>RHEL/CentOS:</p>
+
+<pre><code>sudo cp /path/to/cert.pem /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust</code></pre>
+
+    <p>After adding the cert, restart your terminal session and try the operation again. No environment variables needed once the cert is in the system trust store.</p>
+
+    <h2>Solution 5: Configure MCP Servers with Custom Certificates</h2>
+
+    <p>When using MCP servers that require custom certificates, configure them with the appropriate CA bundle. Check your MCP server's documentation for SSL configuration options.</p>
+
+    <p>For MCP servers launched by Claude Code, you can pass environment variables in your Claude Code configuration or shell profile so all MCP subprocess inherit the correct certificate settings:</p>
+
+<pre><code># Add to ~/.zshrc or ~/.bashrc
+export NODE_EXTRA_CA_CERTS="$HOME/.config/company-ca-bundle.pem"
+export REQUESTS_CA_BUNDLE="$HOME/.config/company-ca-bundle.pem"</code></pre>
+
+    <h2>Solution 6: Fix Server-Side Issues</h2>
+
+    <p>If you control the server, fix the certificate issues there:</p>
+
+    <ul>
+      <li>Renew expiring certificates before they expire (set calendar alerts 30 days out)</li>
+      <li>Get certificates from trusted Certificate Authorities (Let's Encrypt offers free certificates with 90-day validity and automated renewal via certbot)</li>
+      <li>Ensure the certificate includes the correct domain names, including any subdomains you access</li>
+      <li>Properly configure the certificate chain by including intermediate certificates in your server's TLS configuration</li>
+    </ul>
+
+    <p>For nginx, a correct certificate chain configuration looks like:</p>
+
+<pre><code>ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;</code></pre>
+
+    <p>Note <code>fullchain.pem</code> rather than <code>cert.pem</code>, the full chain file includes both the server certificate and all intermediate CA certificates, which prevents the "unable to get local issuer certificate" error.</p>
+
+    <h2>Best Practices for Production</h2>
+
+    <p>Avoid disabling SSL verification in production environments. Instead:</p>
+
+    <ol>
+      <li><strong>Use trusted certificates:</strong> Obtain certificates from reputable CAs. Let's Encrypt is free and widely trusted. For internal services, establish a proper internal PKI rather than using ad-hoc self-signed certificates.</li>
+      <li><strong>Monitor certificate expiration:</strong> Set up alerts for certificate renewal at least 30 days before expiry. Tools like <code>cert-manager</code> in Kubernetes or AWS Certificate Manager handle this automatically.</li>
+      <li><strong>Use certificate management tools:</strong> Tools like certbot automate renewal and can hook into web server configs to reload certificates without downtime.</li>
+      <li><strong>Implement proper certificate chains:</strong> Ensure intermediate certificates are properly configured. Use the <code>fullchain.pem</code> output from certbot rather than just <code>cert.pem</code>.</li>
+      <li><strong>Test from clean environments:</strong> Periodically test your APIs from a machine outside your corporate network or from a fresh cloud VM to catch certificate issues that your internal trust store is silently hiding.</li>
+      <li><strong>Treat <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> as a code smell:</strong> If you find this in a codebase or Makefile, flag it for remediation. It is appropriate only in tightly controlled local development scenarios.</li>
+    </ol>
+
+    <h2>Creating Resilient Skills</h2>
+
+    <p>When building Claude Code skills that make network requests, handle SSL errors gracefully by structuring the skill to test the connection before performing operations:</p>
+
+<pre><code>---
+name: api-fetch
+description: Fetches data from APIs with SSL error handling
+---
+
+This skill handles SSL errors by:
+1. First testing the connection with SSL verification enabled
+2. If it fails, reporting the specific error type (expired, self-signed, chain issue)
+3. Suggesting the correct fix based on the error type rather than disabling verification
+4. Only proceeding with custom CA bundles when explicitly configured</code></pre>
+
+    <p>When writing scripts for Claude Code to execute, structure them to surface certificate errors clearly:</p>
+
+<pre><code>#!/bin/bash
+# Test SSL before running the full workflow
+if ! curl -sf --max-time 5 "https://api.example.com/health" &gt; /dev/null; then
+ echo "ERROR: Cannot reach api.example.com. Checking SSL..."
+ openssl s_client -connect api.example.com:443 &lt;/dev/null 2&gt;&amp;1 | tail -5
+ exit 1
+fi
+# Proceed with actual work</code></pre>
+
+    <p>This approach makes SSL failures loud and diagnostic rather than silently retrying with verification disabled.</p>
+
+    <h2>Conclusion</h2>
+
+    <p>SSL certificate verification failures are common when working with APIs and external services in Claude Code, especially in enterprise environments with corporate proxies, internal CA authorities, or development servers using self-signed certificates. By understanding the causes and implementing the appropriate solutions, you can keep your AI workflows running smoothly while maintaining security.</p>
+
+    <p>The right fix depends on who owns the problem. If the server certificate is expired or misconfigured, fix it at the source. If you are behind a corporate SSL inspection proxy, add the company CA bundle to your environment. If you are working against a local dev server, add the self-signed cert to your trust store for that environment. Reserve <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> and <code>curl -k</code> strictly for quick local diagnosis.</p>
+
+    <p>Remember: the goal is not just to make the error go away, but to maintain secure, reliable connections that protect your data and your users. Disabling SSL verification trades away security for convenience, a bargain that rarely stays contained to "just development."</p>
+
+    <a href="/diagnose/" class="tool-cta">
+      <strong>&rarr; Try the Error Diagnostic Tool</strong> &mdash; paste your error message, get the fix instantly
+    </a>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ClaudHQ</div>
+      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access &rarr;</a>
+      <div class="footer-copy">&copy; 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+    </div>
+  </footer>
+</body>
+</html>

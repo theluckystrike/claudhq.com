@@ -664,3 +664,112 @@ main,
   color: var(--accent);
   text-decoration: none;
 }
+
+/* === Article Page Styles === */
+.article-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.article-meta time { font-weight: 500; }
+.page-content h1 { line-height: 1.2; }
+.page-content h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+.page-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  background: var(--bg-card);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-muted);
+}
+.page-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.page-content th, .page-content td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+.page-content th { background: var(--bg-card); font-weight: 600; }
+.page-content td { background: var(--bg); }
+.page-content img { max-width: 100%; border-radius: var(--radius); }
+.page-content .tool-cta {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.2s;
+}
+.page-content .tool-cta:hover { background: var(--bg-hover); text-decoration: none; }
+.page-content .tool-cta strong { color: var(--accent); }
+
+/* Tool grid for homepage */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.tool-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s, background 0.2s;
+}
+.tool-card:hover { border-color: var(--accent); background: var(--bg-hover); text-decoration: none; }
+.tool-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--accent); font-family: var(--font-body); }
+.tool-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
+
+/* Guide list for homepage */
+.guide-list { list-style: none; margin: 1rem 0; padding: 0; }
+.guide-list li {
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+}
+.guide-list li:first-child { border-top: 1px solid var(--border); }
+.guide-list a { color: var(--text); text-decoration: none; font-size: 0.95rem; }
+.guide-list a:hover { color: var(--accent); }
+.guide-list .arrow { color: var(--accent); margin-right: 0.5rem; }
+
+/* Proof section */
+.proof-bar {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+.proof-bar strong { color: var(--text); }
+
+/* CTA section */
+.cta-section {
+  text-align: center;
+  padding: 3rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.cta-section h2 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+.cta-section p { color: var(--text-muted); margin-bottom: 1.5rem; }
+.cta-btn {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: var(--accent);
+  color: #000;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.cta-btn:hover { opacity: 0.85; text-decoration: none; }

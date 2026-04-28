@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude Code Not Working VSCode (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Claude Code extension issues in VS Code — blank panels, missing output, connection errors, and WSL integration problems. Updated for 2026.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Fix Claude Code Not Working VSCode (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Claude Code extension issues in VS Code — blank panels, missing output, connection errors, and WSL integration problems. Updated for 2026.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-not-working-vscode/">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://claudhq.com/claude-code-not-working-vscode/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Not Working VSCode (2026)",
+    "description": "Resolve Claude Code extension issues in VS Code — blank panels, missing output, connection errors, and WSL integration problems. Updated for 2026.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "datePublished": "2026-04-14",
+    "dateModified": "2026-04-17",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-not-working-vscode/"}
+  }
+  </script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/errors/">Errors</a></li>
+      <li><a href="/diagnose/">Diagnose</a></li>
+      <li><a href="/calculator/">Calculator</a></li>
+      <li><a href="/generator/">Generator</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="article-meta">
+      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-04-22
+    </div>
+
+    <h1>Fix Claude Code Not Working in VS Code</h1>
+
+    <blockquote><p><strong>TL;DR:</strong> Verify the CLI is installed and on PATH, check the extension version, restart VS Code, and inspect the output channel for errors.</p></blockquote>
+
+    <h2>The Problem</h2>
+
+    <p>Claude Code is installed but not working in VS Code. Symptoms include:</p>
+
+    <ul>
+      <li>The Claude Code panel is blank or shows "connecting..."</li>
+      <li>Commands typed in the panel produce no response</li>
+      <li>The extension icon appears but clicking it does nothing</li>
+      <li>Error: "Claude Code CLI not found"</li>
+    </ul>
+
+    <h2>Why This Happens</h2>
+
+    <p>The VS Code extension is a thin wrapper around the Claude Code CLI. It fails when:</p>
+
+    <ul>
+      <li>The CLI is not installed or not on VS Code's PATH</li>
+      <li>VS Code is using a different shell profile than your terminal</li>
+      <li>The extension version is incompatible with the installed CLI version</li>
+      <li>WSL remote sessions have different PATH/environment than the host</li>
+      <li>Another extension is conflicting</li>
+    </ul>
+
+    <h2>The Fix</h2>
+
+    <h3>Step 1 — Verify the CLI Is Installed and on PATH</h3>
+
+    <p>Open VS Code's integrated terminal (Ctrl+`) and run:</p>
+
+    <pre><code>which claude
+claude --version</code></pre>
+
+    <p>If <code>which claude</code> returns nothing, the CLI is not on VS Code's PATH. Fix it:</p>
+
+    <pre><code># Find where claude is installed
+npm list -g @anthropic-ai/claude-code
+
+# Common location
+ls ~/.npm-global/bin/claude 2&gt;/dev/null || ls /usr/local/bin/claude 2&gt;/dev/null
+
+# Add to VS Code's PATH - edit your shell profile
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' &gt;&gt; ~/.zshrc</code></pre>
+
+    <p>Then restart VS Code completely (not just reload window).</p>
+
+    <h3>Step 2 — Check the Extension Output Channel</h3>
+
+    <ol>
+      <li>Open VS Code Command Palette (Cmd+Shift+P / Ctrl+Shift+P)</li>
+      <li>Type "Output: Focus on Output View"</li>
+      <li>In the output panel dropdown, select "Claude Code"</li>
+      <li>Look for error messages</li>
+    </ol>
+
+    <p>Common errors:</p>
+    <ul>
+      <li>"ENOENT: claude not found" — CLI not on PATH (see Step 1)</li>
+      <li>"Authentication required" — Run <code>claude /login</code> in the integrated terminal</li>
+      <li>"Connection refused" — Extension cannot communicate with CLI process</li>
+    </ul>
+
+    <h3>Step 3 — Restart the Extension</h3>
+
+    <ol>
+      <li>Open Command Palette (Cmd+Shift+P / Ctrl+Shift+P)</li>
+      <li>Type "Developer: Restart Extension Host"</li>
+      <li>Wait for extensions to reload</li>
+    </ol>
+
+    <p>If that does not work, fully quit and reopen VS Code.</p>
+
+    <h3>Step 4 — WSL-Specific Fix</h3>
+
+    <p>If you are using VS Code Remote — WSL:</p>
+
+    <pre><code># Inside WSL terminal in VS Code
+# Install Claude Code in WSL, not just on Windows
+npm install -g @anthropic-ai/claude-code
+
+# Authenticate inside WSL
+export ANTHROPIC_API_KEY="sk-ant-api03-your-key-here"
+# Or run: claude /login
+
+# Verify
+claude --version</code></pre>
+
+    <p>The extension in WSL mode uses the WSL environment, not the Windows host.</p>
+
+    <h3>Step 5 — Verify It Works</h3>
+
+    <p>After fixes, test in VS Code:</p>
+
+    <ol>
+      <li>Open the Claude Code panel</li>
+      <li>Type a simple query: "What is 2+2?"</li>
+      <li>Verify you get a response</li>
+    </ol>
+
+    <p><strong>Expected behavior:</strong> Claude responds within a few seconds with the answer.</p>
+
+    <h2>Common Variations</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Cause</th>
+          <th>Quick Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Works in terminal, not in VS Code</td>
+          <td>Different PATH</td>
+          <td>Add npm bin dir to VS Code terminal profile</td>
+        </tr>
+        <tr>
+          <td>Works on first open, fails later</td>
+          <td>Extension crash</td>
+          <td>Restart Extension Host</td>
+        </tr>
+        <tr>
+          <td>WSL: extension hangs</td>
+          <td>CLI not installed in WSL</td>
+          <td>Install CLI inside WSL</td>
+        </tr>
+        <tr>
+          <td>Input corrupts (Cyrillic chars)</td>
+          <td>Encoding bug (Windows)</td>
+          <td>Update extension, use CLI directly</td>
+        </tr>
+        <tr>
+          <td>Panel shows 1M context limit</td>
+          <td>Large project indexing</td>
+          <td>Exclude <code>node_modules</code> from workspace</td>
+        </tr>
+        <tr>
+          <td>Cursor IDE: not working</td>
+          <td>Different extension API</td>
+          <td>Claude Code may need Cursor-specific build</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Prevention</h2>
+
+    <ul>
+      <li><strong>Keep CLI and extension in sync:</strong> Update both together with <code>npm update -g @anthropic-ai/claude-code</code> and VS Code extension auto-update.</li>
+      <li><strong>Use <code>ANTHROPIC_API_KEY</code> in WSL:</strong> Browser-based OAuth is unreliable in WSL; environment variable auth is more stable.</li>
+    </ul>
+
+    <hr>
+
+    <div class="author-bio">
+      <p><strong>Written by Michael</strong> — solo dev, Da Nang, Vietnam. 50K+ Chrome extension users. $500K+ on Upwork (100% Job Success). Runs 5 Claude Max subs in parallel. Built this site with autonomous agent fleets. <a href="https://zovo.one">See what I'm building</a></p>
+    </div>
+
+    <hr>
+
+    <div class="before-after">
+      <p><strong>Without a CLAUDE.md — what actually happens:</strong></p>
+
+      <p>You type: "Add auth to my Next.js app"</p>
+
+      <p>Claude generates: <code>pages/api/auth/[...nextauth].js</code> — wrong directory (you're on App Router), wrong file extension (you use TypeScript), wrong NextAuth version (v4 patterns, you need v5), session handling that doesn't match your middleware setup.</p>
+
+      <p>You spend 40 minutes reverting and rewriting. Claude was "helpful."</p>
+
+      <p><strong>With the Zovo Lifetime CLAUDE.md:</strong></p>
+
+      <p>Same prompt. Claude reads 300 lines of context about YOUR project. Generates: <code>app/api/auth/[...nextauth]/route.ts</code> with v5 patterns, your session types, your middleware config, your test patterns.</p>
+
+      <p>Works on first run. You commit and move on.</p>
+
+      <p>That's the difference a $99 file makes.</p>
+
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta-beforeafter&amp;utm_campaign=claude-code-not-working-vscode">Get the CLAUDE.md for your stack</a></strong></p>
+    </div>
+
+    <div class="mastery-cta">
+      <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+
+      <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use. Not theory — production configs.</p>
+
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta-error&amp;utm_campaign=claude-code-not-working-vscode">Grab the templates — $99 once, free forever</a></strong></p>
+
+      <p>47/500 founding spots. Price goes up when they're gone.</p>
+    </div>
+
+    <h2>Related Issues</h2>
+
+    <ul>
+      <li>Install Claude Code — All Platforms Guide — Fresh installation instructions</li>
+      <li>Fix Claude Code Login — Cannot Paste Auth Code — Authentication issues</li>
+      <li>Claude Code Docker Desktop Workflow Tips — Browse all IDE guides</li>
+    </ul>
+
+    <hr>
+
+    <p><em>If you debug browser extensions alongside VS Code work, <a href="https://zovo.one">Zovo's developer tools</a> streamline the inspect-reload-test cycle for Chrome extensions.</em></p>
+
+    <p><strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+
+    <hr>
+
+    <p><em>Last verified: 2026-04-14. Found an issue? <a href="https://github.com/theluckystrike/extension-insiders/issues">Open a GitHub issue</a>.</em></p>
+
+    <h2>Related Articles</h2>
+
+    <ul>
+      <li>Why Is Claude Code Producing Code That — Developer Guide</li>
+      <li>Fix Claude Code Uncaught Typeerror Is Not A — Quick Guide</li>
+      <li>Claude Code Not Recognizing TypeScript — Developer Guide</li>
+      <li>Why Is Claude Code Changing Files I Did — Developer Guide</li>
+      <li>Fix Claude Md Not Being Read By Claude Code — Quick Guide</li>
+      <li>Fix Claude Code Not Generating Tests — Quick Guide (2026)</li>
+      <li>Fix Claude Code Crashing in VS Code</li>
+      <li>Fix Claude Code Not Working in VS Code</li>
+    </ul>
+
+    <a href="/diagnose/" class="tool-cta">
+      <strong>&rarr; Try the Error Diagnostic Tool</strong> — paste your error message, get the fix instantly
+    </a>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ClaudHQ</div>
+      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access &rarr;</a>
+      <div class="footer-copy">&copy; 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+    </div>
+  </footer>
+</body>
+</html>

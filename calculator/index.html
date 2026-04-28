@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Cost Calculator — Estimate Your Monthly Spend (2026) | ClaudHQ</title>
+  <meta name="description" content="Calculate your Claude Code monthly costs. Compare Max vs API vs Pro plans, estimate token usage, and find the cheapest option for your workflow.">
+  <link rel="canonical" href="https://claudhq.com/calculator/">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Claude Code Cost Calculator — Free Tool">
+  <meta property="og:description" content="Estimate Claude Code API costs for your project. Compare models, calculate token usage, and optimize spending.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://claudhq.com/calculator/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    h1 {
+      font-family: 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      font-size: 28px;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    /* Input sections */
+    .input-section {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .input-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* Range slider */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: oklch(0.30 0.010 60);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: oklch(0.72 0.11 38);
+      cursor: pointer;
+      border: 2px solid oklch(0.155 0.007 60);
+    }
+
+    .slider-row input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: oklch(0.72 0.11 38);
+      cursor: pointer;
+      border: 2px solid oklch(0.155 0.007 60);
+    }
+
+    .slider-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: oklch(0.72 0.11 38);
+      min-width: 60px;
+      text-align: right;
+    }
+
+    /* Radio groups */
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .radio-group label:hover {
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    .radio-group input[type="radio"] {
+      accent-color: oklch(0.72 0.11 38);
+    }
+
+    .radio-group input[type="radio"]:checked + span {
+      color: oklch(0.72 0.11 38);
+      font-weight: 600;
+    }
+
+    /* Output cards */
+    .results-heading {
+      font-size: 20px;
+      color: oklch(0.97 0.006 80);
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      color: oklch(0.72 0.11 38);
+      margin-bottom: 16px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid oklch(0.30 0.010 60 / 0.5);
+      font-size: 14px;
+    }
+
+    .stat-row:last-child { border-bottom: none; }
+
+    .stat-label { color: oklch(0.58 0.010 70); }
+
+    .stat-value {
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+    }
+
+    .stat-value.highlight {
+      color: oklch(0.72 0.11 38);
+    }
+
+    /* Plan comparison table */
+    .plan-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .plan-table th {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 2px solid oklch(0.30 0.010 60);
+      color: oklch(0.58 0.010 70);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .plan-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid oklch(0.235 0.009 60);
+    }
+
+    .plan-table tr.best-plan td {
+      background: oklch(0.185 0.015 38 / 0.3);
+      font-weight: 600;
+    }
+
+    .plan-table .cost-cell {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-weight: 600;
+    }
+
+    .plan-table .best-badge {
+      display: inline-block;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Recommendation card */
+    .recommendation {
+      background: linear-gradient(135deg, oklch(0.72 0.11 38 / 0.08), oklch(0.72 0.11 38 / 0.02));
+      border-color: oklch(0.72 0.11 38 / 0.3);
+    }
+
+    .recommendation .rec-plan {
+      font-size: 22px;
+      font-weight: 700;
+      color: oklch(0.72 0.11 38);
+      margin-bottom: 8px;
+    }
+
+    .recommendation .rec-reason {
+      color: oklch(0.80 0.008 70);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Tips */
+    .tip-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid oklch(0.30 0.010 60 / 0.5);
+      font-size: 14px;
+    }
+
+    .tip-item:last-child { border-bottom: none; }
+
+    .tip-icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: oklch(0.72 0.11 38 / 0.12);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: oklch(0.72 0.11 38);
+    }
+
+    .tip-text { color: oklch(0.80 0.008 70); }
+
+    /* Competitor table */
+    .competitor-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid oklch(0.30 0.010 60 / 0.5);
+      font-size: 14px;
+    }
+
+    .competitor-row:last-child { border-bottom: none; }
+
+    .competitor-name { color: oklch(0.80 0.008 70); }
+
+    .competitor-price {
+      font-weight: 600;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .competitor-note {
+      font-size: 12px;
+      color: oklch(0.58 0.010 70);
+    }
+
+    /* Blurred sections (paywall) */
+    .blurred {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Paywall overlay */
+    #paywall-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: oklch(0.155 0.007 60 / 0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .paywall-box {
+      max-width: 480px;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .paywall-box h2 {
+      color: oklch(0.72 0.11 38);
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .paywall-box p {
+      color: oklch(0.80 0.008 70);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .paywall-cta {
+      display: inline-block;
+      padding: 14px 32px;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      transition: background 0.15s;
+    }
+
+    .paywall-cta:hover {
+      background: oklch(0.64 0.10 38);
+    }
+
+    .paywall-fine {
+      color: oklch(0.42 0.010 70) !important;
+      font-size: 13px !important;
+      margin-top: 16px !important;
+    }
+
+    /* SEO content */
+    .seo-content {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .seo-content h2 {
+      font-family: 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: oklch(0.97 0.006 80);
+      margin: 32px 0 12px;
+    }
+
+    .seo-content h2:first-child {
+      margin-top: 0;
+    }
+
+    .seo-content p {
+      color: oklch(0.80 0.008 70);
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    .seo-content ul, .seo-content ol {
+      margin: 0 0 16px 24px;
+      font-size: 15px;
+    }
+
+    .seo-content li {
+      margin-bottom: 6px;
+    }
+
+    .seo-content a {
+      color: oklch(0.72 0.11 38);
+      text-decoration: none;
+    }
+
+    .seo-content a:hover {
+      text-decoration: underline;
+    }
+
+    details {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 14px 16px;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    summary:hover { color: oklch(0.72 0.11 38); }
+
+    details[open] summary {
+      border-bottom: 1px solid oklch(0.30 0.010 60);
+    }
+
+    details p, details ul {
+      padding: 16px;
+      font-size: 14px;
+    }
+
+    details ul { padding-left: 36px; }
+
+    /* CTA banner */
+    .cta-banner {
+      background: linear-gradient(135deg, oklch(0.72 0.11 38 / 0.12), oklch(0.72 0.11 38 / 0.04));
+      border: 1px solid oklch(0.72 0.11 38 / 0.3);
+      border-radius: 12px;
+      padding: 28px 24px;
+      text-align: center;
+      margin: 32px 0;
+    }
+
+    .cta-banner p {
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+
+    .cta-banner a.cta-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .cta-banner a.cta-btn:hover {
+      background: oklch(0.64 0.10 38);
+      text-decoration: none;
+    }
+
+    /* Related guides */
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .related-link {
+      display: block;
+      padding: 14px 16px;
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      color: oklch(0.80 0.008 70);
+      text-decoration: none;
+      font-size: 14px;
+      transition: border-color 0.15s;
+    }
+
+    .related-link:hover {
+      border-color: oklch(0.72 0.11 38);
+      color: oklch(0.72 0.11 38);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .input-section { padding: 16px; }
+      .card { padding: 16px; }
+      .radio-group { flex-direction: column; }
+      .radio-group label { width: 100%; }
+      .plan-table { font-size: 12px; }
+      .plan-table th, .plan-table td { padding: 8px 4px; }
+    }
+
+/* ========== LEARN MORE ========== */
+.learn-more {
+  margin: 48px 0 0;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--line);
+}
+.learn-more .lm-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+.learn-more .lm-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+.learn-more .lm-title em {
+  font-family: var(--serif-alt);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+.learn-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.learn-more-grid a {
+  background: var(--bg-2);
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
+}
+.learn-more-grid a:hover {
+  background: var(--bg-3);
+  color: var(--accent);
+}
+.learn-more-grid a::before {
+  content: '\2192';
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color .15s ease;
+}
+.learn-more-grid a:hover::before {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .learn-more-grid { grid-template-columns: 1fr; }
+  .learn-more .lm-title { font-size: 24px; }
+}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much does Claude Code cost per month?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Monthly costs range from $0 (free tier) to $200+ depending on your plan and usage. A typical developer using Sonnet 4.6 for 4 hours per day on a medium-sized project spends approximately $95-$130 per month on the API, making the Max Individual plan ($100/mo) the breakeven point. Light users (1-2 hours/day) can often stay within the Pro plan's included tokens at just $20/mo."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Claude Code Max worth it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Max is worth it if you use Claude Code for more than 3-4 hours daily or work with large codebases. The unlimited token usage eliminates cost anxiety and lets you use Opus 4.6 freely for complex architectural decisions. If your estimated API costs would exceed $80-90/month, Max Individual ($100/mo) is the better choice. Teams benefit from Max Team ($200/mo) with shared billing, admin controls, and priority support."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Claude Code vs Cursor pricing — which is cheaper?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Cursor Pro costs $20/month, but limits you to a fixed number of \"fast\" requests before falling back to slower models. Claude Code Pro at $20/month gives you direct access to Sonnet 4.6 with higher token limits. For heavy users, Claude Code Max ($100/mo) offers unlimited Opus-level reasoning, while Cursor Business ($40/mo) still imposes request caps. The right choice depends on whether you prefer an IDE-integrated experience (Cursor) or a terminal-native agent (Claude Code)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I reduce Claude Code costs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Several strategies can cut your Claude Code costs significantly: Use a well-structured CLAUDE.md file to reduce context-gathering tokens by up to 40%. Start with Haiku for simple tasks (formatting, renaming), then switch to Sonnet or Opus only for complex reasoning. Use /compact regularly to compress conversation context. Keep your .claudeignore file updated to exclude build artifacts, node_modules, and other irrelevant directories. Break large tasks into focused, single-purpose sessions rather than long-running conversations that accumulate context."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What's the cheapest way to use Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The cheapest approach is to use the API Direct option with Haiku 4.5 for routine tasks and only switch to Sonnet for complex problems. Combined with an optimized CLAUDE.md file and strict .claudeignore rules, you can keep monthly costs under $15-20. However, this requires discipline in model selection and session management. For most developers, the Pro plan at $20/mo provides better value with simpler budgeting."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "API vs subscription — which is better?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "API Direct billing is better if your usage is highly variable (some weeks heavy, some weeks none) or if you primarily use Haiku. Subscription plans (Pro or Max) are better for consistent daily usage because they provide predictable costs and included tokens. The crossover point is roughly $20/month in API usage for Pro, and $100/month for Max Individual. Use this calculator to estimate your API costs, then compare against the subscription options."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do unused tokens roll over between months?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Included tokens on Pro and other subscription plans reset each billing cycle. There is no rollover or banking of unused tokens. This means the Pro plan's 500,000 included tokens are a \"use it or lose it\" allocation. If you consistently use less than half your included tokens, you may be overpaying and should consider the Free tier or API Direct instead."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I switch plans mid-month?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can upgrade or downgrade your Claude Code plan at any time. Upgrades take effect immediately with prorated billing for the remainder of the month. Downgrades typically take effect at the start of the next billing cycle. If you're experimenting with Claude Code, start with Pro and upgrade to Max once your usage patterns stabilize."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+<nav class="site-nav" aria-label="Main navigation" style="position:sticky;top:0;z-index:40;background:rgba(30,28,24,0.82);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid oklch(0.30 0.010 60);padding:0.75rem 1rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">
+  <a href="/" class="nav-home" style="color:oklch(0.72 0.11 38);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;font-weight:600;">ClaudHQ</a>
+  <a href="/errors/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Errors</a>
+  <a href="/diagnose/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Diagnose</a>
+  <a href="/calculator/" style="color:oklch(0.18 0.04 38);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;background:oklch(0.72 0.11 38);font-weight:600;">Calculator</a>
+  <a href="/generator/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Generator</a>
+</nav>
+  <div class="container">
+    <h1>Claude Code Cost Calculator</h1>
+    <p class="subtitle">Estimate your monthly spend and find the best plan for your workflow. Updated for April 2026 pricing.</p>
+
+    <!-- Input: Hours per day -->
+    <div class="input-section">
+      <label class="input-label" for="hours-slider">Hours coding with Claude per day</label>
+      <div class="slider-row">
+        <input type="range" id="hours-slider" min="1" max="12" value="4" aria-label="Hours per day">
+        <span class="slider-value" id="hours-display">4 hrs</span>
+      </div>
+    </div>
+
+    <!-- Input: Primary model -->
+    <div class="input-section">
+      <span class="input-label">Primary model</span>
+      <div class="radio-group" role="radiogroup" aria-label="Primary model selection">
+        <label>
+          <input type="radio" name="model" value="sonnet" checked>
+          <span>Sonnet 4.6</span>
+        </label>
+        <label>
+          <input type="radio" name="model" value="opus">
+          <span>Opus 4.6</span>
+        </label>
+        <label>
+          <input type="radio" name="model" value="haiku">
+          <span>Haiku 4.5</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Input: Project size -->
+    <div class="input-section">
+      <span class="input-label">Project size</span>
+      <div class="radio-group" role="radiogroup" aria-label="Project size selection">
+        <label>
+          <input type="radio" name="projectSize" value="small">
+          <span>Small (&lt;10K LOC)</span>
+        </label>
+        <label>
+          <input type="radio" name="projectSize" value="medium" checked>
+          <span>Medium (10-100K)</span>
+        </label>
+        <label>
+          <input type="radio" name="projectSize" value="large">
+          <span>Large (100K+)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Input: Current plan -->
+    <div class="input-section">
+      <span class="input-label">Current plan</span>
+      <div class="radio-group" role="radiogroup" aria-label="Current plan selection">
+        <label>
+          <input type="radio" name="plan" value="free">
+          <span>Free</span>
+        </label>
+        <label>
+          <input type="radio" name="plan" value="pro" checked>
+          <span>Pro ($20/mo)</span>
+        </label>
+        <label>
+          <input type="radio" name="plan" value="max100">
+          <span>Max Individual ($100/mo)</span>
+        </label>
+        <label>
+          <input type="radio" name="plan" value="max200">
+          <span>Max Team ($200/mo)</span>
+        </label>
+        <label>
+          <input type="radio" name="plan" value="api">
+          <span>API Direct</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <h2 class="results-heading">Your Results</h2>
+
+    <div class="card-grid">
+      <!-- Card 1: Estimated Usage -->
+      <div class="card" id="card-usage">
+        <h3>Your Estimated Monthly Usage</h3>
+        <div id="usage-output"></div>
+      </div>
+
+      <!-- Card 2: Cost by Plan (gated) -->
+      <div class="card" id="card-plans">
+        <h3>Monthly Cost by Plan</h3>
+        <div id="plans-output"></div>
+      </div>
+
+      <!-- Card 3: Best Plan (gated) -->
+      <div class="card recommendation" id="card-recommendation">
+        <h3>Best Plan for You</h3>
+        <div id="recommendation-output"></div>
+      </div>
+
+      <!-- Card 4: Savings Tips (gated) -->
+      <div class="card" id="card-tips">
+        <h3>Savings Tips</h3>
+        <div id="tips-output"></div>
+      </div>
+
+      <!-- Card 5: Competitor Comparison (gated) -->
+      <div class="card" id="card-competitors">
+        <h3>Competitor Comparison</h3>
+        <div id="competitors-output"></div>
+      </div>
+    </div>
+
+    <!-- Paywall overlay -->
+    <div id="paywall-overlay">
+      <div class="paywall-box">
+        <h2>You've used your 2 free calculations</h2>
+        <p>Unlock unlimited access to all 5 CCG tools + 200 production-ready CLAUDE.md templates, error fixes, and cost optimization configs.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=paywall" class="paywall-cta">Get Lifetime Access &mdash; $99</a>
+        <p class="paywall-fine">One-time payment. All tools. All templates. Forever.</p>
+      </div>
+    </div>
+
+    <!-- SEO Content -->
+    <div class="seo-content">
+      <h2>How Claude Code Pricing Works</h2>
+      <p>Claude Code is Anthropic's official CLI and agentic coding tool that brings Claude directly into your terminal. Unlike traditional IDE extensions, Claude Code operates as a standalone agent that can read your codebase, execute commands, edit files, and manage complex multi-step development tasks. Understanding its pricing structure is essential for budgeting your AI-assisted development workflow.</p>
+      <p>Anthropic offers several pricing tiers for Claude Code. The <strong>Free tier</strong> provides limited access with roughly 50,000 tokens per month, suitable for occasional exploration. The <strong>Pro plan</strong> at $20 per month gives you access to Sonnet 4.6 with generous rate limits and approximately 500,000 included tokens. For heavy users, <strong>Max Individual</strong> ($100/mo) and <strong>Max Team</strong> ($200/mo) plans offer unlimited token usage with no overage charges, priority access during peak hours, and the ability to use Opus 4.6 without worrying about per-token costs.</p>
+      <p>The <strong>API Direct</strong> option lets you pay purely per token with no monthly subscription. This can be the cheapest option for light users or the most expensive for heavy users, depending on your volume. All plans include access to Claude Code's core capabilities: codebase-aware context, multi-file editing, command execution, and git integration.</p>
+
+      <h2>Understanding Token Costs</h2>
+      <p>Tokens are the fundamental unit of measurement for Claude Code usage. A token is roughly 3-4 characters of text. When you interact with Claude Code, you consume two types of tokens:</p>
+      <ul>
+        <li><strong>Input tokens</strong> include your prompts, the codebase context Claude reads, file contents, and system instructions. These are cheaper because Anthropic can process them in batch.</li>
+        <li><strong>Output tokens</strong> are what Claude generates: code, explanations, file edits, and command suggestions. These cost 3-5x more than input tokens because they require sequential generation.</li>
+      </ul>
+      <p>Current per-token pricing (April 2026) varies by model. <strong>Sonnet 4.6</strong> charges $3 per million input tokens and $15 per million output tokens, offering the best balance of capability and cost. <strong>Opus 4.6</strong> at $5/$25 per million tokens delivers the highest reasoning quality at a moderate premium. <strong>Haiku 4.5</strong> at $1/$5 per million tokens is the budget option, best for simple tasks like formatting, renaming, and boilerplate generation.</p>
+      <p>In a typical Claude Code session, approximately 40% of tokens are input (your code context and prompts) and 60% are output (Claude's responses and generated code). Larger projects consume more input tokens because Claude needs to read more files for context. Opus tends to produce longer, more detailed responses, increasing output token usage by roughly 50% compared to Sonnet.</p>
+
+      <h2>Frequently Asked Questions</h2>
+
+      <details>
+        <summary>How much does Claude Code cost per month?</summary>
+        <p>Monthly costs range from $0 (free tier) to $200+ depending on your plan and usage. A typical developer using Sonnet 4.6 for 4 hours per day on a medium-sized project spends approximately $95-$130 per month on the API, making the Max Individual plan ($100/mo) the breakeven point. Light users (1-2 hours/day) can often stay within the Pro plan's included tokens at just $20/mo.</p>
+      </details>
+
+      <details>
+        <summary>Is Claude Code Max worth it?</summary>
+        <p>Max is worth it if you use Claude Code for more than 3-4 hours daily or work with large codebases. The unlimited token usage eliminates cost anxiety and lets you use Opus 4.6 freely for complex architectural decisions. If your estimated API costs would exceed $80-90/month, Max Individual ($100/mo) is the better choice. Teams benefit from Max Team ($200/mo) with shared billing, admin controls, and priority support.</p>
+      </details>
+
+      <details>
+        <summary>Claude Code vs Cursor pricing &mdash; which is cheaper?</summary>
+        <p>Cursor Pro costs $20/month, but limits you to a fixed number of "fast" requests before falling back to slower models. Claude Code Pro at $20/month gives you direct access to Sonnet 4.6 with higher token limits. For heavy users, Claude Code Max ($100/mo) offers unlimited Opus-level reasoning, while Cursor Business ($40/mo) still imposes request caps. The right choice depends on whether you prefer an IDE-integrated experience (Cursor) or a terminal-native agent (Claude Code).</p>
+      </details>
+
+      <details>
+        <summary>How can I reduce Claude Code costs?</summary>
+        <p>Several strategies can cut your Claude Code costs significantly:</p>
+        <ul>
+          <li>Use a well-structured CLAUDE.md file to reduce context-gathering tokens by up to 40%.</li>
+          <li>Start with Haiku for simple tasks (formatting, renaming), then switch to Sonnet or Opus only for complex reasoning.</li>
+          <li>Use <code>/compact</code> regularly to compress conversation context.</li>
+          <li>Keep your <code>.claudeignore</code> file updated to exclude build artifacts, node_modules, and other irrelevant directories.</li>
+          <li>Break large tasks into focused, single-purpose sessions rather than long-running conversations that accumulate context.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>What's the cheapest way to use Claude Code?</summary>
+        <p>The cheapest approach is to use the API Direct option with Haiku 4.5 for routine tasks and only switch to Sonnet for complex problems. Combined with an optimized CLAUDE.md file and strict <code>.claudeignore</code> rules, you can keep monthly costs under $15-20. However, this requires discipline in model selection and session management. For most developers, the Pro plan at $20/mo provides better value with simpler budgeting.</p>
+      </details>
+
+      <details>
+        <summary>API vs subscription &mdash; which is better?</summary>
+        <p>API Direct billing is better if your usage is highly variable (some weeks heavy, some weeks none) or if you primarily use Haiku. Subscription plans (Pro or Max) are better for consistent daily usage because they provide predictable costs and included tokens. The crossover point is roughly $20/month in API usage for Pro, and $100/month for Max Individual. Use this calculator to estimate your API costs, then compare against the subscription options.</p>
+      </details>
+
+      <details>
+        <summary>Do unused tokens roll over between months?</summary>
+        <p>No. Included tokens on Pro and other subscription plans reset each billing cycle. There is no rollover or banking of unused tokens. This means the Pro plan's 500,000 included tokens are a "use it or lose it" allocation. If you consistently use less than half your included tokens, you may be overpaying and should consider the Free tier or API Direct instead.</p>
+      </details>
+
+      <details>
+        <summary>Can I switch plans mid-month?</summary>
+        <p>Yes. You can upgrade or downgrade your Claude Code plan at any time. Upgrades take effect immediately with prorated billing for the remainder of the month. Downgrades typically take effect at the start of the next billing cycle. If you're experimenting with Claude Code, start with Pro and upgrade to Max once your usage patterns stabilize.</p>
+      </details>
+
+      <div class="cta-banner">
+        <p>Reduce your costs by 50%+ with optimized CLAUDE.md templates that minimize token waste.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta" class="cta-btn">Get the Claude Code Playbook ($99 Lifetime)</a>
+      </div>
+
+      <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+        <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;font-family:'Instrument Serif','Times New Roman',serif;font-weight:400;">Related Guides</h2>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+            <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+          </li>
+          <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+            <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+          </li>
+          <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+            <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+          </li>
+          <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+            <a href="/claude-api-timeout-error-handling-retry-guide/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude API Timeout Error Handling and Retry Guide</a>
+          </li>
+          <li style="padding:8px 0;">
+            <a href="/claude-code-gitignore-best-practices/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code .gitignore Best Practices</a>
+          </li>
+        </ul>
+      </section>
+
+<section class="learn-more">
+  <div class="lm-eyebrow">&sect; Related &middot; Cost optimization</div>
+  <h2 class="lm-title">Keep <em>reading.</em></h2>
+  <div class="learn-more-grid">
+    <a href="/errors/">Claude Code Error Hub</a>
+    <a href="/diagnose/">Claude Code Error Diagnostic Tool</a>
+    <a href="/generator/">CLAUDE.md Generator</a>
+    <a href="/claude-api-timeout-error-handling-retry-guide/">Claude API Timeout Error Handling</a>
+    <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Certificate Verification Failed</a>
+    <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+    <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">Skill Timeout Error Fix</a>
+    <a href="/claude-code-gitignore-best-practices/">Claude Code .gitignore Best Practices</a>
+  </div>
+</section>
+    </div>
+  </div>
+
+  <script>
+    /* ========================================================
+       Claude Code Cost Calculator — All logic
+       NASA Power of 10 compliant. IIFE-encapsulated.
+       ======================================================== */
+    (function() {
+      'use strict';
+
+      /* ---- FIX-1: Opus $5/$25, FIX-2: Haiku $1/$5 ---- */
+      const PRICING = Object.freeze({
+        sonnet: Object.freeze({ input: 3, output: 15 }),
+        opus:   Object.freeze({ input: 5, output: 25 }),
+        haiku:  Object.freeze({ input: 1, output: 5 }),
+        plans: Object.freeze({
+          free:   Object.freeze({ name: 'Free Tier',              monthly: 0,   tokensIncluded: 50000,     overage: false }),
+          pro:    Object.freeze({ name: 'Pro ($20/mo)',            monthly: 20,  tokensIncluded: 500000,    overage: true  }),
+          max100: Object.freeze({ name: 'Max Individual ($100/mo)', monthly: 100, tokensIncluded: Infinity, overage: false }),
+          max200: Object.freeze({ name: 'Max Team ($200/mo)',       monthly: 200, tokensIncluded: Infinity, overage: false }),
+          api:    Object.freeze({ name: 'API Direct',              monthly: 0,   tokensIncluded: 0,         overage: true  })
+        }),
+        competitors: Object.freeze({
+          cursor:   Object.freeze({ name: 'Cursor Pro',       monthly: 20 }),
+          copilot:  Object.freeze({ name: 'GitHub Copilot',   monthly: 10 }),
+          windsurf: Object.freeze({ name: 'Windsurf',         monthly: 15 })
+        })
+      });
+
+      const WORKING_DAYS = 22;
+      const INPUT_RATIO = 0.4;
+      const OUTPUT_RATIO = 0.6;
+      const BASE_TOKENS_PER_HOUR = 100000;
+      const VALID_MODELS = Object.freeze(['sonnet', 'opus', 'haiku']);
+      const VALID_SIZES = Object.freeze(['small', 'medium', 'large']);
+      const VALID_PLANS = Object.freeze(['free', 'pro', 'max100', 'max200', 'api']);
+
+      const SIZE_MULT  = Object.freeze({ small: 1.2, medium: 1.8, large: 3.0 });
+      const MODEL_MULT = Object.freeze({ sonnet: 1.0, opus: 1.5, haiku: 0.8 });
+
+      const fmt = new Intl.NumberFormat('en-US');
+      const fmtCurrency = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0
+      });
+      const fmtCurrencyDecimal = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2
+      });
+
+      /* ---- Paywall state (inside IIFE, no globals) ---- */
+      const PAYWALL_KEY = 'ccg_calculator_uses';
+      const PAYWALL_LIMIT = 2;
+      const GATED_CARD_IDS = Object.freeze(['card-plans', 'card-recommendation', 'card-tips', 'card-competitors']);
+      let calculationCount = 0; // tracks full calculations displayed this session
+      let isAutoLoad = true;    // suppress increment on initial page-load recalculate
+
+      /** Read use count from localStorage. Returns 0 if unavailable. */
+      function getUseCount() {
+        console.assert(typeof PAYWALL_KEY === 'string', 'PAYWALL_KEY must be a string');
+        let count = 0;
+        try {
+          count = parseInt(localStorage.getItem(PAYWALL_KEY), 10) || 0;
+        } catch (e) {
+          console.warn('localStorage read failed:', e.message);
+          count = 0;
+        }
+        console.assert(typeof count === 'number' && count >= 0, 'use count must be non-negative number');
+        return count;
+      }
+
+      /** Increment and persist use count. */
+      function incrementUseCount() {
+        console.assert(typeof PAYWALL_KEY === 'string', 'PAYWALL_KEY must be a string');
+        const count = getUseCount() + 1;
+        try {
+          localStorage.setItem(PAYWALL_KEY, String(count));
+        } catch (e) {
+          console.warn('localStorage write failed:', e.message);
+        }
+        console.assert(typeof count === 'number' && count >= 1, 'incremented count must be >= 1');
+        return count;
+      }
+
+      /* ---- DOM refs ---- */
+      const slider          = document.getElementById('hours-slider');
+      const hoursDisplay    = document.getElementById('hours-display');
+      const usageOutput     = document.getElementById('usage-output');
+      const plansOutput     = document.getElementById('plans-output');
+      const recOutput       = document.getElementById('recommendation-output');
+      const tipsOutput      = document.getElementById('tips-output');
+      const compOutput      = document.getElementById('competitors-output');
+      const paywallOverlay  = document.getElementById('paywall-overlay');
+
+      /* ---- Utility: read selected radio value ---- */
+      function getRadio(name) {
+        console.assert(typeof name === 'string' && name.length > 0, 'radio name must be non-empty string');
+        const el = document.querySelector('input[name="' + name + '"]:checked');
+        const result = el ? el.value : null;
+        console.assert(result === null || typeof result === 'string', 'radio value must be string or null');
+        return result;
+      }
+
+      /* ---- Clamp helper ---- */
+      function clamp(val, lo, hi) {
+        console.assert(typeof val === 'number' && typeof lo === 'number' && typeof hi === 'number', 'clamp args must be numbers');
+        console.assert(lo <= hi, 'clamp lo must be <= hi');
+        const result = Math.max(lo, Math.min(hi, val));
+        console.assert(result >= lo && result <= hi, 'clamped result must be within bounds');
+        return result;
+      }
+
+      /* ---- Token estimation ---- */
+      function estimateMonthlyTokens(hoursPerDay, model, projectSize) {
+        console.assert(typeof hoursPerDay === 'number' && hoursPerDay >= 1 && hoursPerDay <= 12, 'hoursPerDay must be 1-12');
+        console.assert(VALID_MODELS.includes(model), 'model must be sonnet/opus/haiku');
+
+        const daily = BASE_TOKENS_PER_HOUR * hoursPerDay
+          * SIZE_MULT[projectSize] * MODEL_MULT[model];
+
+        const total = Math.round(daily * WORKING_DAYS);
+        const inputTokens  = Math.round(total * INPUT_RATIO);
+        const outputTokens = Math.round(total * OUTPUT_RATIO);
+
+        const result = { total: total, input: inputTokens, output: outputTokens };
+        console.assert(result.total > 0, 'token estimate must be positive');
+        console.assert(result.input + result.output > 0, 'input + output tokens must be positive');
+        return result;
+      }
+
+      /* ---- Cost calculation for a single plan ---- */
+      function calcPlanCost(planKey, tokens, model) {
+        console.assert(VALID_PLANS.includes(planKey), 'invalid plan key: ' + planKey);
+        console.assert(VALID_MODELS.includes(model), 'invalid model: ' + model);
+
+        const plan = PRICING.plans[planKey];
+        const modelPricing = PRICING[model];
+        let cost = plan.monthly;
+
+        if (plan.tokensIncluded === Infinity) {
+          console.assert(typeof cost === 'number' && cost >= 0, 'flat cost must be non-negative');
+          return cost;
+        }
+
+        const overage = Math.max(0, tokens.total - plan.tokensIncluded);
+
+        if (overage > 0 && plan.overage) {
+          const overInput  = Math.round(overage * INPUT_RATIO);
+          const overOutput = Math.round(overage * OUTPUT_RATIO);
+          cost += (overInput / 1e6) * modelPricing.input;
+          cost += (overOutput / 1e6) * modelPricing.output;
+        }
+
+        const result = Math.round(cost * 100) / 100;
+        console.assert(typeof result === 'number' && result >= 0, 'plan cost must be non-negative');
+        return result;
+      }
+
+      /* ---- Render: usage card ---- */
+      function renderUsage(tokens, hoursPerDay) {
+        console.assert(tokens && typeof tokens.total === 'number', 'tokens object required');
+        console.assert(typeof hoursPerDay === 'number' && hoursPerDay >= 1, 'hoursPerDay must be >= 1');
+
+        const sessions = Math.round(hoursPerDay * WORKING_DAYS * 1.5);
+        usageOutput.innerHTML =
+          '<div class="stat-row"><span class="stat-label">Total tokens/month</span>' +
+          '<span class="stat-value">' + fmt.format(tokens.total) + '</span></div>' +
+          '<div class="stat-row"><span class="stat-label">Input tokens (40%)</span>' +
+          '<span class="stat-value">' + fmt.format(tokens.input) + '</span></div>' +
+          '<div class="stat-row"><span class="stat-label">Output tokens (60%)</span>' +
+          '<span class="stat-value">' + fmt.format(tokens.output) + '</span></div>' +
+          '<div class="stat-row"><span class="stat-label">Estimated sessions</span>' +
+          '<span class="stat-value">' + fmt.format(sessions) + '</span></div>';
+
+        console.assert(usageOutput.innerHTML.length > 0, 'usage output must not be empty');
+      }
+
+      /* ---- Render: plan comparison table ---- */
+      function renderPlans(tokens, model, currentPlan) {
+        console.assert(tokens && typeof tokens.total === 'number', 'tokens object required');
+        console.assert(VALID_MODELS.includes(model), 'model must be valid');
+
+        const planKeys = VALID_PLANS;
+        const rows = [];
+        let cheapestKey = planKeys[0];
+        let cheapestCost = Infinity;
+
+        for (let i = 0; i < planKeys.length; i++) {
+          const key = planKeys[i];
+          const cost = calcPlanCost(key, tokens, model);
+          if (cost < cheapestCost) {
+            cheapestCost = cost;
+            cheapestKey = key;
+          }
+          rows.push({ key: key, cost: cost });
+        }
+
+        let html = '<table class="plan-table">';
+        html += '<thead><tr><th>Plan</th><th>Monthly Cost</th><th>Status</th></tr></thead><tbody>';
+
+        for (let j = 0; j < rows.length; j++) {
+          const r = rows[j];
+          const isBest = (r.key === cheapestKey);
+          const isCurrent = (r.key === currentPlan);
+          const cls = isBest ? ' class="best-plan"' : '';
+          const badge = isBest ? '<span class="best-badge">Best Value</span>' : '';
+          const status = isCurrent ? 'Current' : '';
+          const costStr = (r.cost >= 1000)
+            ? fmtCurrency.format(r.cost)
+            : fmtCurrencyDecimal.format(r.cost);
+
+          html += '<tr' + cls + '><td>' + PRICING.plans[r.key].name + badge + '</td>';
+          html += '<td class="cost-cell">' + costStr + '</td>';
+          html += '<td>' + status + '</td></tr>';
+        }
+
+        html += '</tbody></table>';
+        plansOutput.innerHTML = html;
+
+        const result = { bestKey: cheapestKey, bestCost: cheapestCost };
+        console.assert(typeof result.bestKey === 'string', 'bestKey must be a string');
+        return result;
+      }
+
+      /* ---- Render: recommendation ---- */
+      function renderRecommendation(bestKey, bestCost, currentPlan, tokens) {
+        console.assert(VALID_PLANS.includes(bestKey), 'bestKey must be a valid plan');
+        console.assert(typeof bestCost === 'number' && bestCost >= 0, 'bestCost must be non-negative');
+
+        const best = PRICING.plans[bestKey];
+        const reason = buildReasonText(bestKey, bestCost, currentPlan, tokens);
+
+        recOutput.innerHTML =
+          '<div class="rec-plan">' + best.name + '</div>' +
+          '<div class="rec-reason">' + reason + '</div>';
+
+        console.assert(recOutput.innerHTML.length > 0, 'recommendation output must not be empty');
+      }
+
+      /** Build recommendation reason text. */
+      function buildReasonText(bestKey, bestCost, currentPlan, tokens) {
+        console.assert(VALID_PLANS.includes(bestKey), 'bestKey must be valid plan');
+        console.assert(VALID_PLANS.includes(currentPlan), 'currentPlan must be valid plan');
+
+        let text;
+        if (bestKey === currentPlan) {
+          text = 'You are already on the most cost-effective plan for your usage. ' +
+            'Your estimated monthly cost is ' + fmtCurrencyDecimal.format(bestCost) + '.';
+        } else {
+          const currentCost = calcPlanCost(currentPlan, tokens, getRadio('model') || 'sonnet');
+          const savings = currentCost - bestCost;
+
+          if (savings > 0) {
+            text = 'Switching from ' + PRICING.plans[currentPlan].name +
+              ' to ' + PRICING.plans[bestKey].name +
+              ' would save you approximately ' + fmtCurrencyDecimal.format(savings) +
+              ' per month (' + fmtCurrencyDecimal.format(bestCost) + ' vs ' +
+              fmtCurrencyDecimal.format(currentCost) + ').';
+          } else {
+            text = 'At your current usage level, ' + PRICING.plans[bestKey].name +
+              ' offers the best value at ' + fmtCurrencyDecimal.format(bestCost) + '/month.';
+          }
+        }
+
+        console.assert(typeof text === 'string' && text.length > 0, 'reason text must be non-empty string');
+        return text;
+      }
+
+      /* ---- Render: savings tips ---- */
+      function renderTips(model, projectSize, hoursPerDay) {
+        console.assert(VALID_MODELS.includes(model), 'model must be valid');
+        console.assert(VALID_SIZES.includes(projectSize), 'projectSize must be valid');
+
+        const tips = selectTips(model, projectSize, hoursPerDay);
+        const icons = ['\u2699', '\u26A1', '\u{1F4CB}'];
+        let html = '';
+        for (let i = 0; i < tips.length; i++) {
+          html += '<div class="tip-item">' +
+            '<div class="tip-icon">' + icons[i % icons.length] + '</div>' +
+            '<div class="tip-text">' + tips[i] + '</div></div>';
+        }
+        tipsOutput.innerHTML = html;
+
+        console.assert(tipsOutput.innerHTML.length > 0, 'tips output must not be empty');
+      }
+
+      /** Select contextual tips based on user inputs. */
+      function selectTips(model, projectSize, hoursPerDay) {
+        console.assert(VALID_MODELS.includes(model), 'model must be valid');
+        console.assert(typeof hoursPerDay === 'number' && hoursPerDay >= 1, 'hoursPerDay must be >= 1');
+
+        const tips = [];
+
+        if (model === 'opus') {
+          tips.push('Use Sonnet 4.6 for routine tasks and reserve Opus for complex architectural decisions. This alone can cut costs by 60-70%.');
+        } else if (model === 'sonnet') {
+          tips.push('Switch to Haiku 4.5 for simple tasks like formatting, renaming, and boilerplate. Haiku costs 75% less than Sonnet.');
+        } else {
+          tips.push('You are already using the most affordable model. Consider upgrading to Sonnet only for tasks where Haiku struggles, like complex refactoring.');
+        }
+
+        if (projectSize === 'large') {
+          tips.push('Add a .claudeignore file to exclude build artifacts, node_modules, and vendor directories. This can reduce input tokens by 30-40% on large codebases.');
+        } else {
+          tips.push('Create a CLAUDE.md file with project conventions and architecture notes. This helps Claude find relevant code faster, reducing context-gathering tokens.');
+        }
+
+        if (hoursPerDay >= 6) {
+          tips.push('Use /compact between major tasks to compress conversation history. Long sessions accumulate context that gets re-sent with every message.');
+        } else {
+          tips.push('Break work into focused 30-60 minute sessions with clear objectives. Shorter, targeted sessions waste fewer tokens on context setup.');
+        }
+
+        console.assert(Array.isArray(tips) && tips.length === 3, 'must produce exactly 3 tips');
+        return tips;
+      }
+
+      /* ---- Render: competitor comparison ---- */
+      function renderCompetitors(bestCost) {
+        console.assert(typeof bestCost === 'number' && bestCost >= 0, 'bestCost must be non-negative number');
+
+        const comps = Object.freeze([
+          Object.freeze({ name: 'Cursor Pro',       monthly: 20, note: 'IDE-based, limited fast requests'  }),
+          Object.freeze({ name: 'GitHub Copilot',   monthly: 10, note: 'Autocomplete focus, less agentic'  }),
+          Object.freeze({ name: 'Windsurf',         monthly: 15, note: 'IDE-based, Cascade flow agent'     })
+        ]);
+
+        let html = '';
+        for (let i = 0; i < comps.length; i++) {
+          const c = comps[i];
+          const diff = bestCost - c.monthly;
+          let diffStr;
+          if (diff > 0) {
+            diffStr = '(+' + fmtCurrencyDecimal.format(diff) + ' more)';
+          } else if (diff < 0) {
+            diffStr = '(' + fmtCurrencyDecimal.format(Math.abs(diff)) + ' cheaper)';
+          } else {
+            diffStr = '(same price)';
+          }
+
+          html += '<div class="competitor-row">' +
+            '<div><span class="competitor-name">' + c.name + '</span>' +
+            '<div class="competitor-note">' + c.note + '</div></div>' +
+            '<div><span class="competitor-price">' + fmtCurrency.format(c.monthly) + '/mo</span>' +
+            '<div class="competitor-note">' + diffStr + '</div></div></div>';
+        }
+
+        compOutput.innerHTML = html;
+        console.assert(compOutput.innerHTML.length > 0, 'competitor output must not be empty');
+      }
+
+      /* ---- Paywall enforcement ---- */
+      function applyPaywall() {
+        console.assert(Array.isArray(GATED_CARD_IDS), 'GATED_CARD_IDS must be an array');
+        const uses = getUseCount();
+
+        if (uses >= PAYWALL_LIMIT) {
+          for (let i = 0; i < GATED_CARD_IDS.length; i++) {
+            const el = document.getElementById(GATED_CARD_IDS[i]);
+            if (el) { el.classList.add('blurred'); }
+          }
+          paywallOverlay.style.display = 'flex';
+        } else {
+          for (let j = 0; j < GATED_CARD_IDS.length; j++) {
+            const el = document.getElementById(GATED_CARD_IDS[j]);
+            if (el) { el.classList.remove('blurred'); }
+          }
+          paywallOverlay.style.display = 'none';
+        }
+
+        console.assert(typeof uses === 'number', 'uses must be a number after applyPaywall');
+      }
+
+      /* ---- Main recalculate ---- */
+      function recalculate() {
+        console.assert(slider !== null, 'slider element must exist');
+
+        const hoursPerDay = clamp(parseInt(slider.value, 10), 1, 12);
+        const model       = getRadio('model')       || 'sonnet';
+        const projectSize = getRadio('projectSize')  || 'medium';
+        const currentPlan = getRadio('plan')         || 'pro';
+
+        hoursDisplay.textContent = hoursPerDay + ' hrs';
+
+        const tokens = estimateMonthlyTokens(hoursPerDay, model, projectSize);
+
+        renderUsage(tokens, hoursPerDay);
+        const best = renderPlans(tokens, model, currentPlan);
+        renderRecommendation(best.bestKey, best.bestCost, currentPlan, tokens);
+        renderTips(model, projectSize, hoursPerDay);
+        renderCompetitors(best.bestCost);
+
+        /* FIX-18: Increment paywall counter only when a full calculation is displayed */
+        /* Only count user-initiated actions, not auto-load */
+        if (!isAutoLoad) {
+          calculationCount++;
+          if (calculationCount <= PAYWALL_LIMIT) {
+            incrementUseCount();
+          }
+        }
+        isAutoLoad = false;
+        applyPaywall();
+        console.assert(typeof best.bestCost === 'number', 'recalculate must produce a valid bestCost');
+      }
+
+      /* ---- Debounce for slider ---- */
+      let debounceTimer = null;
+
+      function debouncedRecalc() {
+        console.assert(slider !== null, 'slider element must exist');
+        /* Update the display immediately for responsiveness */
+        hoursDisplay.textContent = clamp(parseInt(slider.value, 10), 1, 12) + ' hrs';
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(recalculate, 80);
+        console.assert(debounceTimer !== null, 'debounceTimer must be set');
+      }
+
+      /* ---- Wire up event listeners ---- */
+      slider.addEventListener('input', debouncedRecalc);
+
+      const allRadios = document.querySelectorAll('input[type="radio"]');
+      for (let r = 0; r < allRadios.length; r++) {
+        allRadios[r].addEventListener('change', function() {
+          /* FIX-18: Radio clicks do NOT independently increment paywall.
+             Only recalculate() increments when the full result is displayed. */
+          recalculate();
+        });
+      }
+
+      /* ---- Initial calculation on load ---- */
+      recalculate();
+    })();
+  </script>
+<footer style="text-align:center;padding:32px 20px 24px;border-top:1px solid #1a1a1a;margin-top:48px;font-size:13px;color:#666;">
+  <div>&copy; 2026 ClaudHQ. All rights reserved.</div>
+</footer>
+</body>
+</html>

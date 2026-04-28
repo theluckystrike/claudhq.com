@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Should .claude Be in .gitignore? (2026) | ClaudHQ</title>
+  <meta name="description" content="Add .claude to .gitignore to protect API keys and session data. Also covers node_modules, .env, and OS files for a clean Claude Code project setup.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Should .claude Be in .gitignore? (2026) | ClaudHQ">
+  <meta property="og:description" content="Add .claude to .gitignore to protect API keys and session data. Also covers node_modules, .env, and OS files for a clean Claude Code project setup.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-gitignore-best-practices/">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://claudhq.com/claude-code-gitignore-best-practices/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Should .claude Be in .gitignore? (2026)",
+    "description": "Add .claude to .gitignore to protect API keys and session data. Also covers node_modules, .env, and OS files for a clean Claude Code project setup.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "datePublished": "2026-04-19",
+    "dateModified": "2026-04-19",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-gitignore-best-practices/"}
+  }
+  </script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/errors/">Errors</a></li>
+      <li><a href="/diagnose/">Diagnose</a></li>
+      <li><a href="/calculator/">Calculator</a></li>
+      <li><a href="/generator/">Generator</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="article-meta">
+      <time datetime="2026-04-19">April 19, 2026</time> &middot; Last tested 2026-04-21
+    </div>
+
+    <h1>Claude Code Gitignore Best Practices</h1>
+
+    <p>Getting gitignore right in practice means solving merge conflict resolution patterns and branch strategy management. The Claude Code patterns in this gitignore guide were developed from real project requirements.</p>
+
+    <p>When working with Claude Code and its skills ecosystem, proper <code>.gitignore</code> configuration prevents accidentally committing sensitive data, skill cache files, and project artifacts that should stay local. This guide covers essential gitignore patterns for Claude Code projects.</p>
+
+    <h2>Why Gitignore Matters for Claude Code</h2>
+
+    <p>Claude Code stores skill data, conversation history, and working files in specific directories within your project. Without proper exclusions, you risk committing:</p>
+
+    <ul>
+      <li>Skill invocation logs and cached responses</li>
+      <li>Generated code and temporary files</li>
+      <li>API keys and credentials used by skills</li>
+      <li>Build artifacts from skill-powered workflows</li>
+    </ul>
+
+    <h2>Essential Claude Code Gitignore Patterns</h2>
+
+    <p>Add these patterns to your project's <code>.gitignore</code> to keep your repository clean and secure:</p>
+
+    <pre><code>Claude Code directories
+.claude/
+.claude/settings.json
+.claude/settings.local.json
+
+Claude Code skills cache and logs
+.claude/skills/.cache/
+.claude/skills/*.log
+.claude/skills/state/
+.claude/skills/tmp/
+
+Claude Code conversation and session data
+.claude/conversations/
+.claude/sessions/
+.claude/checkpoints/
+
+Skill-specific exclusions
+*.skill-backup
+skill-state.json
+conversation-history/
+.claude-history
+
+Generated artifacts
+dist/
+build/
+*.generated.*
+*.tmp
+
+Environment files
+.env
+.env.local
+.env.*.local
+
+Node and Python dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+OS files
+.DS_Store
+Thumbs.db</code></pre>
+
+    <p>A few patterns deserve special attention. The <code>.claude/settings.local.json</code> file is where Claude Code stores per-machine overrides. things like local MCP server paths or workspace-specific tool permissions that differ from developer to developer. The <code>.claude/conversations/</code> and <code>.claude/sessions/</code> directories accumulate quickly when you use Claude Code heavily; they are safe to regenerate and add significant size to a repository if left unignored.</p>
+
+    <p>If you want to commit your shared Claude Code settings (useful for team alignment on which skills are enabled), you can selectively un-ignore the base settings file while keeping local overrides excluded:</p>
+
+    <pre><code>Commit base settings but not local overrides
+!.claude/settings.json
+.claude/settings.local.json</code></pre>
+
+    <p>This pattern lets your team share a baseline configuration through source control without clobbering each developer's local preferences.</p>
+
+    <h2>Skill-Specific Gitignore Recommendations</h2>
+
+    <h2>For Projects Using the pdf Skill</h2>
+
+    <p>If you're processing documents with the <code>pdf</code> skill, exclude output directories:</p>
+
+    <pre><code>PDF processing outputs
+pdf-output/
+processed-docs/
+extracted-data/</code></pre>
+
+    <h2>For Projects Using the tdd Skill</h2>
+
+    <p>When running test-driven development:</p>
+
+    <pre><code>Test outputs
+test-results/
+coverage/
+.nyc_output/</code></pre>
+
+    <h2>For Projects Using the xlsx and docx Skills</h2>
+
+    <p>Spreadsheet and document automation generates temporary files:</p>
+
+    <pre><code>Office document processing
+excel-temp/
+docx-cache/</code></pre>
+
+    <h2>Global vs Project-Level Gitignore</h2>
+
+    <p>Git supports two tiers of ignore rules, and understanding the difference is important for Claude Code workflows.</p>
+
+    <p>Project-level <code>.gitignore</code> lives in your repository root and is committed to source control. Every developer who clones the repo gets these rules automatically. Use it for patterns that are true for everyone. things like <code>node_modules/</code>, <code>dist/</code>, and skill output directories that your project always generates.</p>
+
+    <p>Global gitignore lives on your machine and applies to every repository you touch, without being committed anywhere. This is the right place for patterns that are specific to your environment. your editor's scratch files, OS metadata, and Claude Code's local data directories.</p>
+
+    <p>Set up a global gitignore file once and it covers all your repositories:</p>
+
+    <pre><code>git config --global core.excludesFile ~/.gitignore_global</code></pre>
+
+    <p>Then populate <code>~/.gitignore_global</code> with machine-specific patterns:</p>
+
+    <pre><code>Claude Code local data (all projects)
+.claude/conversations/
+.claude/sessions/
+.claude/checkpoints/
+.claude/settings.local.json
+.claude-history
+
+macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+JetBrains IDEs
+.idea/
+*.iml
+
+VS Code workspace settings
+.vscode/settings.json
+.vscode/*.code-workspace
+
+Vim / Emacs swap and backup files
+*.swp
+*.swo
+*~
+\#*\#</code></pre>
+
+    <p>The rule of thumb: if a pattern applies to your personal development environment rather than the project itself, it belongs in the global gitignore, not in the project's <code>.gitignore</code>. This keeps project-level ignore files focused and readable for other contributors.</p>
+
+    <p>When team settings need sharing, keep <code>.claude/settings.json</code> (the base config) in the project <code>.gitignore</code> as an explicit exception:</p>
+
+    <pre><code>Ignore most of .claude/ but share the base settings
+.claude/
+!.claude/settings.json</code></pre>
+
+    <p>This approach is common on teams that want all developers running the same skill set without enforcing local machine paths or personal preferences.</p>
+
+    <h2>Verifying Your Gitignore</h2>
+
+    <p>Before committing, check what will be tracked:</p>
+
+    <pre><code>See what's being tracked
+git status
+
+Check what would be added
+git add --dry-run .
+
+Verify gitignore is working
+git check-ignore -v filename</code></pre>
+
+    <h2>Common Mistakes to Avoid</h2>
+
+    <h2>Ignoring Lock Files</h2>
+
+    <p>One of the most damaging gitignore mistakes is accidentally excluding lock files. Lock files (<code>package-lock.json</code>, <code>yarn.lock</code>, <code>poetry.lock</code>, <code>Gemfile.lock</code>) record the exact dependency versions your project used when it last worked. They should almost always be committed.</p>
+
+    <p>The problem typically happens when a developer adds an overly broad pattern like <code>*.lock</code> intending to exclude database lock files or editor lock files, but accidentally catches package manager lock files at the same time. Always be explicit:</p>
+
+    <pre><code>Safe: exclude only specific lock-like files
+*.swp
+*.swo
+
+Dangerous: excludes package-lock.json and yarn.lock too
+*.lock</code></pre>
+
+    <h2>Over-Ignoring Source Directories</h2>
+
+    <p>Adding <code>src/</code> or <code>lib/</code> to <code>.gitignore</code> by mistake wipes your source code from tracking. This usually happens when someone copies a gitignore template from a different project type. Always review templates before applying them. a Node.js template might safely ignore <code>lib/</code> (where TypeScript compiles to), but in a Python project <code>lib/</code> is where your actual source lives.</p>
+
+    <p>Committing <code>.claude/settings.json</code> with Embedded Credentials</p>
+
+    <p>Claude Code settings files can accumulate API keys, MCP server URLs with embedded tokens, and file paths that expose your directory structure. Even if a key is rotated, its presence in git history creates a security audit trail problem. If you have already committed sensitive data, use <code>git filter-repo</code> or <code>BFG Repo Cleaner</code> to scrub history. simply deleting the file in a new commit is not enough.</p>
+
+    <h2>Forgetting Already-Tracked Files</h2>
+
+    <p>Adding a pattern to <code>.gitignore</code> does not automatically un-track files that are already in the repository. If you accidentally committed <code>.claude/settings.json</code> and then added it to <code>.gitignore</code>, git will keep tracking it. You must explicitly remove it from tracking:</p>
+
+    <pre><code>git rm --cached .claude/settings.json
+git commit -m "stop tracking claude settings"</code></pre>
+
+    <p>The <code>--cached</code> flag removes the file from git's index without deleting it from your working directory.</p>
+
+    <h2>Duplicate and Conflicting Patterns</h2>
+
+    <p>Gitignore files read top to bottom, and negation patterns (<code>!pattern</code>) only un-ignore something that was ignored by an earlier rule. A common mistake is placing a negation before the rule it is meant to override:</p>
+
+    <pre><code>Broken. negation comes before the ignore rule, so it has no effect
+!.claude/settings.json
+.claude/
+
+Correct. negate after the broader ignore
+.claude/
+!.claude/settings.json</code></pre>
+
+    <h2>Gitignore Templates for Different Project Types</h2>
+
+    <p>Claude Code is used across a wide variety of project structures. Here are focused gitignore examples for the most common setups.</p>
+
+    <h2>Node.js / TypeScript Projects</h2>
+
+    <pre><code>Claude Code
+.claude/
+!.claude/settings.json
+.claude/settings.local.json
+.claude/skills/.cache/
+.claude/skills/*.log
+
+Dependencies
+node_modules/
+
+Build output
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+Environment
+.env
+.env.local
+.env.*.local
+
+Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+Test coverage
+coverage/
+.nyc_output/
+
+Lock files. DO NOT IGNORE
+package-lock.json and yarn.lock should be committed</code></pre>
+
+    <h2>Python Projects</h2>
+
+    <pre><code>Claude Code
+.claude/
+!.claude/settings.json
+.claude/settings.local.json
+.claude/skills/.cache/
+
+Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+Byte-compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+Distribution and packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+Environment variables
+.env
+.env.local
+
+Jupyter notebooks. optional, include if notebooks are source
+.ipynb_checkpoints/</code></pre>
+
+    <h2>Jekyll / Static Site Projects</h2>
+
+    <p>If you use Claude Code to generate or edit content for a Jekyll site, your gitignore needs to account for both Jekyll's build output and Claude Code's working files:</p>
+
+    <pre><code>Claude Code
+.claude/
+!.claude/settings.json
+.claude/settings.local.json
+.claude/skills/.cache/
+
+Jekyll build output
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+Bundler
+vendor/
+.bundle/
+
+Environment
+.env
+
+OS
+.DS_Store</code></pre>
+
+    <p>Note that <code>_site/</code> is always safe to gitignore for Jekyll projects. GitHub Pages rebuilds it on every push, so committing it adds churn without value.</p>
+
+    <h2>Integrating with Claude Skills Workflow</h2>
+
+    <p>When using skills like <code>docx</code> for documentation or <code>xlsx</code> for data analysis, ensure your workflow generates to excluded directories. Configure skill output paths in your project structure:</p>
+
+    <pre><code>project/
+ src/
+ .gitignore # Exclude output directories
+ output/ # Skill-generated content (gitignored)
+ reports/
+ exports/</code></pre>
+
+    <h2>Best Practices Summary</h2>
+
+    <ul>
+      <li>Add Claude Code specific patterns to every project <code>.gitignore</code></li>
+      <li>Use a global gitignore for system-level exclusions</li>
+      <li>Regularly audit your gitignore as you add new skills</li>
+      <li>Never commit <code>.env</code> files or API credentials</li>
+      <li>Keep skill cache and output directories excluded</li>
+    </ul>
+
+    <p>Proper gitignore configuration is foundational to maintain clean repositories when working with Claude Code's powerful skill ecosystem. These patterns ensure your focus stays on code and content, not generated artifacts.</p>
+
+    <hr>
+
+    <p><em>Last verified: April 2026.</em></p>
+
+    <div class="mastery-cta">
+      <p>This site was built by 5 autonomous agents running in tmux while I was in Bali. 2,500 articles. Zero manual work. 100% quality gate pass rate.</p>
+
+      <p>The orchestration configs, sprint templates, and quality gates that made that possible are in the Zovo Lifetime bundle. Along with 16 CLAUDE.md templates and 80 tested prompts.</p>
+
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta-skills&amp;utm_campaign=claude-code-gitignore-best-practices">See how the pipeline works</a></strong></p>
+
+      <p>$99 once. I'm a solo dev in Da Nang. This is how I scale.</p>
+    </div>
+
+    <h2>Related Reading</h2>
+
+    <ul>
+      <li>.gitignore Not Respected by Claude Fix</li>
+    </ul>
+
+    <p>Built by theluckystrike. More at <a href="https://zovo.one">zovo.one</a></p>
+
+    <p><strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+
+    <a href="/diagnose/" class="tool-cta">
+      <strong>&rarr; Try the Error Diagnostic Tool</strong> — paste your error message, get the fix instantly
+    </a>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ClaudHQ</div>
+      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access &rarr;</a>
+      <div class="footer-copy">&copy; 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+    </div>
+  </footer>
+</body>
+</html>

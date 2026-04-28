@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude API Timeout (2026) | ClaudHQ</title>
+  <meta name="description" content="Handle Claude API timeout errors with retry logic, exponential backoff, and per-request timeout configuration. Tested with production apps in 2026.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Fix Claude API Timeout (2026) | ClaudHQ">
+  <meta property="og:description" content="Handle Claude API timeout errors with retry logic, exponential backoff, and per-request timeout configuration. Tested with production apps in 2026.">
+  <meta property="og:url" content="https://claudhq.com/claude-api-timeout-error-handling-retry-guide/">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://claudhq.com/claude-api-timeout-error-handling-retry-guide/">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude API Timeout (2026)",
+    "description": "Handle Claude API timeout errors with retry logic, exponential backoff, and per-request timeout configuration. Tested with production apps in 2026.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "datePublished": "2026-04-01",
+    "dateModified": "2026-04-17",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-api-timeout-error-handling-retry-guide/"}
+  }
+  </script>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">ClaudHQ</a>
+    <ul class="nav-links">
+      <li><a href="/errors/">Errors</a></li>
+      <li><a href="/diagnose/">Diagnose</a></li>
+      <li><a href="/calculator/">Calculator</a></li>
+      <li><a href="/generator/">Generator</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime ✦</a>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="article-meta">
+      <time datetime="2026-04-01">April 1, 2026</time> · Last tested 2026-04-21
+    </div>
+
+    <h1>Claude API Timeout Errors: Handling and Retry Guide</h1>
+
+    <p>When you integrate the Claude API into a production application, timeout errors are inevitable. Network interruptions, high-latency regions, large prompts, and long-running completions all create situations where API calls exceed their time budget. The difference between an application that handles these failures gracefully and one that surfaces raw errors to users comes down to timeout configuration and retry logic.</p>
+
+    <p>I have built several production services that rely on the Claude API, and timeout handling is consistently one of the first things I get right in the architecture. This guide covers the practical patterns I use.</p>
+
+    <h2>Why Claude API Calls Time Out</h2>
+
+    <p>API timeouts fall into three categories, and each requires a different response strategy.</p>
+
+    <h3>Connection Timeouts</h3>
+
+    <p>The client cannot establish a TCP connection to the Anthropic API endpoint. Causes include DNS resolution failures, network partitions, firewall rules blocking outbound HTTPS, or the API endpoint being temporarily unreachable. Connection timeouts are fast (typically under 10 seconds) and almost always transient.</p>
+
+    <h3>Read Timeouts</h3>
+
+    <p>The connection is established, the request is sent, but the response takes too long to arrive. This is the most common timeout type with the Claude API because response generation time scales with output length. A request that produces 4,000 tokens takes meaningfully longer than one producing 200 tokens. Read timeouts are the ones you need to tune most carefully.</p>
+
+    <h3>Overall Request Timeouts</h3>
+
+    <p>Some HTTP client libraries enforce a single timeout covering the entire request lifecycle, from DNS lookup through the last byte of the response body. If your client's default is 30 seconds and the Claude API needs 45 seconds for a complex generation, the client kills the connection before the response completes.</p>
+
+    <h2>Setting Timeout Values in the Anthropic SDK</h2>
+
+    <h3>Python</h3>
+
+    <p>The official Anthropic Python SDK accepts a <code>timeout</code> parameter that controls the overall request timeout:</p>
+
+<pre><code>import anthropic
+
+client = anthropic.Anthropic(
+ timeout=120.0, # seconds
+)
+
+response = client.messages.create(
+ model="claude-sonnet-4-20250514",
+ max_tokens=4096,
+ messages=[{"role": "user", "content": "Analyze this codebase..."}]
+)</code></pre>
+
+    <p>For more granular control, you can use <code>httpx.Timeout</code> directly:</p>
+
+<pre><code>import httpx
+import anthropic
+
+client = anthropic.Anthropic(
+ timeout=httpx.Timeout(
+ connect=10.0, # time to establish connection
+ read=120.0, # time to receive response
+ write=30.0, # time to send request
+ pool=10.0 # time to acquire connection from pool
+ )
+)</code></pre>
+
+    <p>I recommend setting the read timeout to at least 120 seconds for any request where <code>max_tokens</code> exceeds 2,000. Complex analysis prompts with large context windows can legitimately take 60-90 seconds.</p>
+
+    <h3>TypeScript/Node.js</h3>
+
+    <p>The Anthropic TypeScript SDK follows a similar pattern:</p>
+
+<pre><code>import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+ timeout: 120 * 1000, // milliseconds
+});
+
+const response = await client.messages.create({
+ model: "claude-sonnet-4-20250514",
+ max_tokens: 4096,
+ messages: [{ role: "user", content: "Analyze this codebase..." }],
+});</code></pre>
+
+    <p>For per-request timeout overrides:</p>
+
+<pre><code>const response = await client.messages.create(
+ {
+ model: "claude-sonnet-4-20250514",
+ max_tokens: 4096,
+ messages: [{ role: "user", content: prompt }],
+ },
+ { timeout: 180 * 1000 }
+);</code></pre>
+
+    <p>Per-request overrides are valuable when your application makes both fast (summarization) and slow (code generation) API calls. Set a conservative default and override for known-slow operations.</p>
+
+    <h2>Implementing Retry Logic with Exponential Backoff</h2>
+
+    <p>Not every timeout should be retried. Connection timeouts are almost always safe to retry. Read timeouts on non-streaming requests are safe because the API is stateless. But retrying after a partial streaming response requires more care to avoid duplicate processing.</p>
+
+    <h3>Python Implementation</h3>
+
+<pre><code>import time
+import anthropic
+from anthropic import APITimeoutError, APIConnectionError
+
+def call_with_retry(client, messages, max_retries=3, base_delay=2.0):
+ for attempt in range(max_retries + 1):
+ try:
+ return client.messages.create(
+ model="claude-sonnet-4-20250514",
+ max_tokens=4096,
+ messages=messages,
+ )
+ except APITimeoutError as e:
+ if attempt == max_retries:
+ raise
+ delay = base_delay * (2 ** attempt) # 2s, 4s, 8s
+ print(f"Timeout on attempt {attempt + 1}, retrying in {delay}s")
+ time.sleep(delay)
+ except APIConnectionError as e:
+ if attempt == max_retries:
+ raise
+ delay = base_delay * (2 ** attempt)
+ print(f"Connection error on attempt {attempt + 1}, retrying in {delay}s")
+ time.sleep(delay)</code></pre>
+
+    <p>The exponential backoff pattern (2 seconds, 4 seconds, 8 seconds) avoids hammering the API during temporary issues. I add jitter in production to prevent thundering herd problems when multiple instances retry simultaneously:</p>
+
+<pre><code>import random
+
+delay = base_delay * (2 ** attempt) + random.uniform(0, 1)</code></pre>
+
+    <h3>TypeScript Implementation</h3>
+
+<pre><code>import Anthropic from "@anthropic-ai/sdk";
+
+async function callWithRetry(
+ client: Anthropic,
+ messages: Anthropic.MessageParam[],
+ maxRetries = 3,
+ baseDelay = 2000
+): Promise&lt;Anthropic.Message&gt; {
+ for (let attempt = 0; attempt &lt;= maxRetries; attempt++) {
+ try {
+ return await client.messages.create({
+ model: "claude-sonnet-4-20250514",
+ max_tokens: 4096,
+ messages,
+ });
+ } catch (err) {
+ if (
+ attempt === maxRetries ||
+ !(err instanceof Anthropic.APIConnectionTimeoutError ||
+ err instanceof Anthropic.APIConnectionError)
+ ) {
+ throw err;
+ }
+ const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+ console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms`);
+ await new Promise((resolve) =&gt; setTimeout(resolve, delay));
+ }
+ }
+ throw new Error("Exhausted retries");
+}</code></pre>
+
+    <h2>Handling Timeouts with Streaming Responses</h2>
+
+    <p>Streaming significantly reduces perceived timeout risk because you receive tokens as they are generated. However, streaming introduces a different failure mode: the stream can stall mid-response.</p>
+
+    <h3>Python Streaming with Timeout Recovery</h3>
+
+<pre><code>import anthropic
+
+client = anthropic.Anthropic(timeout=120.0)
+
+collected_text = ""
+try:
+ with client.messages.stream(
+ model="claude-sonnet-4-20250514",
+ max_tokens=4096,
+ messages=[{"role": "user", "content": prompt}],
+ ) as stream:
+ for text in stream.text_stream:
+ collected_text += text
+ print(text, end="", flush=True)
+except anthropic.APITimeoutError:
+ if collected_text:
+ print(f"\nStream timed out after receiving {len(collected_text)} chars")
+ # You have partial content - decide whether to use it or retry
+ else:
+ print("Stream timed out before any content was received")
+ # Safe to retry the full request</code></pre>
+
+    <p>When a stream stalls, you have partial output. Whether you use that partial output or retry depends on your application. For user-facing chat, displaying what you received plus an error message is usually better than silently retrying and making the user wait again.</p>
+
+    <h2>Production Patterns for Timeout Management</h2>
+
+    <h3>Circuit Breaker Pattern</h3>
+
+    <p>If the Claude API is consistently timing out, continuing to send requests wastes resources and degrades user experience. A circuit breaker stops making calls after repeated failures and periodically tests whether the service has recovered:</p>
+
+<pre><code>class CircuitBreaker:
+ def __init__(self, failure_threshold=5, recovery_timeout=60):
+ self.failure_count = 0
+ self.failure_threshold = failure_threshold
+ self.recovery_timeout = recovery_timeout
+ self.last_failure_time = 0
+ self.state = "closed" # closed = healthy, open = failing
+
+ def can_execute(self):
+ if self.state == "closed":
+ return True
+ if time.time() - self.last_failure_time &gt; self.recovery_timeout:
+ self.state = "half-open"
+ return True
+ return False
+
+ def record_success(self):
+ self.failure_count = 0
+ self.state = "closed"
+
+ def record_failure(self):
+ self.failure_count += 1
+ self.last_failure_time = time.time()
+ if self.failure_count &gt;= self.failure_threshold:
+ self.state = "open"</code></pre>
+
+    <p>This pairs well with rate limit handling strategies you should already have in place. Rate limit errors (429) and timeout errors often co-occur during API degradation events.</p>
+
+    <h3>Timeout Budget Allocation</h3>
+
+    <p>When your application makes multiple sequential API calls (for example, a chain where one response feeds into the next prompt), allocate a total time budget and reduce the timeout for each subsequent call:</p>
+
+<pre><code>import time
+
+total_budget = 300 # 5 minutes for the entire chain
+start_time = time.time()
+
+for step in chain_steps:
+ elapsed = time.time() - start_time
+ remaining = total_budget - elapsed
+ if remaining &lt; 30:
+ raise TimeoutError("Insufficient budget for remaining steps")
+
+ step_timeout = min(remaining * 0.5, 120)
+ client_with_timeout = anthropic.Anthropic(timeout=step_timeout)
+ result = call_with_retry(client_with_timeout, step.messages)</code></pre>
+
+    <p>This prevents a single slow step from consuming the entire budget and leaving no time for later steps. The <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">timeout budget workflow tutorial</a> covers similar patterns in the context of Claude Code skill execution.</p>
+
+    <h2>Choosing the Right Timeout Value</h2>
+
+    <p>There is no universal correct timeout. The right value depends on your use case:</p>
+
+    <p>For interactive chat (user waiting for response): 60-90 seconds. Users will not wait longer than this. If the request cannot complete in this window, scope down the prompt.</p>
+
+    <p>For background processing (async jobs, batch operations): 120-300 seconds. Latency matters less, so give the API room to complete complex generations.</p>
+
+    <p>For real-time integrations (webhooks, middleware): 15-30 seconds. The upstream caller likely has its own timeout. Keep your API call well within that budget.</p>
+
+    <p>For agentic loops with tool use: 120-180 seconds per turn. Tool-using conversations involve multiple round trips within a single API call, each consuming time. See the <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">main timeout guide</a> for strategies on scoping agentic tasks.</p>
+
+    <h2>Monitoring and Alerting</h2>
+
+    <p>In production, track these metrics for Claude API calls:</p>
+
+    <ul>
+      <li>p50, p95, and p99 latency per endpoint</li>
+      <li>Timeout rate as a percentage of total requests</li>
+      <li>Retry success rate (what percentage of retries eventually succeed)</li>
+      <li>Circuit breaker state transitions</li>
+    </ul>
+
+    <p>A sudden spike in timeout rate often indicates an API-side issue. A gradual increase over weeks may indicate that your prompts are growing in size or complexity. Either way, these metrics give you the signal to act before users notice.</p>
+
+    <h2>Summary</h2>
+
+    <p>Handling Claude API timeouts reliably requires three layers:</p>
+
+    <ol>
+      <li>Correct timeout configuration in your SDK client, with separate values for connection and read timeouts</li>
+      <li>Retry logic with exponential backoff and jitter for transient failures</li>
+      <li>Application-level patterns (circuit breakers, timeout budgets, streaming) for sustained reliability</li>
+    </ol>
+
+    <p>The defaults in most HTTP clients are too short for Claude API calls that generate long outputs. Set explicit timeouts, implement retries, and monitor the results.</p>
+
+    <p><strong>Know your costs:</strong> Use our <a href="/calculator/">Claude Code Cost Calculator</a> to estimate your monthly spend.</p>
+
+    <h2>Related Reading</h2>
+
+    <ul>
+      <li><a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">Claude Code Skill Timeout Error: How to Increase the Limit</a> — Comprehensive guide to all timeout causes and workarounds in Claude Code</li>
+    </ul>
+
+    <a href="/diagnose/" class="tool-cta">
+      <strong>&rarr; Try the Error Diagnostic Tool</strong> &mdash; paste your error message, get the fix instantly
+    </a>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">ClaudHQ</div>
+      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access &rarr;</a>
+      <div class="footer-copy">&copy; 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+    </div>
+  </footer>
+</body>
+</html>
