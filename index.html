@@ -8,7 +8,7 @@
   <meta name="description" content="Interactive tools and battle-tested guides for Claude Code developers. Error diagnostic, cost calculator, CLAUDE.md generator. Built by a $400K+ Upwork developer.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="ClaudHQ — Claude Code Tools &amp; Production Guides">
-  <meta property="og:description" content="Interactive tools and battle-tested guides for Claude Code developers. Error diagnostic, cost calculator, CLAUDE.md generator.">
+  <meta property="og:description" content="Interactive tools and battle-tested guides for Claude Code developers.">
   <meta property="og:url" content="https://claudhq.com/">
   <meta property="og:site_name" content="ClaudHQ">
   <meta name="twitter:card" content="summary">
@@ -31,70 +31,161 @@
   </script>
 </head>
 <body>
-  <nav>
-    <a href="/" class="brand">ClaudHQ</a>
-    <ul class="nav-links">
-      <li><a href="/errors/">Errors</a></li>
-      <li><a href="/diagnose/">Diagnose</a></li>
-      <li><a href="/calculator/">Calculator</a></li>
-      <li><a href="/generator/">Generator</a></li>
-    </ul>
-    <div class="nav-right">
-      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime ✦</a>
-    </div>
-  </nav>
+  <!-- NAV -->
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand">
+        <span class="brand-mark">&#936;</span>
+        <span class="brand-word">Claud<i>HQ</i></span>
+      </a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
 
+  <!-- HERO -->
   <section class="hero">
-    <h1>Claude Code was meant to work like this.</h1>
-    <p>I run 5 Claude Max subscriptions from a laptop in Da Nang. These are the tools and guides I built to make Claude Code actually productive.</p>
+    <div class="kicker"><span class="dot"></span> Production-grade Claude Code</div>
+    <h1 class="display">Claude Code was<br>meant to work <i>like this.</i></h1>
+    <p class="subtitle">I run 5 Claude Max subscriptions from a laptop in Da Nang. These are the tools and guides I built to make Claude Code actually productive.</p>
+    <div class="hero-cta">
+      <a href="/diagnose/" class="btn-accent cta-btn">Diagnose an Error &rarr;</a>
+      <a href="/errors/" class="btn">Browse All Fixes</a>
+    </div>
   </section>
 
-  <section style="max-width:900px;margin:0 auto;padding:0 2rem;">
-    <h2 style="margin-bottom:1rem;">Interactive Tools</h2>
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num">$400K+</div>
+        <div class="stat-label">Earned on Upwork</div>
+        <div class="stat-body">Top-rated Plus developer. Building production apps with Claude Code every day.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">50K+</div>
+        <div class="stat-label">Extension Users</div>
+        <div class="stat-body">16 Chrome extensions serving real users. Claude Code powers the development pipeline.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Job Success Score</div>
+        <div class="stat-body">Every project delivered. Every client satisfied. These tools are how I do it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section class="tools-section wrap">
+    <div class="eyebrow">&#167; Interactive Tools</div>
+    <h2>Fix it. Calculate it.<br><em>Generate it.</em></h2>
     <div class="tool-grid">
       <a href="/diagnose/" class="tool-card">
-        <h3>Error Diagnostic</h3>
-        <p>Paste your error message, get the fix. 200+ Claude Code errors indexed with step-by-step solutions.</p>
+        <div class="tool-card-icon">&#9881;</div>
+        <h3 class="tool-card-title">Error Diagnostic</h3>
+        <p class="tool-card-desc">Paste your error message, get the fix. 200+ Claude Code errors indexed with step-by-step solutions.</p>
+        <span class="tool-card-link">Open tool &rarr;</span>
       </a>
       <a href="/calculator/" class="tool-card">
-        <h3>Cost Calculator</h3>
-        <p>Know your monthly Claude spend before you start. Compare plans, models, and usage patterns.</p>
+        <div class="tool-card-icon">&#9878;</div>
+        <h3 class="tool-card-title">Cost Calculator</h3>
+        <p class="tool-card-desc">Know your monthly Claude spend before you start. Compare plans, models, and usage patterns.</p>
+        <span class="tool-card-link">Open tool &rarr;</span>
       </a>
       <a href="/generator/" class="tool-card">
-        <h3>CLAUDE.md Generator</h3>
-        <p>Build production-ready CLAUDE.md guidelines for your stack. Framework-aware, best-practices built in.</p>
+        <div class="tool-card-icon">&#9998;</div>
+        <h3 class="tool-card-title">CLAUDE.md Generator</h3>
+        <p class="tool-card-desc">Build production-ready CLAUDE.md guidelines for your stack. Framework-aware, best-practices built in.</p>
+        <span class="tool-card-link">Open tool &rarr;</span>
       </a>
     </div>
   </section>
 
-  <section style="max-width:900px;margin:2rem auto;padding:0 2rem;">
-    <h2>Top Guides</h2>
-    <ul class="guide-list">
-      <li><span class="arrow">→</span> <a href="/claude-api-timeout-error-handling-retry-guide/">Fix API Timeout Errors — Retry Logic &amp; Exponential Backoff</a></li>
-      <li><span class="arrow">→</span> <a href="/claude-code-ssl-certificate-verification-failed-error/">Fix SSL Certificate Verification Failed</a></li>
-      <li><span class="arrow">→</span> <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">Fix Skill Timeout — Increase the Limit</a></li>
-      <li><span class="arrow">→</span> <a href="/claude-code-not-working-vscode/">Fix Claude Code Not Working in VS Code</a></li>
-      <li><span class="arrow">→</span> <a href="/claude-code-gitignore-best-practices/">Should .claude Be in .gitignore?</a></li>
-    </ul>
-    <p style="margin-top:1rem;"><a href="/errors/" style="color:var(--accent);">View all error fixes →</a></p>
+  <!-- GUIDES -->
+  <section class="guides-section wrap">
+    <div class="eyebrow">&#167; Production Guides</div>
+    <h2>Start here if you're <em>stuck.</em></h2>
+    <div class="guide-grid">
+      <a href="/claude-api-timeout-error-handling-retry-guide/" class="guide feat">
+        <span class="guide-tag">Most Popular</span>
+        <div class="guide-title">Fix Claude API Timeout Errors: Handling and Retry Guide</div>
+        <p class="guide-desc">When you integrate the Claude API into a production application, timeout errors are inevitable. This guide covers retry logic, exponential backoff, and per-request timeout configuration.</p>
+        <span class="guide-meta">49 clicks &middot; Troubleshooting</span>
+      </a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" class="guide">
+        <div class="guide-title">Fix SSL Certificate Verification Failed</div>
+        <span class="guide-meta">17 clicks</span>
+      </a>
+      <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/" class="guide">
+        <div class="guide-title">Fix Skill Timeout &mdash; Increase the Limit</div>
+        <span class="guide-meta">15 clicks</span>
+      </a>
+      <a href="/claude-code-not-working-vscode/" class="guide">
+        <div class="guide-title">Fix Claude Code Not Working in VS Code</div>
+        <span class="guide-meta">9 clicks</span>
+      </a>
+      <a href="/claude-code-gitignore-best-practices/" class="guide">
+        <div class="guide-title">Should .claude Be in .gitignore?</div>
+        <span class="guide-meta">9 clicks</span>
+      </a>
+    </div>
+    <p style="margin-top:20px;text-align:center;"><a href="/errors/" style="font-family:var(--mono);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;">View all error fixes &rarr;</a></p>
   </section>
 
+  <!-- PROOF -->
   <div class="proof-bar">
-    <strong>$400K+</strong> earned on Upwork · <strong>50K+</strong> extension users · <strong>100%</strong> Job Success Score
+    <div class="wrap" style="display:flex;justify-content:center;flex-wrap:wrap;">
+      <div class="proof-item"><strong>$400K+</strong> Earned on Upwork</div>
+      <div class="proof-item"><strong>50K+</strong> Extension Users</div>
+      <div class="proof-item"><strong>100%</strong> Job Success Score</div>
+    </div>
   </div>
 
+  <!-- CTA -->
   <section class="cta-section">
-    <h2>Get everything. $99 once, free forever.</h2>
+    <h2>Get everything. <em>$99 once.</em></h2>
     <p>16 CLAUDE.md templates, 80+ prompts, orchestration configs, and lifetime access to all tools.</p>
-    <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=homepage&amp;utm_campaign=hero" class="cta-btn">Get Lifetime Access →</a>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=homepage&amp;utm_campaign=hero" class="cta-btn">Get Lifetime Access &rarr;</a>
   </section>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">ClaudHQ</div>
-      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
-      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access →</a>
-      <div class="footer-copy">© 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col">
+        <div class="footer-logo">C<i>H</i></div>
+        <p class="footer-tagline">Claude Code tools &amp; production guides</p>
+      </div>
+      <div class="foot-col">
+        <h4>Tools</h4>
+        <a href="/diagnose/">Error Diagnostic</a>
+        <a href="/calculator/">Cost Calculator</a>
+        <a href="/generator/">CLAUDE.md Generator</a>
+      </div>
+      <div class="foot-col">
+        <h4>Guides</h4>
+        <a href="/errors/">Error Hub</a>
+        <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+        <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+      </div>
+      <div class="foot-col">
+        <h4>More</h4>
+        <a href="/about.html">About</a>
+        <a href="/prompts.html">Prompt Library</a>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a>
+        <a href="https://github.com/theluckystrike">GitHub</a>
+      </div>
+    </div>
+    <div class="footer-bottom wrap">
+      <span>&copy; 2026 ClaudHQ</span>
+      <span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span>
     </div>
   </footer>
 </body>

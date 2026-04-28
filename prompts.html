@@ -121,19 +121,24 @@
   </script>
 </head>
 <body>
-  <nav>
-    <a href="/" class="brand">ClaudHQ</a>
-    <ul class="nav-links">
-      <li><a href="/answers/">Answers</a></li>
-      <li><a href="/research/">Research</a></li>
-      <li><a href="/blog/">Blog</a></li>
-      <li><a href="/about.html">About</a></li>
-    </ul>
-      <div class="nav-right">
-      <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=nav-link" class="nav-pro" target="_blank">Go Pro ✦</a>
-      <a href="https://zovo.one/tools" class="nav-zovo">Zovo Tools</a>
+<header class="site-header">
+  <nav class="nav">
+    <a href="/" class="brand">
+      <span class="brand-mark">&#936;</span>
+      <span class="brand-word">Claud<i>HQ</i></span>
+    </a>
+    <div class="nav-links">
+      <a href="/errors/">Errors</a>
+      <a href="/diagnose/">Diagnose</a>
+      <a href="/calculator/">Calculator</a>
+      <a href="/generator/">Generator</a>
     </div>
+    <div class="nav-right">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+    </div>
+    <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
   </nav>
+</header>
 
   <section class="hero">
     <h1>Claude Prompt Library</h1>
@@ -263,38 +268,37 @@
     </div>
   </section>
 
-<footer class="site-footer">
-    <div class="footer-inner">
-        <div class="footer-brand">Zovo Tools</div>
-        <div class="footer-tagline">Free developer tools by a solo dev. No tracking.</div>
-        <a href="https://zovo.one/pricing?utm_source=claudhq.com&amp;utm_medium=satellite&amp;utm_campaign=footer-link" class="footer-cta">Zovo Lifetime — $99 once, free forever →</a>
-        <div class="footer-copy">© 2026 <a href="https://zovo.one">Zovo</a> · 47/500 founding spots</div>
+<footer class="footer">
+  <div class="footer-top wrap">
+    <div class="footer-brand-col">
+      <div class="footer-logo">C<i>H</i></div>
+      <p class="footer-tagline">Claude Code tools &amp; production guides</p>
     </div>
+    <div class="foot-col">
+      <h4>Tools</h4>
+      <a href="/diagnose/">Error Diagnostic</a>
+      <a href="/calculator/">Cost Calculator</a>
+      <a href="/generator/">CLAUDE.md Generator</a>
+    </div>
+    <div class="foot-col">
+      <h4>Guides</h4>
+      <a href="/errors/">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+    </div>
+    <div class="foot-col">
+      <h4>More</h4>
+      <a href="/about.html">About</a>
+      <a href="/prompts.html">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike">GitHub</a>
+    </div>
+  </div>
+  <div class="footer-bottom wrap">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span>
+  </div>
 </footer>
-
-<nav class="zovo-network" aria-label="Zovo Tools Network">
-    <div class="zovo-network-inner">
-        <h3 class="zovo-network-title">Explore More Tools</h3>
-        <div class="zovo-network-links">
-            <a href="https://abwex.com">ABWex — A/B Testing</a>
-            <a href="https://claudflow.com">ClaudFlow — Workflows</a>
-            <a href="https://claudkit.com">ClaudKit — API</a>
-            <a href="https://enhio.com">Enhio — Text Tools</a>
-            <a href="https://epochpilot.com">EpochPilot — Timestamps</a>
-            <a href="https://gen8x.com">Gen8X — Color Tools</a>
-            <a href="https://gpt0x.com">GPT0X — AI Models</a>
-            <a href="https://heytensor.com">HeyTensor — ML Tools</a>
-            <a href="https://invokebot.com">InvokeBot — Webhooks</a>
-            <a href="https://kappafy.com">Kappafy — JSON</a>
-            <a href="https://kappakit.com">KappaKit — Dev Toolkit</a>
-            <a href="https://kickllm.com">KickLLM — LLM Costs</a>
-            <a href="https://krzen.com">Krzen — Image Tools</a>
-            <a href="https://lochbot.com">LochBot — Security</a>
-            <a href="https://lockml.com">LockML — ML Compare</a>
-            <a href="https://ml3x.com">ML3X — Matrix Math</a>
-        </div>
-    </div>
-</nav>
 
   <script src="assets/app.js"></script>
 </body>

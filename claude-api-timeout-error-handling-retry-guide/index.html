@@ -29,18 +29,24 @@
   </script>
 </head>
 <body>
-  <nav>
-    <a href="/" class="brand">ClaudHQ</a>
-    <ul class="nav-links">
-      <li><a href="/errors/">Errors</a></li>
-      <li><a href="/diagnose/">Diagnose</a></li>
-      <li><a href="/calculator/">Calculator</a></li>
-      <li><a href="/generator/">Generator</a></li>
-    </ul>
-    <div class="nav-right">
-      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-pro">Get Lifetime ✦</a>
-    </div>
-  </nav>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand">
+        <span class="brand-mark">&#936;</span>
+        <span class="brand-word">Claud<i>HQ</i></span>
+      </a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
 
   <main class="page-content">
     <div class="article-meta">
@@ -337,12 +343,35 @@ for step in chain_steps:
     </a>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">ClaudHQ</div>
-      <div class="footer-tagline">Claude Code tools &amp; production guides</div>
-      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" class="footer-cta">Get Lifetime Access &rarr;</a>
-      <div class="footer-copy">&copy; 2026 ClaudHQ. Built by <a href="https://github.com/theluckystrike">Michael Lip</a>.</div>
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col">
+        <div class="footer-logo">C<i>H</i></div>
+        <p class="footer-tagline">Claude Code tools &amp; production guides</p>
+      </div>
+      <div class="foot-col">
+        <h4>Tools</h4>
+        <a href="/diagnose/">Error Diagnostic</a>
+        <a href="/calculator/">Cost Calculator</a>
+        <a href="/generator/">CLAUDE.md Generator</a>
+      </div>
+      <div class="foot-col">
+        <h4>Guides</h4>
+        <a href="/errors/">Error Hub</a>
+        <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+        <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+      </div>
+      <div class="foot-col">
+        <h4>More</h4>
+        <a href="/about.html">About</a>
+        <a href="/prompts.html">Prompt Library</a>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a>
+        <a href="https://github.com/theluckystrike">GitHub</a>
+      </div>
+    </div>
+    <div class="footer-bottom wrap">
+      <span>&copy; 2026 ClaudHQ</span>
+      <span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span>
     </div>
   </footer>
 </body>

@@ -274,13 +274,23 @@ details .faq-answer{padding:0 18px 16px;color:oklch(0.80 0.008 70);font-size:14p
 </script>
 </head>
 <body>
-<nav class="site-nav" aria-label="Main navigation" style="position:sticky;top:0;z-index:40;background:rgba(30,28,24,0.82);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid oklch(0.30 0.010 60);padding:0.75rem 1rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;">
-  <a href="/" class="nav-home" style="color:oklch(0.72 0.11 38);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;font-weight:600;">ClaudHQ</a>
-  <a href="/errors/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Errors</a>
-  <a href="/diagnose/" style="color:oklch(0.18 0.04 38);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;background:oklch(0.72 0.11 38);font-weight:600;">Diagnose</a>
-  <a href="/calculator/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Calculator</a>
-  <a href="/generator/" style="color:oklch(0.97 0.006 80);text-decoration:none;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;">Generator</a>
-</nav>
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.72 0.11 38);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
 
 <div class="container">
   <nav class="breadcrumb">
@@ -451,11 +461,39 @@ details .faq-answer{padding:0 18px 16px;color:oklch(0.80 0.008 70);font-size:14p
 
   </div>
 
-  <footer class="footer">
-    &copy; 2026 ClaudHQ. All rights reserved.<br>
-    <a href="/">Home</a> &middot; <a href="/errors/">Errors</a> &middot; <a href="/diagnose/">Diagnose</a> &middot; <a href="/calculator/">Calculator</a> &middot; <a href="/generator/">Generator</a>
-  </footer>
 </div>
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">SSL Error Fix</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/about.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">About</a>
+      <a href="/prompts.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
 
 <script>
 (function() {
