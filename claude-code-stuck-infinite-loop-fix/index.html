@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Infinite Loop (2026) | ClaudHQ</title>
+  <meta name="description" content="Claude Code stuck in a loop? Interrupt it instantly with keyboard shortcuts, config fixes, and prevention strategies that stop future loops too.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-stuck-infinite-loop-fix/">
+  <meta property="og:title" content="Claude Code Infinite Loop (2026) | ClaudHQ">
+  <meta property="og:description" content="Claude Code stuck in a loop? Interrupt it instantly with keyboard shortcuts, config fixes, and prevention strategies that stop future loops too.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-stuck-infinite-loop-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Infinite Loop (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>When Claude Code appears stuck in an infinite loop, it can interrupt your workflow and consume system resources. This guide covers practical methods to regain control and get your development environment back on track.</p>
+
+      <h2>Recognizing the Problem</h2>
+
+      <p>An infinite loop in Claude Code typically manifests as repeated tool calls, continuously regenerating responses, or the interface becoming unresponsive. You might notice the same tool being called repeatedly with identical parameters, or the conversation spinning without making progress. This can happen when complex prompts trigger recursive behavior or when certain skills interact in unexpected ways.</p>
+
+      <p>Common scenarios include working with skills like frontend-design or algorithmic-art that generate code iteratively, or when using tdd workflows that attempt to run tests in a tight loop. The key is recognizing the pattern early and knowing how to interrupt gracefully.</p>
+
+      <h2>Signs You Are Stuck</h2>
+
+      <p>Not every slow response is a loop. Here is how to tell the difference:</p>
+
+      <table>
+        <thead>
+          <tr><th>Symptom</th><th>Likely Cause</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Same tool called 3+ times in a row</td><td>True loop. prompt triggered recursive behavior</td><td>Interrupt immediately</td></tr>
+          <tr><td>Incrementally growing output</td><td>Long-running generation</td><td>Wait, or set a limit</td></tr>
+          <tr><td>No output for 60+ seconds</td><td>Network stall or deadlock</td><td>Interrupt and retry</td></tr>
+          <tr><td>CPU/fan spins up constantly</td><td>Process consuming resources in background</td><td>Check process list</td></tr>
+          <tr><td>Terminal cursor blinking but silent</td><td>Waiting on stdin or blocked I/O</td><td>Ctrl+C once</td></tr>
+        </tbody>
+      </table>
+
+      <p>If you see the same file being written repeatedly, or the same command being run over and over in the output, you are in a loop. Do not wait. Interrupt as soon as you notice the pattern.</p>
+
+      <h2>Keyboard Interrupt Methods</h2>
+
+      <p>The fastest way to interrupt Claude Code is using keyboard shortcuts:</p>
+
+      <ul>
+        <li>Ctrl+C (Unix/Linux/macOS): Sends SIGINT, requesting graceful termination</li>
+        <li>Ctrl+Z (macOS/Windows): Suspends the process temporarily</li>
+        <li>Cmd+. (macOS): Some terminal emulators support this alternative interrupt</li>
+      </ul>
+
+      <p>When you press Ctrl+C, Claude Code should stop its current operation and return to a prompt. If the first interrupt doesn't work, try pressing it multiple times. The first attempt requests termination, while subsequent attempts may force a harder kill.</p>
+
+      <pre><code>Typical interrupt sequence
+^C
+Claude Code stops and shows prompt</code></pre>
+
+      <p>One thing developers often miss: pressing Ctrl+C once sends SIGINT. The process can catch and handle that signal gracefully, which means it may still do cleanup work before exiting. If you press Ctrl+C a second time quickly, most terminal programs treat that as a harder interrupt. A third press will usually force-exit any well-behaved CLI program.</p>
+
+      <p>If you are on Windows using PowerShell or CMD, the behavior is slightly different. Ctrl+C still works, but Ctrl+Break (on keyboards that have it) sends a harder termination signal that bypasses graceful shutdown handlers.</p>
+
+      <h2>Process-Level Termination</h2>
+
+      <p>When keyboard interrupts fail, you will need to terminate the process directly:</p>
+
+      <p>On macOS:</p>
+
+      <pre><code>Find the process
+ps aux | grep claude
+
+Kill specific process
+kill -9 &lt;PID&gt;</code></pre>
+
+      <p>On Linux:</p>
+
+      <pre><code>Similar process management
+pkill -f claude-code
+or
+killall -9 node # if running via Node</code></pre>
+
+      <p>Using pgrep for quick identification:</p>
+
+      <pre><code>pgrep -f claude | xargs kill -9</code></pre>
+
+      <p>This approach works when Claude Code becomes completely unresponsive to keyboard interrupts. The <code>-9</code> flag sends SIGKILL, which cannot be ignored. It immediately terminates the process.</p>
+
+      <h2>Finding the Right Process to Kill</h2>
+
+      <p>Claude Code runs as a Node.js process in most installations. If you are not sure which process to kill, use a more targeted approach:</p>
+
+      <pre><code>List all Claude-related processes with their full command lines
+ps aux | grep -i claude | grep -v grep
+
+Output will look like:
+mike 12345 99.0 1.2 /usr/local/bin/node /usr/local/lib/node_modules/@anthropic-ai/claude-code/dist/cli.js
+
+Grab just the PID from the second column
+ps aux | grep -i "claude-code" | grep -v grep | awk '{print $2}'
+
+Kill it
+kill -15 $(ps aux | grep -i "claude-code" | grep -v grep | awk '{print $2}')</code></pre>
+
+      <p>Signal <code>-15</code> (SIGTERM) is safer than <code>-9</code> because it gives the process time to save state. Only escalate to <code>-9</code> if <code>-15</code> does not work within a few seconds.</p>
+
+      <h2>When Multiple Claude Processes Are Running</h2>
+
+      <p>If you are running multiple Claude Code sessions across different terminal tabs (a common pattern with fleet workflows), you need to be precise about which process to kill. Killing the wrong one will disrupt another working session.</p>
+
+      <pre><code>List processes with their parent PIDs to understand session grouping
+ps axo pid,ppid,command | grep claude
+
+Kill only the process from the stuck terminal (use the PID shown in that tab)
+kill -15 &lt;specific-PID&gt;</code></pre>
+
+      <h2>Preventing Infinite Loops</h2>
+
+      <p>Prevention is more effective than cure. Structure your interactions to avoid triggers:</p>
+
+      <h3>Set Clear Iteration Limits</h3>
+
+      <p>When working with iterative tasks, specify explicit boundaries:</p>
+
+      <pre><code>"Generate up to 5 iterations of this report, then stop and show me the results."</code></pre>
+
+      <h3>Use Confirmation Prompts</h3>
+
+      <p>Ask Claude Code to confirm before proceeding with recursive operations:</p>
+
+      <pre><code>"Before running each test cycle, confirm you want to continue."</code></pre>
+
+      <h3>Break Complex Tasks</h3>
+
+      <p>Instead of:</p>
+
+      <pre><code>"Refactor the entire codebase"</code></pre>
+
+      <p>Try:</p>
+
+      <pre><code>"Refactor the authentication module first. Wait for my confirmation before proceeding to the next module."</code></pre>
+
+      <h2>Structuring Prompts That Avoid Loops</h2>
+
+      <p>The most loop-prone prompts share a common structure: they describe an outcome without a stopping condition. Compare these:</p>
+
+      <p>Loop-prone prompt:</p>
+
+      <pre><code>"Keep running tests until everything passes."</code></pre>
+
+      <p>Safe prompt:</p>
+
+      <pre><code>"Run the test suite once. Show me the failures. Do not run tests again until I ask."</code></pre>
+
+      <p>Loop-prone prompt:</p>
+
+      <pre><code>"Fix all the bugs in this file."</code></pre>
+
+      <p>Safe prompt:</p>
+
+      <pre><code>"Look at the first 3 bugs in this file and fix them. List any additional bugs you find but do not fix them yet."</code></pre>
+
+      <p>The pattern is always the same: give Claude Code a finite, bounded task with a clear exit condition. Unbounded instructions like "keep going until done" are the primary cause of loops.</p>
+
+      <h2>Using CLAUDE.md to Set Behavioral Guardrails</h2>
+
+      <p>If you use a <code>CLAUDE.md</code> file in your project root, you can embed session-wide constraints that reduce loop risk:</p>
+
+      <pre><code>Behavioral Rules
+
+- Never run any command more than once in a row without user confirmation
+- If you are about to repeat an action you already took, stop and ask why
+- Maximum 3 tool calls before pausing for user review on open-ended tasks
+- Do not batch-process more than 10 files without a checkpoint</code></pre>
+
+      <p>These rules are loaded at session start and apply throughout the conversation, acting as a persistent safety net even when individual prompts are ambiguous.</p>
+
+      <h2>Recovering After an Interrupt</h2>
+
+      <p>After interrupting Claude Code, your project is in an inconsistent state. Here is how to recover:</p>
+
+      <ol>
+        <li>Check file changes: Review any files modified during the loop</li>
+        <li>Restore unintended changes: Use version control to revert unwanted modifications</li>
+        <li>Clear cache files: Some skills create temporary files that may need cleanup</li>
+      </ol>
+
+      <pre><code>Check git status after interrupt
+git status
+
+Discard uncommitted changes if needed
+git checkout -- .</code></pre>
+
+      <h2>A Systematic Recovery Checklist</h2>
+
+      <p>When you interrupt mid-operation, work through this sequence before continuing:</p>
+
+      <pre><code>1. See what changed on disk
+git status
+git diff --stat
+
+2. Review actual diff to spot partial or duplicate writes
+git diff
+
+3. If files look corrupted or truncated, restore them
+git checkout -- path/to/file.js
+
+4. If you want to fully discard all changes from the stuck session
+git stash
+
+5. Look for any temp files the loop may have created
+ls -lt /tmp/ | head -20
+ls -lt . | head -20
+
+6. Check for orphaned background processes
+jobs
+or
+ps aux | grep node</code></pre>
+
+      <p>Step 4 (git stash) is particularly useful because it preserves the changes without committing them. You can review them later and cherry-pick anything useful instead of losing all work from the session.</p>
+
+      <h2>Skill-Specific Safe Invocation Patterns</h2>
+
+      <p>Here are explicit prompt templates that reduce loop risk for the most loop-prone skill types:</p>
+
+      <p>For tdd:</p>
+
+      <pre><code>"Run the test suite once and report which tests fail. Do not attempt to fix failures yet."</code></pre>
+
+      <p>For frontend-design with iterative generation:</p>
+
+      <pre><code>"Generate one version of this component. Show it to me. Do not generate variations unless I ask."</code></pre>
+
+      <p>For pdf/docx document generation:</p>
+
+      <pre><code>"Generate the document outline first. Wait for my approval before writing full content."</code></pre>
+
+      <p>For algorithmic-art:</p>
+
+      <pre><code>"Generate exactly 3 variations of this design. Stop after 3 regardless of quality."</code></pre>
+
+      <h2>Long-Running Command Safeguards</h2>
+
+      <p>For Claude Code commands that might take time, use timeout wrappers:</p>
+
+      <pre><code>Run with timeout
+timeout 60 claude --continue "your prompt"
+
+Or in your shell profile
+alias claude='timeout 300 claude'</code></pre>
+
+      <p>This ensures no single operation can run indefinitely, providing a safety net when working with complex or experimental prompts.</p>
+
+      <p>You can also combine a timeout with a log file to capture partial output before termination:</p>
+
+      <pre><code>Capture output even if terminated by timeout
+timeout 120 claude --print "your prompt" 2&gt;&amp;1 | tee /tmp/claude-session.log</code></pre>
+
+      <p>If the session times out, your log file still contains all the output up to that point. You can review it, understand how far the process got, and resume from a safe checkpoint.</p>
+
+      <h2>When to Force Quit</h2>
+
+      <p>If standard interrupts don't work and you're confident the process is genuinely stuck:</p>
+
+      <ol>
+        <li>Close the terminal window entirely</li>
+        <li>For desktop installations, force quit the application</li>
+        <li>On macOS: Cmd+Option+Escape to bring up Force Quit dialog</li>
+        <li>On Windows: Ctrl+Shift+Escape to open Task Manager</li>
+      </ol>
+
+      <p>After force quitting, restart Claude Code in a new session. Your conversation history should be preserved depending on your configuration.</p>
+
+      <h2>After a Force Quit: Session State Recovery</h2>
+
+      <p>Claude Code stores conversation context locally. After a force quit, check these locations for recoverable state:</p>
+
+      <pre><code>macOS conversation history location (typical)
+ls ~/.claude/
+
+Look for any recent session files
+ls -lt ~/.claude/projects/ | head -10</code></pre>
+
+      <p>In most cases, Claude Code will offer to resume from the last checkpoint when you start a new session. If it does not, you can reconstruct context by copying the relevant portion of your conversation history into a new session prompt.</p>
+
+      <h2>Best Practices Summary</h2>
+
+      <ul>
+        <li>Use Ctrl+C as your first intervention</li>
+        <li>Process termination via <code>kill</code> when needed</li>
+        <li>Structure prompts with clear boundaries and exit conditions</li>
+        <li>Add behavioral guardrails in CLAUDE.md for persistent protection</li>
+        <li>Set timeouts for long operations using the <code>timeout</code> command</li>
+        <li>Review file changes after any interrupt with <code>git status</code> and <code>git diff</code></li>
+        <li>Restart in a fresh session if recovery fails</li>
+        <li>Use skill-specific prompt patterns that include stopping conditions</li>
+      </ul>
+
+      <p>Getting stuck in an infinite loop happens to every developer working with AI assistants. By knowing these interruption techniques, you can maintain control of your development environment and minimize disruption to your workflow.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for step-by-step fix</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-stuck-infinite-loop-fix">Grab the templates — $99 once, free forever →</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> — solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Infinite Loop (2026)",
+    "description": "Claude Code stuck in a loop? Interrupt it instantly with keyboard shortcuts, config fixes, and prevention strategies that stop future loops too.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-stuck-infinite-loop-fix/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

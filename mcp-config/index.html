@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Server Configuration Generator for Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Build your MCP server configuration interactively. Supabase, GitHub, Slack, Linear, PostgreSQL, Notion, Sentry, Stripe, and more. Free tool.">
+  <link rel="canonical" href="https://claudhq.com/mcp-config/">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="MCP Config Generator — Free Claude Code Tool">
+  <meta property="og:description" content="Build your MCP server configuration interactively. Supabase, GitHub, Slack, and 8 more servers.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://claudhq.com/mcp-config/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MCP Server Configuration Generator for Claude Code (2026)">
+  <meta name="twitter:description" content="Build your MCP server configuration interactively for Claude Code.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How many MCP servers can I run simultaneously?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude Code can run multiple MCP servers simultaneously. Most developers run 2-5 servers at once without any issues. The practical limit depends on your system resources and the servers themselves. Each server runs as a separate process, so memory usage scales linearly. For most setups, 10 or fewer servers is recommended."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do MCP servers cost extra?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MCP servers themselves are free and open source. However, the services they connect to may have their own costs. For example, the Supabase MCP server is free, but your Supabase project may incur charges based on usage. The GitHub MCP server is free, but GitHub API rate limits apply. Always check the pricing of the underlying service."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between project and global scope for MCP configuration?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Project scope (.claude/settings.json) applies MCP servers only to a specific project directory. Global scope (claude_desktop_config.json) makes servers available across all projects. Use project scope for project-specific databases or APIs, and global scope for general tools like GitHub or Slack that you use everywhere."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I secure my API keys for MCP servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Never hardcode API keys in configuration files that are committed to version control. Use environment variables, a .env file (added to .gitignore), or a secrets manager. For team projects, use a shared secrets vault. The MCP configuration supports environment variable references so you can keep keys out of config files."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use custom MCP servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can build custom MCP servers using the MCP SDK in TypeScript or Python. Custom servers can connect to any API, database, or service. Add them to your configuration by specifying the command to run them and any required environment variables. The MCP protocol is open and well-documented."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do MCP servers slow down Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MCP servers add minimal overhead. They run as separate processes and communicate via stdio or HTTP. Claude Code only calls a server when it needs data from that service. Unused servers consume minimal memory (typically under 50MB each). The main performance factor is the latency of the underlying API calls, not the MCP layer itself."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I update MCP servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most MCP servers installed via npx automatically use the latest version on each run. For servers installed globally, run npm update -g @package/server-name. Check the server's GitHub repository for changelogs and breaking changes. It is good practice to test updates in a project scope before applying them globally."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens if an MCP server fails or crashes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "If an MCP server crashes, Claude Code continues working normally but without access to that server's tools. You will see an error message indicating which server failed. Claude Code does not crash when a server fails. You can restart the server by restarting Claude Code or by running the /mcp command to reinitialize servers."
+        }
+      }
+    ]
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    h1 {
+      font-family: 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      font-size: 28px;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-family: 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: oklch(0.97 0.006 80);
+      margin: 40px 0 16px;
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-size: 17px;
+      color: oklch(0.97 0.006 80);
+      margin: 20px 0 8px;
+    }
+
+    .subtitle {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .section-card {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    /* Checkbox grid */
+    .server-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .server-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .server-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .server-item:hover {
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    .server-item.selected {
+      border-color: oklch(0.72 0.11 38);
+      background: rgba(114, 180, 100, 0.05);
+    }
+
+    .server-item input[type="checkbox"] {
+      accent-color: oklch(0.72 0.11 38);
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .server-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .server-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: oklch(0.97 0.006 80);
+      display: block;
+    }
+
+    .server-desc {
+      font-size: 12px;
+      color: oklch(0.58 0.010 70);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Scope toggle */
+    .scope-toggle {
+      display: flex;
+      gap: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .scope-btn {
+      flex: 1;
+      padding: 10px 16px;
+      text-align: center;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.58 0.010 70);
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .scope-btn.active {
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+    }
+
+    .scope-btn:hover:not(.active) {
+      background: oklch(0.185 0.008 60);
+      color: oklch(0.80 0.008 70);
+    }
+
+    /* Custom server input */
+    .custom-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .custom-input-row input {
+      flex: 1;
+      padding: 8px 12px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 6px;
+      color: oklch(0.80 0.008 70);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .custom-input-row input::placeholder {
+      color: oklch(0.42 0.010 70);
+    }
+
+    .custom-input-row input:focus {
+      outline: none;
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    /* Output panel */
+    .output-panel {
+      position: relative;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: oklch(0.185 0.008 60);
+      border-bottom: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .output-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: oklch(0.58 0.010 70);
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 6px;
+      background: oklch(0.235 0.009 60);
+      color: oklch(0.80 0.008 70);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-sm:hover {
+      background: oklch(0.30 0.010 60);
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    .output-pre {
+      padding: 16px;
+      margin: 0;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+      color: oklch(0.80 0.008 70);
+      min-height: 120px;
+      max-height: 500px;
+    }
+
+    .output-blurred .output-pre {
+      filter: blur(5px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Syntax highlighting */
+    .json-key { color: oklch(0.72 0.11 38); }
+    .json-string { color: oklch(0.78 0.14 150); }
+    .json-bracket { color: oklch(0.58 0.010 70); }
+    .json-colon { color: oklch(0.80 0.008 70); }
+
+    /* Generate button */
+    .btn-generate {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s;
+    }
+
+    .btn-generate:hover {
+      opacity: 0.9;
+    }
+
+    .uses-left {
+      text-align: center;
+      font-size: 13px;
+      color: oklch(0.58 0.010 70);
+      margin-bottom: 16px;
+    }
+
+    /* Status badge */
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    .status-msg.success { color: oklch(0.72 0.11 38); }
+    .status-msg.error { color: #f85149; }
+
+    /* SEO content */
+    .seo-content {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .seo-content p {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    .seo-content ul, .seo-content ol {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin: 0 0 16px 24px;
+      line-height: 1.7;
+    }
+
+    .seo-content li {
+      margin-bottom: 6px;
+    }
+
+    .seo-content strong {
+      color: oklch(0.80 0.008 70);
+    }
+
+    .seo-content a {
+      color: oklch(0.72 0.11 38);
+      text-decoration: none;
+    }
+
+    .seo-content a:hover {
+      text-decoration: underline;
+    }
+
+    /* FAQ details */
+    details {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    details summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      color: oklch(0.97 0.006 80);
+      list-style: none;
+    }
+
+    details summary::-webkit-details-marker { display: none; }
+
+    details summary::before {
+      content: "+";
+      display: inline-block;
+      width: 20px;
+      color: oklch(0.72 0.11 38);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    details[open] summary::before {
+      content: "-";
+    }
+
+    details .faq-answer {
+      padding: 0 18px 14px;
+      color: oklch(0.58 0.010 70);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* CTA */
+    .cta-box {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      margin-top: 32px;
+    }
+
+    .cta-box h3 {
+      color: oklch(0.97 0.006 80);
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .cta-box p {
+      color: oklch(0.58 0.010 70);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .cta-link {
+      display: inline-block;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 15px;
+      transition: opacity 0.2s;
+    }
+
+    .cta-link:hover {
+      opacity: 0.9;
+      text-decoration: none;
+    }
+
+    /* Links row */
+    .related-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .related-links a {
+      color: oklch(0.72 0.11 38);
+      font-size: 14px;
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 6px;
+      transition: border-color 0.2s;
+    }
+
+    .related-links a:hover {
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    /* ========== LEARN MORE ========== */
+    .learn-more {
+      margin: 48px 0 0;
+      padding: 40px 0 0;
+      border-top: 1px solid var(--line);
+    }
+    .learn-more .lm-eyebrow {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-3);
+      margin-bottom: 12px;
+    }
+    .learn-more .lm-title {
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0 0 24px;
+      font-weight: 400;
+    }
+    .learn-more .lm-title em {
+      font-family: var(--serif-alt);
+      font-style: italic;
+      font-weight: 300;
+      color: var(--accent);
+    }
+    .learn-more-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .learn-more-grid a {
+      background: var(--bg-2);
+      padding: 16px 20px;
+      text-decoration: none;
+      color: var(--ink-2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      letter-spacing: -0.005em;
+      transition: background .15s ease, color .15s ease;
+    }
+    .learn-more-grid a:hover {
+      background: var(--bg-3);
+      color: var(--accent);
+    }
+    .learn-more-grid a::before {
+      content: '\2192';
+      color: var(--ink-4);
+      font-family: var(--mono);
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: color .15s ease;
+    }
+    .learn-more-grid a:hover::before {
+      color: var(--accent);
+    }
+    @media (max-width: 640px) {
+      .learn-more-grid { grid-template-columns: 1fr; }
+      .learn-more .lm-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>MCP Server Configuration Generator for Claude Code (2026)</h1>
+  <p class="subtitle">Select your MCP servers, choose a scope, and generate a ready-to-use configuration file. No signup required.</p>
+
+  <!-- Step 1: Server selection -->
+  <div class="section-card">
+    <span class="section-label">1. Select MCP Servers</span>
+    <div class="server-grid" id="server-grid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- Custom server -->
+  <div class="section-card" id="custom-section" style="display:none;">
+    <span class="section-label">Custom Server Configuration</span>
+    <div class="custom-input-row">
+      <input type="text" id="custom-name" placeholder="Server name (e.g. my-api)" maxlength="60">
+      <input type="text" id="custom-command" placeholder="Command (e.g. npx -y @my/server)" maxlength="200">
+    </div>
+    <div class="custom-input-row" style="margin-top:8px;">
+      <input type="text" id="custom-env-key" placeholder="Env var name (e.g. MY_API_KEY)" maxlength="80">
+      <input type="text" id="custom-env-val" placeholder="Env var value or placeholder" maxlength="200">
+    </div>
+    <div class="custom-input-row" style="margin-top:8px;">
+      <input type="text" id="custom-args" placeholder="Arguments (optional, e.g. /path/to/dir)" maxlength="200">
+    </div>
+  </div>
+
+  <!-- Step 2: Scope toggle -->
+  <div class="section-card">
+    <span class="section-label">2. Configuration Scope</span>
+    <div class="scope-toggle">
+      <button class="scope-btn active" data-scope="project" id="scope-project">Project (.claude/settings.json)</button>
+      <button class="scope-btn" data-scope="global" id="scope-global">Global (claude_desktop_config.json)</button>
+    </div>
+  </div>
+
+  <!-- Generate button -->
+  <button class="btn-generate" id="btn-generate">Generate Configuration</button>
+  <div class="uses-left" id="uses-left"></div>
+
+  <!-- Step 3: Output -->
+  <div class="section-card" id="output-section" style="display:none;">
+    <span class="section-label">3. Your MCP Configuration</span>
+    <div class="output-panel" id="output-panel">
+      <div class="output-header">
+        <span class="output-title" id="output-filename">config.json</span>
+        <div class="output-actions">
+          <button class="btn-sm" id="btn-copy">Copy</button>
+          <button class="btn-sm" id="btn-download">Download</button>
+        </div>
+      </div>
+      <pre class="output-pre" id="output-pre"></pre>
+    </div>
+    <div class="status-msg" id="status-msg"></div>
+  </div>
+
+  <!-- Paywall overlay -->
+  <div id="paywall-overlay" style="display:none; position:fixed; inset:0; background:rgba(20, 18, 14, 0.88); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:oklch(0.185 0.008 60); border:1px solid oklch(0.30 0.010 60); border-radius:16px; padding:48px; max-width:420px; text-align:center;">
+      <h2 style="color:oklch(0.97 0.006 80); font-size:22px; margin-bottom:12px;">Free uses exhausted</h2>
+      <p style="color:oklch(0.58 0.010 70); margin-bottom:24px;">Get unlimited access to all 10 CCG tools plus 200+ CLAUDE.md templates.</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" style="display:inline-block; background:oklch(0.72 0.11 38); color:oklch(0.18 0.04 38); font-weight:700; padding:14px 32px; border-radius:8px; text-decoration:none; font-size:16px;">Get Lifetime Access — $99</a>
+      <p style="color:oklch(0.42 0.010 70); font-size:13px; margin-top:16px;">One-time payment. All tools. All templates. Forever.</p>
+    </div>
+  </div>
+
+  <!-- SEO Content -->
+  <div class="seo-content">
+
+    <h2>What Are MCP Servers?</h2>
+    <p>The <strong>Model Context Protocol (MCP)</strong> is an open standard created by Anthropic that lets AI assistants like Claude Code connect to external tools, databases, and services. Think of MCP servers as plugins that extend what Claude can do. Instead of being limited to reading files and running commands, Claude Code can query your Supabase database, create GitHub issues, send Slack messages, or interact with dozens of other services directly from your terminal.</p>
+    <p>MCP works through a simple client-server architecture. Claude Code acts as the MCP client. Each MCP server is a lightweight process that exposes a set of tools (functions Claude can call), resources (data Claude can read), and prompts (templates for common tasks). The communication happens over standard I/O or HTTP, making it fast and secure. When you configure an MCP server, you are telling Claude Code how to start that server process and what credentials to use.</p>
+    <p>The protocol was open-sourced in late 2024 and has since been adopted by dozens of companies and open-source projects. As of 2026, there are over 200 community-built MCP servers available, covering everything from databases to project management tools to payment processors. This generator helps you configure the most popular ones without memorizing JSON syntax or reading documentation.</p>
+
+    <h2>Supported MCP Servers</h2>
+    <p>This tool supports configuration for the following MCP servers, each designed for a specific integration:</p>
+    <ul>
+      <li><strong>Supabase</strong> -- Full access to your Supabase project including database queries, authentication management, storage buckets, and edge functions. Ideal for full-stack applications built on Supabase.</li>
+      <li><strong>GitHub</strong> -- Interact with repositories, issues, pull requests, code search, and GitHub Actions. Claude can create branches, review PRs, and manage issues directly.</li>
+      <li><strong>Slack</strong> -- Send and read messages, manage channels, search conversation history, and post notifications. Perfect for team workflow automation.</li>
+      <li><strong>Linear</strong> -- Create and manage issues, projects, and cycles in Linear. Claude can triage bugs, update statuses, and plan sprints.</li>
+      <li><strong>PostgreSQL</strong> -- Direct database access for any PostgreSQL instance. Run queries, inspect schemas, and manage data without leaving Claude Code.</li>
+      <li><strong>Google Drive</strong> -- Access documents, spreadsheets, and files in Google Drive. Claude can read, search, and reference your Drive content.</li>
+      <li><strong>Notion</strong> -- Read and write Notion pages and databases. Useful for documentation workflows and knowledge base management.</li>
+      <li><strong>Sentry</strong> -- Access error tracking data, view issues, analyze stack traces, and manage alerts. Essential for debugging production issues.</li>
+      <li><strong>Stripe</strong> -- Query payment data, manage subscriptions, and inspect webhook events. Helpful for e-commerce and SaaS applications.</li>
+      <li><strong>Filesystem</strong> -- Grant Claude access to specific directories outside the current project. Useful for monorepos or multi-project workflows.</li>
+    </ul>
+
+    <h2>Configuration Best Practices</h2>
+    <p>Getting MCP configuration right from the start saves debugging time later. Follow these guidelines for a secure and efficient setup:</p>
+    <ul>
+      <li><strong>Choose the right scope.</strong> Use project scope for databases and APIs specific to one project. Use global scope for tools you need everywhere, like GitHub and Slack. This keeps configurations clean and avoids conflicts.</li>
+      <li><strong>Secure your environment variables.</strong> Never commit API keys or tokens to version control. Store them in a <code>.env</code> file that is listed in your <code>.gitignore</code>, or use your operating system's keychain. For teams, use a shared secrets manager like 1Password or HashiCorp Vault.</li>
+      <li><strong>Use least-privilege tokens.</strong> When creating API tokens for MCP servers, grant only the permissions that Claude needs. A read-only GitHub token is safer than a full-access token if you only need Claude to review code. Supabase tokens should use row-level security.</li>
+      <li><strong>Start small and add servers gradually.</strong> Begin with one or two MCP servers and verify they work before adding more. This makes it easier to identify issues when something goes wrong.</li>
+      <li><strong>Keep servers updated.</strong> MCP servers installed via <code>npx -y</code> automatically fetch the latest version each time they run. For globally installed servers, run periodic updates to get bug fixes and new features.</li>
+      <li><strong>Monitor resource usage.</strong> Each MCP server runs as a separate process. If you notice high memory usage or slow responses, check which servers are running and disable any you are not actively using.</li>
+    </ul>
+
+    <h2>Common Questions</h2>
+
+    <details>
+      <summary>How many MCP servers can I run simultaneously?</summary>
+      <div class="faq-answer">Claude Code can run multiple MCP servers simultaneously. Most developers run 2-5 servers at once without any issues. The practical limit depends on your system resources and the servers themselves. Each server runs as a separate process, so memory usage scales linearly. For most setups, 10 or fewer servers is recommended.</div>
+    </details>
+
+    <details>
+      <summary>Do MCP servers cost extra?</summary>
+      <div class="faq-answer">MCP servers themselves are free and open source. However, the services they connect to may have their own costs. For example, the Supabase MCP server is free, but your Supabase project may incur charges based on usage. The GitHub MCP server is free, but GitHub API rate limits apply. Always check the pricing of the underlying service.</div>
+    </details>
+
+    <details>
+      <summary>What is the difference between project and global scope?</summary>
+      <div class="faq-answer">Project scope (<code>.claude/settings.json</code>) applies MCP servers only to a specific project directory. Global scope (<code>claude_desktop_config.json</code>) makes servers available across all projects. Use project scope for project-specific databases or APIs, and global scope for general tools like GitHub or Slack that you use everywhere.</div>
+    </details>
+
+    <details>
+      <summary>How do I secure my API keys for MCP servers?</summary>
+      <div class="faq-answer">Never hardcode API keys in configuration files that are committed to version control. Use environment variables, a <code>.env</code> file (added to <code>.gitignore</code>), or a secrets manager. For team projects, use a shared secrets vault. The MCP configuration supports environment variable references so you can keep keys out of config files.</div>
+    </details>
+
+    <details>
+      <summary>Can I use custom MCP servers?</summary>
+      <div class="faq-answer">Yes. You can build custom MCP servers using the MCP SDK in TypeScript or Python. Custom servers can connect to any API, database, or service. Add them to your configuration by specifying the command to run them and any required environment variables. The MCP protocol is open and well-documented.</div>
+    </details>
+
+    <details>
+      <summary>Do MCP servers slow down Claude Code?</summary>
+      <div class="faq-answer">MCP servers add minimal overhead. They run as separate processes and communicate via stdio or HTTP. Claude Code only calls a server when it needs data from that service. Unused servers consume minimal memory (typically under 50MB each). The main performance factor is the latency of the underlying API calls, not the MCP layer itself.</div>
+    </details>
+
+    <details>
+      <summary>How do I update MCP servers?</summary>
+      <div class="faq-answer">Most MCP servers installed via <code>npx -y</code> automatically use the latest version on each run. For servers installed globally, run <code>npm update -g @package/server-name</code>. Check the server's GitHub repository for changelogs and breaking changes. It is good practice to test updates in a project scope before applying them globally.</div>
+    </details>
+
+    <details>
+      <summary>What happens if an MCP server fails or crashes?</summary>
+      <div class="faq-answer">If an MCP server crashes, Claude Code continues working normally but without access to that server's tools. You will see an error message indicating which server failed. Claude Code does not crash when a server fails. You can restart the server by restarting Claude Code or by running the <code>/mcp</code> command to reinitialize servers.</div>
+    </details>
+
+    <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+      <h2 style="font-family:'Instrument Serif','Times New Roman',serif;font-weight:400;color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+      <ul style="list-style:none;padding:0;margin:0;">
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+        </li>
+        <li style="padding:8px 0;">
+          <a href="/skill-finder/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Skill Finder</a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="learn-more">
+      <div class="lm-eyebrow">&sect; Related &middot; MCP servers</div>
+      <h2 class="lm-title">Keep <em>reading.</em></h2>
+      <div class="learn-more-grid">
+        <a href="/model-selector/">Claude Model Selector</a>
+        <a href="/permissions/">Permission Configurator</a>
+        <a href="/commands/">Command Reference</a>
+        <a href="/token-estimator/">Token Usage Estimator</a>
+        <a href="/starter/">Project Starter Wizard</a>
+        <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+        <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+        <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+        <a href="/claude-code-gitignore-best-practices/">Gitignore Best Practices</a>
+      </div>
+    </section>
+
+    <div class="cta-box">
+      <h3>50+ Pre-Configured MCP Setups</h3>
+      <p>Get production-ready MCP configurations for every stack, plus 200+ CLAUDE.md templates and all 10 CCG tools.</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="cta-link">Claude Code Mastery Playbook — $99</a>
+    </div>
+
+  </div>
+</div>
+
+
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">SSL Error Fix</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/about.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">About</a>
+      <a href="/prompts.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════
+     Constants (immutable)
+     ══════════════════════════════════════════════════════════ */
+  var PAYWALL_KEY = 'ccg_mcpconfig_uses';
+  var PAYWALL_LIMIT = 2;
+  var isAutoLoad = true;
+
+  var MCP_SERVERS = Object.freeze([
+    {
+      id: 'supabase',
+      name: 'Supabase',
+      desc: 'Database + Auth + Storage',
+      command: 'npx',
+      args: ['-y', '@supabase/mcp-server'],
+      envKey: 'SUPABASE_ACCESS_TOKEN',
+      envPlaceholder: 'your-supabase-access-token'
+    },
+    {
+      id: 'github',
+      name: 'GitHub',
+      desc: 'Repos + Issues + PRs',
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-github'],
+      envKey: 'GITHUB_PERSONAL_ACCESS_TOKEN',
+      envPlaceholder: 'ghp_xxxxxxxxxxxxxxxxxxxx'
+    },
+    {
+      id: 'slack',
+      name: 'Slack',
+      desc: 'Messages + Channels',
+      command: 'npx',
+      args: ['-y', '@anthropic/mcp-server-slack'],
+      envKey: 'SLACK_BOT_TOKEN',
+      envPlaceholder: 'xoxb-your-slack-bot-token'
+    },
+    {
+      id: 'linear',
+      name: 'Linear',
+      desc: 'Issues + Projects',
+      command: 'npx',
+      args: ['-y', '@anthropic/mcp-server-linear'],
+      envKey: 'LINEAR_API_KEY',
+      envPlaceholder: 'lin_api_xxxxxxxxxxxx'
+    },
+    {
+      id: 'postgres',
+      name: 'PostgreSQL',
+      desc: 'Direct DB access',
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-postgres'],
+      envKey: 'POSTGRES_CONNECTION_STRING',
+      envPlaceholder: 'postgresql://user:pass@host:5432/db'
+    },
+    {
+      id: 'gdrive',
+      name: 'Google Drive',
+      desc: 'Docs + Sheets',
+      command: 'npx',
+      args: ['-y', '@anthropic/mcp-server-google-drive'],
+      envKey: 'GOOGLE_CREDENTIALS',
+      envPlaceholder: '/path/to/credentials.json'
+    },
+    {
+      id: 'notion',
+      name: 'Notion',
+      desc: 'Pages + Databases',
+      command: 'npx',
+      args: ['-y', '@notionhq/mcp-server'],
+      envKey: 'NOTION_API_KEY',
+      envPlaceholder: 'ntn_xxxxxxxxxxxxxxxxxxxx'
+    },
+    {
+      id: 'sentry',
+      name: 'Sentry',
+      desc: 'Error tracking',
+      command: 'npx',
+      args: ['-y', '@sentry/mcp-server'],
+      envKey: 'SENTRY_AUTH_TOKEN',
+      envPlaceholder: 'sntrys_xxxxxxxxxxxxxxxxxxxx'
+    },
+    {
+      id: 'stripe',
+      name: 'Stripe',
+      desc: 'Payments + Subscriptions',
+      command: 'npx',
+      args: ['-y', '@stripe/mcp-server'],
+      envKey: 'STRIPE_API_KEY',
+      envPlaceholder: 'sk_live_xxxxxxxxxxxxxxxxxxxx'
+    },
+    {
+      id: 'filesystem',
+      name: 'Filesystem',
+      desc: 'Local file access',
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-filesystem'],
+      envKey: null,
+      envPlaceholder: null,
+      extraArgs: ['/path/to/allowed/directory']
+    },
+    {
+      id: 'custom',
+      name: 'Custom Server',
+      desc: 'Your own MCP server',
+      command: null,
+      args: null,
+      envKey: null,
+      envPlaceholder: null
+    }
+  ]);
+
+  /* ══════════════════════════════════════════════════════════
+     State (local to IIFE)
+     ══════════════════════════════════════════════════════════ */
+  var selectedServers = new Set();
+  var currentScope = 'project';
+
+  /* ══════════════════════════════════════════════════════════
+     DOM references (set in init)
+     ══════════════════════════════════════════════════════════ */
+  var serverGridEl, customSection, outputSection, outputPanel;
+  var outputPre, outputFilename, statusMsg, usesLeftEl;
+  var btnGenerate, btnCopy, btnDownload, paywallOverlay;
+  var scopeProjectBtn, scopeGlobalBtn;
+  var customNameInput, customCommandInput, customEnvKeyInput;
+  var customEnvValInput, customArgsInput;
+
+  /* ══════════════════════════════════════════════════════════
+     Utility: get usage count from localStorage
+     ══════════════════════════════════════════════════════════ */
+  function getUsageCount() {
+    console.assert(typeof PAYWALL_KEY === 'string', 'getUsageCount: PAYWALL_KEY must be string');
+    console.assert(PAYWALL_LIMIT > 0, 'getUsageCount: PAYWALL_LIMIT must be positive');
+    try {
+      var raw = localStorage.getItem(PAYWALL_KEY);
+      var count = parseInt(raw || '0', 10);
+      if (isNaN(count) || count < 0) { return 0; }
+      return count;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Utility: increment usage count
+     ══════════════════════════════════════════════════════════ */
+  function incrementUsage() {
+    console.assert(typeof PAYWALL_KEY === 'string', 'incrementUsage: PAYWALL_KEY must be string');
+    console.assert(typeof PAYWALL_LIMIT === 'number', 'incrementUsage: PAYWALL_LIMIT must be number');
+    try {
+      var current = getUsageCount();
+      localStorage.setItem(PAYWALL_KEY, String(current + 1));
+      return current + 1;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Utility: update uses-left display
+     ══════════════════════════════════════════════════════════ */
+  function updateUsesDisplay() {
+    console.assert(usesLeftEl !== null, 'updateUsesDisplay: usesLeftEl must exist');
+    console.assert(typeof PAYWALL_LIMIT === 'number', 'updateUsesDisplay: PAYWALL_LIMIT must be number');
+    var used = getUsageCount();
+    var remaining = Math.max(0, PAYWALL_LIMIT - used);
+    usesLeftEl.textContent = remaining + ' free generation' + (remaining !== 1 ? 's' : '') + ' remaining';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Utility: sanitize text for display
+     ══════════════════════════════════════════════════════════ */
+  function sanitize(str) {
+    console.assert(typeof str === 'string', 'sanitize: input must be string');
+    console.assert(str.length <= 500, 'sanitize: input too long');
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Utility: show status message
+     ══════════════════════════════════════════════════════════ */
+  function showStatus(msg, type) {
+    console.assert(typeof msg === 'string', 'showStatus: msg must be string');
+    console.assert(type === 'success' || type === 'error', 'showStatus: type must be success or error');
+    statusMsg.textContent = msg;
+    statusMsg.className = 'status-msg ' + type;
+    setTimeout(function() {
+      statusMsg.textContent = '';
+      statusMsg.className = 'status-msg';
+    }, 3000);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Render: server checkbox grid
+     ══════════════════════════════════════════════════════════ */
+  function renderServerGrid() {
+    console.assert(serverGridEl !== null, 'renderServerGrid: serverGridEl must exist');
+    console.assert(Array.isArray(MCP_SERVERS), 'renderServerGrid: MCP_SERVERS must be array');
+    var html = '';
+    for (var i = 0; i < MCP_SERVERS.length; i++) {
+      var srv = MCP_SERVERS[i];
+      html += '<label class="server-item" data-server-id="' + srv.id + '">';
+      html += '<input type="checkbox" value="' + srv.id + '">';
+      html += '<div class="server-info">';
+      html += '<span class="server-name">' + sanitize(srv.name) + '</span>';
+      html += '<span class="server-desc">' + sanitize(srv.desc) + '</span>';
+      html += '</div></label>';
+    }
+    serverGridEl.innerHTML = html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: checkbox toggle
+     ══════════════════════════════════════════════════════════ */
+  function handleServerToggle(event) {
+    var target = event.target;
+    if (target.type !== 'checkbox') { return; }
+    console.assert(typeof target.value === 'string', 'handleServerToggle: checkbox value must be string');
+    console.assert(target.value.length > 0, 'handleServerToggle: checkbox value must not be empty');
+
+    var serverId = target.value;
+    var label = target.closest('.server-item');
+
+    if (target.checked) {
+      selectedServers.add(serverId);
+      if (label) { label.classList.add('selected'); }
+    } else {
+      selectedServers.delete(serverId);
+      if (label) { label.classList.remove('selected'); }
+    }
+
+    /* Show/hide custom section */
+    if (serverId === 'custom') {
+      customSection.style.display = target.checked ? 'block' : 'none';
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: scope toggle
+     ══════════════════════════════════════════════════════════ */
+  function handleScopeToggle(event) {
+    var btn = event.target;
+    if (!btn.classList.contains('scope-btn')) { return; }
+    console.assert(btn.dataset.scope === 'project' || btn.dataset.scope === 'global',
+      'handleScopeToggle: scope must be project or global');
+    console.assert(typeof btn.dataset.scope === 'string', 'handleScopeToggle: scope must be string');
+
+    currentScope = btn.dataset.scope;
+    scopeProjectBtn.classList.toggle('active', currentScope === 'project');
+    scopeGlobalBtn.classList.toggle('active', currentScope === 'global');
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Build: config JSON object from selected servers
+     ══════════════════════════════════════════════════════════ */
+  function buildConfigObject() {
+    console.assert(selectedServers instanceof Set, 'buildConfigObject: selectedServers must be Set');
+    console.assert(selectedServers.size > 0, 'buildConfigObject: at least one server must be selected');
+
+    var mcpServers = {};
+    var serverList = Array.from(selectedServers);
+
+    for (var i = 0; i < serverList.length; i++) {
+      var serverId = serverList[i];
+
+      if (serverId === 'custom') {
+        var customConfig = buildCustomServerEntry();
+        if (customConfig !== null) {
+          mcpServers[customConfig.name] = customConfig.entry;
+        }
+        continue;
+      }
+
+      var serverDef = findServerById(serverId);
+      if (serverDef === null) { continue; }
+
+      var entry = buildStandardServerEntry(serverDef);
+      mcpServers[serverId] = entry;
+    }
+
+    if (currentScope === 'project') {
+      return { mcpServers: mcpServers };
+    }
+    return { mcpServers: mcpServers };
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Build: standard server entry from definition
+     ══════════════════════════════════════════════════════════ */
+  function buildStandardServerEntry(serverDef) {
+    console.assert(serverDef !== null, 'buildStandardServerEntry: serverDef must not be null');
+    console.assert(typeof serverDef.command === 'string', 'buildStandardServerEntry: command must be string');
+
+    var entry = {
+      command: serverDef.command,
+      args: serverDef.args.slice()
+    };
+
+    /* Add extra args for filesystem server */
+    if (serverDef.extraArgs && serverDef.extraArgs.length > 0) {
+      for (var j = 0; j < serverDef.extraArgs.length; j++) {
+        entry.args.push(serverDef.extraArgs[j]);
+      }
+    }
+
+    /* Add env block if server requires one */
+    if (serverDef.envKey !== null) {
+      entry.env = {};
+      entry.env[serverDef.envKey] = serverDef.envPlaceholder;
+    }
+
+    return entry;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Build: custom server entry from user inputs
+     ══════════════════════════════════════════════════════════ */
+  function buildCustomServerEntry() {
+    console.assert(customNameInput !== null, 'buildCustomServerEntry: customNameInput must exist');
+    console.assert(customCommandInput !== null, 'buildCustomServerEntry: customCommandInput must exist');
+
+    var name = customNameInput.value.trim();
+    var command = customCommandInput.value.trim();
+
+    if (name.length === 0 || command.length === 0) {
+      return null;
+    }
+
+    var parts = command.split(/\s+/);
+    var cmd = parts[0];
+    var cmdArgs = parts.slice(1);
+
+    /* Add user-specified extra args */
+    var extraArgs = customArgsInput.value.trim();
+    if (extraArgs.length > 0) {
+      cmdArgs.push(extraArgs);
+    }
+
+    var entry = { command: cmd, args: cmdArgs };
+
+    var envKey = customEnvKeyInput.value.trim();
+    var envVal = customEnvValInput.value.trim();
+    if (envKey.length > 0) {
+      entry.env = {};
+      entry.env[envKey] = envVal.length > 0 ? envVal : 'YOUR_VALUE_HERE';
+    }
+
+    return { name: name, entry: entry };
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Find: server definition by ID
+     ══════════════════════════════════════════════════════════ */
+  function findServerById(id) {
+    console.assert(typeof id === 'string', 'findServerById: id must be string');
+    console.assert(id.length > 0, 'findServerById: id must not be empty');
+    for (var i = 0; i < MCP_SERVERS.length; i++) {
+      if (MCP_SERVERS[i].id === id) {
+        return MCP_SERVERS[i];
+      }
+    }
+    return null;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Render: syntax-highlighted JSON
+     ══════════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     Helper: colorize a non-string JSON character
+     ══════════════════════════════════════════════════════════ */
+  function colorizeStructural(ch) {
+    console.assert(typeof ch === 'string', 'colorizeStructural: ch must be string');
+    console.assert(ch.length === 1, 'colorizeStructural: ch must be single char');
+    if (ch === '{' || ch === '}' || ch === '[' || ch === ']') {
+      return '<span class="json-bracket">' + ch + '</span>';
+    }
+    if (ch === ':') {
+      return '<span class="json-colon">:</span>';
+    }
+    return ch;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Helper: wrap completed string buffer with span
+     ══════════════════════════════════════════════════════════ */
+  function wrapJsonString(buffer, jsonStr, closeIdx) {
+    console.assert(typeof buffer === 'string', 'wrapJsonString: buffer must be string');
+    console.assert(typeof jsonStr === 'string', 'wrapJsonString: jsonStr must be string');
+    var isKey = isJsonKey(jsonStr, closeIdx);
+    var cls = isKey ? 'json-key' : 'json-string';
+    return '<span class="' + cls + '">' + escapeHtml(buffer) + '</span>';
+  }
+
+  function highlightJSON(jsonStr) {
+    console.assert(typeof jsonStr === 'string', 'highlightJSON: input must be string');
+    console.assert(jsonStr.length > 0, 'highlightJSON: input must not be empty');
+
+    var result = '';
+    var inString = false;
+    var escaped = false;
+    var buffer = '';
+
+    for (var i = 0; i < jsonStr.length; i++) {
+      var ch = jsonStr[i];
+
+      if (escaped) { buffer += ch; escaped = false; continue; }
+      if (ch === '\\' && inString) { buffer += ch; escaped = true; continue; }
+
+      if (ch === '"' && !inString) {
+        inString = true;
+        buffer = '"';
+        continue;
+      }
+
+      if (ch === '"' && inString) {
+        buffer += '"';
+        inString = false;
+        result += wrapJsonString(buffer, jsonStr, i);
+        buffer = '';
+        continue;
+      }
+
+      if (inString) { buffer += ch; continue; }
+
+      result += colorizeStructural(ch);
+    }
+
+    return result;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Helper: is the string at position i a JSON key?
+     ══════════════════════════════════════════════════════════ */
+  function isJsonKey(jsonStr, closeQuoteIdx) {
+    console.assert(typeof jsonStr === 'string', 'isJsonKey: jsonStr must be string');
+    console.assert(typeof closeQuoteIdx === 'number', 'isJsonKey: index must be number');
+    /* Look ahead for colon after whitespace */
+    for (var j = closeQuoteIdx + 1; j < jsonStr.length && j < closeQuoteIdx + 20; j++) {
+      var c = jsonStr[j];
+      if (c === ' ' || c === '\n' || c === '\r' || c === '\t') { continue; }
+      return c === ':';
+    }
+    return false;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Helper: escape HTML entities
+     ══════════════════════════════════════════════════════════ */
+  function escapeHtml(str) {
+    console.assert(typeof str === 'string', 'escapeHtml: input must be string');
+    console.assert(str.length < 10000, 'escapeHtml: input too long');
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: generate configuration
+     ══════════════════════════════════════════════════════════ */
+  function handleGenerate() {
+    console.assert(outputSection !== null, 'handleGenerate: outputSection must exist');
+    console.assert(outputPre !== null, 'handleGenerate: outputPre must exist');
+
+    /* Validate at least one server selected */
+    if (selectedServers.size === 0) {
+      showStatus('Please select at least one MCP server.', 'error');
+      return;
+    }
+
+    /* Paywall read-only check always runs */
+    var usageCount = getUsageCount();
+    if (usageCount >= PAYWALL_LIMIT) {
+      isAutoLoad = false;
+      showPaywall();
+      return;
+    }
+
+    /* Build config */
+    var config = buildConfigObject();
+    var jsonStr = JSON.stringify(config, null, 2);
+
+    /* Render output */
+    outputSection.style.display = 'block';
+    outputPre.innerHTML = highlightJSON(jsonStr);
+    outputPanel.classList.remove('output-blurred');
+
+    /* Set filename based on scope */
+    var filename = currentScope === 'project'
+      ? '.claude/settings.json'
+      : 'claude_desktop_config.json';
+    outputFilename.textContent = filename;
+
+    /* Only increment usage for user-initiated actions, not auto-load */
+    if (!isAutoLoad) {
+      incrementUsage();
+    }
+    isAutoLoad = false;
+    updateUsesDisplay();
+
+    /* Scroll to output */
+    outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showStatus('Configuration generated successfully.', 'success');
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: show paywall
+     ══════════════════════════════════════════════════════════ */
+  function showPaywall() {
+    console.assert(paywallOverlay !== null, 'showPaywall: paywallOverlay must exist');
+    console.assert(outputPanel !== null, 'showPaywall: outputPanel must exist');
+
+    /* Blur existing output if any */
+    outputPanel.classList.add('output-blurred');
+
+    /* Show overlay */
+    paywallOverlay.style.display = 'flex';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: dismiss paywall on outside click
+     ══════════════════════════════════════════════════════════ */
+  function handlePaywallClick(event) {
+    console.assert(paywallOverlay !== null, 'handlePaywallClick: paywallOverlay must exist');
+    console.assert(event !== null, 'handlePaywallClick: event must exist');
+    if (event.target === paywallOverlay) {
+      paywallOverlay.style.display = 'none';
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: copy to clipboard
+     ══════════════════════════════════════════════════════════ */
+  function handleCopy() {
+    console.assert(outputPre !== null, 'handleCopy: outputPre must exist');
+    console.assert(typeof outputPre.textContent === 'string', 'handleCopy: textContent must be string');
+
+    var text = outputPre.textContent;
+    if (text.length === 0) {
+      showStatus('Nothing to copy.', 'error');
+      return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showStatus('Copied to clipboard!', 'success');
+      }, function() {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Helper: fallback copy using textarea
+     ══════════════════════════════════════════════════════════ */
+  function fallbackCopy(text) {
+    console.assert(typeof text === 'string', 'fallbackCopy: text must be string');
+    console.assert(text.length > 0, 'fallbackCopy: text must not be empty');
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showStatus('Copied to clipboard!', 'success');
+    } catch (e) {
+      showStatus('Copy failed. Please select and copy manually.', 'error');
+    }
+    document.body.removeChild(ta);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Handler: download config file
+     ══════════════════════════════════════════════════════════ */
+  function handleDownload() {
+    console.assert(outputPre !== null, 'handleDownload: outputPre must exist');
+    console.assert(outputFilename !== null, 'handleDownload: outputFilename must exist');
+
+    var text = outputPre.textContent;
+    if (text.length === 0) {
+      showStatus('Nothing to download.', 'error');
+      return;
+    }
+
+    var filename = currentScope === 'project'
+      ? 'settings.json'
+      : 'claude_desktop_config.json';
+
+    var blob = new Blob([text], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showStatus('Download started: ' + filename, 'success');
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Init: bind all DOM refs and event listeners
+     ══════════════════════════════════════════════════════════ */
+  function init() {
+    /* Bind DOM refs */
+    serverGridEl = document.getElementById('server-grid');
+    customSection = document.getElementById('custom-section');
+    outputSection = document.getElementById('output-section');
+    outputPanel = document.getElementById('output-panel');
+    outputPre = document.getElementById('output-pre');
+    outputFilename = document.getElementById('output-filename');
+    statusMsg = document.getElementById('status-msg');
+    usesLeftEl = document.getElementById('uses-left');
+    btnGenerate = document.getElementById('btn-generate');
+    btnCopy = document.getElementById('btn-copy');
+    btnDownload = document.getElementById('btn-download');
+    paywallOverlay = document.getElementById('paywall-overlay');
+    scopeProjectBtn = document.getElementById('scope-project');
+    scopeGlobalBtn = document.getElementById('scope-global');
+    customNameInput = document.getElementById('custom-name');
+    customCommandInput = document.getElementById('custom-command');
+    customEnvKeyInput = document.getElementById('custom-env-key');
+    customEnvValInput = document.getElementById('custom-env-val');
+    customArgsInput = document.getElementById('custom-args');
+
+    /* Assertions for all DOM refs */
+    console.assert(serverGridEl !== null, 'init: server-grid not found');
+    console.assert(customSection !== null, 'init: custom-section not found');
+    console.assert(outputSection !== null, 'init: output-section not found');
+    console.assert(outputPanel !== null, 'init: output-panel not found');
+    console.assert(outputPre !== null, 'init: output-pre not found');
+    console.assert(outputFilename !== null, 'init: output-filename not found');
+    console.assert(statusMsg !== null, 'init: status-msg not found');
+    console.assert(usesLeftEl !== null, 'init: uses-left not found');
+    console.assert(btnGenerate !== null, 'init: btn-generate not found');
+    console.assert(btnCopy !== null, 'init: btn-copy not found');
+    console.assert(btnDownload !== null, 'init: btn-download not found');
+    console.assert(paywallOverlay !== null, 'init: paywall-overlay not found');
+
+    /* Render server grid */
+    renderServerGrid();
+
+    /* Bind events */
+    serverGridEl.addEventListener('change', handleServerToggle);
+    btnGenerate.addEventListener('click', handleGenerate);
+    btnCopy.addEventListener('click', handleCopy);
+    btnDownload.addEventListener('click', handleDownload);
+    paywallOverlay.addEventListener('click', handlePaywallClick);
+    scopeProjectBtn.addEventListener('click', handleScopeToggle);
+    scopeGlobalBtn.addEventListener('click', handleScopeToggle);
+
+    /* Initial display */
+    updateUsesDisplay();
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Boot
+     ══════════════════════════════════════════════════════════ */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+
+
+</body>
+</html>

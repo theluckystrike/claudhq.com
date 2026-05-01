@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which Claude Model Should You Use? Interactive Selector (2026) | ClaudHQ</title>
+<meta name="description" content="Answer 5 questions to find the best Claude model for your project. Compare Sonnet 4.6, Opus 4.6, and Haiku 4.5 by task, budget, and team size.">
+<meta property="og:title" content="Claude Model Selector — Free Comparison Tool">
+<meta property="og:description" content="Choose the best Claude model for your use case. Compare Opus, Sonnet, and Haiku on speed, cost, and capability.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://claudhq.com/model-selector/">
+<meta name="robots" content="index, follow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Model Selector — ClaudHQ">
+<meta name="twitter:description" content="Answer 5 questions to find the best Claude model for your project.">
+<link rel="canonical" href="https://claudhq.com/model-selector/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: oklch(0.155 0.007 60);
+  color: oklch(0.80 0.008 70);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: oklch(0.72 0.11 38); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.85; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid oklch(0.72 0.11 38);
+  outline-offset: 2px;
+}
+
+/* ── Layout ── */
+.container { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+.container-wide { max-width: 900px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* ── Header ── */
+.site-header {
+  padding: 1rem 0;
+  border-bottom: 1px solid oklch(0.80 0.008 70 / 0.08);
+}
+.site-header .container-wide {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+}
+.site-logo {
+  font-size: 1.05rem; font-weight: 600; color: oklch(0.80 0.008 70);
+  letter-spacing: -0.01em;
+}
+.site-nav {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center;
+}
+.site-nav a {
+  font-size: 0.8rem; color: oklch(0.80 0.008 70 / 0.60);
+  transition: color 0.2s; white-space: nowrap;
+}
+.site-nav a:hover { color: oklch(0.80 0.008 70); opacity: 1; }
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 3rem 0 2rem;
+}
+.hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  color: oklch(0.97 0.006 80);
+}
+.hero h1 .accent { color: oklch(0.72 0.11 38); }
+.hero .subhead {
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  color: oklch(0.80 0.008 70 / 0.60);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ── Progress Bar ── */
+.progress-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: oklch(0.80 0.008 70 / 0.08);
+  border-radius: 3px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, oklch(0.72 0.11 38), oklch(0.64 0.10 38));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+/* ── Wizard Card ── */
+.wizard-card {
+  background: oklch(0.80 0.008 70 / 0.03);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  min-height: 320px;
+  position: relative;
+}
+
+/* ── Question Step ── */
+.question-step {
+  display: none;
+  animation: fadeIn 0.35s ease;
+}
+.question-step.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.question-step h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: oklch(0.97 0.006 80);
+  margin-bottom: 0.35rem;
+}
+.question-number {
+  font-size: 0.8rem;
+  color: oklch(0.72 0.11 38);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Option Buttons ── */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  background: oklch(0.80 0.008 70 / 0.04);
+  border: 1px solid oklch(0.80 0.008 70 / 0.12);
+  border-radius: 8px;
+  color: oklch(0.80 0.008 70);
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.option-btn:hover {
+  background: oklch(0.72 0.11 38 / 0.08);
+  border-color: oklch(0.72 0.11 38 / 0.30);
+  color: oklch(0.97 0.006 80);
+}
+.option-btn.selected {
+  background: oklch(0.72 0.11 38 / 0.12);
+  border-color: oklch(0.72 0.11 38);
+  color: oklch(0.97 0.006 80);
+}
+
+/* ── Nav Buttons ── */
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+.btn-back {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid oklch(0.80 0.008 70 / 0.15);
+  border-radius: 6px;
+  color: oklch(0.80 0.008 70 / 0.60);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-back:hover {
+  border-color: oklch(0.80 0.008 70 / 0.30);
+  color: oklch(0.80 0.008 70);
+}
+
+/* ── Result Card ── */
+.result-section {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+.result-section.active { display: block; }
+
+.result-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.result-header .model-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+.badge-sonnet { background: oklch(0.62 0.15 260 / 0.15); color: oklch(0.72 0.11 38); border: 1px solid oklch(0.62 0.15 260 / 0.30); }
+.badge-opus { background: oklch(0.68 0.14 300 / 0.15); color: oklch(0.70 0.15 310); border: 1px solid oklch(0.68 0.14 300 / 0.30); }
+.badge-haiku { background: oklch(0.82 0.14 85 / 0.15); color: oklch(0.82 0.14 85); border: 1px solid oklch(0.82 0.14 85 / 0.30); }
+
+.result-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: oklch(0.97 0.006 80);
+  margin-bottom: 0.5rem;
+}
+.result-reasoning {
+  color: oklch(0.80 0.008 70 / 0.75);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+.also-consider {
+  background: oklch(0.80 0.008 70 / 0.04);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.also-consider strong { color: oklch(0.97 0.006 80); }
+
+/* ── Cost Table ── */
+.cost-table-wrap {
+  margin-bottom: 1.5rem;
+}
+.cost-table-wrap h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: oklch(0.97 0.006 80);
+  margin-bottom: 0.75rem;
+}
+.cost-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.cost-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: oklch(0.80 0.008 70 / 0.05);
+  color: oklch(0.80 0.008 70 / 0.70);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid oklch(0.80 0.008 70 / 0.08);
+}
+.cost-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid oklch(0.80 0.008 70 / 0.06);
+  color: oklch(0.80 0.008 70);
+}
+.cost-table tr.highlight td {
+  color: oklch(0.72 0.11 38);
+  font-weight: 600;
+}
+
+/* ── Config Snippet ── */
+.config-snippet-wrap {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+.config-snippet-wrap h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: oklch(0.97 0.006 80);
+  margin-bottom: 0.75rem;
+}
+.config-snippet {
+  background: oklch(0.185 0.008 60);
+  border: 1px solid oklch(0.80 0.008 70 / 0.10);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: oklch(0.80 0.008 70);
+  white-space: pre-wrap;
+  word-break: break-word;
+  position: relative;
+}
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0.75rem;
+  padding: 8px 18px;
+  background: oklch(0.72 0.11 38 / 0.10);
+  border: 1px solid oklch(0.72 0.11 38 / 0.30);
+  border-radius: 6px;
+  color: oklch(0.72 0.11 38);
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-copy:hover {
+  background: oklch(0.72 0.11 38 / 0.18);
+}
+.btn-copy.copied {
+  background: oklch(0.72 0.11 38 / 0.20);
+  color: oklch(0.64 0.10 38);
+}
+
+.btn-restart {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid oklch(0.80 0.008 70 / 0.15);
+  border-radius: 6px;
+  color: oklch(0.80 0.008 70 / 0.60);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-restart:hover {
+  border-color: oklch(0.80 0.008 70 / 0.30);
+  color: oklch(0.80 0.008 70);
+}
+
+/* ── Blurred result ── */
+.result-blurred {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Paywall Overlay ── */
+#paywall-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(20, 18, 14, 0.88);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#paywall-overlay.visible {
+  display: flex;
+}
+.paywall-inner {
+  max-width: 480px;
+  text-align: center;
+  padding: 40px 24px;
+  background: oklch(0.185 0.008 60); border: 1px solid oklch(0.30 0.010 60); border-radius: 12px;
+}
+.paywall-inner h2 {
+  color: oklch(0.72 0.11 38);
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.paywall-inner p {
+  color: oklch(0.80 0.008 70);
+  margin-bottom: 24px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+.paywall-inner .btn-paywall {
+  display: inline-block;
+  padding: 14px 32px;
+  background: oklch(0.72 0.11 38);
+  color: oklch(0.18 0.04 38);
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.paywall-inner .btn-paywall:hover {
+  background: oklch(0.64 0.10 38);
+  opacity: 1;
+}
+.paywall-fine {
+  color: oklch(0.42 0.010 70);
+  font-size: 0.8rem;
+  margin-top: 16px;
+}
+
+/* ── SEO Content ── */
+.seo-content {
+  padding: 3rem 0 2rem;
+  border-top: 1px solid oklch(0.80 0.008 70 / 0.06);
+  margin-top: 2rem;
+}
+.seo-content h2 {
+  font-size: 1.4rem;
+  font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400;
+  color: oklch(0.97 0.006 80);
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  letter-spacing: -0.01em;
+}
+.seo-content h2:first-child { margin-top: 0; }
+.seo-content p {
+  margin-bottom: 1rem;
+  color: oklch(0.80 0.008 70 / 0.80);
+  line-height: 1.7;
+}
+.seo-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: oklch(0.97 0.006 80);
+  margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+/* ── Comparison Table ── */
+.comparison-table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 560px;
+}
+.comparison-table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: oklch(0.80 0.008 70 / 0.05);
+  color: oklch(0.80 0.008 70 / 0.70);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid oklch(0.80 0.008 70 / 0.10);
+}
+.comparison-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid oklch(0.80 0.008 70 / 0.06);
+  color: oklch(0.80 0.008 70);
+}
+.comparison-table tbody tr:hover {
+  background: oklch(0.80 0.008 70 / 0.02);
+}
+
+/* ── FAQ ── */
+.faq-list { margin: 1rem 0 2rem; }
+.faq-list details {
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 8px;
+  margin-bottom: 0.65rem;
+  overflow: hidden;
+}
+.faq-list summary {
+  padding: 14px 18px;
+  font-weight: 600;
+  color: oklch(0.97 0.006 80);
+  cursor: pointer;
+  font-size: 0.95rem;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+.faq-list summary:hover {
+  background: oklch(0.80 0.008 70 / 0.03);
+}
+.faq-list summary::before {
+  content: '+';
+  font-size: 1.1rem;
+  color: oklch(0.72 0.11 38);
+  font-weight: 400;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+.faq-list details[open] summary::before { content: '-'; }
+.faq-list .faq-body {
+  padding: 0 18px 16px 46px;
+  color: oklch(0.80 0.008 70 / 0.75);
+  line-height: 1.65;
+  font-size: 0.9rem;
+}
+
+/* ── CTA Banner ── */
+.cta-banner {
+  background: linear-gradient(135deg, oklch(0.72 0.11 38 / 0.08), oklch(0.64 0.10 38 / 0.04));
+  border: 1px solid oklch(0.72 0.11 38 / 0.15);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin: 2.5rem 0;
+}
+.cta-banner h3 {
+  color: oklch(0.97 0.006 80);
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+.cta-banner p {
+  color: oklch(0.80 0.008 70 / 0.65);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+.cta-banner .btn-cta {
+  display: inline-block;
+  padding: 12px 28px;
+  background: oklch(0.72 0.11 38);
+  color: oklch(0.18 0.04 38);
+  font-weight: 700;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+.cta-banner .btn-cta:hover { background: oklch(0.64 0.10 38); opacity: 1; }
+
+/* ── Related Links ── */
+.related-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 2rem;
+}
+.related-links a {
+  display: block;
+  padding: 12px 16px;
+  background: oklch(0.80 0.008 70 / 0.03);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: oklch(0.72 0.11 38);
+  transition: all 0.2s;
+}
+.related-links a:hover {
+  background: oklch(0.72 0.11 38 / 0.06);
+  border-color: oklch(0.72 0.11 38 / 0.20);
+  opacity: 1;
+}
+
+/* ── Footer ── */
+.site-footer {
+  padding: 2rem 0;
+  border-top: 1px solid oklch(0.80 0.008 70 / 0.06);
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: oklch(0.80 0.008 70 / 0.35);
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .wizard-card { padding: 1.25rem; }
+  .hero { padding: 2rem 0 1.25rem; }
+  .option-btn { padding: 12px 14px; font-size: 0.9rem; }
+  .cost-table { font-size: 0.8rem; }
+  .cost-table th, .cost-table td { padding: 8px 8px; }
+  .comparison-table th, .comparison-table td { padding: 10px 10px; }
+  .cta-banner { padding: 1.5rem; }
+}
+
+/* ========== LEARN MORE ========== */
+.learn-more {
+  margin: 48px 0 0;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--line);
+}
+.learn-more .lm-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+.learn-more .lm-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+.learn-more .lm-title em {
+  font-family: var(--serif-alt);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+.learn-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.learn-more-grid a {
+  background: var(--bg-2);
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
+}
+.learn-more-grid a:hover {
+  background: var(--bg-3);
+  color: var(--accent);
+}
+.learn-more-grid a::before {
+  content: '\2192';
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color .15s ease;
+}
+.learn-more-grid a:hover::before {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .learn-more-grid { grid-template-columns: 1fr; }
+  .learn-more .lm-title { font-size: 24px; }
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Opus worth the extra cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For routine coding tasks, no. Sonnet handles the vast majority of feature work and bug fixes at one-fifth the cost. Opus becomes worth it for architecture decisions, complex refactoring across many files, and debugging subtle concurrency or security issues. Most teams save money by defaulting to Sonnet and switching to Opus selectively for high-stakes tasks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I mix models in one project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, and you should. In your CLAUDE.md file, you can specify which model to use for different task types. For example, set Sonnet as your default, use Haiku for autocomplete and quick lookups, and switch to Opus for architecture reviews. Claude Code's /model command lets you switch models mid-session without losing context."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which model is fastest?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Haiku 4.5 is the fastest by a significant margin, typically 2-3x faster than Sonnet for output generation. Sonnet 4.6 is fast enough for interactive coding sessions. Opus is noticeably slower, especially on long outputs, which is why it is best reserved for tasks where thoroughness matters more than speed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which model is cheapest?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Haiku 4.5 at $1 per million input tokens and $5 per million output tokens. A solo developer doing light work can stay under $5/month with Haiku. Sonnet costs roughly 3x more per token, and Opus costs 5x more than Haiku for input. However, cheap tokens that produce wrong code cost more in debugging time, so consider quality alongside raw price."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What changed from Sonnet 4.5 to 4.6?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sonnet 4.6 brought improved multi-step reasoning, better adherence to CLAUDE.md instructions, more reliable tool use (fewer hallucinated file paths), and stronger performance on long-context tasks. It also improved at understanding framework conventions and producing code that matches existing project style. For Claude Code users, the upgrade is meaningful for daily productivity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I switch models in Claude Code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use the /model slash command within any Claude Code session to switch models instantly. You can also set a default model in your CLAUDE.md file by adding a \"Model Configuration\" section. When using the API directly, specify the model ID in your request: claude-sonnet-4-6-20260401, claude-opus-4-6-20260401, or claude-haiku-4-5-20241022."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do all models have the same context window?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, all three current models support a 200K token context window. The difference lies in how effectively each model utilizes that context. Opus tends to maintain better recall across the full window, while Haiku may lose accuracy on details placed early in very long contexts. For codebases exceeding 100K tokens, Sonnet or Opus will generally give more reliable answers about the full codebase."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use extended thinking with any model?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Extended thinking is most valuable with Opus for complex architectural decisions and multi-file refactoring. It adds latency and cost but can catch issues that standard responses miss. With Sonnet, extended thinking helps for moderately complex tasks but offers diminishing returns compared to Opus. Haiku does not benefit meaningfully from extended thinking and the added cost is rarely justified."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <h1>Which Claude Model <span class="accent">Should You Use?</span></h1>
+    <p class="subhead">Answer 5 quick questions. Get a tailored recommendation with cost estimates and a ready-to-paste CLAUDE.md config.</p>
+  </div>
+</section>
+
+<!-- ── Wizard ── -->
+<div class="container">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill"></div>
+  </div>
+
+  <div class="wizard-card" id="wizardCard">
+
+    <!-- Q1 -->
+    <div class="question-step active" data-step="0">
+      <div class="question-number">Question 1 of 5</div>
+      <h2>What are you building?</h2>
+      <div class="options-list">
+        <button class="option-btn" data-key="task" data-value="script">Quick script or one-off task</button>
+        <button class="option-btn" data-key="task" data-value="feature">Single feature or bug fix</button>
+        <button class="option-btn" data-key="task" data-value="app">Full application or major feature</button>
+        <button class="option-btn" data-key="task" data-value="architecture">Architecture design or system refactor</button>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-step" data-step="1">
+      <div class="question-number">Question 2 of 5</div>
+      <h2>How large is the codebase?</h2>
+      <div class="options-list">
+        <button class="option-btn" data-key="size" data-value="small">Small (&lt;5K lines)</button>
+        <button class="option-btn" data-key="size" data-value="medium">Medium (5K&ndash;50K lines)</button>
+        <button class="option-btn" data-key="size" data-value="large">Large (50K&ndash;200K lines)</button>
+        <button class="option-btn" data-key="size" data-value="xlarge">Very large (200K+ lines)</button>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-back" data-action="back" aria-label="Go back to previous question">Back</button>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-step" data-step="2">
+      <div class="question-number">Question 3 of 5</div>
+      <h2>What matters most?</h2>
+      <div class="options-list">
+        <button class="option-btn" data-key="priority" data-value="speed">Speed &mdash; I want fast responses</button>
+        <button class="option-btn" data-key="priority" data-value="quality">Quality &mdash; I want the best output</button>
+        <button class="option-btn" data-key="priority" data-value="cost">Cost &mdash; I want to minimize spend</button>
+        <button class="option-btn" data-key="priority" data-value="context">Context &mdash; I need maximum context window</button>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-back" data-action="back" aria-label="Go back to previous question">Back</button>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-step" data-step="3">
+      <div class="question-number">Question 4 of 5</div>
+      <h2>Solo or team?</h2>
+      <div class="options-list">
+        <button class="option-btn" data-key="team" data-value="solo">Solo developer</button>
+        <button class="option-btn" data-key="team" data-value="small">Small team (2&ndash;10)</button>
+        <button class="option-btn" data-key="team" data-value="enterprise">Enterprise (50+)</button>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-back" data-action="back" aria-label="Go back to previous question">Back</button>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-step" data-step="4">
+      <div class="question-number">Question 5 of 5</div>
+      <h2>Budget sensitivity?</h2>
+      <div class="options-list">
+        <button class="option-btn" data-key="budget" data-value="minimize">Minimize cost at all costs</button>
+        <button class="option-btn" data-key="budget" data-value="balanced">Balanced &mdash; good value</button>
+        <button class="option-btn" data-key="budget" data-value="any">Quality at any price</button>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-back" data-action="back" aria-label="Go back to previous question">Back</button>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-section" id="resultSection">
+      <div id="resultContent">
+        <div class="result-header" id="resultHeader"></div>
+        <div class="result-reasoning" id="resultReasoning"></div>
+        <div class="also-consider" id="alsoConsider"></div>
+        <div class="cost-table-wrap" id="costTableWrap"></div>
+        <div class="config-snippet-wrap" id="configSnippetWrap"></div>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn-restart" data-action="restart" aria-label="Start over">Start Over</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Paywall ── -->
+<div id="paywall-overlay">
+  <div class="paywall-inner">
+    <h2>You've used your 2 free selections</h2>
+    <p>Unlock unlimited access to all 5 CCG tools + 200 production-ready CLAUDE.md templates, error fixes, and cost optimization configs.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="btn-paywall">Get Lifetime Access &mdash; $99</a>
+    <p class="paywall-fine">One-time payment. All tools. All templates. Forever.</p>
+  </div>
+</div>
+
+<!-- ── SEO Content ── -->
+<div class="container seo-content">
+
+  <h2>Claude Model Comparison: Sonnet vs Opus vs Haiku (April 2026)</h2>
+  <p>Anthropic offers three distinct Claude model tiers, each engineered for different development scenarios. Choosing the right one saves money and improves output quality. Here is a side-by-side look at the current lineup.</p>
+
+  <div class="comparison-table-wrap">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Haiku 4.5</th>
+          <th>Sonnet 4.6</th>
+          <th>Opus 4.6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Input price</td>
+          <td>$1 / 1M tokens</td>
+          <td>$3 / 1M tokens</td>
+          <td>$5 / 1M tokens</td>
+        </tr>
+        <tr>
+          <td>Output price</td>
+          <td>$5 / 1M tokens</td>
+          <td>$15 / 1M tokens</td>
+          <td>$25 / 1M tokens</td>
+        </tr>
+        <tr>
+          <td>Context window</td>
+          <td>200K tokens</td>
+          <td>200K tokens</td>
+          <td>200K tokens</td>
+        </tr>
+        <tr>
+          <td>Speed (tokens/sec)</td>
+          <td>Very fast</td>
+          <td>Fast</td>
+          <td>Moderate</td>
+        </tr>
+        <tr>
+          <td>Code quality</td>
+          <td>Good</td>
+          <td>Excellent</td>
+          <td>Best-in-class</td>
+        </tr>
+        <tr>
+          <td>Complex reasoning</td>
+          <td>Basic</td>
+          <td>Strong</td>
+          <td>State of the art</td>
+        </tr>
+        <tr>
+          <td>Best for</td>
+          <td>Autocomplete, quick lookups, test gen</td>
+          <td>Daily coding, features, bug fixes</td>
+          <td>Architecture, refactoring, system design</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Pricing is based on Anthropic's published API rates as of April 2026. If you use Claude Code via the Max subscription ($100/month or $200/month), token costs are bundled into your plan, but model selection still affects response speed and quality.</p>
+
+  <h2>When to Use Each Model</h2>
+
+  <h3>Haiku 4.5 &mdash; The Speed Specialist</h3>
+  <p>Haiku is Anthropic's fastest and most affordable model. It excels at tasks that require rapid iteration: autocomplete suggestions, quick file lookups, generating boilerplate tests, and answering simple factual questions about your codebase. If your workflow involves hundreds of small prompts per day, Haiku keeps costs below $5/month for most solo developers. The tradeoff is reduced reasoning depth. Haiku can miss subtle bugs in complex logic and may struggle with multi-file refactoring that requires understanding architectural patterns. Use it for volume, not for depth.</p>
+
+  <h3>Sonnet 4.6 &mdash; The Everyday Workhorse</h3>
+  <p>Sonnet sits in the sweet spot for most Claude Code users. It handles feature implementation, bug fixes, code review, and test writing with high accuracy and at a reasonable cost. Most teams find that Sonnet covers 80-90% of their daily development needs without breaking the budget. Sonnet 4.6 introduced meaningful improvements over 4.5 in multi-step reasoning and adherence to project conventions specified in CLAUDE.md. It reads and follows style guides, understands framework-specific patterns, and produces code that generally fits into existing codebases without heavy editing. For teams spending $20-60/month per developer, Sonnet delivers the best value.</p>
+
+  <h3>Opus 4.6 &mdash; The Deep Thinker</h3>
+  <p>Opus is the most capable model in the Claude lineup and commands a premium price. It shines in scenarios that demand deep reasoning: designing system architecture from scratch, refactoring tangled legacy code, debugging race conditions, and writing complex algorithms. The quality difference between Opus and Sonnet becomes apparent when tasks exceed 200 lines of interconnected code or require reasoning across more than five files simultaneously. Enterprise teams use Opus for architecture reviews and security audits where missing a subtle issue has outsized consequences. For cost-conscious developers, the best strategy is to use Sonnet for daily work and switch to Opus only when a task genuinely requires its reasoning depth.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list">
+
+    <details>
+      <summary>Is Opus worth the extra cost?</summary>
+      <div class="faq-body">For routine coding tasks, no. Sonnet handles the vast majority of feature work and bug fixes at one-fifth the cost. Opus becomes worth it for architecture decisions, complex refactoring across many files, and debugging subtle concurrency or security issues. Most teams save money by defaulting to Sonnet and switching to Opus selectively for high-stakes tasks.</div>
+    </details>
+
+    <details>
+      <summary>Can I mix models in one project?</summary>
+      <div class="faq-body">Yes, and you should. In your CLAUDE.md file, you can specify which model to use for different task types. For example, set Sonnet as your default, use Haiku for autocomplete and quick lookups, and switch to Opus for architecture reviews. Claude Code's <code>/model</code> command lets you switch models mid-session without losing context.</div>
+    </details>
+
+    <details>
+      <summary>Which model is fastest?</summary>
+      <div class="faq-body">Haiku 4.5 is the fastest by a significant margin, typically 2-3x faster than Sonnet for output generation. Sonnet 4.6 is fast enough for interactive coding sessions. Opus is noticeably slower, especially on long outputs, which is why it is best reserved for tasks where thoroughness matters more than speed.</div>
+    </details>
+
+    <details>
+      <summary>Which model is cheapest?</summary>
+      <div class="faq-body">Haiku 4.5 at $1 per million input tokens and $5 per million output tokens. A solo developer doing light work can stay under $5/month with Haiku. Sonnet costs roughly 3x more per token, and Opus costs 5x more than Haiku for input. However, cheap tokens that produce wrong code cost more in debugging time, so consider quality alongside raw price.</div>
+    </details>
+
+    <details>
+      <summary>What changed from Sonnet 4.5 to 4.6?</summary>
+      <div class="faq-body">Sonnet 4.6 brought improved multi-step reasoning, better adherence to CLAUDE.md instructions, more reliable tool use (fewer hallucinated file paths), and stronger performance on long-context tasks. It also improved at understanding framework conventions and producing code that matches existing project style. For Claude Code users, the upgrade is meaningful for daily productivity.</div>
+    </details>
+
+    <details>
+      <summary>How do I switch models in Claude Code?</summary>
+      <div class="faq-body">Use the <code>/model</code> slash command within any Claude Code session to switch models instantly. You can also set a default model in your CLAUDE.md file by adding a "Model Configuration" section. When using the API directly, specify the model ID in your request: <code>claude-sonnet-4-6-20260401</code>, <code>claude-opus-4-6-20260401</code>, or <code>claude-haiku-4-5-20241022</code>.</div>
+    </details>
+
+    <details>
+      <summary>Do all models have the same context window?</summary>
+      <div class="faq-body">Yes, all three current models support a 200K token context window. The difference lies in how effectively each model utilizes that context. Opus tends to maintain better recall across the full window, while Haiku may lose accuracy on details placed early in very long contexts. For codebases exceeding 100K tokens, Sonnet or Opus will generally give more reliable answers about the full codebase.</div>
+    </details>
+
+    <details>
+      <summary>Should I use extended thinking with any model?</summary>
+      <div class="faq-body">Extended thinking is most valuable with Opus for complex architectural decisions and multi-file refactoring. It adds latency and cost but can catch issues that standard responses miss. With Sonnet, extended thinking helps for moderately complex tasks but offers diminishing returns compared to Opus. Haiku does not benefit meaningfully from extended thinking and the added cost is rarely justified.</div>
+    </details>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-banner">
+    <h3>Get model-optimized CLAUDE.md templates for every scenario</h3>
+    <p>200 production-ready configs tuned for Sonnet, Opus, and Haiku across 26 frameworks.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="btn-cta">Get Lifetime Access &mdash; $99</a>
+  </div>
+
+  <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+    <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+    <ul style="list-style:none;padding:0;margin:0;">
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+      </li>
+      <li style="padding:8px 0;">
+        <a href="/skill-finder/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Skill Finder</a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="learn-more">
+    <div class="lm-eyebrow">&sect; Related &middot; Model comparison</div>
+    <h2 class="lm-title">Keep <em>reading.</em></h2>
+    <div class="learn-more-grid">
+      <a href="/permissions/">Permission Configurator</a>
+      <a href="/mcp-config/">MCP Server Config Generator</a>
+      <a href="/commands/">Command Reference</a>
+      <a href="/token-estimator/">Token Usage Estimator</a>
+      <a href="/starter/">Project Starter Wizard</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+      <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+      <a href="/claude-code-gitignore-best-practices/">Gitignore Best Practices</a>
+      <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/">Skill Timeout Error Fix</a>
+    </div>
+  </section>
+
+</div>
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Claude Code Error Hub</a>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Claude Code Error Diagnostic Tool</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Claude Code Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Frozen constant data ── */
+  const TIEBREAKER = Object.freeze({ sonnet: 2, opus: 1, haiku: 0 });
+  const VALID_MODELS = Object.freeze(['sonnet', 'opus', 'haiku']);
+  const VALID_TASKS = Object.freeze(['script', 'feature', 'app', 'architecture']);
+  const VALID_SIZES = Object.freeze(['small', 'medium', 'large', 'xlarge']);
+  const VALID_PRIORITIES = Object.freeze(['speed', 'quality', 'cost', 'context']);
+  const VALID_TEAMS = Object.freeze(['solo', 'small', 'enterprise']);
+  const VALID_BUDGETS = Object.freeze(['minimize', 'balanced', 'any']);
+  const COMPLEX_TASKS = Object.freeze(['architecture', 'app']);
+  const TOTAL_STEPS = 5;
+  const MAX_LOOP = 100;
+  const STORAGE_KEY = 'ccg_modelselector_uses';
+
+  const MODEL_INFO = Object.freeze({
+    haiku:  Object.freeze({ label: 'Haiku 4.5',  maxPlan: '$100/mo (5x)' }),
+    sonnet: Object.freeze({ label: 'Sonnet 4.6', maxPlan: '$100/mo (5x)' }),
+    opus:   Object.freeze({ label: 'Opus 4.6',   maxPlan: '$200/mo (20x)' })
+  });
+
+  const SUBTASK_ADVICE = Object.freeze({
+    haiku: 'for autocomplete, quick file lookups, and generating boilerplate tests to keep costs low on simple tasks.',
+    sonnet: 'for standard feature work and bug fixes where deep architectural reasoning is not required.',
+    opus: 'for architecture reviews, security audits, and complex refactoring sessions that demand maximum reasoning depth.'
+  });
+
+  /* ── Null-safe DOM query helper ── */
+  function getEl(id) {
+    console.assert(typeof id === 'string', 'getEl: id must be a string');
+    const el = document.getElementById(id);
+    console.assert(el !== null, 'getEl: element not found for id: ' + id);
+    return el;
+  }
+
+  /* ── Null-safe getAttribute helper ── */
+  function getAttr(el, attr) {
+    console.assert(el instanceof HTMLElement, 'getAttr: el must be an HTMLElement');
+    console.assert(typeof attr === 'string', 'getAttr: attr must be a string');
+    const val = el.getAttribute(attr);
+    return val !== null ? val : '';
+  }
+
+  /* ── State (module-scoped, not global) ── */
+  var isAutoLoad = true;
+  let currentStep = 0;
+  let answers = {};
+
+  /* ── DOM refs with null guards ── */
+  const steps = document.querySelectorAll('.question-step');
+  const resultSection = getEl('resultSection');
+  const progressFill = getEl('progressFill');
+
+  /* ── Init: attach option listeners via delegation ── */
+  function initListeners() {
+    console.assert(steps.length > 0, 'initListeners: no question steps found');
+    console.assert(resultSection !== null, 'initListeners: resultSection is null');
+
+    const wizardCard = getEl('wizardCard');
+    if (!wizardCard) { return; }
+
+    /* Event delegation on the wizard card */
+    wizardCard.addEventListener('click', function(e) {
+      const optBtn = e.target.closest('.option-btn');
+      const backBtn = e.target.closest('[data-action="back"]');
+      const restartBtn = e.target.closest('[data-action="restart"]');
+      const copyBtn = e.target.closest('[data-action="copy"]');
+
+      if (optBtn) {
+        handleOptionClick(optBtn);
+      } else if (backBtn) {
+        goBack();
+      } else if (restartBtn) {
+        startOver();
+      } else if (copyBtn) {
+        copyConfig();
+      }
+    });
+  }
+
+  /* ── Handle option click ── */
+  function handleOptionClick(btn) {
+    console.assert(btn instanceof HTMLElement, 'handleOptionClick: btn must be HTMLElement');
+    const key = getAttr(btn, 'data-key');
+    const value = getAttr(btn, 'data-value');
+    console.assert(key.length > 0 && value.length > 0, 'handleOptionClick: missing data-key or data-value');
+
+    answers[key] = value;
+
+    /* Highlight selected */
+    const parent = btn.parentElement;
+    if (parent) {
+      const siblings = parent.querySelectorAll('.option-btn');
+      let count = 0;
+      for (let i = 0; i < siblings.length && count < MAX_LOOP; i++) {
+        siblings[i].classList.remove('selected');
+        count++;
+      }
+    }
+    btn.classList.add('selected');
+
+    /* Advance after brief delay */
+    setTimeout(function() {
+      if (currentStep < TOTAL_STEPS - 1) {
+        currentStep++;
+        renderStep();
+      } else {
+        showResult();
+      }
+    }, 250);
+  }
+
+  /* ── Render current step ── */
+  function renderStep() {
+    console.assert(currentStep >= 0 && currentStep < TOTAL_STEPS, 'renderStep: step out of bounds');
+    console.assert(steps.length > 0, 'renderStep: no steps available');
+
+    let count = 0;
+    for (let i = 0; i < steps.length && count < MAX_LOOP; i++) {
+      steps[i].classList.remove('active');
+      count++;
+    }
+    resultSection.classList.remove('active');
+
+    if (currentStep < steps.length) {
+      steps[currentStep].classList.add('active');
+    }
+
+    updateProgress();
+  }
+
+  /* ── Go back ── */
+  function goBack() {
+    console.assert(typeof currentStep === 'number', 'goBack: currentStep must be number');
+    console.assert(currentStep >= 0, 'goBack: currentStep must be non-negative');
+    if (currentStep > 0) {
+      currentStep--;
+      renderStep();
+    }
+  }
+
+  /* ── Update progress bar ── */
+  function updateProgress() {
+    console.assert(typeof currentStep === 'number', 'updateProgress: currentStep must be number');
+    console.assert(progressFill !== null, 'updateProgress: progressFill element is null');
+    const pct = (currentStep / TOTAL_STEPS) * 100;
+    progressFill.style.width = pct + '%';
+  }
+
+  /* ── Scoring engine with complexity floor (FIX-11) ── */
+  function getRecommendation(ans) {
+    console.assert(typeof ans === 'object' && ans !== null, 'getRecommendation: answers must be object');
+    console.assert(typeof ans.task === 'string', 'getRecommendation: answers.task must be string');
+
+    const scores = { sonnet: 0, opus: 0, haiku: 0 };
+
+    /* Q1: Task complexity */
+    if (ans.task === 'script')       { scores.haiku += 3; scores.sonnet += 2; }
+    if (ans.task === 'feature')      { scores.sonnet += 3; scores.opus += 1; }
+    if (ans.task === 'app')          { scores.sonnet += 2; scores.opus += 3; }
+    if (ans.task === 'architecture') { scores.opus += 4; }
+
+    /* Q2: Codebase size */
+    if (ans.size === 'small')  { scores.haiku += 2; }
+    if (ans.size === 'medium') { scores.sonnet += 2; }
+    if (ans.size === 'large')  { scores.sonnet += 2; scores.opus += 2; }
+    if (ans.size === 'xlarge') { scores.opus += 3; }
+
+    /* Q3: Priority */
+    if (ans.priority === 'speed')   { scores.haiku += 3; scores.sonnet += 2; }
+    if (ans.priority === 'quality') { scores.opus += 4; }
+    if (ans.priority === 'cost')    { scores.haiku += 4; }
+    if (ans.priority === 'context') { scores.opus += 2; scores.sonnet += 2; }
+
+    /* Q4: Team */
+    if (ans.team === 'solo')       { scores.sonnet += 1; }
+    if (ans.team === 'small')      { scores.sonnet += 2; }
+    if (ans.team === 'enterprise') { scores.opus += 2; }
+
+    /* Q5: Budget */
+    if (ans.budget === 'minimize') { scores.haiku += 4; }
+    if (ans.budget === 'balanced') { scores.sonnet += 3; }
+    if (ans.budget === 'any')      { scores.opus += 3; }
+
+    /* FIX-11: Task complexity floor — Opus never loses to Haiku for complex tasks */
+    if (ans.task === 'architecture' || ans.task === 'app') {
+      scores.opus = Math.max(scores.opus, scores.haiku + 1);
+    }
+
+    return rankModels(scores);
+  }
+
+  /* ── Rank models by score with deterministic tie-breaking (FIX-3) ── */
+  function rankModels(scores) {
+    console.assert(typeof scores === 'object' && scores !== null, 'rankModels: scores must be object');
+    console.assert(typeof scores.sonnet === 'number' && typeof scores.opus === 'number' && typeof scores.haiku === 'number',
+      'rankModels: all scores must be numbers');
+
+    const entries = Object.entries(scores);
+    entries.sort(function(a, b) {
+      if (b[1] !== a[1]) { return b[1] - a[1]; }
+      /* Tiebreak: sonnet(2) > opus(1) > haiku(0) */
+      return (TIEBREAKER[b[0]] || 0) - (TIEBREAKER[a[0]] || 0);
+    });
+
+    const result = {
+      primary: entries[0][0],
+      secondary: entries[1][0],
+      scores: scores
+    };
+
+    console.assert(VALID_MODELS.indexOf(result.primary) !== -1, 'rankModels: invalid primary model');
+    console.assert(result.primary !== result.secondary, 'rankModels: primary must differ from secondary');
+    return result;
+  }
+
+  /* ── Show result ── */
+  function showResult() {
+    console.assert(Object.keys(answers).length > 0, 'showResult: no answers provided');
+    const rec = getRecommendation(answers);
+    var useCount = 0;
+    if (!isAutoLoad) {
+      useCount = incrementUseCount();
+    } else {
+      useCount = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+    }
+    isAutoLoad = false;
+    console.assert(typeof useCount === 'number' && useCount >= 0, 'showResult: useCount must be non-negative');
+
+    let count = 0;
+    for (let i = 0; i < steps.length && count < MAX_LOOP; i++) {
+      steps[i].classList.remove('active');
+      count++;
+    }
+
+    progressFill.style.width = '100%';
+    resultSection.classList.add('active');
+
+    renderResultHeader(rec);
+    renderReasoning(rec);
+    renderAlsoConsider(rec);
+    renderCostTable(rec);
+    renderConfigSnippet(rec);
+
+    /* Paywall after 2 uses (read-only check always runs) */
+    if (useCount > 2) {
+      applyPaywall();
+    }
+  }
+
+  /* ── Render result header ── */
+  function renderResultHeader(rec) {
+    console.assert(rec && typeof rec.primary === 'string', 'renderResultHeader: rec.primary required');
+    const el = getEl('resultHeader');
+    if (!el) { return; }
+    const info = getModelInfo(rec.primary);
+    console.assert(info && typeof info.label === 'string', 'renderResultHeader: info.label required');
+    el.innerHTML =
+      '<span class="model-badge badge-' + rec.primary + '">' + info.label + '</span>' +
+      '<h2>Use ' + info.label + ' for This Project</h2>';
+  }
+
+  /* ── Render reasoning ── */
+  function renderReasoning(rec) {
+    console.assert(rec && typeof rec.primary === 'string', 'renderReasoning: rec.primary required');
+    const el = getEl('resultReasoning');
+    if (!el) { return; }
+    const text = buildReasoningText(rec);
+    console.assert(typeof text === 'string' && text.length > 0, 'renderReasoning: text must be non-empty');
+    el.textContent = text;
+  }
+
+  /* ── Build reasoning text ── */
+  function buildReasoningText(rec) {
+    console.assert(rec && typeof rec.primary === 'string', 'buildReasoningText: rec.primary required');
+    const info = getModelInfo(rec.primary);
+    console.assert(info && info.label, 'buildReasoningText: model info must exist');
+
+    const lines = [];
+    lines.push(info.label + ' is the best match for your scenario.');
+
+    if (rec.primary === 'opus') {
+      lines.push('Your project demands deep reasoning and architectural understanding that only Opus delivers reliably.');
+    } else if (rec.primary === 'sonnet') {
+      lines.push('Sonnet delivers the best balance of quality and cost for everyday coding tasks.');
+    } else {
+      lines.push('Haiku keeps costs minimal while handling straightforward tasks quickly.');
+    }
+
+    if (answers.task === 'architecture') {
+      lines.push('Architecture-level decisions benefit from the strongest reasoning model available.');
+    } else if (answers.task === 'app') {
+      lines.push('Full application development requires a model that maintains coherence across many files.');
+    }
+
+    if (answers.budget === 'minimize' && rec.primary !== 'haiku') {
+      lines.push('While you prefer lower costs, the complexity of your task justifies the investment in a more capable model.');
+    }
+
+    return lines.join(' ');
+  }
+
+  /* ── Render also-consider ── */
+  function renderAlsoConsider(rec) {
+    console.assert(rec && typeof rec.secondary === 'string', 'renderAlsoConsider: rec.secondary required');
+    const el = getEl('alsoConsider');
+    if (!el) { return; }
+    const secondary = getModelInfo(rec.secondary);
+    const subtask = getSubtaskAdvice(rec.secondary);
+    console.assert(typeof subtask === 'string', 'renderAlsoConsider: subtask must be string');
+    el.innerHTML = '<strong>Also consider:</strong> Use ' + secondary.label + ' ' + subtask;
+  }
+
+  /* ── Subtask advice by model ── */
+  function getSubtaskAdvice(model) {
+    console.assert(typeof model === 'string', 'getSubtaskAdvice: model must be string');
+    const advice = SUBTASK_ADVICE[model] || SUBTASK_ADVICE.opus;
+    console.assert(typeof advice === 'string' && advice.length > 0, 'getSubtaskAdvice: must return non-empty string');
+    return advice;
+  }
+
+  /* ── Render cost table ── */
+  function renderCostTable(rec) {
+    console.assert(rec && typeof rec.primary === 'string', 'renderCostTable: rec.primary required');
+    const el = getEl('costTableWrap');
+    if (!el) { return; }
+    const costs = getCostEstimates(answers);
+    console.assert(costs && typeof costs.haiku === 'string', 'renderCostTable: costs must have haiku');
+
+    let html = '<h3>Estimated Monthly Cost</h3>';
+    html += '<table class="cost-table">';
+    html += '<thead><tr><th>Model</th><th>API Cost</th><th>Max Plan</th></tr></thead>';
+    html += '<tbody>';
+
+    const modelNames = ['haiku', 'sonnet', 'opus'];
+    for (let i = 0; i < modelNames.length; i++) {
+      const m = modelNames[i];
+      const info = getModelInfo(m);
+      const highlight = (m === rec.primary) ? ' class="highlight"' : '';
+      html += '<tr' + highlight + '>';
+      html += '<td>' + info.label + '</td>';
+      html += '<td>' + costs[m] + '</td>';
+      html += '<td>' + info.maxPlan + '</td>';
+      html += '</tr>';
+    }
+
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  /* ── Get cost estimates based on answers ── */
+  function getCostEstimates(ans) {
+    console.assert(typeof ans === 'object' && ans !== null, 'getCostEstimates: answers must be object');
+    const base = { haiku: 5, sonnet: 25, opus: 120 };
+
+    if (ans.size === 'large' || ans.size === 'xlarge') {
+      base.haiku *= 2; base.sonnet *= 2; base.opus *= 1.5;
+    }
+    if (ans.team === 'small') {
+      base.haiku *= 4; base.sonnet *= 4; base.opus *= 4;
+    }
+    if (ans.team === 'enterprise') {
+      base.haiku *= 25; base.sonnet *= 25; base.opus *= 25;
+    }
+    if (ans.task === 'architecture' || ans.task === 'app') {
+      base.haiku *= 1.5; base.sonnet *= 1.5; base.opus *= 1.3;
+    }
+
+    const result = {
+      haiku:  '$' + Math.round(base.haiku) + '/mo',
+      sonnet: '$' + Math.round(base.sonnet) + '/mo',
+      opus:   '$' + Math.round(base.opus) + '/mo'
+    };
+    console.assert(typeof result.haiku === 'string', 'getCostEstimates: haiku cost must be string');
+    return result;
+  }
+
+  /* ── Render config snippet ── */
+  function renderConfigSnippet(rec) {
+    console.assert(rec && typeof rec.primary === 'string', 'renderConfigSnippet: rec.primary required');
+    const el = getEl('configSnippetWrap');
+    if (!el) { return; }
+    const config = buildConfigText(rec);
+    console.assert(typeof config === 'string' && config.length > 0, 'renderConfigSnippet: config must be non-empty');
+
+    let html = '<h3>CLAUDE.md Model Configuration</h3>';
+    html += '<div class="config-snippet" id="configText">' + escapeHtml(config) + '</div>';
+    html += '<button class="btn-copy" data-action="copy" aria-label="Copy configuration to clipboard">Copy Configuration</button>';
+
+    el.innerHTML = html;
+  }
+
+  /* ── Build config text ── */
+  function buildConfigText(rec) {
+    console.assert(rec && typeof rec.primary === 'string', 'buildConfigText: rec.primary required');
+    console.assert(VALID_MODELS.indexOf(rec.primary) !== -1, 'buildConfigText: must be valid model');
+    const lines = ['## Model Configuration'];
+
+    if (rec.primary === 'sonnet') {
+      lines.push('- Default: sonnet (4.6) for all coding tasks');
+      lines.push('- Use opus for architecture reviews and complex refactoring');
+      lines.push('- Use haiku for autocomplete, quick lookups, and test generation');
+    } else if (rec.primary === 'opus') {
+      lines.push('- Default: opus (4.6) for architecture and complex tasks');
+      lines.push('- Use sonnet for standard feature work and bug fixes');
+      lines.push('- Use haiku for autocomplete and boilerplate generation');
+    } else {
+      lines.push('- Default: haiku (4.5) for quick tasks and cost efficiency');
+      lines.push('- Use sonnet for features requiring deeper reasoning');
+      lines.push('- Use opus sparingly for architecture-critical decisions');
+    }
+
+    return lines.join('\n');
+  }
+
+  /* ── Copy config to clipboard (FIX-19: .catch added) ── */
+  function copyConfig() {
+    const textEl = document.getElementById('configText');
+    console.assert(textEl !== null, 'copyConfig: configText element must exist');
+    if (!textEl) { return; }
+    const text = textEl.textContent;
+
+    const btn = document.querySelector('[data-action="copy"]');
+    console.assert(btn !== null, 'copyConfig: copy button must exist');
+    if (!btn) { return; }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy Configuration';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(function(err) {
+        console.warn('Clipboard write failed:', err);
+        fallbackCopy(text, btn);
+      });
+    } else {
+      fallbackCopy(text, btn);
+    }
+  }
+
+  /* ── Fallback copy for older browsers ── */
+  function fallbackCopy(text, btn) {
+    console.assert(typeof text === 'string', 'fallbackCopy: text must be string');
+    console.assert(btn instanceof HTMLElement, 'fallbackCopy: btn must be HTMLElement');
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy Configuration';
+        btn.classList.remove('copied');
+      }, 2000);
+    } catch (e) {
+      btn.textContent = 'Copy failed';
+    }
+    document.body.removeChild(ta);
+  }
+
+  /* ── Model info helper ── */
+  function getModelInfo(name) {
+    console.assert(typeof name === 'string', 'getModelInfo: name must be string');
+    const info = MODEL_INFO[name] || MODEL_INFO.sonnet;
+    console.assert(info && typeof info.label === 'string', 'getModelInfo: must return valid info');
+    return info;
+  }
+
+  /* ── Escape HTML ── */
+  function escapeHtml(str) {
+    console.assert(typeof str === 'string', 'escapeHtml: str must be string');
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    const result = div.innerHTML;
+    console.assert(typeof result === 'string', 'escapeHtml: must return string');
+    return result;
+  }
+
+  /* ── Start over ── */
+  function startOver() {
+    console.assert(typeof currentStep === 'number', 'startOver: currentStep must be number');
+    currentStep = 0;
+    answers = {};
+
+    resultSection.classList.remove('active');
+
+    /* Clear all selected states */
+    const allBtns = document.querySelectorAll('.option-btn');
+    console.assert(allBtns.length > 0, 'startOver: option buttons must exist');
+    let count = 0;
+    for (let i = 0; i < allBtns.length && count < MAX_LOOP; i++) {
+      allBtns[i].classList.remove('selected');
+      count++;
+    }
+
+    renderStep();
+  }
+
+  /* ── Use counter (localStorage) ── */
+  function incrementUseCount() {
+    console.assert(typeof STORAGE_KEY === 'string', 'incrementUseCount: STORAGE_KEY must be string');
+    let count = 0;
+    try {
+      count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+    } catch (e) {
+      count = 0;
+    }
+    count++;
+    console.assert(count > 0, 'incrementUseCount: count must be positive');
+    try {
+      localStorage.setItem(STORAGE_KEY, String(count));
+    } catch (e) { /* storage full or blocked — proceed without saving */ }
+    return count;
+  }
+
+  /* ── Apply paywall blur ── */
+  function applyPaywall() {
+    const content = document.getElementById('resultContent');
+    console.assert(content !== null, 'applyPaywall: resultContent must exist');
+    if (!content) { return; }
+    content.classList.add('result-blurred');
+
+    const overlay = document.getElementById('paywall-overlay');
+    console.assert(overlay !== null, 'applyPaywall: paywall-overlay must exist');
+    if (!overlay) { return; }
+    overlay.classList.add('visible');
+  }
+
+  /* ── Init ── */
+  initListeners();
+  updateProgress();
+  isAutoLoad = false;
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Token Usage Estimator — Estimate Tokens Per Session (2026) | ClaudHQ</title>
+  <meta name="description" content="Estimate how many tokens a Claude Code session will use. Plan your budget across Haiku, Sonnet, and Opus models. Optimize context window utilization.">
+  <link rel="canonical" href="https://claudhq.com/token-estimator/">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Claude Code Token Estimator — Free Tool">
+  <meta property="og:description" content="Estimate token usage per session. Plan your budget across Haiku, Sonnet, and Opus models.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://claudhq.com/token-estimator/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How many tokens does a typical Claude Code session use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A typical 30-minute Claude Code session with Sonnet uses approximately 25,000-50,000 tokens depending on codebase size and task complexity. Debugging and refactoring tasks consume more tokens than code review or documentation tasks due to the iterative back-and-forth required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What counts as input vs output tokens in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Input tokens include your prompts, the system prompt, CLAUDE.md contents, file contents loaded into context, and conversation history. Output tokens are Claude's responses including generated code, explanations, and tool calls. Input typically accounts for about 65% of total tokens because context loading dominates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does codebase size affect token usage?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Larger codebases consume more tokens because Claude Code loads relevant files into context to understand your project. Roughly 10-20% of your codebase may be loaded during a session. A 100K LOC project will use significantly more context tokens than a 10K LOC project, even for the same task."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the 200K context window limit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "All Claude models (Haiku 4.5, Sonnet 4.6, and Opus 4.6) share a 200,000-token context window. This is the maximum amount of text the model can process in a single conversation turn. When you exceed this limit, Claude Code automatically compacts the conversation, which can lose important context."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does /compact reduce token usage?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The /compact command summarizes your conversation history into a condensed form, dramatically reducing the token count. Using /compact after every 3 exchanges can reduce total session token usage by 40-60%. It is one of the most effective token optimization strategies available."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Claude model uses the most tokens?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Opus 4.6 uses approximately 1.4x more tokens than Sonnet 4.6 due to longer, more detailed responses. Haiku 4.5 uses about 0.7x the tokens of Sonnet because it produces more concise output. Choose Haiku for simple tasks to save tokens, and Opus for complex tasks where thoroughness matters."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I stay within my plan's token limit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pro plan users get approximately 500K tokens per month included. To stay within limits: use /compact frequently, choose Haiku for simple tasks, keep CLAUDE.md under 500 lines, avoid loading unnecessary files, and break large tasks into focused sessions. The Max plan offers unlimited tokens for heavy users."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do MCP servers use additional tokens?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Each MCP server adds its tool definitions to the system prompt, consuming input tokens on every turn. A typical MCP server adds 500-2,000 tokens per turn. If you have 5 MCP servers configured, that is an extra 2,500-10,000 tokens per turn just for tool definitions. Only enable MCP servers you actively need."
+        }
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    h1 {
+      font-family: 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      font-size: 28px;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    /* Input sections */
+    .input-section {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .input-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* Range slider */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: oklch(0.30 0.010 60);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: oklch(0.72 0.11 38);
+      cursor: pointer;
+      border: 2px solid oklch(0.155 0.007 60);
+    }
+
+    .slider-row input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: oklch(0.72 0.11 38);
+      cursor: pointer;
+      border: 2px solid oklch(0.155 0.007 60);
+    }
+
+    .slider-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: oklch(0.72 0.11 38);
+      min-width: 120px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* Radio groups */
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .radio-group label:hover {
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    .radio-group input[type="radio"] {
+      accent-color: oklch(0.72 0.11 38);
+    }
+
+    .radio-group input[type="radio"]:checked + span {
+      color: oklch(0.72 0.11 38);
+      font-weight: 600;
+    }
+
+    /* Checkbox groups */
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .checkbox-group label:hover {
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      accent-color: oklch(0.72 0.11 38);
+    }
+
+    .checkbox-group input[type="checkbox"]:checked + span {
+      color: oklch(0.72 0.11 38);
+      font-weight: 600;
+    }
+
+    /* Output cards */
+    .results-heading {
+      font-size: 20px;
+      color: oklch(0.97 0.006 80);
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      color: oklch(0.72 0.11 38);
+      margin-bottom: 16px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+      font-size: 14px;
+    }
+
+    .stat-row:last-child { border-bottom: none; }
+
+    .stat-label { color: oklch(0.58 0.010 70); }
+
+    .stat-value {
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+    }
+
+    .stat-value.highlight {
+      color: oklch(0.72 0.11 38);
+    }
+
+    /* Context bar */
+    .context-bar-container {
+      margin-top: 12px;
+    }
+
+    .context-bar-label {
+      font-size: 13px;
+      color: oklch(0.58 0.010 70);
+      margin-bottom: 6px;
+    }
+
+    .context-bar-track {
+      width: 100%;
+      height: 24px;
+      background: oklch(0.235 0.009 60);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .context-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.3s, background 0.3s;
+      min-width: 2px;
+    }
+
+    .context-bar-pct {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      font-weight: 700;
+      color: oklch(0.97 0.006 80);
+    }
+
+    /* Usage bar (Card 4) */
+    .usage-zones {
+      display: flex;
+      height: 32px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 12px;
+      position: relative;
+    }
+
+    .usage-zone {
+      height: 100%;
+    }
+
+    .usage-zone-green { background: #238636; flex: 5; }
+    .usage-zone-yellow { background: #9e6a03; flex: 3; }
+    .usage-zone-red { background: #da3633; flex: 2; }
+
+    .usage-marker {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 3px;
+      background: #fff;
+      box-shadow: 0 0 6px rgba(255,255,255,0.6);
+      transition: left 0.3s;
+    }
+
+    .usage-zone-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: oklch(0.58 0.010 70);
+      margin-top: 4px;
+    }
+
+    /* Copyable block */
+    .copy-block {
+      position: relative;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: oklch(0.80 0.008 70);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: oklch(0.30 0.010 60);
+      color: oklch(0.80 0.008 70);
+      border: 1px solid oklch(0.42 0.010 70);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: oklch(0.42 0.010 70);
+    }
+
+    /* Blurred sections (paywall) */
+    .blurred {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Paywall overlay */
+    #paywall-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 15, 0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .paywall-box {
+      max-width: 480px;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .paywall-box h2 {
+      color: oklch(0.72 0.11 38);
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .paywall-box p {
+      color: oklch(0.80 0.008 70);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .paywall-cta {
+      display: inline-block;
+      padding: 14px 32px;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      transition: background 0.15s;
+    }
+
+    .paywall-cta:hover {
+      background: oklch(0.64 0.10 38);
+    }
+
+    .paywall-fine {
+      color: #666 !important;
+      font-size: 13px !important;
+      margin-top: 16px !important;
+    }
+
+    /* SEO content */
+    .seo-content {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid oklch(0.30 0.010 60);
+    }
+
+    .seo-content h2 {
+      font-size: 22px;
+      color: oklch(0.97 0.006 80);
+      margin: 32px 0 12px;
+    }
+
+    .seo-content h2:first-child {
+      margin-top: 0;
+    }
+
+    .seo-content p {
+      color: oklch(0.80 0.008 70);
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    .seo-content ul, .seo-content ol {
+      margin: 0 0 16px 24px;
+      font-size: 15px;
+    }
+
+    .seo-content li {
+      margin-bottom: 6px;
+    }
+
+    .seo-content a {
+      color: oklch(0.72 0.11 38);
+      text-decoration: none;
+    }
+
+    .seo-content a:hover {
+      text-decoration: underline;
+    }
+
+    details {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      padding: 0;
+    }
+
+    details summary {
+      padding: 14px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      font-size: 15px;
+      list-style: none;
+    }
+
+    details summary::-webkit-details-marker { display: none; }
+
+    details summary::before {
+      content: '+ ';
+      color: oklch(0.72 0.11 38);
+      font-weight: 700;
+    }
+
+    details[open] summary::before {
+      content: '- ';
+    }
+
+    details div {
+      padding: 0 16px 14px;
+      font-size: 14px;
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, rgba(110, 231, 183, 0.08), rgba(110, 231, 183, 0.02));
+      border: 1px solid rgba(110, 231, 183, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 32px;
+    }
+
+    .cta-box a {
+      color: oklch(0.72 0.11 38);
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .cta-box a:hover {
+      text-decoration: underline;
+    }
+
+    .cta-box p {
+      color: oklch(0.58 0.010 70);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .slider-value { font-size: 16px; min-width: 90px; }
+      .radio-group, .checkbox-group { flex-direction: column; }
+      .radio-group label, .checkbox-group label { width: 100%; }
+      .stat-row { font-size: 13px; }
+      .copy-block { font-size: 12px; padding: 12px; }
+    }
+
+    /* ========== LEARN MORE ========== */
+    .learn-more {
+      margin: 48px 0 0;
+      padding: 40px 0 0;
+      border-top: 1px solid var(--line);
+    }
+    .learn-more .lm-eyebrow {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-3);
+      margin-bottom: 12px;
+    }
+    .learn-more .lm-title {
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0 0 24px;
+      font-weight: 400;
+    }
+    .learn-more .lm-title em {
+      font-family: var(--serif-alt);
+      font-style: italic;
+      font-weight: 300;
+      color: var(--accent);
+    }
+    .learn-more-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .learn-more-grid a {
+      background: var(--bg-2);
+      padding: 16px 20px;
+      text-decoration: none;
+      color: var(--ink-2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      letter-spacing: -0.005em;
+      transition: background .15s ease, color .15s ease;
+    }
+    .learn-more-grid a:hover {
+      background: var(--bg-3);
+      color: var(--accent);
+    }
+    .learn-more-grid a::before {
+      content: '\2192';
+      color: var(--ink-4);
+      font-family: var(--mono);
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: color .15s ease;
+    }
+    .learn-more-grid a:hover::before {
+      color: var(--accent);
+    }
+    @media (max-width: 640px) {
+      .learn-more-grid { grid-template-columns: 1fr; }
+      .learn-more .lm-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>Claude Code Token Usage Estimator (2026)</h1>
+  <p class="subtitle">Estimate tokens per session. Plan your budget. Stay within limits.</p>
+
+  <!-- Input: Codebase Size -->
+  <div class="input-section">
+    <span class="input-label">Codebase Size</span>
+    <div class="slider-row">
+      <input type="range" id="codebase-slider" min="1" max="500" value="50" step="1">
+      <span class="slider-value" id="codebase-display">50K lines</span>
+    </div>
+  </div>
+
+  <!-- Input: Average File Size -->
+  <div class="input-section">
+    <span class="input-label">Average File Size</span>
+    <div class="radio-group">
+      <label><input type="radio" name="filesize" value="small"><span>Small (&lt;100 LOC)</span></label>
+      <label><input type="radio" name="filesize" value="medium" checked><span>Medium (100-500 LOC)</span></label>
+      <label><input type="radio" name="filesize" value="large"><span>Large (500+ LOC)</span></label>
+    </div>
+  </div>
+
+  <!-- Input: Task Type -->
+  <div class="input-section">
+    <span class="input-label">Task Type (select all that apply)</span>
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="task" value="codegen" checked><span>Code Generation (1.0x)</span></label>
+      <label><input type="checkbox" name="task" value="debug"><span>Debugging (1.3x)</span></label>
+      <label><input type="checkbox" name="task" value="refactor"><span>Refactoring (1.5x)</span></label>
+      <label><input type="checkbox" name="task" value="review"><span>Code Review (0.8x)</span></label>
+      <label><input type="checkbox" name="task" value="docs"><span>Documentation (0.6x)</span></label>
+      <label><input type="checkbox" name="task" value="testing"><span>Testing (1.2x)</span></label>
+    </div>
+  </div>
+
+  <!-- Input: Session Length -->
+  <div class="input-section">
+    <span class="input-label">Session Length</span>
+    <div class="slider-row">
+      <input type="range" id="session-slider" min="15" max="240" value="60" step="15">
+      <span class="slider-value" id="session-display">1h 0m</span>
+    </div>
+  </div>
+
+  <!-- Input: Model -->
+  <div class="input-section">
+    <span class="input-label">Model</span>
+    <div class="radio-group">
+      <label><input type="radio" name="model" value="haiku"><span>Haiku 4.5 (fast, 0.7x)</span></label>
+      <label><input type="radio" name="model" value="sonnet" checked><span>Sonnet 4.6 (medium, 1.0x)</span></label>
+      <label><input type="radio" name="model" value="opus"><span>Opus 4.6 (slow, 1.4x)</span></label>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <h2 class="results-heading">Estimation Results</h2>
+
+  <div class="card-grid">
+    <!-- Card 1: Token Breakdown -->
+    <div class="card" id="card-breakdown">
+      <h3>Token Breakdown</h3>
+      <div class="stat-row">
+        <span class="stat-label">Estimated input tokens</span>
+        <span class="stat-value" id="out-input">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Estimated output tokens</span>
+        <span class="stat-value" id="out-output">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Total tokens per session</span>
+        <span class="stat-value highlight" id="out-total">--</span>
+      </div>
+      <div class="context-bar-container">
+        <div class="context-bar-label" id="context-bar-label">Context window utilization: --%</div>
+        <div class="context-bar-track">
+          <div class="context-bar-fill" id="context-bar-fill" style="width: 0%; background: #238636;"></div>
+          <span class="context-bar-pct" id="context-bar-pct">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Plan Limits -->
+    <div class="card" id="card-plans">
+      <h3>Plan Limits</h3>
+      <div class="stat-row">
+        <span class="stat-label">Sessions before Pro limit (500K/mo)</span>
+        <span class="stat-value" id="out-pro-sessions">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Sessions before Max limit</span>
+        <span class="stat-value highlight" id="out-max-sessions">Unlimited</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">API cost per session</span>
+        <span class="stat-value" id="out-api-cost">--</span>
+      </div>
+    </div>
+
+    <!-- Card 3: CLAUDE.md Token Budget -->
+    <div class="card" id="card-budget">
+      <h3>CLAUDE.md Token Budget</h3>
+      <div class="copy-block" id="budget-block">## Token Budget
+- Target: &lt;50K tokens per task
+- Use /compact after every 3 exchanges
+- Model: Sonnet 4.6
+- Expected session cost: $0.00</div>
+      <button class="copy-btn" id="copy-btn" aria-label="Copy token budget to clipboard">Copy</button>
+    </div>
+
+    <!-- Card 4: Token Usage Bar -->
+    <div class="card" id="card-usage-bar">
+      <h3>Token Usage Bar</h3>
+      <p style="font-size: 14px; color: oklch(0.58 0.010 70);" id="usage-bar-label">Your estimated session uses 0% of the 200K context window</p>
+      <div class="usage-zones">
+        <div class="usage-zone usage-zone-green"></div>
+        <div class="usage-zone usage-zone-yellow"></div>
+        <div class="usage-zone usage-zone-red"></div>
+        <div class="usage-marker" id="usage-marker" style="left: 0%;"></div>
+      </div>
+      <div class="usage-zone-labels">
+        <span>0% (Safe)</span>
+        <span>50% (Caution)</span>
+        <span>80% (Danger)</span>
+        <span>100%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paywall overlay -->
+  <div id="paywall-overlay">
+    <div class="paywall-box">
+      <h2>Unlock Unlimited Estimations</h2>
+      <p>Get lifetime access to all Claude Code tools, token-optimized CLAUDE.md templates, and expert configuration guides.</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="paywall-cta">Get Lifetime Access &mdash; $99</a>
+      <p class="paywall-fine">One-time payment. All tools. All templates. Forever.</p>
+    </div>
+  </div>
+
+  <!-- SEO Content -->
+  <div class="seo-content">
+    <h2>Understanding Claude Code Token Usage</h2>
+    <p>Every interaction with Claude Code consumes tokens -- the fundamental unit of measurement for large language model usage. Tokens represent chunks of text, where roughly 4 characters equal one token and 100 tokens approximate 75 English words. Understanding token consumption is critical for managing costs, optimizing workflows, and staying within plan limits.</p>
+    <p>Claude Code sessions involve two types of token consumption: input tokens and output tokens. Input tokens include everything sent to the model -- your prompts, system instructions, CLAUDE.md configuration, loaded file contents, and the accumulated conversation history. Output tokens cover Claude's responses, including generated code, explanations, tool call arguments, and reasoning traces. In a typical session, input tokens dominate at roughly 65% of total usage because the model must ingest your codebase context on every turn.</p>
+    <p>The ratio of input to output tokens shifts depending on your task. Code review sessions are heavily input-weighted because Claude reads many files but produces short assessments. Code generation sessions skew more toward output as Claude writes large blocks of new code. Debugging sits in between, with iterative cycles of reading error context and proposing fixes.</p>
+
+    <h2>How Context Windows Work</h2>
+    <p>All current Claude models -- Haiku 4.5, Sonnet 4.6, and Opus 4.6 -- share a 200,000-token context window. This window acts as the model's working memory: it holds the entire conversation, system prompt, tool definitions, and any files loaded into context. Once the conversation approaches the window limit, Claude Code must either compact the conversation or start a fresh session.</p>
+    <p>Context window utilization directly impacts response quality. When the window is under 50% full, Claude has ample room to reason and produce detailed responses. Between 50-80%, you may notice slightly less thorough responses as the model manages its available space. Above 80%, response quality can degrade noticeably, and you risk hitting hard limits that force compaction. The <code>/compact</code> command summarizes conversation history into a condensed form, freeing context space without losing essential information.</p>
+    <p>Codebase size has a multiplicative effect on context usage. When Claude Code works with a 100K-line codebase, it may load 10-20% of the relevant files into context per turn. That means a single turn could consume 15,000-30,000 tokens just for file contents before any prompt or response tokens are counted. For large codebases, aggressive use of <code>.claudeignore</code> to exclude irrelevant directories is essential.</p>
+
+    <h2>Token Optimization Strategies</h2>
+    <p>Effective token management can reduce your monthly usage by 40-60% without sacrificing productivity. Here are the most impactful strategies, ranked by effectiveness:</p>
+    <ul>
+      <li><strong>Use /compact regularly.</strong> Run <code>/compact</code> after every 3 exchanges to reset context accumulation. This single habit has the largest impact on total token usage.</li>
+      <li><strong>Choose the right model.</strong> Use Haiku 4.5 for simple tasks like formatting, renaming, or small edits. Reserve Opus 4.6 for complex architectural decisions or multi-file refactors where thoroughness matters.</li>
+      <li><strong>Keep CLAUDE.md lean.</strong> Every token in your CLAUDE.md is loaded on every single turn. A 500-line CLAUDE.md wastes thousands of tokens per session. Keep it under 200 lines with only essential rules.</li>
+      <li><strong>Scope your tasks narrowly.</strong> Instead of saying "refactor the entire auth module," break it into focused requests: "refactor the password validation function in auth/validators.ts." Narrower tasks load fewer files and produce faster results.</li>
+      <li><strong>Disable unused MCP servers.</strong> Each MCP server adds its tool definitions to every turn's input. Five MCP servers can add 5,000-10,000 tokens per turn in overhead.</li>
+      <li><strong>Use .claudeignore.</strong> Exclude <code>node_modules</code>, <code>dist</code>, <code>.git</code>, test fixtures, and other directories Claude does not need to read.</li>
+    </ul>
+
+    <h2>Common Questions</h2>
+
+    <details>
+      <summary>How many tokens does a typical session use?</summary>
+      <div>A typical 30-minute Claude Code session with Sonnet uses approximately 25,000-50,000 tokens depending on codebase size and task complexity. Debugging and refactoring tasks consume more tokens than code review or documentation tasks due to the iterative back-and-forth required. Sessions over an hour commonly exceed 80,000 tokens.</div>
+    </details>
+
+    <details>
+      <summary>What counts as input vs output tokens?</summary>
+      <div>Input tokens include your prompts, the system prompt, CLAUDE.md contents, file contents loaded into context, and conversation history. Output tokens are Claude's responses including generated code, explanations, and tool calls. Input typically accounts for about 65% of total tokens because context loading dominates each turn.</div>
+    </details>
+
+    <details>
+      <summary>How does codebase size affect token usage?</summary>
+      <div>Larger codebases consume more tokens because Claude Code loads relevant files into context to understand your project. Roughly 10-20% of your codebase may be loaded during a session. A 100K LOC project will use significantly more context tokens than a 10K LOC project, even for identical tasks. Use <code>.claudeignore</code> to exclude irrelevant directories.</div>
+    </details>
+
+    <details>
+      <summary>What is the 200K context window limit?</summary>
+      <div>All Claude models (Haiku 4.5, Sonnet 4.6, and Opus 4.6) share a 200,000-token context window. This is the maximum amount of text the model can process in a single conversation turn. When you exceed this limit, Claude Code automatically compacts the conversation, which can lose important context from earlier in the session.</div>
+    </details>
+
+    <details>
+      <summary>How does /compact reduce token usage?</summary>
+      <div>The <code>/compact</code> command summarizes your conversation history into a condensed form, dramatically reducing the token count carried forward. Using <code>/compact</code> after every 3 exchanges can reduce total session token usage by 40-60%. It preserves key decisions and context while removing verbose intermediate steps.</div>
+    </details>
+
+    <details>
+      <summary>Which model uses the most tokens?</summary>
+      <div>Opus 4.6 uses approximately 1.4x more tokens than Sonnet 4.6 due to longer, more detailed responses and deeper reasoning. Haiku 4.5 uses about 0.7x the tokens of Sonnet because it produces more concise output. Choose Haiku for simple tasks to save tokens, and reserve Opus for complex tasks where thoroughness justifies the higher cost.</div>
+    </details>
+
+    <details>
+      <summary>How do I stay within my plan's token limit?</summary>
+      <div>Pro plan users get approximately 500K tokens per month included. To stay within limits: use <code>/compact</code> frequently, choose Haiku for simple tasks, keep CLAUDE.md under 500 lines, avoid loading unnecessary files, and break large tasks into focused sessions. The Max plan offers unlimited tokens for heavy users who regularly exceed Pro limits.</div>
+    </details>
+
+    <details>
+      <summary>Do MCP servers use additional tokens?</summary>
+      <div>Yes. Each MCP server adds its tool definitions to the system prompt, consuming input tokens on every turn. A typical MCP server adds 500-2,000 tokens per turn. If you have 5 MCP servers configured, that adds 2,500-10,000 extra tokens per turn just for tool definitions. Only enable MCP servers you actively need for your current task.</div>
+    </details>
+
+    <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+      <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+      <ul style="list-style:none;padding:0;margin:0;">
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+        </li>
+        <li style="padding:8px 0;">
+          <a href="/skill-finder/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Skill Finder</a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="learn-more">
+      <div class="lm-eyebrow">&sect; Related &middot; Token optimization</div>
+      <h2 class="lm-title">Keep <em>reading.</em></h2>
+      <div class="learn-more-grid">
+        <a href="/model-selector/">Claude Model Selector</a>
+        <a href="/permissions/">Permission Configurator</a>
+        <a href="/mcp-config/">MCP Server Config Generator</a>
+        <a href="/commands/">Command Reference</a>
+        <a href="/starter/">Project Starter Wizard</a>
+        <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+        <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+        <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+        <a href="/claude-code-gitignore-best-practices/">Gitignore Best Practices</a>
+      </div>
+    </section>
+
+    <div class="cta-box">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall">Token-optimized CLAUDE.md templates &rarr; Playbook ($99)</a>
+      <p>Pre-built configurations that cut token waste by 40-60%</p>
+    </div>
+  </div>
+</div>
+
+
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">SSL Error Fix</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/about.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">About</a>
+      <a href="/prompts.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ---- Constants ---- */
+  var CONTEXT_WINDOW = 200000;
+  var BASE_TOKENS_PER_MINUTE = 800;
+  var INPUT_RATIO = 0.65;
+  var OUTPUT_RATIO = 0.35;
+  var PRO_MONTHLY_TOKENS = 500000;
+
+  var TASK_MULTIPLIERS = Object.freeze({
+    codegen: 1.0,
+    debug: 1.3,
+    refactor: 1.5,
+    review: 0.8,
+    docs: 0.6,
+    testing: 1.2
+  });
+
+  var MODEL_CONFIG = Object.freeze({
+    haiku:  { label: 'Haiku 4.5',  multiplier: 0.7, inputPrice: 0.80,  outputPrice: 4.00  },
+    sonnet: { label: 'Sonnet 4.6', multiplier: 1.0, inputPrice: 3.00,  outputPrice: 15.00 },
+    opus:   { label: 'Opus 4.6',   multiplier: 1.4, inputPrice: 15.00, outputPrice: 75.00 }
+  });
+
+  /* avgFileTokens: how many tokens per line of code, scaled by file size category */
+  var FILE_SIZE_TOKENS = Object.freeze({
+    small: 8,
+    medium: 12,
+    large: 18
+  });
+
+  var VALID_MODELS = Object.freeze(['haiku', 'sonnet', 'opus']);
+  var VALID_FILE_SIZES = Object.freeze(['small', 'medium', 'large']);
+
+  /* ---- Paywall state ---- */
+  var PAYWALL_KEY = 'ccg_tokenest_uses';
+  var PAYWALL_LIMIT = 2;
+  var GATED_CARD_IDS = Object.freeze(['card-plans', 'card-budget', 'card-usage-bar']);
+  var estimationCount = 0;
+  var isAutoLoad = true;
+
+  /* ---- Formatters ---- */
+  var fmt = new Intl.NumberFormat('en-US');
+  var fmtCurrency = new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+
+  /* ---- Paywall helpers ---- */
+  function getUseCount() {
+    console.assert(typeof PAYWALL_KEY === 'string', 'PAYWALL_KEY must be a string');
+    var count = 0;
+    try {
+      count = parseInt(localStorage.getItem(PAYWALL_KEY), 10) || 0;
+    } catch (e) {
+      console.warn('localStorage read failed:', e.message);
+      count = 0;
+    }
+    console.assert(typeof count === 'number' && count >= 0, 'use count must be non-negative');
+    return count;
+  }
+
+  function incrementUseCount() {
+    console.assert(typeof PAYWALL_KEY === 'string', 'PAYWALL_KEY must be a string');
+    var count = getUseCount() + 1;
+    try {
+      localStorage.setItem(PAYWALL_KEY, String(count));
+    } catch (e) {
+      console.warn('localStorage write failed:', e.message);
+    }
+    console.assert(typeof count === 'number' && count >= 1, 'incremented count must be >= 1');
+    return count;
+  }
+
+  /* ---- DOM refs ---- */
+  var codebaseSlider  = document.getElementById('codebase-slider');
+  var codebaseDisplay = document.getElementById('codebase-display');
+  var sessionSlider   = document.getElementById('session-slider');
+  var sessionDisplay  = document.getElementById('session-display');
+  var paywallOverlay  = document.getElementById('paywall-overlay');
+
+  console.assert(codebaseSlider !== null, 'codebase-slider must exist');
+  console.assert(sessionSlider !== null, 'session-slider must exist');
+  console.assert(paywallOverlay !== null, 'paywall-overlay must exist');
+
+  /* ---- Utility: read selected radio ---- */
+  function getRadio(name) {
+    console.assert(typeof name === 'string' && name.length > 0, 'radio name must be non-empty');
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    var result = el ? el.value : null;
+    console.assert(result === null || typeof result === 'string', 'radio value must be string or null');
+    return result;
+  }
+
+  /* ---- Utility: get checked checkboxes ---- */
+  function getCheckedTasks() {
+    var checkboxes = document.querySelectorAll('input[name="task"]:checked');
+    console.assert(checkboxes !== null, 'querySelectorAll must return a NodeList');
+    var tasks = [];
+    var maxLen = 10;
+    for (var i = 0; i < checkboxes.length && i < maxLen; i++) {
+      tasks.push(checkboxes[i].value);
+    }
+    console.assert(Array.isArray(tasks), 'tasks must be an array');
+    return tasks;
+  }
+
+  /* ---- Utility: clamp ---- */
+  function clamp(val, lo, hi) {
+    console.assert(typeof val === 'number' && typeof lo === 'number' && typeof hi === 'number', 'clamp args must be numbers');
+    console.assert(lo <= hi, 'clamp lo must be <= hi');
+    return Math.max(lo, Math.min(hi, val));
+  }
+
+  /* ---- Utility: format session time ---- */
+  function formatSessionTime(minutes) {
+    console.assert(typeof minutes === 'number' && minutes >= 15 && minutes <= 240, 'minutes must be 15-240');
+    var hours = Math.floor(minutes / 60);
+    var mins = minutes % 60;
+    if (hours === 0) {
+      return mins + 'm';
+    }
+    if (mins === 0) {
+      return hours + 'h 0m';
+    }
+    console.assert(hours >= 0 && mins >= 0, 'hours and mins must be non-negative');
+    return hours + 'h ' + mins + 'm';
+  }
+
+  /* ---- Utility: format codebase size ---- */
+  function formatCodebaseSize(kLines) {
+    console.assert(typeof kLines === 'number' && kLines >= 1 && kLines <= 500, 'kLines must be 1-500');
+    if (kLines >= 1000) {
+      return (kLines / 1000).toFixed(0) + 'M lines';
+    }
+    console.assert(kLines < 1000, 'kLines must be < 1000 if not using M suffix');
+    return kLines + 'K lines';
+  }
+
+  /* ---- Core: compute task multiplier ---- */
+  function computeTaskMultiplier(tasks) {
+    console.assert(Array.isArray(tasks), 'tasks must be an array');
+    console.assert(tasks.length > 0, 'at least one task must be selected');
+    var sum = 0;
+    for (var i = 0; i < tasks.length && i < 10; i++) {
+      var key = tasks[i];
+      var mult = TASK_MULTIPLIERS[key];
+      if (typeof mult === 'number') {
+        sum += mult;
+      }
+    }
+    var avg = sum / tasks.length;
+    console.assert(avg > 0 && avg <= 2.0, 'task multiplier average must be in reasonable range');
+    return avg;
+  }
+
+  /* ---- Core: estimate session tokens ---- */
+  function estimateSessionTokens(codebaseKLines, fileSize, tasks, sessionMinutes, model) {
+    console.assert(codebaseKLines >= 1 && codebaseKLines <= 500, 'codebase must be 1-500K');
+    console.assert(VALID_FILE_SIZES.indexOf(fileSize) !== -1, 'fileSize must be valid');
+
+    var codebaseLines = codebaseKLines * 1000;
+    var avgFileTokens = FILE_SIZE_TOKENS[fileSize];
+    var contextLoadTokens = codebaseLines * avgFileTokens * 0.15;
+
+    var taskMultiplier = computeTaskMultiplier(tasks);
+    var modelMultiplier = MODEL_CONFIG[model].multiplier;
+
+    var sessionTokens = (BASE_TOKENS_PER_MINUTE * sessionMinutes * taskMultiplier * modelMultiplier) + contextLoadTokens;
+    var inputTokens = Math.round(sessionTokens * INPUT_RATIO);
+    var outputTokens = Math.round(sessionTokens * OUTPUT_RATIO);
+    var totalTokens = inputTokens + outputTokens;
+
+    console.assert(totalTokens > 0, 'total tokens must be positive');
+    console.assert(inputTokens >= 0 && outputTokens >= 0, 'token counts must be non-negative');
+
+    return {
+      input: inputTokens,
+      output: outputTokens,
+      total: totalTokens,
+      contextLoad: Math.round(contextLoadTokens)
+    };
+  }
+
+  /* ---- Core: compute API cost ---- */
+  function computeApiCost(inputTokens, outputTokens, model) {
+    console.assert(typeof inputTokens === 'number' && inputTokens >= 0, 'inputTokens must be non-negative');
+    console.assert(typeof outputTokens === 'number' && outputTokens >= 0, 'outputTokens must be non-negative');
+    var config = MODEL_CONFIG[model];
+    var cost = (inputTokens / 1000000) * config.inputPrice + (outputTokens / 1000000) * config.outputPrice;
+    console.assert(cost >= 0, 'cost must be non-negative');
+    return cost;
+  }
+
+  /* ---- Core: get context utilization color ---- */
+  function getUtilizationColor(pct) {
+    console.assert(typeof pct === 'number' && pct >= 0, 'pct must be non-negative');
+    if (pct <= 50) { return '#238636'; }
+    if (pct <= 80) { return '#9e6a03'; }
+    console.assert(pct > 80, 'pct must be > 80 if reaching red');
+    return '#da3633';
+  }
+
+  /* ---- Render: update all output cards ---- */
+  function renderResults(estimate, model) {
+    console.assert(estimate !== null && typeof estimate === 'object', 'estimate must be an object');
+    console.assert(VALID_MODELS.indexOf(model) !== -1, 'model must be valid');
+
+    /* Card 1: Token Breakdown */
+    document.getElementById('out-input').textContent = fmt.format(estimate.input);
+    document.getElementById('out-output').textContent = fmt.format(estimate.output);
+    document.getElementById('out-total').textContent = fmt.format(estimate.total);
+
+    var utilPct = clamp((estimate.total / CONTEXT_WINDOW) * 100, 0, 100);
+    var utilColor = getUtilizationColor(utilPct);
+    var barFill = document.getElementById('context-bar-fill');
+    barFill.style.width = utilPct.toFixed(1) + '%';
+    barFill.style.background = utilColor;
+    document.getElementById('context-bar-pct').textContent = utilPct.toFixed(1) + '%';
+    document.getElementById('context-bar-label').textContent = 'Context window utilization: ' + utilPct.toFixed(1) + '%';
+
+    console.assert(utilPct >= 0 && utilPct <= 100, 'utilization pct must be 0-100');
+  }
+
+  function renderPlans(estimate, model) {
+    console.assert(estimate !== null && typeof estimate === 'object', 'estimate must be an object');
+    console.assert(estimate.total > 0, 'total tokens must be positive for plan calc');
+
+    /* Card 2: Plan Limits */
+    var proSessions = Math.floor(PRO_MONTHLY_TOKENS / estimate.total);
+    document.getElementById('out-pro-sessions').textContent = proSessions > 0 ? fmt.format(proSessions) + ' sessions' : '<1 session';
+    document.getElementById('out-max-sessions').textContent = 'Unlimited';
+
+    var apiCost = computeApiCost(estimate.input, estimate.output, model);
+    document.getElementById('out-api-cost').textContent = fmtCurrency.format(apiCost);
+
+    console.assert(proSessions >= 0, 'proSessions must be non-negative');
+  }
+
+  function renderBudget(estimate, model) {
+    console.assert(estimate !== null && typeof estimate === 'object', 'estimate must be an object');
+    console.assert(VALID_MODELS.indexOf(model) !== -1, 'model must be valid');
+
+    /* Card 3: CLAUDE.md Token Budget */
+    var apiCost = computeApiCost(estimate.input, estimate.output, model);
+    var targetTokens = estimate.total < 50000 ? '<50K' : '<' + Math.ceil(estimate.total / 1000) + 'K';
+    var budgetText = '## Token Budget\n- Target: ' + targetTokens + ' tokens per task\n- Use /compact after every 3 exchanges\n- Model: ' + MODEL_CONFIG[model].label + '\n- Expected session cost: ' + fmtCurrency.format(apiCost);
+    document.getElementById('budget-block').textContent = budgetText;
+
+    console.assert(typeof budgetText === 'string' && budgetText.length > 0, 'budget text must be non-empty');
+  }
+
+  function renderUsageBar(estimate) {
+    console.assert(estimate !== null && typeof estimate === 'object', 'estimate must be an object');
+    console.assert(estimate.total >= 0, 'total must be non-negative');
+
+    /* Card 4: Usage Bar */
+    var pct = clamp((estimate.total / CONTEXT_WINDOW) * 100, 0, 100);
+    document.getElementById('usage-marker').style.left = pct + '%';
+    document.getElementById('usage-bar-label').textContent = 'Your estimated session uses ' + pct.toFixed(1) + '% of the 200K context window';
+
+    console.assert(pct >= 0 && pct <= 100, 'usage pct must be 0-100');
+  }
+
+  /* ---- Paywall enforcement ---- */
+  function enforcePaywall() {
+    console.assert(typeof estimationCount === 'number', 'estimationCount must be a number');
+    var uses = getUseCount();
+    if (uses >= PAYWALL_LIMIT) {
+      for (var i = 0; i < GATED_CARD_IDS.length && i < 10; i++) {
+        var el = document.getElementById(GATED_CARD_IDS[i]);
+        if (el) { el.classList.add('blurred'); }
+      }
+      paywallOverlay.style.display = 'flex';
+    } else {
+      for (var j = 0; j < GATED_CARD_IDS.length && j < 10; j++) {
+        var el2 = document.getElementById(GATED_CARD_IDS[j]);
+        if (el2) { el2.classList.remove('blurred'); }
+      }
+      paywallOverlay.style.display = 'none';
+    }
+    console.assert(paywallOverlay !== null, 'paywall overlay must exist');
+  }
+
+  /* ---- Main calculation trigger ---- */
+  function calculate() {
+    var codebaseK = parseInt(codebaseSlider.value, 10);
+    var fileSize = getRadio('filesize');
+    var tasks = getCheckedTasks();
+    var sessionMin = parseInt(sessionSlider.value, 10);
+    var model = getRadio('model');
+
+    console.assert(typeof codebaseK === 'number' && codebaseK >= 1, 'codebase must be >= 1');
+    console.assert(typeof sessionMin === 'number' && sessionMin >= 15, 'session must be >= 15');
+
+    /* Ensure at least one task */
+    if (tasks.length === 0) {
+      tasks = ['codegen'];
+    }
+
+    /* Ensure valid selections */
+    if (!fileSize || VALID_FILE_SIZES.indexOf(fileSize) === -1) { fileSize = 'medium'; }
+    if (!model || VALID_MODELS.indexOf(model) === -1) { model = 'sonnet'; }
+
+    /* Update displays */
+    codebaseDisplay.textContent = formatCodebaseSize(codebaseK);
+    sessionDisplay.textContent = formatSessionTime(sessionMin);
+
+    /* Compute */
+    var estimate = estimateSessionTokens(codebaseK, fileSize, tasks, sessionMin, model);
+
+    /* Render all cards */
+    renderResults(estimate, model);
+    renderPlans(estimate, model);
+    renderBudget(estimate, model);
+    renderUsageBar(estimate);
+
+    /* Paywall: increment only on user-initiated calculation */
+    if (!isAutoLoad) {
+      estimationCount++;
+      if (estimationCount <= PAYWALL_LIMIT) {
+        incrementUseCount();
+      }
+    }
+    isAutoLoad = false;
+    /* Read-only paywall check always runs */
+    enforcePaywall();
+  }
+
+  /* ---- Slider display-only updates (no paywall increment) ---- */
+  function updateCodebaseDisplay() {
+    console.assert(codebaseSlider !== null, 'codebaseSlider must exist');
+    var val = parseInt(codebaseSlider.value, 10);
+    codebaseDisplay.textContent = formatCodebaseSize(val);
+    console.assert(val >= 1 && val <= 500, 'codebase value must be in range');
+  }
+
+  function updateSessionDisplay() {
+    console.assert(sessionSlider !== null, 'sessionSlider must exist');
+    var val = parseInt(sessionSlider.value, 10);
+    sessionDisplay.textContent = formatSessionTime(val);
+    console.assert(val >= 15 && val <= 240, 'session value must be in range');
+  }
+
+  /* ---- Copy to clipboard helper ---- */
+  function handleCopyClick() {
+    var copyBtn = document.getElementById('copy-btn');
+    var budgetBlock = document.getElementById('budget-block');
+    console.assert(copyBtn !== null, 'copy-btn must exist');
+    console.assert(budgetBlock !== null, 'budget-block must exist');
+    var text = budgetBlock ? budgetBlock.textContent : '';
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(text).then(function() {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+      }).catch(function() {
+        copyBtn.textContent = 'Failed';
+        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+      });
+    } else {
+      /* Fallback for older browsers */
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        copyBtn.textContent = 'Copied!';
+      } catch (err) {
+        copyBtn.textContent = 'Failed';
+      }
+      document.body.removeChild(ta);
+      setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+    }
+  }
+
+  /* ---- Event binding ---- */
+  function bindEvents() {
+    console.assert(codebaseSlider !== null && sessionSlider !== null, 'sliders must exist for binding');
+    console.assert(typeof calculate === 'function', 'calculate must be a function');
+
+    /* Sliders: update display on input, full calc on change */
+    codebaseSlider.addEventListener('input', updateCodebaseDisplay);
+    codebaseSlider.addEventListener('change', calculate);
+    sessionSlider.addEventListener('input', updateSessionDisplay);
+    sessionSlider.addEventListener('change', calculate);
+
+    /* Radios */
+    var radios = document.querySelectorAll('input[type="radio"]');
+    for (var i = 0; i < radios.length && i < 50; i++) {
+      radios[i].addEventListener('change', calculate);
+    }
+
+    /* Checkboxes */
+    var checkboxes = document.querySelectorAll('input[name="task"]');
+    for (var j = 0; j < checkboxes.length && j < 50; j++) {
+      checkboxes[j].addEventListener('change', calculate);
+    }
+
+    /* Copy button */
+    var copyBtn = document.getElementById('copy-btn');
+    console.assert(copyBtn !== null, 'copy-btn must exist');
+    copyBtn.addEventListener('click', handleCopyClick);
+  }
+
+  /* ---- Initialize ---- */
+  bindEvents();
+  updateCodebaseDisplay();
+  updateSessionDisplay();
+
+  /* Run initial calculation; isAutoLoad flag prevents paywall increment */
+  calculate();
+  /* isAutoLoad is now false (set inside calculate), so future calls count */
+
+})();
+</script>
+
+
+</body>
+</html>

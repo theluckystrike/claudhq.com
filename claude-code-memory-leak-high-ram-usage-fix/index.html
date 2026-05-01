@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Leak Detection Workflow (2026) | ClaudHQ</title>
+  <meta name="description" content="A practical guide to identifying and resolving memory leaks in Claude Code sessions. Learn the detection workflow with real examples.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-memory-leak-high-ram-usage-fix/">
+  <meta property="og:title" content="Memory Leak Detection Workflow (2026) | ClaudHQ">
+  <meta property="og:description" content="A practical guide to identifying and resolving memory leaks in Claude Code sessions. Learn the detection workflow with real examples.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-memory-leak-high-ram-usage-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Memory Leak Detection Workflow (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>Memory leaks in Claude Code sessions can silently degrade performance, cause unexpected crashes, and waste computational resources. For developers working on extended coding sessions or power users running complex agent workflows, understanding how to detect and address these issues is essential. This guide provides a practical detection workflow with concrete examples you can apply immediately.</p>
+
+      <h2>Understanding Memory Leaks in Claude Code</h2>
+
+      <p>A memory leak occurs when allocated memory is no longer needed but is never released back to the system. In Claude Code, this manifests through growing memory consumption during extended sessions, particularly when working with large files, complex project structures, or when using skills that maintain stateful connections.</p>
+
+      <p>Common culprits include improperly closed file handles, unbounded caching in skills, unreleased database connections in custom MCP servers, and accumulating context windows without cleanup. Unlike traditional applications where leaks are obvious, Claude Code leaks often appear gradually. Your session starts responsive but becomes sluggish over hours of intensive work.</p>
+
+      <h2>Why Claude Code Sessions Are Particularly Susceptible</h2>
+
+      <p>Claude Code's architecture adds several leak vectors that don't exist in typical CLI tools. First, MCP servers are long-running Node.js processes that persist for the entire session. Any leak in a custom MCP server compounds over hours. Second, skills that cache API responses or store intermediate results can grow their in-memory footprint without bound if they lack eviction logic. Third, the conversation context itself is an in-memory structure. Every tool call result, file read, and code block gets appended to the context and held in memory until the session ends.</p>
+
+      <p>Understanding which of these three vectors is causing your issue determines the right fix. A leak in an MCP server requires code changes to the server. A leak from context accumulation is addressed by session hygiene and context compaction. A leak in a skill's cache is fixed in the skill's configuration or source.</p>
+
+      <h2>The Detection Workflow</h2>
+
+      <h3>Step 1: Monitor Baseline Memory Usage</h3>
+
+      <p>Before detecting leaks, establish a baseline. Use system monitoring tools to track Claude Code's memory footprint during normal operation.</p>
+
+      <pre><code>macOS: Monitor process memory
+ps -o pid,rss,vsz,comm -p $(pgrep -f "claude")
+
+Linux: Alternative using top
+top -p $(pgrep -f "claude")</code></pre>
+
+      <p>Record the baseline RSS (Resident Set Size) after a fresh session starts. A healthy baseline typically stays under 500MB for simple tasks but may exceed 1GB when working with large codebases.</p>
+
+      <p>For a more detailed picture, use <code>pmap</code> on Linux or <code>vmmap</code> on macOS to break down memory by region:</p>
+
+      <pre><code>macOS: Detailed memory map of the Claude Code process
+vmmap $(pgrep -f "claude") | grep -E "^(REGION|__TEXT|__DATA|MALLOC)"
+
+Linux: Show memory regions sorted by size
+pmap -x $(pgrep -f "claude") | sort -k3 -n -r | head -20</code></pre>
+
+      <p>Save this output to a file at session start, then compare it after two hours of work. Regions that have grown significantly are your primary suspects.</p>
+
+      <h3>Step 2: Trigger Repeated Operations</h3>
+
+      <p>Memory leaks often reveal themselves through repeated operations. Create a test scenario that exercises the functionality you suspect is leaking:</p>
+
+      <pre><code>// Example: Test repeated file operations
+const fs = require('fs');
+const path = require('path');
+
+async function stressTest() {
+  const files = [];
+  for (let i = 0; i &lt; 100; i++) {
+    const content = fs.readFileSync(`project/src/${i}.js`, 'utf8');
+    // Process content without proper cleanup
+    files.push(content);
+  }
+  // Files array grows unbounded
+}
+
+stressTest();</code></pre>
+
+      <p>If you're using skills for processing multiple files, repeat the operation multiple times and monitor memory growth between iterations.</p>
+
+      <p>The key signal is the growth rate, not the absolute number. Run the operation once and record memory. Run it ten more times. If memory grows proportionally to iteration count, you have a leak. If memory plateaus, the GC is keeping up and the growth was initialization overhead.</p>
+
+      <pre><code>Script to track memory growth across iterations
+for i in $(seq 1 10); do
+  echo "Iteration $i:"
+  ps -o pid,rss -p $(pgrep -f "claude") | tail -1
+  # Trigger your suspect operation here
+  sleep 5
+done</code></pre>
+
+      <h3>Step 3: Capture Heap Snapshots</h3>
+
+      <p>For JavaScript-based memory analysis, Node.js provides built-in heap snapshot capabilities. If you're running custom MCP servers or debugging skill behavior, inject memory tracking:</p>
+
+      <pre><code>// Add to your MCP server or skill code
+const v8 = require('v8');
+
+function captureHeapSnapshot() {
+  const snapshot = v8.writeHeapSnapshot();
+  console.log(`Heap snapshot written to: ${snapshot}`);
+  return snapshot;
+}
+
+// Call periodically to compare snapshots
+setInterval(() =&gt; {
+  if (process.memoryUsage().heapUsed &gt; 500 * 1024 * 1024) {
+    captureHeapSnapshot();
+  }
+}, 60000);</code></pre>
+
+      <p>Compare snapshots using Chrome DevTools. Look for objects that grow consistently across snapshots. This indicates potential leaks.</p>
+
+      <p>To open heap snapshots in Chrome DevTools: navigate to <code>chrome://inspect</code>, click "Open dedicated DevTools for Node", then go to the Memory tab and load your <code>.heapsnapshot</code> files. The Comparison view between two snapshots shows exactly which objects were allocated and not freed between them.</p>
+
+      <p>When reviewing snapshot comparisons, focus on:</p>
+
+      <ul>
+        <li>Constructor names that appear in large counts in snapshot 2 but not snapshot 1</li>
+        <li>Strings that are holding large amounts of data. File contents, API responses, or serialized objects stored without bounds</li>
+        <li>Array instances that are growing. These are often the unbounded cache or accumulation pattern</li>
+      </ul>
+
+      <h3>Step 4: Analyze Context Accumulation</h3>
+
+      <p>Claude Code maintains conversation context that can grow unbounded. After each test iteration, check the context window size. If it grows beyond expected bounds, your prompts or skill configurations are accumulating unnecessary history.</p>
+
+      <p>One practical way to estimate context growth is to watch token usage in the response metadata. Sessions that start at 2K tokens per response and creep up to 8K over an hour are accumulating context faster than expected. When this happens, the context likely contains redundant tool call results. Full file contents that were read multiple times, or bash output that was never needed for downstream reasoning.</p>
+
+      <p>To diagnose this, ask Claude directly mid-session:</p>
+
+      <pre><code>Without executing any tools, tell me: approximately how much of our
+current conversation context is made up of file contents vs. your
+reasoning and responses? Is there content in the context that we no
+longer need for the current task?</code></pre>
+
+      <p>This surfaces context bloat before it causes latency problems, and Claude can suggest which earlier tool results can be summarized away.</p>
+
+      <h2>Common Leak Patterns and Solutions</h2>
+
+      <h3>Unbounded Caching</h3>
+
+      <p>Skills often cache results for performance. Without eviction policies, this cache grows indefinitely:</p>
+
+      <pre><code>// Problematic: No size limit
+const cache = new Map();
+function getCached(key) {
+  if (!cache.has(key)) {
+    cache.set(key, expensiveOperation(key));
+  }
+  return cache.get(key);
+}
+
+// Fixed: LRU cache with size limit
+const LRU = require('lru-cache');
+const cache = new LRU({ max: 100 });
+function getCached(key) {
+  if (!cache.has(key)) {
+    cache.set(key, expensiveOperation(key));
+  }
+  return cache.get(key);
+}</code></pre>
+
+      <p>The <code>lru-cache</code> package is the standard fix here, but you need to choose <code>max</code> carefully. Set it too low and you lose the performance benefit. Set it too high and you still have a memory problem. A reasonable starting point is: estimate the average object size, divide your memory budget for the cache by that size, and use that as your <code>max</code>.</p>
+
+      <p>For caches that store API responses, also consider TTL-based eviction:</p>
+
+      <pre><code>const cache = new LRU({
+  max: 500,
+  ttl: 1000 * 60 * 15, // 15 minutes
+  allowStale: false,
+});</code></pre>
+
+      <h3>Event Listener Accumulation</h3>
+
+      <p>When skills register event listeners without cleanup, each session adds listeners that persist:</p>
+
+      <pre><code>// Problematic: Listeners accumulate
+emitter.on('event', handler);
+
+// Fixed: Track and remove listeners
+const handlers = new Map();
+function registerHandler(event, handler) {
+  emitter.on(event, handler);
+  handlers.set(event, handler);
+}
+
+function cleanup() {
+  handlers.forEach((handler, event) =&gt; {
+    emitter.off(event, handler);
+  });
+  handlers.clear();
+}</code></pre>
+
+      <p>A quick way to detect listener accumulation is to check the listener count at runtime:</p>
+
+      <pre><code>// Add this diagnostic anywhere in your MCP server
+function auditListeners(emitter, label) {
+  const events = emitter.eventNames();
+  events.forEach(event =&gt; {
+    const count = emitter.listenerCount(event);
+    if (count &gt; 5) {
+      console.warn(`[${label}] High listener count on '${event}': ${count}`);
+    }
+  });
+}
+
+// Call after each operation you suspect is leaking
+auditListeners(myEmitter, 'MCP server');</code></pre>
+
+      <p>Node.js itself will warn you when a single emitter has more than 10 listeners on one event (<code>MaxListenersExceededWarning</code>). If you see this warning in your Claude Code MCP server logs, you have a listener accumulation leak and the cleanup pattern above is the fix.</p>
+
+      <h3>Context Window Pollution</h3>
+
+      <p>When processing documents or UI work, each interaction adds to the conversation context. Periodically summarize and compact:</p>
+
+      <pre><code>Context compaction strategy
+def compact_context(messages, max_tokens=8000):
+    """Keep recent messages, summarize older ones."""
+    recent = messages[-10:]  # Last 10 exchanges
+    older = messages[:-10]
+    summary = summarize_conversation(older)
+    return [{"role": "system", "content": summary}] + recent</code></pre>
+
+      <p>In practice, the most effective compaction strategy for Claude Code sessions is task-based rather than token-based. When you finish one discrete task (say, debugging a specific function) and move to the next (refactoring a module), start a fresh context rather than carrying over all the intermediate reasoning from the first task.</p>
+
+      <pre><code>Use the --continue flag to resume a session, or start fresh with a
+handoff summary that captures only what the next task needs to know
+
+Good handoff prompt for a new session:
+claude "Context from previous session:
+- Fixed authentication bug in auth/middleware.js (line 47, missing await)
+- Test suite passes with 100% coverage on auth module
+- Next task: refactor the user API endpoints in api/users.js to use the new auth middleware
+
+Starting fresh on the refactor."</code></pre>
+
+      <p>This pattern keeps context lean from the start rather than compacting retroactively.</p>
+
+      <h3>Database Connection Leaks in MCP Servers</h3>
+
+      <p>If your custom MCP server connects to a database to serve tool calls, connection lifecycle management is critical. Each unawaited async operation that opens a connection and throws an exception can leave connections in the pool indefinitely:</p>
+
+      <pre><code>// Problematic: connection not released on error
+async function queryTool(params) {
+  const conn = await pool.acquire();
+  const result = await db.query(conn, params.sql); // throws on bad SQL
+  pool.release(conn); // never reached
+  return result;
+}
+
+// Fixed: use try/finally
+async function queryTool(params) {
+  const conn = await pool.acquire();
+  try {
+    const result = await db.query(conn, params.sql);
+    return result;
+  } finally {
+    pool.release(conn); // always releases
+  }
+}</code></pre>
+
+      <p>Monitor your database connection pool health separately from process memory. A connection pool that is always at maximum capacity is a leak signal even if the Node.js heap looks healthy, because the leak is in the database server's connection table, not the MCP server's heap.</p>
+
+      <h2>Proactive Prevention</h2>
+
+      <p>Build leak prevention into your development workflow:</p>
+
+      <ol>
+        <li>Write memory tests alongside functional tests</li>
+        <li>Set memory thresholds in CI/CD pipelines</li>
+        <li>Generate memory audit reports regularly</li>
+        <li>Document memory-sensitive operations in your project</li>
+      </ol>
+
+      <p>For frontend workflows, optimize asset handling by implementing proper disposal patterns:</p>
+
+      <pre><code>class DesignProcessor {
+  constructor() {
+    this.cache = new WeakMap();
+  }
+
+  process(asset) {
+    if (this.cache.has(asset)) {
+      return this.cache.get(asset);
+    }
+    const result = this.processSync(asset);
+    this.cache.set(asset, result);
+    return result;
+  }
+
+  dispose() {
+    this.cache = new WeakMap();
+  }
+}</code></pre>
+
+      <p><code>WeakMap</code> is particularly well-suited for caches keyed on objects because the GC can collect the key-value pair when the key object has no other references. This gives you automatic eviction without needing an LRU policy, at the cost of not being able to iterate the cache or check its size.</p>
+
+      <h3>Memory Thresholds in CI</h3>
+
+      <p>Adding memory assertions to your test suite catches regressions before they reach production:</p>
+
+      <pre><code>// jest test: memory does not grow across repeated operations
+test('processFiles does not leak memory', async () =&gt; {
+  const initialMemory = process.memoryUsage().heapUsed;
+
+  // Run the operation 50 times
+  for (let i = 0; i &lt; 50; i++) {
+    await processFiles(testFileList);
+  }
+
+  // Force GC if available (run node with --expose-gc)
+  if (global.gc) global.gc();
+
+  const finalMemory = process.memoryUsage().heapUsed;
+  const growthMB = (finalMemory - initialMemory) / 1024 / 1024;
+
+  // Allow up to 10MB growth for legitimate initialization overhead
+  expect(growthMB).toBeLessThan(10);
+});</code></pre>
+
+      <p>Run this test with <code>node --expose-gc</code> to enable explicit GC calls, which prevents false positives from GC timing.</p>
+
+      <h2>When to Reset</h2>
+
+      <p>Even with careful detection and prevention, some sessions benefit from a clean start. Reset when:</p>
+
+      <ul>
+        <li>Memory exceeds 2x your baseline after extended use</li>
+        <li>Response latency increases noticeably</li>
+        <li>Error rates spike without clear cause</li>
+        <li>You've switched between significantly different projects</li>
+      </ul>
+
+      <p>A session reset is not a defeat. It is a tool. The goal of the detection workflow is to determine whether the issue is a fixable code bug (in which case, fix it) or session accumulation (in which case, reset and carry over a lean handoff summary). Both outcomes are productive.</p>
+
+      <p>Keep a short text file of your "session handoff template" so resetting never means losing work:</p>
+
+      <pre><code>Current task: [what you're doing]
+Key decisions made: [architecture choices, why you ruled out alternatives]
+Files modified: [list with brief note on each change]
+Next step: [exact next action to take]
+Open questions: [things you need to figure out]</code></pre>
+
+      <p>Filling this out takes two minutes and means your next session picks up exactly where you left off with none of the context bloat.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/calculator/">Estimate your token usage and session costs</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-memory-leak-high-ram-usage-fix">Grab the templates — $99 once, free forever →</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> — solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Memory Leak Detection Workflow (2026)",
+    "description": "A practical guide to identifying and resolving memory leaks in Claude Code sessions. Learn the detection workflow with real examples.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-memory-leak-high-ram-usage-fix/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Command Reference — All 80+ Commands, Flags &amp; Shortcuts (2026) | ClaudHQ</title>
+  <meta name="description" content="Search, filter, and copy every Claude Code command. Slash commands, CLI flags, keyboard shortcuts, CLAUDE.md directives, and MCP commands in one place.">
+  <link rel="canonical" href="https://claudhq.com/commands/">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Claude Code Command Reference — All 80+ Commands">
+  <meta property="og:description" content="Search, filter, and copy every Claude Code command. Slash commands, CLI flags, keyboard shortcuts, and more.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://claudhq.com/commands/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code Command Reference — All 80+ Commands (2026)">
+  <meta name="twitter:description" content="Search, filter, and copy every Claude Code command instantly.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I see all available commands in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Type /help inside a Claude Code session to see a list of all available slash commands. For CLI flags, run claude --help in your terminal. You can also use this command reference page to search all 80+ commands at once."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I create custom slash commands in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude Code does not support custom slash commands directly, but you can achieve similar functionality by defining instructions in your CLAUDE.md file. Use project-level directives to create reusable workflows that Claude will follow automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between /compact and /clear in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "/compact summarizes the current conversation to reduce token usage while preserving context. /clear wipes the conversation entirely and starts fresh. Use /compact when you want to keep working on the same task but reduce costs; use /clear when switching to a completely different task."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I use Claude Code in CI/CD pipelines?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use the --print flag (or -p) to run Claude Code in non-interactive mode. Combine with --output-format json for machine-readable output. Example: claude -p 'review this PR' --output-format json. Set ANTHROPIC_API_KEY as an environment variable and use --dangerously-skip-permissions for fully automated runs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does --dangerously-skip-permissions do in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The --dangerously-skip-permissions flag bypasses all permission checks, allowing Claude Code to read, write, and execute without asking for confirmation. This is useful in CI/CD pipelines but should never be used in interactive sessions where untrusted code could be executed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I chain multiple CLI flags together in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, you can chain multiple flags. For example: claude --model claude-opus-4-6 --verbose --max-turns 10 -p 'fix all lint errors'. Flags can be combined in any order. Some flags like --print and --output-format are commonly paired together for scripting."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I update Claude Code to the latest version?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run npm update -g @anthropic-ai/claude-code to update to the latest version. You can check your current version with claude --version. Claude Code updates frequently, so check for updates weekly to get new features and bug fixes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What keyboard shortcuts work inside Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Key shortcuts include: Ctrl+C to cancel the current operation, Ctrl+D to exit Claude Code, Escape to interrupt generation, Tab for autocomplete, Up Arrow for command history, Shift+Tab for inserting a newline in multi-line input, and Ctrl+L to clear the screen."
+        }
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { color: oklch(0.72 0.11 38); text-decoration: none; }
+    a:hover { opacity: 0.85; }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    h1 { font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; letter-spacing: -0.02em; font-size: 28px; color: oklch(0.97 0.006 80); margin-bottom: 8px; line-height: 1.3; }
+    .subtitle { color: oklch(0.58 0.010 70); font-size: 15px; margin-bottom: 32px; }
+
+    /* Search bar */
+    .search-wrap {
+      margin-bottom: 16px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 12px 16px;
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      color: oklch(0.97 0.006 80);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input:focus {
+      border-color: oklch(0.72 0.11 38);
+    }
+    .search-wrap input::placeholder { color: oklch(0.42 0.010 70); }
+
+    /* Filter buttons */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid oklch(0.30 0.010 60);
+      background: transparent;
+      color: oklch(0.58 0.010 70);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .filter-btn:hover { border-color: oklch(0.72 0.11 38); color: oklch(0.80 0.008 70); }
+    .filter-btn.active { background: oklch(0.72 0.11 38); color: oklch(0.155 0.007 60); border-color: oklch(0.72 0.11 38); font-weight: 600; }
+
+    /* Results counter */
+    .results-counter {
+      font-size: 13px;
+      color: oklch(0.58 0.010 70);
+      margin-bottom: 16px;
+    }
+
+    /* Command cards */
+    .cmd-list { display: flex; flex-direction: column; gap: 12px; }
+    .cmd-card {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 10px;
+      padding: 16px 20px;
+      transition: border-color 0.2s;
+    }
+    .cmd-card:hover { border-color: oklch(0.72 0.11 38); }
+    .cmd-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .cmd-name {
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 15px;
+      color: oklch(0.72 0.11 38);
+      font-weight: 600;
+    }
+    .cmd-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .badge-slash { background: rgba(136,84,208,0.2); color: #d2a8ff; }
+    .badge-cli { background: rgba(56,139,253,0.2); color: oklch(0.72 0.11 38); }
+    .badge-keyboard { background: rgba(238,159,49,0.2); color: #e3b341; }
+    .badge-claudemd { background: rgba(110,231,183,0.2); color: oklch(0.72 0.11 38); }
+    .badge-mcp { background: rgba(248,81,73,0.2); color: #ff7b72; }
+
+    .cmd-desc { font-size: 14px; color: oklch(0.80 0.008 70); margin-bottom: 8px; }
+    .cmd-usage {
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.235 0.009 60);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      color: oklch(0.58 0.010 70);
+      margin-bottom: 8px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .cmd-tip {
+      font-size: 12px;
+      color: oklch(0.42 0.010 70);
+      font-style: italic;
+    }
+    .copy-btn {
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid oklch(0.30 0.010 60);
+      background: oklch(0.235 0.009 60);
+      color: oklch(0.80 0.008 70);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: oklch(0.30 0.010 60); color: oklch(0.97 0.006 80); }
+    .copy-btn.copied { background: #238636; border-color: #238636; color: #fff; }
+
+    /* Blurred state */
+    .cmd-card.blurred {
+      filter: blur(5px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* SEO content */
+    .seo-content { margin-top: 64px; }
+    .seo-content h2 {
+      font-size: 22px;
+      color: oklch(0.97 0.006 80);
+      margin: 40px 0 12px;
+    }
+    .seo-content p {
+      font-size: 15px;
+      color: oklch(0.80 0.008 70);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .seo-content ul { margin: 0 0 16px 24px; }
+    .seo-content li { font-size: 15px; color: oklch(0.80 0.008 70); margin-bottom: 6px; }
+
+    details {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    details summary {
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      font-size: 14px;
+    }
+    details summary:hover { color: oklch(0.72 0.11 38); }
+    details[open] summary { border-bottom: 1px solid oklch(0.235 0.009 60); }
+    details .faq-answer {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: oklch(0.80 0.008 70);
+      line-height: 1.7;
+    }
+
+    .cta-box {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      margin: 40px 0;
+    }
+    .cta-box h3 { color: oklch(0.97 0.006 80); font-size: 18px; margin-bottom: 8px; }
+    .cta-box p { color: oklch(0.58 0.010 70); font-size: 14px; margin-bottom: 16px; }
+    .cta-link {
+      display: inline-block;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: opacity 0.2s;
+    }
+    .cta-link:hover { opacity: 0.9; color: oklch(0.18 0.04 38); }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .cmd-card { padding: 12px 14px; }
+      .cmd-card-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .filter-btn { font-size: 12px; padding: 5px 10px; }
+    }
+
+    /* ========== LEARN MORE ========== */
+    .learn-more {
+      margin: 48px 0 0;
+      padding: 40px 0 0;
+      border-top: 1px solid var(--line);
+    }
+    .learn-more .lm-eyebrow {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-3);
+      margin-bottom: 12px;
+    }
+    .learn-more .lm-title {
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0 0 24px;
+      font-weight: 400;
+    }
+    .learn-more .lm-title em {
+      font-family: var(--serif-alt);
+      font-style: italic;
+      font-weight: 300;
+      color: var(--accent);
+    }
+    .learn-more-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .learn-more-grid a {
+      background: var(--bg-2);
+      padding: 16px 20px;
+      text-decoration: none;
+      color: var(--ink-2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      letter-spacing: -0.005em;
+      transition: background .15s ease, color .15s ease;
+    }
+    .learn-more-grid a:hover {
+      background: var(--bg-3);
+      color: var(--accent);
+    }
+    .learn-more-grid a::before {
+      content: '\2192';
+      color: var(--ink-4);
+      font-family: var(--mono);
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: color .15s ease;
+    }
+    .learn-more-grid a:hover::before {
+      color: var(--accent);
+    }
+    @media (max-width: 640px) {
+      .learn-more-grid { grid-template-columns: 1fr; }
+      .learn-more .lm-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>Claude Code Command Reference (2026)</h1>
+  <p class="subtitle">Search 80+ commands, shortcuts, and flags. Filter by category. Copy instantly.</p>
+
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="Search commands by name, description, or tip..." aria-label="Search commands">
+  </div>
+
+  <div class="filter-row" id="filter-row">
+    <button class="filter-btn active" data-cat="all">All</button>
+    <button class="filter-btn" data-cat="Slash Commands">Slash Commands</button>
+    <button class="filter-btn" data-cat="CLI Flags">CLI Flags</button>
+    <button class="filter-btn" data-cat="Keyboard Shortcuts">Keyboard Shortcuts</button>
+    <button class="filter-btn" data-cat="CLAUDE.md Directives">CLAUDE.md Directives</button>
+    <button class="filter-btn" data-cat="MCP Commands">MCP Commands</button>
+  </div>
+
+  <div class="results-counter" id="results-counter">Showing 0 of 0 commands</div>
+
+  <div class="cmd-list" id="cmd-list"></div>
+
+  <div id="paywall-overlay" style="display:none; position:fixed; inset:0; background:rgba(20, 18, 14, 0.88); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:oklch(0.185 0.008 60); border:1px solid oklch(0.30 0.010 60); border-radius:16px; padding:48px; max-width:420px; text-align:center;">
+      <h2 style="color:oklch(0.97 0.006 80); font-size:22px; margin-bottom:12px;">Free uses exhausted</h2>
+      <p style="color:oklch(0.58 0.010 70); margin-bottom:24px;">Get unlimited access to all 10 CCG tools plus 200+ CLAUDE.md templates.</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" style="display:inline-block; background:oklch(0.72 0.11 38); color:oklch(0.18 0.04 38); font-weight:700; padding:14px 32px; border-radius:8px; text-decoration:none; font-size:16px;">Get Lifetime Access — $99</a>
+      <p style="color:oklch(0.42 0.010 70); font-size:13px; margin-top:16px;">One-time payment. All tools. All templates. Forever.</p>
+    </div>
+  </div>
+
+  <div class="seo-content">
+    <h2>Why a Command Reference?</h2>
+    <p>Claude Code ships with dozens of commands spread across slash commands, CLI flags, keyboard shortcuts, CLAUDE.md directives, and MCP integrations. Remembering every option is impractical, and the built-in <code>/help</code> command only shows a subset. This reference puts every command in one searchable, filterable interface so you spend less time hunting through documentation and more time shipping code.</p>
+    <p>Whether you are a first-time user trying to learn the basics or a power user automating CI/CD pipelines, having a single source of truth for all available commands eliminates guesswork. You can filter by category to focus on exactly what you need, copy any command with one click, and discover tips you might have missed in the official docs.</p>
+    <p>We built this tool after watching teams waste hours looking up obscure flags or rediscovering the same keyboard shortcuts. By consolidating every command into a searchable database, we turned a scattered experience into a streamlined workflow. The search covers command names, descriptions, and tips simultaneously, so even a vague query like "token" or "permission" surfaces all relevant commands instantly.</p>
+
+    <h2>Slash Commands Explained</h2>
+    <p>Slash commands are typed directly inside a Claude Code session by prefixing a keyword with <code>/</code>. They control the session itself rather than issuing prompts to the model. For example, <code>/compact</code> compresses your conversation to save tokens, <code>/clear</code> resets the session entirely, and <code>/doctor</code> runs a diagnostic check on your environment.</p>
+    <p>The slash command system is designed to be discoverable. Typing <code>/</code> by itself in some configurations will show an autocomplete menu. Commands like <code>/init</code> generate a CLAUDE.md file for your project, while <code>/model</code> lets you switch between models mid-session. Understanding these commands is essential because they give you control over context length, cost, and session behavior without leaving the terminal.</p>
+    <p>Some slash commands accept arguments. For example, <code>/review</code> can target a specific file, and <code>/compact</code> can take an optional instruction for how to summarize. Check the usage examples in each card above for the correct syntax.</p>
+
+    <h2>CLI Flags for Power Users</h2>
+    <p>CLI flags are passed when launching Claude Code from the terminal. They configure behavior before the session starts, making them essential for automation and scripting. The most commonly used flag is <code>--print</code> (or <code>-p</code>), which runs Claude Code in non-interactive mode and prints the result to stdout.</p>
+    <p>For CI/CD pipelines, combine <code>--print</code> with <code>--output-format json</code> to get structured output you can pipe into other tools. Add <code>--dangerously-skip-permissions</code> to bypass interactive permission prompts in trusted environments. The <code>--max-turns</code> flag bounds the number of agentic steps, preventing runaway sessions in automated workflows.</p>
+    <p>Flags like <code>--model</code> and <code>--system-prompt</code> let you customize which model runs and what instructions it receives, all without modifying any configuration files. This makes it easy to test different setups or run specialized tasks from shell scripts. You can chain as many flags as needed in a single invocation.</p>
+
+    <h2>Keyboard Shortcuts That Save Time</h2>
+    <p>Keyboard shortcuts in Claude Code follow standard terminal conventions, so most will feel familiar. <code>Ctrl+C</code> cancels the current operation without exiting, while <code>Ctrl+D</code> exits the session entirely. These two shortcuts alone save significant time compared to waiting for a response to finish and then manually stopping it.</p>
+    <p><code>Escape</code> interrupts the current generation, which is useful when you realize mid-response that you asked the wrong question. <code>Tab</code> triggers autocomplete for file paths and slash commands. <code>Shift+Tab</code> inserts a newline when you need to write multi-line input without submitting. The <code>Up Arrow</code> cycles through your command history, letting you re-run or modify previous prompts quickly.</p>
+    <p>Mastering these shortcuts turns Claude Code from a chatbot into a true power tool. Instead of waiting, canceling, and retyping, you can interrupt, correct, and iterate at the speed of thought. The difference is especially noticeable during long debugging sessions where you might issue dozens of prompts in rapid succession.</p>
+
+    <h2>Common Questions</h2>
+
+    <details>
+      <summary>How do I see all available commands in Claude Code?</summary>
+      <div class="faq-answer">Type <code>/help</code> inside a Claude Code session to see a list of all available slash commands. For CLI flags, run <code>claude --help</code> in your terminal. You can also use this command reference page to search all 80+ commands at once.</div>
+    </details>
+
+    <details>
+      <summary>Can I create custom slash commands in Claude Code?</summary>
+      <div class="faq-answer">Claude Code does not support custom slash commands directly, but you can achieve similar functionality by defining instructions in your CLAUDE.md file. Use project-level directives to create reusable workflows that Claude will follow automatically when you reference them.</div>
+    </details>
+
+    <details>
+      <summary>What is the difference between /compact and /clear?</summary>
+      <div class="faq-answer"><code>/compact</code> summarizes the current conversation to reduce token usage while preserving context. <code>/clear</code> wipes the conversation entirely and starts fresh. Use <code>/compact</code> when you want to keep working on the same task but reduce costs; use <code>/clear</code> when switching to a completely different task.</div>
+    </details>
+
+    <details>
+      <summary>How do I use Claude Code in CI/CD pipelines?</summary>
+      <div class="faq-answer">Use the <code>--print</code> flag (or <code>-p</code>) to run Claude Code in non-interactive mode. Combine with <code>--output-format json</code> for machine-readable output. Example: <code>claude -p 'review this PR' --output-format json</code>. Set <code>ANTHROPIC_API_KEY</code> as an environment variable and use <code>--dangerously-skip-permissions</code> for fully automated runs.</div>
+    </details>
+
+    <details>
+      <summary>What does --dangerously-skip-permissions do?</summary>
+      <div class="faq-answer">The <code>--dangerously-skip-permissions</code> flag bypasses all permission checks, allowing Claude Code to read, write, and execute without asking for confirmation. This is useful in CI/CD pipelines but should never be used in interactive sessions where untrusted code could be executed. The name is intentionally alarming to discourage casual use.</div>
+    </details>
+
+    <details>
+      <summary>Can I chain multiple CLI flags together?</summary>
+      <div class="faq-answer">Yes, you can chain multiple flags. For example: <code>claude --model claude-opus-4-6 --verbose --max-turns 10 -p 'fix all lint errors'</code>. Flags can be combined in any order. Some flags like <code>--print</code> and <code>--output-format</code> are commonly paired together for scripting.</div>
+    </details>
+
+    <details>
+      <summary>How do I update Claude Code to the latest version?</summary>
+      <div class="faq-answer">Run <code>npm update -g @anthropic-ai/claude-code</code> to update to the latest version. You can check your current version with <code>claude --version</code>. Claude Code updates frequently, so check for updates weekly to get new features and bug fixes.</div>
+    </details>
+
+    <details>
+      <summary>What keyboard shortcuts work inside Claude Code?</summary>
+      <div class="faq-answer">Key shortcuts include: <code>Ctrl+C</code> to cancel the current operation, <code>Ctrl+D</code> to exit, <code>Escape</code> to interrupt generation, <code>Tab</code> for autocomplete, <code>Up Arrow</code> for command history, <code>Shift+Tab</code> for inserting a newline, and <code>Ctrl+L</code> to clear the screen.</div>
+    </details>
+
+    <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+      <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+      <ul style="list-style:none;padding:0;margin:0;">
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+          <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+        </li>
+        <li style="padding:8px 0;">
+          <a href="/skill-finder/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Skill Finder</a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="learn-more">
+      <div class="lm-eyebrow">&sect; Related &middot; Commands &amp; workflow</div>
+      <h2 class="lm-title">Keep <em>reading.</em></h2>
+      <div class="learn-more-grid">
+        <a href="/model-selector/">Claude Model Selector</a>
+        <a href="/permissions/">Permission Configurator</a>
+        <a href="/mcp-config/">MCP Server Config Generator</a>
+        <a href="/token-estimator/">Token Usage Estimator</a>
+        <a href="/starter/">Project Starter Wizard</a>
+        <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+        <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+        <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+        <a href="/claude-code-gitignore-best-practices/">Gitignore Best Practices</a>
+      </div>
+    </section>
+
+    <div class="cta-box">
+      <h3>80+ command templates and cheat sheets</h3>
+      <p>Get the full Claude Code Mastery Playbook with ready-to-use command templates, CLAUDE.md examples, and automation scripts.</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="cta-link">Get Lifetime Access &mdash; $99</a>
+    </div>
+  </div>
+</div>
+
+
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">SSL Error Fix</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/about.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">About</a>
+      <a href="/prompts.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Command Database ── */
+  var COMMANDS = Object.freeze([
+    /* === SLASH COMMANDS (19) === */
+    {name:'/init',category:'Slash Commands',description:'Initialize a new CLAUDE.md file for your project with sensible defaults.',usage:'/init',tip:'Run this first in any new project. It scans your repo and generates context automatically.'},
+    {name:'/compact',category:'Slash Commands',description:'Compress conversation history to reduce token usage while preserving key context.',usage:'/compact [optional instruction]',tip:'Use when your session gets long and costs rise. Add an instruction like /compact "keep the DB schema" to guide summarization.'},
+    {name:'/clear',category:'Slash Commands',description:'Wipe the entire conversation and start a fresh session.',usage:'/clear',tip:'Best when switching to a completely different task. Unlike /compact, this loses all context.'},
+    {name:'/doctor',category:'Slash Commands',description:'Run diagnostic checks on your Claude Code installation and environment.',usage:'/doctor',tip:'First thing to try when something is broken. Checks Node version, API keys, and permissions.'},
+    {name:'/help',category:'Slash Commands',description:'Show all available slash commands and brief descriptions.',usage:'/help',tip:'Your starting point for discovery. Does not show CLI flags — use claude --help for those.'},
+    {name:'/review',category:'Slash Commands',description:'Ask Claude to review code for bugs, style issues, and improvements.',usage:'/review [file or description]',tip:'Works best when you specify what to focus on: "/review security concerns in auth.ts".'},
+    {name:'/cost',category:'Slash Commands',description:'Display the current session cost including token counts and pricing.',usage:'/cost',tip:'Check this periodically during long sessions to avoid surprise bills.'},
+    {name:'/memory',category:'Slash Commands',description:'View and manage Claude Code memory and stored context.',usage:'/memory',tip:'Memory persists across sessions. Use this to see what Claude remembers about your project.'},
+    {name:'/model',category:'Slash Commands',description:'Switch the active model mid-session without restarting.',usage:'/model claude-opus-4-6',tip:'Useful for switching to a cheaper model for simple tasks, then back to Opus for complex ones.'},
+    {name:'/permissions',category:'Slash Commands',description:'View and manage tool permission settings for the current session.',usage:'/permissions',tip:'Shows which tools are allowed, denied, or require approval. Adjust for security or automation.'},
+    {name:'/config',category:'Slash Commands',description:'View or modify Claude Code configuration settings.',usage:'/config',tip:'Changes here affect the current session. For persistent config, edit settings.json directly.'},
+    {name:'/status',category:'Slash Commands',description:'Show current session status including model, token usage, and active tools.',usage:'/status',tip:'Quick snapshot of your session. Shows model, cost so far, and conversation length.'},
+    {name:'/terminal-setup',category:'Slash Commands',description:'Configure terminal integration for optimal Claude Code experience.',usage:'/terminal-setup',tip:'Run once per machine. Sets up shell integration for features like Shift+Tab newlines.'},
+    {name:'/bug',category:'Slash Commands',description:'Report a bug to the Anthropic team with session context automatically attached.',usage:'/bug [description]',tip:'Include what you expected vs what happened. Session logs are attached automatically.'},
+    {name:'/login',category:'Slash Commands',description:'Authenticate with your Anthropic account or API key.',usage:'/login',tip:'Required before first use. Supports both OAuth and direct API key entry.'},
+    {name:'/logout',category:'Slash Commands',description:'Sign out of your current Anthropic account.',usage:'/logout',tip:'Use when switching between personal and team accounts.'},
+    {name:'/mcp',category:'Slash Commands',description:'Manage Model Context Protocol servers and connections.',usage:'/mcp [list|restart|status]',tip:'See /mcp list for connected servers, /mcp restart to reconnect a failing server.'},
+    {name:'/vim',category:'Slash Commands',description:'Toggle vim-style keybindings for the input area.',usage:'/vim',tip:'Enables hjkl navigation, modal editing, and other vim motions in the input field.'},
+    {name:'/fast',category:'Slash Commands',description:'Toggle fast mode for quicker responses using the same model with optimized output.',usage:'/fast',tip:'Fast mode uses the same Claude model but with faster output generation. Toggle again to disable.'},
+
+    /* === CLI FLAGS (18) === */
+    {name:'--dangerously-skip-permissions',category:'CLI Flags',description:'Bypass all permission prompts. Use only in trusted, automated environments.',usage:'claude --dangerously-skip-permissions -p "run tests"',tip:'Never use this interactively. Designed for CI/CD where no human is watching.'},
+    {name:'--allowedTools',category:'CLI Flags',description:'Restrict which tools Claude can use during the session.',usage:'claude --allowedTools "Bash,Read,Write"',tip:'Whitelist only the tools you need. Great for sandboxing Claude to read-only operations.'},
+    {name:'--model',category:'CLI Flags',description:'Specify which Claude model to use for the session.',usage:'claude --model claude-opus-4-6',tip:'Override the default model. Useful for testing with different model versions.'},
+    {name:'--print',category:'CLI Flags',description:'Run in non-interactive mode and print the response to stdout.',usage:'claude --print "explain this error"',tip:'Essential for scripting. Combine with --output-format json for structured output.'},
+    {name:'--output-format',category:'CLI Flags',description:'Set the output format for non-interactive mode (text, json, or stream-json).',usage:'claude --print --output-format json "list files"',tip:'Use json for parsing in scripts, stream-json for real-time streaming output.'},
+    {name:'--verbose',category:'CLI Flags',description:'Enable detailed logging of API calls, tool usage, and internal state.',usage:'claude --verbose',tip:'Helpful for debugging unexpected behavior. Shows full request/response details.'},
+    {name:'--resume',category:'CLI Flags',description:'Resume a specific previous conversation by session ID.',usage:'claude --resume session_abc123',tip:'Find session IDs in ~/.claude/sessions/. Useful for picking up complex tasks.'},
+    {name:'--continue',category:'CLI Flags',description:'Continue the most recent conversation automatically.',usage:'claude --continue',tip:'Shortcut for resuming your last session without looking up the session ID.'},
+    {name:'--max-turns',category:'CLI Flags',description:'Limit the number of agentic turns Claude can take before stopping.',usage:'claude --max-turns 10 -p "refactor auth module"',tip:'Prevents runaway sessions in automation. Each tool use counts as one turn.'},
+    {name:'--system-prompt',category:'CLI Flags',description:'Override the default system prompt with a custom one.',usage:'claude --system-prompt "You are a security auditor" -p "review this code"',tip:'Powerful for specialized tasks. The custom prompt replaces the default entirely.'},
+    {name:'--append-system-prompt',category:'CLI Flags',description:'Add text to the end of the default system prompt without replacing it.',usage:'claude --append-system-prompt "Always use TypeScript"',tip:'Safer than --system-prompt because you keep the default behavior and just add constraints.'},
+    {name:'--api-key',category:'CLI Flags',description:'Provide an API key directly instead of using stored credentials.',usage:'claude --api-key sk-ant-xxx -p "hello"',tip:'Useful in CI/CD where you pass the key via environment. Prefer ANTHROPIC_API_KEY env var instead.'},
+    {name:'--no-cache',category:'CLI Flags',description:'Disable prompt caching for this session.',usage:'claude --no-cache',tip:'Forces fresh responses. Useful when debugging caching-related issues.'},
+    {name:'--version',category:'CLI Flags',description:'Print the installed Claude Code version and exit.',usage:'claude --version',tip:'Check this before reporting bugs. Include the version number in bug reports.'},
+    {name:'-p (print mode)',category:'CLI Flags',description:'Short alias for --print. Run non-interactively and output to stdout.',usage:'claude -p "what files are in this repo?"',tip:'The most common flag for scripting. Pair with -c to continue a previous session in print mode.'},
+    {name:'-c (continue)',category:'CLI Flags',description:'Short alias for --continue. Resume the last conversation.',usage:'claude -c',tip:'Quick way to pick up where you left off. Combine with -p for non-interactive continuation.'},
+    {name:'--mcp-config',category:'CLI Flags',description:'Specify a custom MCP configuration file path.',usage:'claude --mcp-config ./my-mcp-config.json',tip:'Override the default MCP config. Useful for project-specific MCP server setups.'},
+    {name:'--input-format',category:'CLI Flags',description:'Specify input format when piping data to Claude Code.',usage:'cat file.ts | claude -p --input-format text "review this"',tip:'Supports text and other formats. Use when piping file content via stdin.'},
+
+    /* === KEYBOARD SHORTCUTS (10) === */
+    {name:'Ctrl+C',category:'Keyboard Shortcuts',description:'Cancel the current operation without exiting Claude Code.',usage:'Press Ctrl+C during generation',tip:'Does not exit the session. Use to stop a response you no longer need.'},
+    {name:'Ctrl+D',category:'Keyboard Shortcuts',description:'Exit Claude Code entirely and return to your shell.',usage:'Press Ctrl+D at the prompt',tip:'Standard terminal exit signal. Works even if Claude is idle.'},
+    {name:'Ctrl+L',category:'Keyboard Shortcuts',description:'Clear the terminal screen while keeping the session active.',usage:'Press Ctrl+L at the prompt',tip:'Cosmetic only. Does not affect conversation history or token usage.'},
+    {name:'Escape',category:'Keyboard Shortcuts',description:'Interrupt the current response generation immediately.',usage:'Press Escape during generation',tip:'Faster than Ctrl+C for stopping mid-response. The partial response is still visible.'},
+    {name:'Tab',category:'Keyboard Shortcuts',description:'Trigger autocomplete for file paths and slash commands.',usage:'Type / then press Tab',tip:'Works for file paths in your project and all available slash commands.'},
+    {name:'Up Arrow',category:'Keyboard Shortcuts',description:'Cycle through previous prompts in your command history.',usage:'Press Up Arrow at empty prompt',tip:'Navigate your prompt history without retyping. Down Arrow goes forward.'},
+    {name:'Shift+Tab',category:'Keyboard Shortcuts',description:'Insert a newline in your input for multi-line prompts.',usage:'Press Shift+Tab while typing',tip:'Essential for writing multi-line code or detailed instructions without submitting.'},
+    {name:'Ctrl+R',category:'Keyboard Shortcuts',description:'Reverse search through your prompt history.',usage:'Press Ctrl+R then start typing',tip:'Standard terminal reverse search. Finds previous prompts matching your input.'},
+    {name:'Ctrl+A',category:'Keyboard Shortcuts',description:'Move cursor to the beginning of the current input line.',usage:'Press Ctrl+A while editing',tip:'Standard readline shortcut. Works in the Claude Code input field.'},
+    {name:'Ctrl+E',category:'Keyboard Shortcuts',description:'Move cursor to the end of the current input line.',usage:'Press Ctrl+E while editing',tip:'Pair with Ctrl+A to quickly jump between start and end of your prompt.'},
+
+    /* === CLAUDE.md DIRECTIVES (16) === */
+    {name:'# Project Overview',category:'CLAUDE.md Directives',description:'Define your project description and purpose at the top of CLAUDE.md.',usage:'# Project Overview\nThis is a Next.js SaaS app for...',tip:'Keep it to 2-3 sentences. Claude reads this first to understand your project context.'},
+    {name:'## Code Style',category:'CLAUDE.md Directives',description:'Specify coding conventions Claude should follow in your project.',usage:'## Code Style\n- Use TypeScript strict mode\n- Prefer const over let\n- Max line length: 100',tip:'Be specific. "Clean code" is vague; "use early returns, max 50 lines per function" is actionable.'},
+    {name:'## Testing',category:'CLAUDE.md Directives',description:'Define testing requirements and conventions for generated code.',usage:'## Testing\n- Use vitest for unit tests\n- Test files go in __tests__/\n- Minimum 80% coverage',tip:'Include your test runner, file naming convention, and any required patterns.'},
+    {name:'## Dependencies',category:'CLAUDE.md Directives',description:'List approved dependencies and package management rules.',usage:'## Dependencies\n- Use pnpm, not npm or yarn\n- Do not add new deps without asking',tip:'Prevents Claude from installing random packages. Specify your package manager explicitly.'},
+    {name:'@file references',category:'CLAUDE.md Directives',description:'Reference other files to include their content as additional context.',usage:'@src/types/index.ts\n@.env.example',tip:'Use sparingly. Each referenced file adds tokens. Best for type definitions and config files.'},
+    {name:'IMPORTANT: prefix',category:'CLAUDE.md Directives',description:'Mark critical instructions that Claude must always follow.',usage:'IMPORTANT: Never modify the database schema without explicit approval.',tip:'Use for guardrails. Claude gives extra weight to IMPORTANT-prefixed lines.'},
+    {name:'TODO tracking',category:'CLAUDE.md Directives',description:'Define TODO comment conventions for tracking work items.',usage:'## TODO Conventions\n- Use TODO(username): format\n- Include ticket number when available',tip:'Standardizes how Claude writes TODO comments so your team can find and track them.'},
+    {name:'## Forbidden Patterns',category:'CLAUDE.md Directives',description:'List anti-patterns and code practices Claude must avoid.',usage:'## Forbidden Patterns\n- No any type in TypeScript\n- No console.log in production code\n- No default exports',tip:'Explicitly listing forbidden patterns is more effective than hoping Claude avoids them.'},
+    {name:'## Architecture',category:'CLAUDE.md Directives',description:'Describe your project architecture and directory structure.',usage:'## Architecture\n- /src/api/ — API routes\n- /src/components/ — React components\n- /src/lib/ — Shared utilities',tip:'Helps Claude navigate your codebase and put new files in the right locations.'},
+    {name:'## Build & Run',category:'CLAUDE.md Directives',description:'Specify how to build, run, and deploy your project.',usage:'## Build & Run\n- Dev: pnpm dev\n- Build: pnpm build\n- Test: pnpm test',tip:'Claude will use these commands when you ask it to run or test things.'},
+    {name:'## Git Conventions',category:'CLAUDE.md Directives',description:'Define commit message format and branch naming rules.',usage:'## Git Conventions\n- Conventional commits: feat:, fix:, chore:\n- Branch: feature/ticket-description',tip:'Ensures Claude creates commits and branches matching your team standards.'},
+    {name:'## Environment Variables',category:'CLAUDE.md Directives',description:'Document required environment variables without exposing values.',usage:'## Environment Variables\n- DATABASE_URL — Postgres connection string\n- API_KEY — Third-party service key',tip:'Never put actual values in CLAUDE.md. Reference .env.example for the template.'},
+    {name:'## Error Handling',category:'CLAUDE.md Directives',description:'Specify error handling patterns Claude should follow.',usage:'## Error Handling\n- Use custom error classes\n- Always log errors with context\n- Return user-friendly messages',tip:'Prevents Claude from generating bare try/catch blocks with generic error messages.'},
+    {name:'## Security Rules',category:'CLAUDE.md Directives',description:'Define security requirements for generated code.',usage:'## Security Rules\n- Sanitize all user input\n- Use parameterized queries\n- Never expose stack traces',tip:'Critical for production code. Claude will check these rules before writing security-sensitive code.'},
+    {name:'## File Naming',category:'CLAUDE.md Directives',description:'Specify file naming conventions for your project.',usage:'## File Naming\n- Components: PascalCase.tsx\n- Utilities: camelCase.ts\n- Tests: *.test.ts',tip:'Avoids inconsistent naming. Claude follows these when creating new files.'},
+    {name:'## API Conventions',category:'CLAUDE.md Directives',description:'Define REST or GraphQL API design rules.',usage:'## API Conventions\n- RESTful routes: /api/v1/resource\n- Use zod for request validation\n- Return consistent error shapes',tip:'Essential for backend projects. Keeps API endpoints consistent across Claude-generated code.'},
+
+    /* === MCP COMMANDS (8) === */
+    {name:'mcp__server__tool',category:'MCP Commands',description:'Call a specific tool on a connected MCP server using the standard naming format.',usage:'mcp__github__create_issue',tip:'Format: mcp__<server>__<tool>. The server name matches your MCP config key.'},
+    {name:'/mcp list',category:'MCP Commands',description:'Show all connected MCP servers and their available tools.',usage:'/mcp list',tip:'Run this to verify your MCP servers connected successfully and see available tools.'},
+    {name:'/mcp restart',category:'MCP Commands',description:'Restart a specific MCP server connection without restarting Claude Code.',usage:'/mcp restart github',tip:'Use when an MCP server becomes unresponsive or disconnects.'},
+    {name:'/mcp status',category:'MCP Commands',description:'Check the health and connection status of all MCP servers.',usage:'/mcp status',tip:'Shows connected, disconnected, and errored servers. Check this first when MCP tools fail.'},
+    {name:'mcp__filesystem__read_file',category:'MCP Commands',description:'Read a file through the filesystem MCP server.',usage:'mcp__filesystem__read_file({path: "/etc/hosts"})',tip:'Useful when Claude does not have direct filesystem access but an MCP server does.'},
+    {name:'mcp__github__search_repositories',category:'MCP Commands',description:'Search GitHub repositories through the GitHub MCP server.',usage:'mcp__github__search_repositories({query: "claude mcp"})',tip:'Requires the GitHub MCP server to be configured with a valid token.'},
+    {name:'mcp__memory__store',category:'MCP Commands',description:'Store key-value data in the memory MCP server for cross-session persistence.',usage:'mcp__memory__store({key: "project_context", value: "..."})',tip:'Useful for persisting context between sessions without relying on CLAUDE.md.'},
+    {name:'mcp__browser__navigate',category:'MCP Commands',description:'Navigate to a URL using the browser MCP server for web interaction.',usage:'mcp__browser__navigate({url: "https://example.com"})',tip:'Requires the Puppeteer or Playwright MCP server. Enables web scraping and testing.'},
+
+    /* === ADDITIONAL SLASH COMMANDS (6) === */
+    {name:'/diff',category:'Slash Commands',description:'Show a diff of all changes Claude has made during the current session.',usage:'/diff',tip:'Review before committing. Shows all file modifications in unified diff format.'},
+    {name:'/undo',category:'Slash Commands',description:'Undo the last file change Claude made.',usage:'/undo',tip:'Only undoes the most recent change. Use multiple times to undo multiple changes.'},
+    {name:'/pr-review',category:'Slash Commands',description:'Review the current pull request with detailed feedback.',usage:'/pr-review',tip:'Works when you are on a branch with an open PR. Provides line-by-line review comments.'},
+    {name:'/commit',category:'Slash Commands',description:'Create a git commit with an AI-generated message based on staged changes.',usage:'/commit',tip:'Stages and commits changes with a descriptive message. Review the message before confirming.'},
+    {name:'/search',category:'Slash Commands',description:'Search across your codebase using semantic or text search.',usage:'/search "authentication middleware"',tip:'Searches file contents, not just filenames. Useful for finding usage patterns.'},
+    {name:'/context',category:'Slash Commands',description:'View the current conversation context window usage and limits.',usage:'/context',tip:'Shows how much of the context window is used. Helps decide when to /compact.'},
+
+    /* === ADDITIONAL CLI FLAGS (6) === */
+    {name:'--disable-telemetry',category:'CLI Flags',description:'Disable anonymous usage telemetry for the session.',usage:'claude --disable-telemetry',tip:'Telemetry is anonymous by default. Use this flag if your organization requires it.'},
+    {name:'--color',category:'CLI Flags',description:'Force colored output even when piping to another program.',usage:'claude --color -p "explain this"',tip:'Useful when piping output to tools that support ANSI colors like less -R.'},
+    {name:'--no-color',category:'CLI Flags',description:'Disable colored output entirely.',usage:'claude --no-color -p "list files"',tip:'Use when piping to files or tools that cannot render ANSI escape codes.'},
+    {name:'--config-dir',category:'CLI Flags',description:'Specify a custom directory for Claude Code configuration files.',usage:'claude --config-dir /path/to/config',tip:'Useful for running multiple isolated Claude Code configurations on the same machine.'},
+    {name:'--project-dir',category:'CLI Flags',description:'Set the project root directory explicitly.',usage:'claude --project-dir /path/to/project',tip:'Overrides automatic project root detection. Useful when running from a different directory.'},
+    {name:'--timeout',category:'CLI Flags',description:'Set a maximum time limit for the entire session in seconds.',usage:'claude --timeout 300 -p "quick review"',tip:'Prevents long-running sessions in automated pipelines. Session stops after the timeout.'},
+
+    /* === ADDITIONAL KEYBOARD SHORTCUTS (3) === */
+    {name:'Ctrl+U',category:'Keyboard Shortcuts',description:'Delete from cursor position to the beginning of the line.',usage:'Press Ctrl+U while editing',tip:'Quickly clear your current input without pressing backspace repeatedly.'},
+    {name:'Ctrl+K',category:'Keyboard Shortcuts',description:'Delete from cursor position to the end of the line.',usage:'Press Ctrl+K while editing',tip:'Standard readline shortcut for cutting text to the end of the line.'},
+    {name:'Ctrl+W',category:'Keyboard Shortcuts',description:'Delete the word before the cursor.',usage:'Press Ctrl+W while editing',tip:'Faster than pressing backspace multiple times. Deletes one word at a time.'},
+
+    /* === ADDITIONAL CLAUDE.md DIRECTIVES (2) === */
+    {name:'## Performance',category:'CLAUDE.md Directives',description:'Define performance requirements and optimization guidelines.',usage:'## Performance\n- No N+1 queries\n- Use pagination for lists > 50 items\n- Cache expensive computations',tip:'Helps Claude generate performant code from the start rather than fixing it later.'},
+    {name:'## Deployment',category:'CLAUDE.md Directives',description:'Specify deployment targets and CI/CD configuration.',usage:'## Deployment\n- Deploy to Vercel\n- Preview on PR, production on merge to main',tip:'Claude will reference these when generating deployment configs or CI/CD scripts.'}
+  ]);
+
+  /* ── Paywall State ── */
+  var PAYWALL_KEY = 'ccg_commands_uses';
+  var PAYWALL_LIMIT = 2;
+
+  /* ── Category Badge Map ── */
+  var BADGE_MAP = Object.freeze({
+    'Slash Commands': 'badge-slash',
+    'CLI Flags': 'badge-cli',
+    'Keyboard Shortcuts': 'badge-keyboard',
+    'CLAUDE.md Directives': 'badge-claudemd',
+    'MCP Commands': 'badge-mcp'
+  });
+
+  /* ── DOM References ── */
+  var searchInput = document.getElementById('search-input');
+  var filterRow = document.getElementById('filter-row');
+  var cmdList = document.getElementById('cmd-list');
+  var resultsCounter = document.getElementById('results-counter');
+  var paywallOverlay = document.getElementById('paywall-overlay');
+
+  console.assert(searchInput !== null, 'search-input element must exist');
+  console.assert(cmdList !== null, 'cmd-list element must exist');
+  console.assert(resultsCounter !== null, 'results-counter element must exist');
+  console.assert(paywallOverlay !== null, 'paywall-overlay element must exist');
+  console.assert(filterRow !== null, 'filter-row element must exist');
+
+  /* ── State ── */
+  var activeCategories = ['all'];
+  var searchUseCount = getStoredUses();
+  var paywallActive = false;
+  var isAutoLoad = true;
+
+  /* ── Utility: Get stored uses ── */
+  function getStoredUses() {
+    console.assert(typeof PAYWALL_KEY === 'string', 'PAYWALL_KEY must be a string');
+    console.assert(PAYWALL_KEY.length > 0, 'PAYWALL_KEY must not be empty');
+    var raw = null;
+    try { raw = localStorage.getItem(PAYWALL_KEY); } catch (e) { /* private browsing */ }
+    var val = raw !== null ? parseInt(raw, 10) : 0;
+    return isNaN(val) ? 0 : val;
+  }
+
+  /* ── Utility: Increment uses ── */
+  function incrementUses() {
+    console.assert(typeof searchUseCount === 'number', 'searchUseCount must be a number');
+    console.assert(searchUseCount >= 0, 'searchUseCount must not be negative');
+    searchUseCount += 1;
+    try { localStorage.setItem(PAYWALL_KEY, String(searchUseCount)); } catch (e) { /* private browsing */ }
+    return searchUseCount;
+  }
+
+  /* ── Utility: Check paywall ── */
+  function shouldShowPaywall() {
+    console.assert(typeof searchUseCount === 'number', 'searchUseCount must be a number');
+    console.assert(typeof PAYWALL_LIMIT === 'number', 'PAYWALL_LIMIT must be a number');
+    return searchUseCount >= PAYWALL_LIMIT;
+  }
+
+  /* ── Utility: Show paywall overlay ── */
+  function showPaywall() {
+    console.assert(paywallOverlay !== null, 'paywallOverlay must exist');
+    console.assert(cmdList !== null, 'cmdList must exist');
+    paywallActive = true;
+    paywallOverlay.style.display = 'flex';
+    var cards = cmdList.querySelectorAll('.cmd-card');
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].classList.add('blurred');
+    }
+  }
+
+  /* ── Utility: Escape HTML ── */
+  function escapeHTML(str) {
+    console.assert(typeof str === 'string', 'escapeHTML input must be a string');
+    console.assert(str.length < 5000, 'escapeHTML input must be under 5000 chars');
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  /* ── Utility: Build a single card ── */
+  function buildCard(cmd) {
+    console.assert(cmd !== null && typeof cmd === 'object', 'cmd must be an object');
+    console.assert(typeof cmd.name === 'string', 'cmd.name must be a string');
+    var badgeClass = BADGE_MAP[cmd.category] || 'badge-slash';
+    var cardHTML = '<div class="cmd-card' + (paywallActive ? ' blurred' : '') + '">';
+    cardHTML += '<div class="cmd-card-header">';
+    cardHTML += '<span class="cmd-name">' + escapeHTML(cmd.name) + '</span>';
+    cardHTML += '<span style="display:flex;gap:8px;align-items:center;">';
+    cardHTML += '<span class="cmd-badge ' + badgeClass + '">' + escapeHTML(cmd.category) + '</span>';
+    cardHTML += '<button class="copy-btn" data-copy="' + escapeHTML(cmd.name) + '">Copy</button>';
+    cardHTML += '</span></div>';
+    cardHTML += '<div class="cmd-desc">' + escapeHTML(cmd.description) + '</div>';
+    cardHTML += '<div class="cmd-usage">' + escapeHTML(cmd.usage) + '</div>';
+    cardHTML += '<div class="cmd-tip">Tip: ' + escapeHTML(cmd.tip) + '</div>';
+    cardHTML += '</div>';
+    return cardHTML;
+  }
+
+  /* ── Filter commands ── */
+  function filterCommands(query, categories) {
+    console.assert(typeof query === 'string', 'query must be a string');
+    console.assert(Array.isArray(categories), 'categories must be an array');
+    var q = query.toLowerCase().trim();
+    var isAll = categories.indexOf('all') !== -1;
+    var results = [];
+    for (var i = 0; i < COMMANDS.length; i++) {
+      var cmd = COMMANDS[i];
+      /* Category filter */
+      if (!isAll && categories.indexOf(cmd.category) === -1) {
+        continue;
+      }
+      /* Search filter */
+      if (q.length > 0) {
+        var haystack = (cmd.name + ' ' + cmd.description + ' ' + cmd.tip).toLowerCase();
+        if (haystack.indexOf(q) === -1) {
+          continue;
+        }
+      }
+      results.push(cmd);
+    }
+    return results;
+  }
+
+  /* ── Render cards ── */
+  function renderCards(commands) {
+    console.assert(Array.isArray(commands), 'commands must be an array');
+    console.assert(cmdList !== null, 'cmdList must exist');
+    var htmlParts = [];
+    for (var i = 0; i < commands.length; i++) {
+      htmlParts.push(buildCard(commands[i]));
+    }
+    cmdList.innerHTML = htmlParts.join('');
+    resultsCounter.textContent = 'Showing ' + commands.length + ' of ' + COMMANDS.length + ' commands';
+  }
+
+  /* ── Handle search + filter ── */
+  function handleUpdate() {
+    console.assert(searchInput !== null, 'searchInput must exist');
+    console.assert(Array.isArray(activeCategories), 'activeCategories must be an array');
+    var query = searchInput.value;
+    var filtered = filterCommands(query, activeCategories);
+    renderCards(filtered);
+    if (paywallActive) {
+      var cards = cmdList.querySelectorAll('.cmd-card');
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.add('blurred');
+      }
+    }
+  }
+
+  /* ── Handle search with paywall check ── */
+  function handleSearch() {
+    console.assert(searchInput !== null, 'searchInput must exist');
+    console.assert(typeof isAutoLoad === 'boolean', 'isAutoLoad must be a boolean');
+    var query = searchInput.value.trim();
+    if (query.length > 0 && !paywallActive) {
+      if (!isAutoLoad) {
+        var uses = incrementUses();
+      }
+      isAutoLoad = false;
+      if (shouldShowPaywall()) {
+        showPaywall();
+      }
+    }
+    handleUpdate();
+  }
+
+  /* ── Handle copy ── */
+  function handleCopy(btn) {
+    console.assert(btn !== null, 'copy button must exist');
+    console.assert(typeof btn.getAttribute === 'function', 'btn must be a DOM element');
+    var text = btn.getAttribute('data-copy');
+    if (!text) { return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    } else {
+      /* Fallback for older browsers */
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1500);
+    }
+  }
+
+  /* ── Event: Search input ── */
+  var searchTimer = null;
+  searchInput.addEventListener('input', function() {
+    if (searchTimer !== null) { clearTimeout(searchTimer); }
+    searchTimer = setTimeout(function() {
+      searchTimer = null;
+      handleSearch();
+    }, 200);
+  });
+
+  /* ── Event: Filter buttons ── */
+  filterRow.addEventListener('click', function(e) {
+    var btn = e.target;
+    if (!btn.classList.contains('filter-btn')) { return; }
+    var cat = btn.getAttribute('data-cat');
+    console.assert(typeof cat === 'string', 'data-cat must be a string');
+
+    if (cat === 'all') {
+      /* Click All: deselect everything else, select All */
+      activeCategories = ['all'];
+    } else {
+      /* Remove "all" if present */
+      var allIdx = activeCategories.indexOf('all');
+      if (allIdx !== -1) { activeCategories.splice(allIdx, 1); }
+
+      /* Toggle this category */
+      var idx = activeCategories.indexOf(cat);
+      if (idx !== -1) {
+        activeCategories.splice(idx, 1);
+      } else {
+        activeCategories.push(cat);
+      }
+
+      /* If nothing selected, default to all */
+      if (activeCategories.length === 0) {
+        activeCategories = ['all'];
+      }
+    }
+
+    /* Update button states */
+    var btns = filterRow.querySelectorAll('.filter-btn');
+    for (var i = 0; i < btns.length; i++) {
+      var bCat = btns[i].getAttribute('data-cat');
+      if (activeCategories.indexOf(bCat) !== -1) {
+        btns[i].classList.add('active');
+      } else {
+        btns[i].classList.remove('active');
+      }
+    }
+
+    handleUpdate();
+  });
+
+  /* ── Event: Copy buttons (delegated) ── */
+  cmdList.addEventListener('click', function(e) {
+    var btn = e.target;
+    if (btn.classList.contains('copy-btn')) {
+      handleCopy(btn);
+    }
+  });
+
+  /* ── Initial Render ── */
+  console.assert(COMMANDS.length >= 80, 'Must have at least 80 commands, got ' + COMMANDS.length);
+  renderCards(COMMANDS);
+
+  /* ── Check if paywall should be active on load (read-only) ── */
+  if (shouldShowPaywall()) {
+    showPaywall();
+  }
+
+  /* ── Mark auto-load phase complete ── */
+  isAutoLoad = false;
+
+})();
+</script>
+
+
+</body>
+</html>

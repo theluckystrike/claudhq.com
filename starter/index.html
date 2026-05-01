@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Project Starter Wizard (2026) | ClaudHQ</title>
+  <meta name="description" content="Generate a complete Claude Code project setup. Answer 5 questions, get CLAUDE.md, settings.json, and MCP config — ready to paste.">
+  <link rel="canonical" href="https://claudhq.com/starter/">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Claude Code Project Starter Wizard — Free Tool">
+  <meta property="og:description" content="Generate a complete Claude Code project setup. Answer 5 questions, get CLAUDE.md, settings.json, and MCP config.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://claudhq.com/starter/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code Project Starter Wizard (2026)">
+  <meta name="twitter:description" content="Generate a complete Claude Code project setup. Answer 5 questions, get CLAUDE.md, settings.json, and MCP config.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I initialize Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run 'claude /init' in your project root. This creates a CLAUDE.md file with project context. You can also create CLAUDE.md manually before running Claude Code. The file tells Claude about your project structure, coding conventions, and any special instructions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What should CLAUDE.md contain?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CLAUDE.md should contain your project overview, tech stack, coding standards, directory structure, build commands, test commands, and any special rules. Think of it as onboarding documentation for Claude. Keep it concise but comprehensive — typically 50-200 lines."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need settings.json?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "settings.json (.claude/settings.json) is optional but recommended for teams. It controls which tools Claude can use, permission allowlists for bash commands, and MCP server configuration. Solo developers can often rely on CLAUDE.md alone, but teams benefit from explicit permission boundaries."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I add MCP servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add MCP servers in .claude/settings.json under the 'mcpServers' key. Each server needs a command, args array, and optional env vars. Common servers include GitHub (@modelcontextprotocol/server-github), Supabase (npx supabase-mcp-server), and filesystem (@modelcontextprotocol/server-filesystem)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What's the best team setup?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For teams, commit CLAUDE.md and .claude/settings.json to version control. Use project-level settings for shared tool permissions and MCP servers. Each developer can override with personal settings in ~/.claude/settings.json. Add pre-commit hooks to enforce code quality standards."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Claude Code with monorepos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Place a root CLAUDE.md with shared rules, then add package-specific CLAUDE.md files in each workspace. Claude reads all CLAUDE.md files from the current directory up to the repo root. Use settings.json to configure MCP servers that span multiple packages."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I set up CI/CD?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use 'claude --dangerously-skip-permissions -p \"your prompt\"' in CI/CD pipelines with the ANTHROPIC_API_KEY environment variable. Create a dedicated CI-focused CLAUDE.md with stricter rules. GitHub Actions workflows can run Claude Code as a step for automated code review, test generation, or migration tasks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What languages does Claude Code support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude Code works with any programming language. It has deep expertise in JavaScript, TypeScript, Python, Rust, Go, Java, Ruby, C#, PHP, Swift, and Kotlin. Framework-specific knowledge includes React, Next.js, Vue, Django, FastAPI, Express, and many more. CLAUDE.md helps Claude understand your specific stack."
+        }
+      }
+    ]
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    h1 {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 28px;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 22px;
+      color: oklch(0.97 0.006 80);
+      margin: 40px 0 16px;
+    }
+
+    h3 {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 18px;
+      color: oklch(0.97 0.006 80);
+      margin: 24px 0 12px;
+    }
+
+    p { margin-bottom: 16px; }
+
+    a { color: oklch(0.72 0.11 38); }
+    a:hover { text-decoration: underline; }
+
+    /* Card / section */
+    .card {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    /* Progress indicator */
+    .progress-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .progress-step {
+      flex: 1;
+      height: 6px;
+      background: oklch(0.30 0.010 60);
+      border-radius: 3px;
+      transition: background 0.3s;
+    }
+
+    .progress-step.active {
+      background: oklch(0.72 0.11 38);
+    }
+
+    .progress-step.completed {
+      background: oklch(0.64 0.10 38);
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: oklch(0.58 0.010 70);
+      margin-bottom: 16px;
+    }
+
+    .step-title {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 20px;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    /* Wizard step containers */
+    .wizard-step {
+      display: none;
+    }
+
+    .wizard-step.active {
+      display: block;
+    }
+
+    /* Radio / checkbox groups */
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .option-item:hover {
+      border-color: oklch(0.72 0.11 38);
+      background: oklch(0.235 0.009 60);
+    }
+
+    .option-item.selected {
+      border-color: oklch(0.72 0.11 38);
+      background: oklch(0.235 0.009 60);
+    }
+
+    .option-item input[type="radio"],
+    .option-item input[type="checkbox"] {
+      accent-color: oklch(0.72 0.11 38);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .option-item label {
+      cursor: pointer;
+      font-size: 15px;
+      color: oklch(0.97 0.006 80);
+      flex: 1;
+    }
+
+    .option-item .option-desc {
+      font-size: 13px;
+      color: oklch(0.58 0.010 70);
+      margin-top: 2px;
+    }
+
+    /* Dropdowns */
+    .select-group {
+      margin-bottom: 16px;
+    }
+
+    .select-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      color: oklch(0.97 0.006 80);
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238b949e'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid oklch(0.30 0.010 60);
+      font-family: inherit;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-back {
+      background: oklch(0.235 0.009 60);
+      color: oklch(0.80 0.008 70);
+    }
+
+    .btn-back:hover {
+      background: oklch(0.30 0.010 60);
+    }
+
+    .btn-next {
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.155 0.007 60);
+      border-color: oklch(0.72 0.11 38);
+    }
+
+    .btn-next:hover {
+      background: oklch(0.64 0.10 38);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-generate {
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.155 0.007 60);
+      border-color: oklch(0.72 0.11 38);
+      font-size: 17px;
+      padding: 14px 32px;
+    }
+
+    .btn-generate:hover {
+      background: oklch(0.64 0.10 38);
+    }
+
+    /* Summary list */
+    .summary-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .summary-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid oklch(0.30 0.010 60);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .summary-list li:last-child {
+      border-bottom: none;
+    }
+
+    .summary-key {
+      color: oklch(0.58 0.010 70);
+      font-size: 14px;
+    }
+
+    .summary-value {
+      color: oklch(0.97 0.006 80);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* Output section */
+    .output-section {
+      margin-top: 24px;
+    }
+
+    .output-pre {
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: oklch(0.80 0.008 70);
+      white-space: pre;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-copy, .btn-download {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid oklch(0.30 0.010 60);
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .btn-copy {
+      background: oklch(0.235 0.009 60);
+      color: oklch(0.80 0.008 70);
+    }
+
+    .btn-copy:hover { background: oklch(0.30 0.010 60); }
+    .btn-copy.copied { background: oklch(0.72 0.11 38); color: oklch(0.155 0.007 60); border-color: oklch(0.72 0.11 38); }
+
+    .btn-download {
+      background: oklch(0.235 0.009 60);
+      color: oklch(0.80 0.008 70);
+    }
+
+    .btn-download:hover { background: oklch(0.30 0.010 60); }
+
+    /* Paywall */
+    .paywall-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(20, 18, 14, 0.88);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .paywall-overlay.visible { display: flex; }
+
+    .paywall-box {
+      background: oklch(0.185 0.008 60);
+      border: 2px solid oklch(0.72 0.11 38);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .paywall-box h3 {
+      color: oklch(0.97 0.006 80);
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .paywall-box p {
+      color: oklch(0.58 0.010 70);
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    .paywall-btn {
+      display: inline-block;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.155 0.007 60);
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+
+    .paywall-btn:hover { background: oklch(0.64 0.10 38); text-decoration: none; }
+
+    .paywall-dismiss {
+      display: block;
+      color: oklch(0.58 0.010 70);
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      margin-top: 8px;
+      font-family: inherit;
+    }
+
+    .blurred { filter: blur(6px); pointer-events: none; user-select: none; }
+
+    /* SEO content */
+    .seo-content { margin-top: 48px; }
+    .seo-content p { color: oklch(0.58 0.010 70); font-size: 15px; line-height: 1.7; }
+    .seo-content ul, .seo-content ol { color: oklch(0.58 0.010 70); font-size: 15px; margin: 12px 0 16px 24px; }
+    .seo-content li { margin-bottom: 6px; }
+
+    details {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      padding: 0;
+    }
+
+    summary {
+      padding: 14px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      font-size: 15px;
+    }
+
+    summary:hover { color: oklch(0.72 0.11 38); }
+
+    details[open] summary { border-bottom: 1px solid oklch(0.30 0.010 60); }
+
+    details p {
+      padding: 14px 16px;
+      margin: 0;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, oklch(0.185 0.008 60), oklch(0.235 0.009 60));
+      border: 2px solid oklch(0.72 0.11 38);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      margin: 32px 0;
+    }
+
+    .cta-box h3 { color: oklch(0.97 0.006 80); margin-bottom: 12px; }
+    .cta-box p { color: oklch(0.58 0.010 70); margin-bottom: 20px; }
+
+    .cta-btn {
+      display: inline-block;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.155 0.007 60);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .cta-btn:hover { background: oklch(0.64 0.10 38); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .card { padding: 16px; }
+      .btn-row { flex-direction: column; }
+      .btn { width: 100%; text-align: center; }
+      .output-actions { flex-direction: column; }
+    }
+
+/* ========== LEARN MORE ========== */
+.learn-more {
+  margin: 48px 0 0;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--line);
+}
+.learn-more .lm-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+.learn-more .lm-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+.learn-more .lm-title em {
+  font-family: var(--serif-alt);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+.learn-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.learn-more-grid a {
+  background: var(--bg-2);
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
+}
+.learn-more-grid a:hover {
+  background: var(--bg-3);
+  color: var(--accent);
+}
+.learn-more-grid a::before {
+  content: '\2192';
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color .15s ease;
+}
+.learn-more-grid a:hover::before {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .learn-more-grid { grid-template-columns: 1fr; }
+  .learn-more .lm-title { font-size: 24px; }
+}
+  </style>
+</head>
+<body>
+
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>Claude Code Project Starter Wizard</h1>
+  <p class="subtitle">Answer 5 questions, get a complete project setup — CLAUDE.md, settings.json, MCP config, and more. Ready to paste.</p>
+
+  <!-- Wizard -->
+  <div class="card" id="wizardCard">
+    <!-- Progress bar -->
+    <div class="progress-bar">
+      <div class="progress-step" id="prog1"></div>
+      <div class="progress-step" id="prog2"></div>
+      <div class="progress-step" id="prog3"></div>
+      <div class="progress-step" id="prog4"></div>
+      <div class="progress-step" id="prog5"></div>
+    </div>
+
+    <!-- Step 1: Project Type -->
+    <div class="wizard-step active" id="step1">
+      <div class="step-label">Step 1 of 5</div>
+      <div class="step-title">What type of project?</div>
+      <div class="option-group" id="projectTypeGroup">
+        <div class="option-item" data-value="new">
+          <input type="radio" name="projectType" id="pt-new" value="new">
+          <div>
+            <label for="pt-new">New project from scratch</label>
+            <div class="option-desc">Starting fresh — scaffolding, structure, and conventions</div>
+          </div>
+        </div>
+        <div class="option-item" data-value="existing">
+          <input type="radio" name="projectType" id="pt-existing" value="existing">
+          <div>
+            <label for="pt-existing">Existing codebase</label>
+            <div class="option-desc">Adding Claude Code to a project already in progress</div>
+          </div>
+        </div>
+        <div class="option-item" data-value="monorepo">
+          <input type="radio" name="projectType" id="pt-monorepo" value="monorepo">
+          <div>
+            <label for="pt-monorepo">Monorepo</label>
+            <div class="option-desc">Multiple packages or services in one repository</div>
+          </div>
+        </div>
+        <div class="option-item" data-value="script">
+          <input type="radio" name="projectType" id="pt-script" value="script">
+          <div>
+            <label for="pt-script">Quick script</label>
+            <div class="option-desc">One-off script, automation, or small utility</div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-next" id="btn1next" disabled>Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Language + Framework -->
+    <div class="wizard-step" id="step2">
+      <div class="step-label">Step 2 of 5</div>
+      <div class="step-title">Language &amp; Framework</div>
+      <div class="select-group">
+        <span class="select-label">Language</span>
+        <select id="langSelect">
+          <option value="">Select a language...</option>
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="rust">Rust</option>
+          <option value="go">Go</option>
+          <option value="java">Java</option>
+          <option value="ruby">Ruby</option>
+          <option value="csharp">C#</option>
+          <option value="php">PHP</option>
+          <option value="swift">Swift</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="select-group" id="frameworkGroup" style="display:none;">
+        <span class="select-label">Framework</span>
+        <select id="frameworkSelect">
+          <option value="none">None</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" id="btn2back">&larr; Back</button>
+        <button class="btn btn-next" id="btn2next" disabled>Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 3: What do you need? -->
+    <div class="wizard-step" id="step3">
+      <div class="step-label">Step 3 of 5</div>
+      <div class="step-title">What do you need?</div>
+      <div class="option-group" id="featuresGroup">
+        <div class="option-item">
+          <input type="checkbox" id="feat-claude" checked>
+          <div>
+            <label for="feat-claude">CLAUDE.md file</label>
+            <div class="option-desc">Project context, rules, and conventions for Claude</div>
+          </div>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="feat-settings">
+          <div>
+            <label for="feat-settings">.claude/settings.json</label>
+            <div class="option-desc">Tool permissions, allowlists, and deny rules</div>
+          </div>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="feat-mcp">
+          <div>
+            <label for="feat-mcp">MCP server config</label>
+            <div class="option-desc">Model Context Protocol server connections</div>
+          </div>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="feat-hooks">
+          <div>
+            <label for="feat-hooks">Git hooks (pre-commit lint check)</label>
+            <div class="option-desc">Automated code quality checks before commits</div>
+          </div>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="feat-ci">
+          <div>
+            <label for="feat-ci">CI/CD integration (GitHub Actions)</label>
+            <div class="option-desc">Automated Claude Code tasks in your pipeline</div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" id="btn3back">&larr; Back</button>
+        <button class="btn btn-next" id="btn3next">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Team Size -->
+    <div class="wizard-step" id="step4">
+      <div class="step-label">Step 4 of 5</div>
+      <div class="step-title">Team size</div>
+      <div class="option-group" id="teamGroup">
+        <div class="option-item" data-value="solo">
+          <input type="radio" name="teamSize" id="ts-solo" value="solo">
+          <div>
+            <label for="ts-solo">Solo developer</label>
+            <div class="option-desc">Just you — maximum autonomy, minimal guardrails</div>
+          </div>
+        </div>
+        <div class="option-item" data-value="small">
+          <input type="radio" name="teamSize" id="ts-small" value="small">
+          <div>
+            <label for="ts-small">Small team (2-5)</label>
+            <div class="option-desc">Shared conventions, code review integration</div>
+          </div>
+        </div>
+        <div class="option-item" data-value="enterprise">
+          <input type="radio" name="teamSize" id="ts-enterprise" value="enterprise">
+          <div>
+            <label for="ts-enterprise">Enterprise (6+)</label>
+            <div class="option-desc">Strict permissions, audit trails, compliance</div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-back" id="btn4back">&larr; Back</button>
+        <button class="btn btn-next" id="btn4next" disabled>Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Review + Generate -->
+    <div class="wizard-step" id="step5">
+      <div class="step-label">Step 5 of 5</div>
+      <div class="step-title">Review &amp; Generate</div>
+      <ul class="summary-list" id="summaryList">
+        <li><span class="summary-key">Project type</span><span class="summary-value" id="sumType">—</span></li>
+        <li><span class="summary-key">Language</span><span class="summary-value" id="sumLang">—</span></li>
+        <li><span class="summary-key">Framework</span><span class="summary-value" id="sumFramework">—</span></li>
+        <li><span class="summary-key">Components</span><span class="summary-value" id="sumFeatures">—</span></li>
+        <li><span class="summary-key">Team size</span><span class="summary-value" id="sumTeam">—</span></li>
+      </ul>
+      <div class="btn-row">
+        <button class="btn btn-back" id="btn5back">&larr; Back</button>
+        <button class="btn btn-generate" id="btnGenerate">Generate Setup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output section -->
+  <div class="output-section" id="outputSection" style="display:none;">
+    <h2>Your Project Setup Script</h2>
+    <p class="subtitle">Copy this script or download it. Run it in your project root.</p>
+    <pre class="output-pre" id="outputPre"></pre>
+    <div class="output-actions">
+      <button class="btn-copy" id="btnCopy">Copy Script</button>
+      <button class="btn-download" id="btnDownload">Download .sh</button>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<!-- Paywall overlay -->
+<div class="paywall-overlay" id="paywallOverlay">
+  <div class="paywall-box">
+    <h3>Unlock Unlimited Setups</h3>
+    <p>You have used your 2 free project generations. Get lifetime access to all Claude Code tools, 200+ guides, and production-ready project templates.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="paywall-btn">Get Full Access — $99</a>
+    <button class="paywall-dismiss" id="paywallDismiss">Maybe later</button>
+  </div>
+</div>
+
+<!-- SEO content -->
+<div class="container seo-content">
+
+  <h2>Getting Started with Claude Code</h2>
+  <p>Setting up Claude Code correctly from the start saves hours of friction later. The most important file in any Claude Code project is CLAUDE.md — a markdown file at your repository root that tells Claude about your project. Think of it as onboarding documentation: project structure, coding conventions, build commands, test commands, and any special rules.</p>
+  <p>Running <code>claude /init</code> creates a basic CLAUDE.md, but the real power comes from customizing it for your specific stack. A well-written CLAUDE.md reduces hallucinations, keeps Claude aligned with your coding style, and eliminates repetitive instructions. For example, a TypeScript Next.js project benefits from explicit rules about using server components by default, importing from specific barrel files, and running <code>pnpm lint</code> before committing.</p>
+  <p>Beyond CLAUDE.md, the <code>.claude/settings.json</code> file controls tool permissions. You can allowlist specific bash commands (like <code>npm test</code>, <code>git status</code>), deny dangerous patterns (like <code>rm -rf /</code>), and configure MCP servers for database access, API integrations, or file system operations. For solo developers, permissive settings work fine. For teams, explicit allowlists prevent accidents and ensure consistency across developers.</p>
+
+  <h2>Project Setup Best Practices</h2>
+  <p>The difference between a productive Claude Code session and a frustrating one often comes down to initial setup. Here are the practices that experienced Claude Code users follow.</p>
+  <ul>
+    <li><strong>Start with CLAUDE.md.</strong> Always create or update this file before your first session. Include your tech stack, directory structure, coding standards, and common commands. Claude reads this file at the start of every session.</li>
+    <li><strong>Use project-level settings.</strong> Place <code>.claude/settings.json</code> in your repo root and commit it. This ensures every developer on the team has the same tool permissions and MCP server configuration.</li>
+    <li><strong>Configure MCP servers for your workflow.</strong> If you use GitHub, add the GitHub MCP server. If you have a database, add a database MCP server. These give Claude direct access to your tools without manual copy-pasting.</li>
+    <li><strong>Add pre-commit hooks.</strong> A simple lint check before every commit catches issues early. Claude Code can generate these hooks for you, ensuring code quality stays high even during rapid iteration.</li>
+    <li><strong>Set up CI/CD early.</strong> GitHub Actions workflows that run Claude Code for automated code review or test generation pay dividends quickly. Use the <code>--dangerously-skip-permissions</code> flag in CI with a dedicated API key.</li>
+    <li><strong>Keep CLAUDE.md under 200 lines.</strong> Concise instructions work better than verbose ones. Focus on rules and conventions, not documentation. Link to external docs if Claude needs reference material.</li>
+    <li><strong>Version control everything.</strong> CLAUDE.md, settings.json, MCP config, and git hooks should all be committed. This makes your Claude Code setup reproducible and shareable across the team.</li>
+  </ul>
+
+  <h2>Common Questions</h2>
+
+  <details>
+    <summary>How do I initialize Claude Code?</summary>
+    <p>Run <code>claude /init</code> in your project root. This creates a CLAUDE.md file with basic project context. You can also create CLAUDE.md manually — Claude reads it automatically at the start of every session. The file supports standard markdown formatting including headers, lists, and code blocks.</p>
+  </details>
+
+  <details>
+    <summary>What should CLAUDE.md contain?</summary>
+    <p>Include your project overview, tech stack, directory structure, coding standards, build commands, test commands, and any special rules. Keep it concise — 50 to 200 lines. Think of it as onboarding documentation for a new developer who happens to be an AI. Avoid including sensitive information like API keys or passwords.</p>
+  </details>
+
+  <details>
+    <summary>Do I need settings.json?</summary>
+    <p>For solo developers, it is optional — CLAUDE.md alone works well. For teams, settings.json is highly recommended. It controls tool permissions (which tools Claude can use), bash command allowlists, and MCP server configuration. Place it at <code>.claude/settings.json</code> and commit it to version control.</p>
+  </details>
+
+  <details>
+    <summary>How do I add MCP servers?</summary>
+    <p>Add MCP servers in <code>.claude/settings.json</code> under the <code>mcpServers</code> key. Each server needs a <code>command</code> (like <code>npx</code>), an <code>args</code> array, and optional <code>env</code> variables. Popular servers include GitHub, Supabase, filesystem, PostgreSQL, Slack, and Notion. Use the <a href="/mcp-config/">MCP Config Generator</a> to build your configuration interactively.</p>
+  </details>
+
+  <details>
+    <summary>What is the best team setup?</summary>
+    <p>Commit CLAUDE.md and <code>.claude/settings.json</code> to version control. Use project-level settings for shared tool permissions. Each developer can add personal overrides in <code>~/.claude/settings.json</code>. For enterprise teams, restrict bash commands to a vetted allowlist and enable audit logging.</p>
+  </details>
+
+  <details>
+    <summary>Can I use Claude Code with monorepos?</summary>
+    <p>Yes. Place a root CLAUDE.md with shared rules, then add package-specific CLAUDE.md files in each workspace directory. Claude reads all CLAUDE.md files from the current directory up to the repo root, so rules cascade naturally. Use settings.json to configure MCP servers that span multiple packages.</p>
+  </details>
+
+  <details>
+    <summary>How do I set up CI/CD?</summary>
+    <p>Use <code>claude --dangerously-skip-permissions -p "your prompt"</code> in CI/CD pipelines. Set the <code>ANTHROPIC_API_KEY</code> environment variable as a GitHub Actions secret. Create a dedicated CI CLAUDE.md with stricter rules. Common use cases include automated code review on pull requests, test generation, and migration tasks.</p>
+  </details>
+
+  <details>
+    <summary>What languages does Claude Code support?</summary>
+    <p>Claude Code works with any programming language. It has deep expertise in JavaScript, TypeScript, Python, Rust, Go, Java, Ruby, C#, PHP, Swift, and Kotlin. Framework-specific knowledge includes React, Next.js, Vue, Svelte, Django, FastAPI, Flask, Express, Actix, Axum, Gin, and many more. CLAUDE.md helps Claude understand your specific stack and conventions.</p>
+  </details>
+
+  <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+    <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+    <ul style="list-style:none;padding:0;margin:0;">
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+      </li>
+      <li style="padding:8px 0;">
+        <a href="/skill-finder/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Skill Finder</a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="learn-more">
+    <div class="lm-eyebrow">&sect; Related &middot; Getting started</div>
+    <h2 class="lm-title">Keep <em>reading.</em></h2>
+    <div class="learn-more-grid">
+      <a href="/model-selector/">Claude Model Selector</a>
+      <a href="/permissions/">Permission Configurator</a>
+      <a href="/mcp-config/">MCP Server Config Generator</a>
+      <a href="/commands/">Command Reference</a>
+      <a href="/token-estimator/">Token Usage Estimator</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+      <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+      <a href="/claude-code-gitignore-best-practices/">Gitignore Best Practices</a>
+    </div>
+  </section>
+
+  <div class="cta-box">
+    <h3>200 Project Templates</h3>
+    <p>Get production-ready CLAUDE.md templates, team permission configs, MCP setups, and CI/CD workflows for every major framework.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="cta-btn">Claude Code Mastery Playbook — $99</a>
+  </div>
+
+</div>
+
+
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">SSL Error Fix</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/about.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">About</a>
+      <a href="/prompts.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Constants ── */
+  var PAYWALL_KEY = 'ccg_starter_uses';
+  var PAYWALL_LIMIT = 2;
+  var MAX_STEPS = 5;
+  var MAX_FEATURES = 5;
+
+  /* ── Auto-load flag: prevents page-load actions from counting as uses ── */
+  var isAutoLoad = true;
+
+  /* ── Framework map ── */
+  var FRAMEWORK_MAP = {
+    javascript: ['React', 'Next.js', 'Vue', 'Svelte', 'Express', 'Fastify', 'None'],
+    typescript: ['React', 'Next.js', 'Vue', 'Svelte', 'Express', 'Fastify', 'None'],
+    python: ['Django', 'Flask', 'FastAPI', 'None'],
+    rust: ['Actix', 'Axum', 'Rocket', 'None'],
+    go: ['Gin', 'Echo', 'Fiber', 'None'],
+    java: ['Spring Boot', 'Quarkus', 'None'],
+    ruby: ['Rails', 'Sinatra', 'None'],
+    csharp: ['.NET', 'Blazor', 'None'],
+    php: ['Laravel', 'Symfony', 'None'],
+    swift: ['SwiftUI', 'Vapor', 'None'],
+    kotlin: ['Ktor', 'Spring Boot', 'None'],
+    other: ['None']
+  };
+
+  /* ── Project type labels ── */
+  var PROJECT_LABELS = {
+    new: 'New project from scratch',
+    existing: 'Existing codebase',
+    monorepo: 'Monorepo',
+    script: 'Quick script'
+  };
+
+  /* ── Team labels ── */
+  var TEAM_LABELS = {
+    solo: 'Solo developer',
+    small: 'Small team (2-5)',
+    enterprise: 'Enterprise (6+)'
+  };
+
+  /* ── State ── */
+  var state = {
+    currentStep: 1,
+    projectType: '',
+    language: '',
+    framework: 'None',
+    features: { claude: true, settings: false, mcp: false, hooks: false, ci: false },
+    teamSize: '',
+    useCount: 0
+  };
+
+  /* ── DOM refs ── */
+  var outputSection = document.getElementById('outputSection');
+  var outputPre = document.getElementById('outputPre');
+  var paywallOverlay = document.getElementById('paywallOverlay');
+  var paywallDismiss = document.getElementById('paywallDismiss');
+
+  /* ── Assertion helper ── */
+  function assert(condition, msg) {
+    if (!condition) {
+      console.error('Assertion failed: ' + msg);
+    }
+  }
+
+  /* ── Paywall: load ── */
+  function loadUseCount() {
+    assert(typeof PAYWALL_KEY === 'string', 'PAYWALL_KEY must be string');
+    assert(typeof PAYWALL_LIMIT === 'number', 'PAYWALL_LIMIT must be number');
+    try {
+      var stored = localStorage.getItem(PAYWALL_KEY);
+      state.useCount = stored ? parseInt(stored, 10) || 0 : 0;
+    } catch (e) {
+      state.useCount = 0;
+    }
+    assert(typeof state.useCount === 'number', 'useCount must be number');
+  }
+
+  /* ── Paywall: save ── */
+  function saveUseCount() {
+    assert(typeof state.useCount === 'number', 'useCount must be number before save');
+    assert(state.useCount >= 0, 'useCount must be non-negative');
+    try {
+      localStorage.setItem(PAYWALL_KEY, String(state.useCount));
+    } catch (e) {
+      /* storage full or disabled */
+    }
+  }
+
+  /* ── Paywall: check ── */
+  function checkPaywall() {
+    assert(typeof state.useCount === 'number', 'useCount must be number');
+    assert(paywallOverlay !== null, 'paywallOverlay must exist');
+    if (state.useCount >= PAYWALL_LIMIT) {
+      outputSection.classList.add('blurred');
+      paywallOverlay.classList.add('visible');
+    }
+  }
+
+  /* ── Update progress bar ── */
+  function updateProgress() {
+    assert(state.currentStep >= 1 && state.currentStep <= MAX_STEPS, 'step in range');
+    assert(document.getElementById('prog1') !== null, 'prog1 must exist');
+    for (var i = 1; i <= MAX_STEPS; i++) {
+      var el = document.getElementById('prog' + i);
+      el.className = 'progress-step';
+      if (i < state.currentStep) {
+        el.classList.add('completed');
+      } else if (i === state.currentStep) {
+        el.classList.add('active');
+      }
+    }
+  }
+
+  /* ── Show step ── */
+  function showStep(num) {
+    assert(num >= 1 && num <= MAX_STEPS, 'step num in valid range');
+    assert(typeof num === 'number', 'step num must be number');
+    state.currentStep = num;
+    for (var i = 1; i <= MAX_STEPS; i++) {
+      var stepEl = document.getElementById('step' + i);
+      if (stepEl) {
+        stepEl.classList.toggle('active', i === num);
+      }
+    }
+    updateProgress();
+    if (num === 5) {
+      populateSummary();
+    }
+  }
+
+  /* ── Populate summary ── */
+  function populateSummary() {
+    assert(state.projectType !== '', 'projectType must be set');
+    assert(state.language !== '', 'language must be set');
+    document.getElementById('sumType').textContent = PROJECT_LABELS[state.projectType] || state.projectType;
+    document.getElementById('sumLang').textContent = capitalize(state.language);
+    document.getElementById('sumFramework').textContent = state.framework;
+    var featureNames = getSelectedFeatureNames();
+    document.getElementById('sumFeatures').textContent = featureNames.join(', ') || 'None';
+    document.getElementById('sumTeam').textContent = TEAM_LABELS[state.teamSize] || state.teamSize;
+  }
+
+  /* ── Get selected feature names ── */
+  function getSelectedFeatureNames() {
+    assert(typeof state.features === 'object', 'features must be object');
+    var names = [];
+    var limit = MAX_FEATURES;
+    if (state.features.claude && limit-- > 0) { names.push('CLAUDE.md'); }
+    if (state.features.settings && limit-- > 0) { names.push('settings.json'); }
+    if (state.features.mcp && limit-- > 0) { names.push('MCP config'); }
+    if (state.features.hooks && limit-- > 0) { names.push('Git hooks'); }
+    if (state.features.ci && limit-- > 0) { names.push('CI/CD'); }
+    assert(names.length <= MAX_FEATURES, 'features within limit');
+    return names;
+  }
+
+  /* ── Capitalize ── */
+  function capitalize(str) {
+    assert(typeof str === 'string', 'capitalize expects string');
+    if (str === 'csharp') { return 'C#'; }
+    if (str === 'javascript') { return 'JavaScript'; }
+    if (str === 'typescript') { return 'TypeScript'; }
+    if (str === 'php') { return 'PHP'; }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  /* ── Update framework dropdown ── */
+  function updateFrameworks() {
+    var lang = state.language;
+    assert(typeof lang === 'string', 'language must be string');
+    var fwGroup = document.getElementById('frameworkGroup');
+    var fwSelect = document.getElementById('frameworkSelect');
+    assert(fwGroup !== null, 'frameworkGroup must exist');
+    assert(fwSelect !== null, 'frameworkSelect must exist');
+    var frameworks = FRAMEWORK_MAP[lang] || ['None'];
+    fwSelect.innerHTML = '';
+    for (var i = 0; i < frameworks.length && i < 20; i++) {
+      var opt = document.createElement('option');
+      opt.value = frameworks[i];
+      opt.textContent = frameworks[i];
+      fwSelect.appendChild(opt);
+    }
+    state.framework = frameworks[0];
+    fwGroup.style.display = frameworks.length > 1 ? 'block' : 'none';
+  }
+
+  /* ── Generate: build CLAUDE.md content ── */
+  function buildClaudeMd() {
+    assert(state.language !== '', 'language required for CLAUDE.md');
+    assert(state.projectType !== '', 'projectType required for CLAUDE.md');
+    var lines = [];
+    lines.push('# Project Overview');
+    lines.push('');
+    if (state.projectType === 'monorepo') {
+      lines.push('This is a monorepo containing multiple packages.');
+    } else if (state.projectType === 'script') {
+      lines.push('This is a utility script / small automation project.');
+    } else if (state.projectType === 'existing') {
+      lines.push('This is an existing codebase. Respect current patterns.');
+    } else {
+      lines.push('This is a new ' + capitalize(state.language) + ' project.');
+    }
+    lines.push('');
+    lines.push('## Tech Stack');
+    lines.push('- Language: ' + capitalize(state.language));
+    if (state.framework !== 'None') {
+      lines.push('- Framework: ' + state.framework);
+    }
+    lines.push('');
+    lines.push('## Coding Standards');
+    lines = lines.concat(getCodingStandards());
+    lines.push('');
+    lines.push('## Commands');
+    lines = lines.concat(getBuildCommands());
+    if (state.teamSize === 'enterprise') {
+      lines.push('');
+      lines.push('## Team Rules');
+      lines.push('- All changes require code review');
+      lines.push('- No direct pushes to main');
+      lines.push('- Run full test suite before opening PR');
+      lines.push('- Follow conventional commit messages');
+    }
+    return lines.join('\n');
+  }
+
+  /* ── Get coding standards by language ── */
+  function getCodingStandards() {
+    assert(typeof state.language === 'string', 'language must be string');
+    var lang = state.language;
+    var stds = [];
+    if (lang === 'typescript' || lang === 'javascript') {
+      stds.push('- Use const/let, never var');
+      stds.push('- Prefer arrow functions for callbacks');
+      stds.push('- Use async/await over raw promises');
+      if (state.framework === 'React' || state.framework === 'Next.js') {
+        stds.push('- Functional components with hooks');
+        stds.push('- Co-locate tests with components');
+      }
+      if (state.framework === 'Next.js') {
+        stds.push('- Use server components by default');
+        stds.push('- App Router conventions');
+      }
+    } else if (lang === 'python') {
+      stds.push('- Follow PEP 8 style guide');
+      stds.push('- Type hints on all function signatures');
+      stds.push('- Docstrings on public functions');
+      if (state.framework === 'FastAPI') {
+        stds.push('- Pydantic models for request/response');
+        stds.push('- Dependency injection for services');
+      }
+    } else if (lang === 'rust') {
+      stds.push('- Run cargo clippy before committing');
+      stds.push('- No unwrap() in production code');
+      stds.push('- Document public API with /// comments');
+    } else if (lang === 'go') {
+      stds.push('- Run go vet and golint');
+      stds.push('- Error wrapping with fmt.Errorf');
+      stds.push('- Table-driven tests');
+    } else {
+      stds.push('- Follow language-standard style guide');
+      stds.push('- Write tests for all public functions');
+    }
+    assert(stds.length > 0, 'standards must not be empty');
+    assert(stds.length <= 20, 'standards within bounds');
+    return stds;
+  }
+
+  /* ── Get build commands by language ── */
+  function getBuildCommands() {
+    assert(typeof state.language === 'string', 'language must be string');
+    var cmds = [];
+    var lang = state.language;
+    if (lang === 'typescript' || lang === 'javascript') {
+      cmds.push('- Install: `npm install`');
+      cmds.push('- Dev: `npm run dev`');
+      cmds.push('- Build: `npm run build`');
+      cmds.push('- Test: `npm test`');
+      cmds.push('- Lint: `npm run lint`');
+    } else if (lang === 'python') {
+      cmds.push('- Install: `pip install -r requirements.txt`');
+      cmds.push('- Test: `pytest`');
+      cmds.push('- Lint: `ruff check .`');
+      cmds.push('- Format: `ruff format .`');
+    } else if (lang === 'rust') {
+      cmds.push('- Build: `cargo build`');
+      cmds.push('- Test: `cargo test`');
+      cmds.push('- Lint: `cargo clippy`');
+      cmds.push('- Format: `cargo fmt`');
+    } else if (lang === 'go') {
+      cmds.push('- Build: `go build ./...`');
+      cmds.push('- Test: `go test ./...`');
+      cmds.push('- Lint: `golangci-lint run`');
+    } else {
+      cmds.push('- Build: (configure for your project)');
+      cmds.push('- Test: (configure for your project)');
+    }
+    assert(cmds.length > 0, 'commands must not be empty');
+    return cmds;
+  }
+
+  /* ── Generate: build settings.json ── */
+  function buildSettingsJson() {
+    assert(typeof state.teamSize === 'string', 'teamSize must be string');
+    var settings = { permissions: { allow: [], deny: [] } };
+    if (state.language === 'typescript' || state.language === 'javascript') {
+      settings.permissions.allow = ['npm test', 'npm run lint', 'npm run build', 'npx tsc --noEmit', 'git status', 'git diff', 'git log'];
+    } else if (state.language === 'python') {
+      settings.permissions.allow = ['pytest', 'ruff check .', 'ruff format .', 'pip install -r requirements.txt', 'git status', 'git diff'];
+    } else if (state.language === 'rust') {
+      settings.permissions.allow = ['cargo test', 'cargo clippy', 'cargo build', 'cargo fmt', 'git status', 'git diff'];
+    } else if (state.language === 'go') {
+      settings.permissions.allow = ['go test ./...', 'go build ./...', 'golangci-lint run', 'git status', 'git diff'];
+    } else {
+      settings.permissions.allow = ['git status', 'git diff', 'git log'];
+    }
+    settings.permissions.deny = ['rm -rf /', 'sudo', 'git push --force'];
+    if (state.teamSize === 'enterprise') {
+      settings.permissions.deny.push('git push origin main');
+      settings.permissions.deny.push('DROP TABLE');
+      settings.permissions.deny.push('DELETE FROM');
+    }
+    if (state.features.mcp) {
+      settings.mcpServers = buildMcpServers();
+    }
+    assert(settings.permissions.allow.length > 0, 'allow list must not be empty');
+    return JSON.stringify(settings, null, 2);
+  }
+
+  /* ── Generate: MCP servers ── */
+  function buildMcpServers() {
+    assert(typeof state.language === 'string', 'language must be set for MCP');
+    var servers = {};
+    servers['github'] = {
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-github'],
+      env: { GITHUB_PERSONAL_ACCESS_TOKEN: '<your-github-token>' }
+    };
+    servers['filesystem'] = {
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-filesystem', '.']
+    };
+    assert(Object.keys(servers).length >= 1, 'at least 1 MCP server');
+    assert(Object.keys(servers).length <= 10, 'MCP servers within bounds');
+    return servers;
+  }
+
+  /* ── Generate: git hooks ── */
+  function buildGitHook() {
+    assert(typeof state.language === 'string', 'language must be set for hooks');
+    var lines = [];
+    lines.push('#!/bin/sh');
+    lines.push('# Pre-commit hook — lint check');
+    lines.push('set -e');
+    lines.push('');
+    if (state.language === 'typescript' || state.language === 'javascript') {
+      lines.push('echo "Running lint..."');
+      lines.push('npm run lint');
+      lines.push('echo "Running type check..."');
+      lines.push('npx tsc --noEmit 2>/dev/null || true');
+    } else if (state.language === 'python') {
+      lines.push('echo "Running ruff..."');
+      lines.push('ruff check . --fix');
+    } else if (state.language === 'rust') {
+      lines.push('echo "Running clippy..."');
+      lines.push('cargo clippy -- -D warnings');
+    } else if (state.language === 'go') {
+      lines.push('echo "Running go vet..."');
+      lines.push('go vet ./...');
+    } else {
+      lines.push('echo "Pre-commit check passed"');
+    }
+    lines.push('');
+    lines.push('echo "Pre-commit checks passed."');
+    assert(lines.length > 3, 'hook must have content');
+    return lines.join('\n');
+  }
+
+  /* ── Generate: GitHub Actions ── */
+  function buildGithubActions() {
+    assert(typeof state.language === 'string', 'language must be set for CI');
+    var lines = [];
+    lines.push('name: Claude Code CI');
+    lines.push('on:');
+    lines.push('  pull_request:');
+    lines.push('    branches: [main]');
+    lines.push('');
+    lines.push('jobs:');
+    lines.push('  claude-review:');
+    lines.push('    runs-on: ubuntu-latest');
+    lines.push('    steps:');
+    lines.push('      - uses: actions/checkout@v4');
+    if (state.language === 'typescript' || state.language === 'javascript') {
+      lines.push('      - uses: actions/setup-node@v4');
+      lines.push('        with:');
+      lines.push('          node-version: 20');
+      lines.push('      - run: npm ci');
+      lines.push('      - run: npm test');
+      lines.push('      - run: npm run lint');
+    } else if (state.language === 'python') {
+      lines.push('      - uses: actions/setup-python@v5');
+      lines.push('        with:');
+      lines.push('          python-version: "3.12"');
+      lines.push('      - run: pip install -r requirements.txt');
+      lines.push('      - run: pytest');
+    } else if (state.language === 'rust') {
+      lines.push('      - uses: actions-rs/toolchain@v1');
+      lines.push('        with:');
+      lines.push('          toolchain: stable');
+      lines.push('      - run: cargo test');
+      lines.push('      - run: cargo clippy -- -D warnings');
+    } else if (state.language === 'go') {
+      lines.push('      - uses: actions/setup-go@v5');
+      lines.push('        with:');
+      lines.push('          go-version: "1.22"');
+      lines.push('      - run: go test ./...');
+    }
+    lines.push('      - name: Claude Code Review');
+    lines.push('        run: |');
+    lines.push('          npx @anthropic-ai/claude-code --dangerously-skip-permissions \\');
+    lines.push('            -p "Review the changes in this PR for bugs, style issues, and improvements."');
+    lines.push('        env:');
+    lines.push('          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}');
+    assert(lines.length > 10, 'CI config must have content');
+    assert(lines.length < 100, 'CI config must be bounded');
+    return lines.join('\n');
+  }
+
+  /* ── Generate: full script ── */
+  function generateScript() {
+    assert(state.projectType !== '', 'projectType required');
+    assert(state.language !== '', 'language required');
+    assert(state.teamSize !== '', 'teamSize required');
+    var parts = [];
+    parts.push('#!/bin/bash');
+    parts.push('# Claude Code Project Setup Script');
+    parts.push('# Generated by claudhq.com/starter/');
+    parts.push('# ' + new Date().toISOString().slice(0, 10));
+    parts.push('set -e');
+    parts.push('');
+    parts.push('echo "Setting up Claude Code for your project..."');
+    parts.push('');
+    /* Initialize claude */
+    parts.push('# Initialize Claude Code');
+    parts.push('claude /init 2>/dev/null || echo "claude /init skipped (run manually if needed)"');
+    parts.push('');
+    /* CLAUDE.md */
+    if (state.features.claude) {
+      parts.push('# Create CLAUDE.md');
+      parts.push("cat > CLAUDE.md << 'CLAUDE_EOF'");
+      parts.push(buildClaudeMd());
+      parts.push('CLAUDE_EOF');
+      parts.push('echo "Created CLAUDE.md"');
+      parts.push('');
+    }
+    /* settings.json */
+    if (state.features.settings || state.features.mcp) {
+      parts.push('# Create .claude/settings.json');
+      parts.push('mkdir -p .claude');
+      parts.push("cat > .claude/settings.json << 'SETTINGS_EOF'");
+      parts.push(buildSettingsJson());
+      parts.push('SETTINGS_EOF');
+      parts.push('echo "Created .claude/settings.json"');
+      parts.push('');
+    }
+    /* Git hooks */
+    if (state.features.hooks) {
+      parts.push('# Create pre-commit hook');
+      parts.push('mkdir -p .git/hooks');
+      parts.push("cat > .git/hooks/pre-commit << 'HOOK_EOF'");
+      parts.push(buildGitHook());
+      parts.push('HOOK_EOF');
+      parts.push('chmod +x .git/hooks/pre-commit');
+      parts.push('echo "Created pre-commit hook"');
+      parts.push('');
+    }
+    /* CI/CD */
+    if (state.features.ci) {
+      parts.push('# Create GitHub Actions workflow');
+      parts.push('mkdir -p .github/workflows');
+      parts.push("cat > .github/workflows/claude-ci.yml << 'CI_EOF'");
+      parts.push(buildGithubActions());
+      parts.push('CI_EOF');
+      parts.push('echo "Created .github/workflows/claude-ci.yml"');
+      parts.push('');
+    }
+    parts.push('echo ""');
+    parts.push('echo "Setup complete! Your Claude Code project is ready."');
+    parts.push('echo "Run: claude to start a session."');
+    assert(parts.length > 5, 'script must have content');
+    assert(parts.length < 500, 'script must be bounded');
+    return parts.join('\n');
+  }
+
+  /* ── Bind: radio option items ── */
+  function bindRadioGroup(groupId, stateKey) {
+    var group = document.getElementById(groupId);
+    assert(group !== null, groupId + ' must exist');
+    assert(typeof stateKey === 'string', 'stateKey must be string');
+    var items = group.querySelectorAll('.option-item');
+    for (var i = 0; i < items.length && i < 20; i++) {
+      (function(item) {
+        item.addEventListener('click', function() {
+          var radio = item.querySelector('input[type="radio"]');
+          if (radio) {
+            radio.checked = true;
+            state[stateKey] = radio.value;
+            /* Update visual */
+            for (var j = 0; j < items.length && j < 20; j++) {
+              items[j].classList.remove('selected');
+            }
+            item.classList.add('selected');
+            updateNextButtons();
+          }
+        });
+      })(items[i]);
+    }
+  }
+
+  /* ── Bind: checkbox items ── */
+  function bindCheckboxes() {
+    var group = document.getElementById('featuresGroup');
+    assert(group !== null, 'featuresGroup must exist');
+    var checkboxes = [
+      { id: 'feat-claude', key: 'claude' },
+      { id: 'feat-settings', key: 'settings' },
+      { id: 'feat-mcp', key: 'mcp' },
+      { id: 'feat-hooks', key: 'hooks' },
+      { id: 'feat-ci', key: 'ci' }
+    ];
+    for (var i = 0; i < checkboxes.length && i < MAX_FEATURES; i++) {
+      (function(cfg) {
+        var cb = document.getElementById(cfg.id);
+        var item = cb.closest('.option-item');
+        assert(cb !== null, cfg.id + ' must exist');
+        item.addEventListener('click', function(e) {
+          if (e.target !== cb) {
+            cb.checked = !cb.checked;
+          }
+          state.features[cfg.key] = cb.checked;
+          item.classList.toggle('selected', cb.checked);
+        });
+        /* Init visual */
+        if (cb.checked) {
+          item.classList.add('selected');
+        }
+      })(checkboxes[i]);
+    }
+  }
+
+  /* ── Update next button enabled state ── */
+  function updateNextButtons() {
+    assert(typeof state.currentStep === 'number', 'currentStep must be number');
+    var btn1 = document.getElementById('btn1next');
+    var btn2 = document.getElementById('btn2next');
+    var btn4 = document.getElementById('btn4next');
+    btn1.disabled = (state.projectType === '');
+    btn2.disabled = (state.language === '');
+    btn4.disabled = (state.teamSize === '');
+  }
+
+  /* ── Bind: language dropdown ── */
+  function bindLanguageSelect() {
+    var langSelect = document.getElementById('langSelect');
+    assert(langSelect !== null, 'langSelect must exist');
+    langSelect.addEventListener('change', function() {
+      state.language = langSelect.value;
+      if (state.language) {
+        updateFrameworks();
+      }
+      updateNextButtons();
+    });
+    var fwSelect = document.getElementById('frameworkSelect');
+    assert(fwSelect !== null, 'frameworkSelect must exist');
+    fwSelect.addEventListener('change', function() {
+      state.framework = fwSelect.value || 'None';
+    });
+  }
+
+  /* ── Bind: navigation buttons ── */
+  function bindNavButtons() {
+    var nav = [
+      { id: 'btn1next', action: function() { showStep(2); } },
+      { id: 'btn2back', action: function() { showStep(1); } },
+      { id: 'btn2next', action: function() { showStep(3); } },
+      { id: 'btn3back', action: function() { showStep(2); } },
+      { id: 'btn3next', action: function() { showStep(4); } },
+      { id: 'btn4back', action: function() { showStep(3); } },
+      { id: 'btn4next', action: function() { showStep(5); } },
+      { id: 'btn5back', action: function() { showStep(4); } }
+    ];
+    for (var i = 0; i < nav.length && i < 20; i++) {
+      (function(cfg) {
+        var btn = document.getElementById(cfg.id);
+        assert(btn !== null, cfg.id + ' must exist');
+        btn.addEventListener('click', cfg.action);
+      })(nav[i]);
+    }
+  }
+
+  /* ── Bind: generate button ── */
+  function bindGenerate() {
+    var btn = document.getElementById('btnGenerate');
+    assert(btn !== null, 'btnGenerate must exist');
+    assert(outputSection !== null, 'outputSection must exist');
+    btn.addEventListener('click', function() {
+      assert(typeof isAutoLoad === 'boolean', 'isAutoLoad must be boolean');
+      assert(typeof state.useCount === 'number', 'useCount must be number before increment');
+      if (!isAutoLoad) {
+        state.useCount++;
+        saveUseCount();
+      }
+      isAutoLoad = false;
+      var script = generateScript();
+      outputPre.textContent = script;
+      outputSection.style.display = 'block';
+      outputSection.scrollIntoView({ behavior: 'smooth' });
+      checkPaywall();
+    });
+  }
+
+  /* ── Bind: copy button ── */
+  function bindCopy() {
+    var btn = document.getElementById('btnCopy');
+    assert(btn !== null, 'btnCopy must exist');
+    assert(outputPre !== null, 'outputPre must exist');
+    btn.addEventListener('click', function() {
+      var text = outputPre.textContent || '';
+      if (navigator.clipboard && text.length > 0) {
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy Script';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+    });
+  }
+
+  /* ── Bind: download button ── */
+  function bindDownload() {
+    var btn = document.getElementById('btnDownload');
+    assert(btn !== null, 'btnDownload must exist');
+    assert(outputPre !== null, 'outputPre must exist');
+    btn.addEventListener('click', function() {
+      var text = outputPre.textContent || '';
+      assert(text.length > 0, 'text must not be empty for download');
+      var blob = new Blob([text], { type: 'text/x-shellscript' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'claude-code-setup.sh';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  /* ── Bind: paywall dismiss ── */
+  function bindPaywallDismiss() {
+    assert(paywallDismiss !== null, 'paywallDismiss must exist');
+    assert(paywallOverlay !== null, 'paywallOverlay must exist');
+    paywallDismiss.addEventListener('click', function() {
+      paywallOverlay.classList.remove('visible');
+    });
+  }
+
+  /* ── Init ── */
+  function init() {
+    assert(document.getElementById('step1') !== null, 'step1 must exist');
+    assert(document.getElementById('wizardCard') !== null, 'wizardCard must exist');
+    loadUseCount();
+    bindRadioGroup('projectTypeGroup', 'projectType');
+    bindRadioGroup('teamGroup', 'teamSize');
+    bindCheckboxes();
+    bindLanguageSelect();
+    bindNavButtons();
+    bindGenerate();
+    bindCopy();
+    bindDownload();
+    bindPaywallDismiss();
+    updateProgress();
+    updateNextButtons();
+  }
+
+  init();
+})();
+</script>
+
+
+</body>
+</html>

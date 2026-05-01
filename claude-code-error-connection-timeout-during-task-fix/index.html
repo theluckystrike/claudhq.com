@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Request Timed Out Error (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix 'request timed out' in Claude Code with copy-paste config. Covers API timeouts, MCP connection drops, and retry settings that actually work.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-error-connection-timeout-during-task-fix/">
+  <meta property="og:title" content="Fix Claude Code Request Timed Out Error (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix 'request timed out' in Claude Code with copy-paste config. Covers API timeouts, MCP connection drops, and retry settings that actually work.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-error-connection-timeout-during-task-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Request Timed Out Error (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>Connection timeout errors in Claude Code can interrupt your workflow during critical development tasks. When the CLI cannot establish or maintain a connection to Anthropic's API servers, tasks fail mid-execution, leaving incomplete work and frustrating error messages. This guide provides practical solutions for developers and power users facing these timeout issues.</p>
+
+      <h2>Understanding Connection Timeout Errors</h2>
+
+      <p>A connection timeout occurs when Claude Code fails to establish a network connection within the expected time frame. The error typically manifests as:</p>
+
+      <pre><code>Error: Connection timeout after 120000ms</code></pre>
+
+      <p>or</p>
+
+      <pre><code>Claude Code API request failed: connect ETIMEDOUT</code></pre>
+
+      <p>These errors can occur during initial connection, between API calls in long-running tasks, or when processing large responses. Understanding the root cause helps you apply the right fix.</p>
+
+      <h2>Common Causes and Solutions</h2>
+
+      <h3>1. Network Configuration Issues</h3>
+
+      <p>The most frequent cause of connection timeouts is network configuration. Claude Code communicates with Anthropic's servers over HTTPS, requiring proper DNS resolution and network routing.</p>
+
+      <p>Diagnose the issue:</p>
+
+      <pre><code># Test connectivity to Anthropic's API endpoint
+curl -I https://api.anthropic.com
+
+# Test DNS resolution
+nslookup api.anthropic.com
+
+# Check your default gateway
+route -n get default</code></pre>
+
+      <p><strong>Solution:</strong> If you use a corporate VPN or firewall, ensure it allows outbound HTTPS traffic to <code>api.anthropic.com</code>. Some users benefit from configuring a custom DNS server like Cloudflare (1.1.1.1) or Google (8.8.8.8).</p>
+
+      <h3>2. API Key and Authentication Problems</h3>
+
+      <p>Expired or incorrectly configured API keys can cause connection attempts to fail silently or timeout while waiting for authentication.</p>
+
+      <p>Verify your API key:</p>
+
+      <pre><code># Check if ANTHROPIC_API_KEY is set
+echo $ANTHROPIC_API_KEY
+
+# Set the API key explicitly for the current session
+export ANTHROPIC_API_KEY="sk-ant-api03-your-key-here"</code></pre>
+
+      <p><strong>Solution:</strong> Generate a fresh API key from the Anthropic console and ensure it has the correct permissions. The environment variable should be set before invoking Claude Code.</p>
+
+      <h3>3. Request Timeout Configuration</h3>
+
+      <p>For tasks that involve large file processing or complex operations, the default timeout is insufficient.</p>
+
+      <p>Increase timeout in your configuration:</p>
+
+      <pre><code># Set a custom timeout (in seconds)
+export CLAUDE_TIMEOUT=300
+
+# Or pass it directly to the command
+claude --print "your task here"</code></pre>
+
+      <p><strong>Solution:</strong> Adjust the <code>ANTHROPIC_TIMEOUT</code> environment variable or use the <code>--timeout</code> flag. Values between 180 and 600 seconds work well for complex tasks.</p>
+
+      <h3>4. Proxy and TLS Inspection Issues</h3>
+
+      <p>Corporate proxies and TLS inspection tools can interfere with HTTPS connections, causing unexpected timeouts or connection failures.</p>
+
+      <p>Test direct connection (bypassing proxy):</p>
+
+      <pre><code># Temporarily unset proxy variables
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+
+# Run your task
+claude "your task"</code></pre>
+
+      <p><strong>Solution:</strong> If a proxy is required for internet access, configure it properly:</p>
+
+      <pre><code>export HTTP_PROXY=http://proxy.example.com:8080
+export HTTPS_PROXY=http://proxy.example.com:8080
+export NO_PROXY=localhost,127.0.0.1</code></pre>
+
+      <p>For TLS inspection issues, you may need to add your corporate certificate to the system trust store or disable inspection for <code>api.anthropic.com</code>.</p>
+
+      <h3>5. Rate Limiting and Server Issues</h3>
+
+      <p>Anthropic implements rate limiting that can manifest as timeouts when you exceed allowed request frequency.</p>
+
+      <p>Check your rate limit status:</p>
+
+      <pre><code># View current rate limit headers in API responses
+claude --verbose "your task" 2&gt;&amp;1 | grep -i rate</code></pre>
+
+      <p><strong>Solution:</strong> Implement exponential backoff in your automation scripts. If you consistently hit limits, consider upgrading your plan or distributing requests across multiple API keys.</p>
+
+      <h2>Working with Claude Skills During Timeout Issues</h2>
+
+      <p>When connection timeouts occur during skill execution, the partial state can complicate recovery.</p>
+
+      <p>Resume interrupted tasks:</p>
+
+      <pre><code># Use the continue flag to resume
+claude --continue "continue the previous task"
+
+# Or specify a checkpoint file
+claude --continue</code></pre>
+
+      <p><strong>Best practice:</strong> Break large tasks into smaller steps when working with skills. This reduces the impact of timeouts and makes recovery easier.</p>
+
+      <h2>Performance Optimization for Complex Tasks</h2>
+
+      <p>Prevent timeouts by optimizing how you structure complex tasks:</p>
+
+      <h3>Chunk Large Operations</h3>
+
+      <p>Instead of processing an entire codebase:</p>
+
+      <pre><code># Process files in batches
+find ./src -name "*.ts" | head -10 | xargs -I {} claude "analyze {}"</code></pre>
+
+      <h3>Use Streaming Responsibly</h3>
+
+      <p>Skills that generate large outputs may benefit from streaming disabled:</p>
+
+      <pre><code>claude --print "generate the design"</code></pre>
+
+      <h3>Configure Retry Behavior</h3>
+
+      <p>Add automatic retries for transient failures:</p>
+
+      <pre><code># Shell wrapper with retry logic
+retry_claude() {
+ local attempt=1
+ while [ $attempt -le 3 ]; do
+  claude "$@" &amp;&amp; return 0
+  echo "Attempt $attempt failed, retrying..."
+  attempt=$((attempt + 1))
+  sleep 5
+ done
+ echo "All attempts failed"
+ return 1
+}</code></pre>
+
+      <h2>Debugging Tools and Techniques</h2>
+
+      <p>When standard fixes don't resolve the issue, use detailed debugging:</p>
+
+      <pre><code># Enable debug output
+export DEBUG=claude:*
+
+# Run with verbose logging
+claude --verbose --debug "your task"</code></pre>
+
+      <p>Network-level debugging helps identify where connections fail:</p>
+
+      <pre><code># Trace the connection path
+traceroute -I api.anthropic.com
+
+# Or use mtr for more detailed analysis
+mtr api.anthropic.com</code></pre>
+
+      <h2>Prevention Strategies</h2>
+
+      <ol>
+        <li>Monitor network health before starting large tasks</li>
+        <li>Keep Claude Code updated for the latest connection handling improvements</li>
+        <li>Use checkpoint files for long-running operations</li>
+        <li>Maintain multiple authentication methods (API key rotation)</li>
+        <li>Implement health checks in automation scripts:</li>
+      </ol>
+
+      <pre><code># Quick health check before main task
+curl -s -o /dev/null -w "%{http_code}" https://api.anthropic.com &amp;&amp; \
+ claude "your task" || \
+ echo "Connection check failed"</code></pre>
+
+      <h2>When to Seek Additional Help</h2>
+
+      <p>If you've tried these solutions and still experience timeout errors:</p>
+
+      <ul>
+        <li>Check <a href="https://status.anthropic.com">Anthropic's status page</a> for outages</li>
+        <li>Review your account for any API key restrictions</li>
+        <li>Consider geographic latency, users in some regions benefit from using regional API endpoints</li>
+      </ul>
+
+      <p>Connection timeout errors in Claude Code are typically resolvable through proper configuration, network settings, or timeout adjustments. By understanding the underlying causes and implementing these fixes, you can maintain productive workflows without interruption.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your timeout error for an instant fix</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-error-connection-timeout-during-task-fix">Grab the templates — $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> — solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Request Timed Out Error (2026)",
+    "description": "Fix 'request timed out' in Claude Code with copy-paste config. Covers API timeouts, MCP connection drops, and retry settings that actually work.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-error-connection-timeout-during-task-fix/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production Guides — Troubleshooting &amp; Workflows | ClaudHQ</title>
+  <meta name="description" content="13 production guides for Claude Code. Fix timeouts, crashes, SSL errors, memory leaks. FPGA and Lottie workflows. Offline usage. All battle-tested.">
+  <link rel="canonical" href="https://claudhq.com/guides/">
+  <meta property="og:title" content="Production Guides | ClaudHQ">
+  <meta property="og:description" content="13 production guides for Claude Code developers. Troubleshooting, configuration, and workflows.">
+  <meta property="og:url" content="https://claudhq.com/guides/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section style="padding:clamp(48px,6vw,80px) 0;">
+      <div class="eyebrow">&sect; 13 Guides</div>
+      <h1 style="font-family:var(--serif);font-size:clamp(32px,5vw,52px);margin-bottom:12px;">Production <em style="font-family:var(--serif-alt);font-style:italic;color:var(--accent);">guides.</em></h1>
+      <p style="color:var(--ink-2);font-size:16px;max-width:600px;margin-bottom:clamp(24px,4vw,48px);">Battle-tested fixes and workflows from a developer running 5 Claude Max subscriptions daily.</p>
+
+      <!-- Connection & Timeout -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Connection &amp; Timeout</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-api-timeout-error-handling-retry-guide/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Claude API Timeout Errors</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Retry logic, exponential backoff, per-request timeout configuration.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-ssl-certificate-verification-failed-error/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix SSL Certificate Verification Failed</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Diagnose and resolve SSL cert chain issues in Claude Code.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Skill Timeout Error</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Increase the skill timeout limit for long-running operations.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-error-connection-timeout-during-task-fix/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Connection Timeout During Task</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Resolve mid-task connection drops and network interruptions.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Crashes & Performance -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Crashes &amp; Performance</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-code-crashes-on-large-files-fix/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Crashes on Large Files</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Handle large file processing without crashing Claude Code.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-stuck-infinite-loop-fix/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Stuck Infinite Loop</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Break out of infinite loops and prevent them from recurring.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-bun-crash-fix/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Bun Crash</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Resolve Bun runtime crashes when using Claude Code.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-memory-leak-high-ram-usage-fix/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Memory Leak / High RAM Usage</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Diagnose and fix excessive memory consumption.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Setup & Configuration -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Setup &amp; Configuration</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-code-not-working-vscode/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Fix Not Working in VS Code</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Get Claude Code running in VS Code when it refuses to start.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-gitignore-best-practices/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">.gitignore Best Practices</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">What to include and exclude for Claude Code projects.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Workflows -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Workflows</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-code-for-fpga-vhdl-development-workflow/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">FPGA/VHDL Development Workflow</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Use Claude Code for hardware description language projects.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-for-lottie-animation-workflow/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Lottie Animation Workflow</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Generate and edit Lottie animations with Claude Code.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/best-way-to-use-claude-code-offline-without-internet-access/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Offline Usage Guide</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Best practices for using Claude Code without internet access.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>Get everything. <em>$99 once.</em></h2>
+      <p>Unlimited access to all tools plus CLAUDE.md templates, prompts, and orchestration configs.</p>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=guides-hub" class="cta-btn">Get Lifetime Access &rarr;</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

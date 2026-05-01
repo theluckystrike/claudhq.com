@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code for FPGA Development (2026) | ClaudHQ</title>
+  <meta name="description" content="Use Claude Code for FPGA development from project setup to simulation and synthesis. Verilog and VHDL code generation with AI-assisted tooling.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-for-fpga-vhdl-development-workflow/">
+  <meta property="og:title" content="Claude Code for FPGA Development (2026) | ClaudHQ">
+  <meta property="og:description" content="Use Claude Code for FPGA development from project setup to simulation and synthesis. Verilog and VHDL code generation with AI-assisted tooling.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-for-fpga-vhdl-development-workflow/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code for FPGA Development (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>FPGA development has traditionally been a complex, tool-heavy process requiring specialized knowledge of hardware description languages like Verilog or VHDL, vendor-specific toolchains, and intricate debugging setups. Claude Code brings AI-assisted development capabilities to this domain, helping developers write cleaner HDL code, manage projects more efficiently, and automate repetitive tasks. This tutorial walks you through integrating Claude Code into your FPGA development workflow, from initial project scaffolding through simulation, synthesis, and deployment.</p>
+
+      <h2>Setting Up Your FPGA Development Environment</h2>
+
+      <p>Before integrating Claude Code, ensure your development environment is properly configured. Most FPGA workflows require vendor-specific tools from Intel (Quartus), AMD (Vivado), Lattice, or Microchip. Install your target toolchain and verify it's accessible from the command line.</p>
+
+      <p>The table below summarizes the major vendor toolchains and their command-line entry points:</p>
+
+      <table>
+        <thead>
+          <tr><th>Vendor</th><th>Toolchain</th><th>Command</th><th>Primary Target</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AMD/Xilinx</td><td>Vivado</td><td><code>vivado</code></td><td>Artix, Kintex, Virtex, Zynq</td></tr>
+          <tr><td>Intel/Altera</td><td>Quartus Prime</td><td><code>quartus_sh</code></td><td>Cyclone, Arria, Stratix</td></tr>
+          <tr><td>Lattice</td><td>Radiant / Diamond</td><td><code>radiantc</code></td><td>ECP5, iCE40, CrossLink</td></tr>
+          <tr><td>Microchip</td><td>Libero SoC</td><td><code>libero</code></td><td>PolarFire, IGLOO2</td></tr>
+          <tr><td>Open-source</td><td>Yosys + nextpnr</td><td><code>yosys</code></td><td>ECP5, iCE40 (OSS flow)</td></tr>
+        </tbody>
+      </table>
+
+      <p>Create a dedicated directory for your FPGA projects and initialize a structured folder hierarchy:</p>
+
+      <pre><code>mkdir fpga-projects &amp;&amp; cd fpga-projects
+mkdir -p rtl sim synth constraints docs ip scripts</code></pre>
+
+      <p>The <code>ip</code> folder holds vendor IP cores and third-party components. The <code>scripts</code> folder stores Tcl automation scripts that Claude Code will help you build over time.</p>
+
+      <p>Initialize a simple project file to help Claude Code understand your setup:</p>
+
+      <pre><code>{
+ "project": "my-fpga-design",
+ "vendor": "xilinx",
+ "tool": "vivado",
+ "target_device": "xc7a35tcpg236-1",
+ "top_module": "top_design",
+ "clock_freq_mhz": 100,
+ "hdl_language": "verilog"
+}</code></pre>
+
+      <p>This context file lets Claude Code generate code appropriate to your target device's resource constraints and supported language features. When you open a Claude Code session, you can reference this file directly in your prompt to ensure consistent, device-aware suggestions.</p>
+
+      <h2>Writing HDL Code with Claude Code Assistance</h2>
+
+      <p>Claude Code excels at generating HDL code, explaining existing implementations, and suggesting improvements. When writing Verilog or VHDL, describe your intended functionality in natural language and let Claude translate it into synthesizable code.</p>
+
+      <p>A key advantage over generic code completion tools is that Claude Code understands synthesis constraints, it knows, for example, that <code>initial</code> blocks are not synthesizable in most toolchains, that blocking versus non-blocking assignments in <code>always</code> blocks carry different semantic meanings, and that inferred latches are almost always unintentional.</p>
+
+      <p>Useful prompt patterns when working on HDL:</p>
+
+      <ul>
+        <li>"Generate a parameterized synchronous FIFO in Verilog with configurable depth and data width, using the vendor's <code>(* ram_style = "block" *)</code> attribute."</li>
+        <li>"Review this <code>always</code> block and identify any unintended latch inference."</li>
+        <li>"Rewrite this code to use a two-process FSM style with separated combinational and sequential logic."</li>
+      </ul>
+
+      <h2>Creating a Simple Finite State Machine</h2>
+
+      <p>Suppose you need a UART receiver state machine. Instead of writing it from scratch, describe the requirements to Claude Code and it will produce synthesizable RTL:</p>
+
+      <pre><code>// UART Receiver State Machine
+// 8 data bits, 1 stop bit, no parity
+// 9600 baud rate assumption
+
+module uart_rx (
+ input wire clk,
+ input wire rst_n,
+ input wire rx,
+ output reg [7:0] data_out,
+ output reg data_valid
+);
+
+ // State definitions
+ localparam IDLE  = 3'b000;
+ localparam START = 3'b001;
+ localparam DATA  = 3'b010;
+ localparam STOP  = 3'b011;
+ localparam DONE  = 3'b100;
+
+ reg [2:0] state, next_state;
+ reg [3:0] bit_index;
+ reg [7:0] shift_reg;
+ reg [15:0] baud_counter;
+
+ // Baud rate generator (assuming 100MHz clock)
+ localparam BAUD_DIV = 100000000 / 9600 / 16;
+
+ always @(posedge clk or negedge rst_n) begin
+ if (!rst_n) begin
+  state &lt;= IDLE;
+  baud_counter &lt;= 0;
+  bit_index &lt;= 0;
+  data_valid &lt;= 0;
+ end else begin
+  if (state == IDLE &amp;&amp; !rx) begin
+   baud_counter &lt;= 0;
+   next_state &lt;= START;
+  end else if (baud_counter &lt; BAUD_DIV - 1) begin
+   baud_counter &lt;= baud_counter + 1;
+   next_state &lt;= state;
+  end else begin
+   baud_counter &lt;= 0;
+   case (state)
+    START: begin
+     next_state &lt;= DATA;
+     bit_index &lt;= 0;
+    end
+    DATA: begin
+     shift_reg &lt;= {rx, shift_reg[7:1]};
+     if (bit_index == 7) begin
+      next_state &lt;= STOP;
+     end else begin
+      bit_index &lt;= bit_index + 1;
+     end
+    end
+    STOP: begin
+     data_out &lt;= shift_reg;
+     data_valid &lt;= 1;
+     next_state &lt;= IDLE;
+    end
+    default: next_state &lt;= IDLE;
+   endcase
+  end
+  state &lt;= next_state;
+ end
+ end
+
+ always @(posedge clk or negedge rst_n) begin
+ if (!rst_n) data_valid &lt;= 0;
+ else if (state == DONE) data_valid &lt;= 0;
+ end
+
+endmodule</code></pre>
+
+      <p>Notice the addition of an active-low asynchronous reset (<code>rst_n</code>). Ask Claude Code to add this whenever you need your FPGA to reach a known state on power-up without waiting for the first clock edge. This code handles the core UART receive functionality. Claude Code can also help you layer on features like framing error detection, FIFO buffering, or synchronizer chains for clock domain crossings.</p>
+
+      <h2>Asking Claude Code to Explain Unfamiliar Code</h2>
+
+      <p>When inheriting legacy RTL, paste the module into Claude Code with a prompt like: "Explain what this Verilog module does, identify any synthesis risks, and suggest improvements." This pattern is especially valuable when working with third-party IP or older codebases written in VHDL-87 style.</p>
+
+      <h2>Simulation and Testbench Generation</h2>
+
+      <p>Writing testbenches is often tedious but essential for FPGA verification. Claude Code can generate comprehensive testbenches based on your RTL description. Provide the module interface and the test scenarios you want to cover:</p>
+
+      <pre><code>`timescale 1ns/1ps
+
+module tb_uart_rx;
+ reg clk;
+ reg rst_n;
+ reg rx;
+ wire [7:0] data_out;
+ wire data_valid;
+
+ // Clock generation - 100MHz
+ initial begin
+ clk = 0;
+ forever #5 clk = ~clk;
+ end
+
+ // UART RX instance
+ uart_rx dut (
+ .clk(clk),
+ .rst_n(rst_n),
+ .rx(rx),
+ .data_out(data_out),
+ .data_valid(data_valid)
+ );
+
+ // Helper task: send one UART byte at 9600 baud
+ task send_byte;
+ input [7:0] byte_val;
+ integer i;
+ begin
+  rx = 0; #8680; // Start bit
+  for (i = 0; i &lt; 8; i = i + 1) begin
+   rx = byte_val[i]; #8680; // Data bits LSB first
+  end
+  rx = 1; #8680; // Stop bit
+ end
+ endtask
+
+ // Test stimulus
+ initial begin
+ $dumpfile("uart_rx.vcd");
+ $dumpvars(0, tb_uart_rx);
+
+ rst_n = 0;
+ rx = 1; // Idle line
+ #100;
+ rst_n = 1;
+ #100;
+
+ // Test 1: Send 0xA5
+ send_byte(8'hA5);
+ #10000;
+ if (data_out !== 8'hA5)
+  $display("FAIL: expected A5, got %h", data_out);
+ else
+  $display("PASS: received %h", data_out);
+
+ // Test 2: Send 0x00
+ send_byte(8'h00);
+ #10000;
+ $display("Received: %h (expected 00)", data_out);
+
+ // Test 3: Send 0xFF
+ send_byte(8'hFF);
+ #10000;
+ $display("Received: %h (expected FF)", data_out);
+
+ $finish;
+ end
+
+endmodule</code></pre>
+
+      <p>The refactored testbench introduces a <code>send_byte</code> task that eliminates the manual bit-banging duplication, making it easier to run multiple test vectors. Ask Claude Code to extend this pattern with a test vector file, pass byte values in from a <code>$readmemh</code> call so you can swap test patterns without recompiling the testbench.</p>
+
+      <p>Run the simulation with your vendor's simulator or an open-source alternative:</p>
+
+      <table>
+        <thead>
+          <tr><th>Simulator</th><th>Command</th><th>License</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Vivado Simulator (xsim)</td><td><code>xsim tb_uart_rx --runall</code></td><td>Included with Vivado</td></tr>
+          <tr><td>ModelSim / QuestaSim</td><td><code>vsim tb_uart_rx -do "run -all"</code></td><td>Free/commercial tiers</td></tr>
+          <tr><td>GHDL + GTKWave</td><td><code>ghdl -r tb_uart_rx --vcd=out.vcd</code></td><td>Open-source</td></tr>
+          <tr><td>Icarus Verilog + GTKWave</td><td><code>iverilog -o sim tb_uart_rx.v &amp;&amp; vvp sim</code></td><td>Open-source</td></tr>
+        </tbody>
+      </table>
+
+      <p>For open-source projects targeting Lattice parts, the Icarus Verilog + GTKWave pairing is entirely free and widely used. Claude Code can help you write Makefiles that invoke the correct simulator based on your project config file.</p>
+
+      <h2>Synthesis and Implementation Automation</h2>
+
+      <p>Once your design passes simulation, synthesis and implementation follow. The Tcl scripting interface in Vivado and Quartus makes it possible to automate the entire flow without the GUI. Claude Code can generate, review, and debug these scripts efficiently.</p>
+
+      <p>A minimal Vivado synthesis script:</p>
+
+      <pre><code># synthesis.tcl - Vivado batch synthesis script
+set project_name "uart_rx_project"
+set target_device "xc7a35tcpg236-1"
+set top_module "top_design"
+
+create_project $project_name ./synth/$project_name -part $target_device -force
+
+# Add RTL sources
+add_files [glob ./rtl/*.v]
+
+# Add constraints
+add_files -fileset constrs_1 ./constraints/timing.xdc
+
+# Set top module
+set_property top $top_module [current_fileset]
+
+# Run synthesis
+launch_runs synth_1 -jobs 4
+wait_on_run synth_1
+
+# Run implementation
+launch_runs impl_1 -to_step write_bitstream -jobs 4
+wait_on_run impl_1
+
+# Report timing summary
+open_run impl_1
+report_timing_summary -file ./synth/${project_name}/timing_summary.rpt
+report_utilization -file ./synth/${project_name}/utilization.rpt</code></pre>
+
+      <p>Create a Claude Code skill to orchestrate the end-to-end build:</p>
+
+      <pre><code>#!/usr/bin/env bash
+# fpga_build.sh - Full FPGA build workflow
+
+set -euo pipefail
+
+echo "==&gt; Running simulation..."
+iverilog -o sim/tb_out sim/tb_uart_rx.v rtl/uart_rx.v
+vvp sim/tb_out
+
+echo "==&gt; Running synthesis and implementation..."
+vivado -mode batch -source scripts/synthesis.tcl
+
+echo "==&gt; Checking timing closure..."
+python3 scripts/check_timing.py synth/uart_rx_project/timing_summary.rpt
+
+echo "==&gt; Build complete. Bitstream at synth/uart_rx_project/top_design.bit"</code></pre>
+
+      <p>Pair this with a simple Python script that Claude Code can help you write to parse the timing report and fail the build if any path violates setup or hold margins:</p>
+
+      <pre><code># check_timing.py - Fail CI if timing is not met
+import sys, re
+
+def check_timing(report_path):
+ with open(report_path) as f:
+  content = f.read()
+
+ # Look for the worst negative slack line
+ wns_match = re.search(r'WNS\(ns\)\s+([-\d.]+)', content)
+ if wns_match:
+  wns = float(wns_match.group(1))
+  if wns &lt; 0:
+   print(f"TIMING VIOLATION: WNS = {wns} ns")
+   sys.exit(1)
+  else:
+   print(f"Timing met: WNS = {wns} ns")
+ else:
+  print("WARNING: Could not parse timing report")
+
+if __name__ == "__main__":
+ check_timing(sys.argv[1])</code></pre>
+
+      <p>Document your toolchain commands in a Makefile that Claude Code can reference across sessions:</p>
+
+      <pre><code>.PHONY: sim synth clean
+
+sim:
+	iverilog -o sim/tb_out sim/tb_uart_rx.v rtl/uart_rx.v &amp;&amp; vvp sim/tb_out
+
+synth:
+	vivado -mode batch -source scripts/synthesis.tcl
+
+check:
+	python3 scripts/check_timing.py synth/uart_rx_project/timing_summary.rpt
+
+clean:
+	rm -rf synth/ sim/tb_out</code></pre>
+
+      <h2>Constraint File Authoring with Claude Code</h2>
+
+      <p>One of the most error-prone parts of FPGA development is writing XDC or SDC timing constraint files. A missing or incorrect constraint can silently cause setup or hold violations that only show up at elevated temperatures or specific data patterns.</p>
+
+      <p>Claude Code can help you generate constraint templates and explain what each constraint means:</p>
+
+      <pre><code># timing.xdc - Xilinx XDC constraint file
+
+# Primary clock definition - 100 MHz system clock
+create_clock -period 10.000 -name sys_clk [get_ports clk]
+
+# Input delay constraints for UART RX pin
+# Allow up to 5 ns of input delay relative to the clock
+set_input_delay -clock sys_clk -max 5.0 [get_ports rx]
+set_input_delay -clock sys_clk -min 0.5 [get_ports rx]
+
+# Output delay constraints for data output bus
+set_output_delay -clock sys_clk -max 5.0 [get_ports {data_out[*]}]
+set_output_delay -clock sys_clk -min 0.5 [get_ports {data_out[*]}]
+
+# Pin assignments (Arty A7-35T board)
+set_property PACKAGE_PIN E3 [get_ports clk]
+set_property IOSTANDARD LVCMOS33 [get_ports clk]
+
+set_property PACKAGE_PIN A9 [get_ports rx]
+set_property IOSTANDARD LVCMOS33 [get_ports rx]</code></pre>
+
+      <p>Prompt Claude Code with: "Generate XDC constraints for a 100 MHz clock on pin E3 and a UART RX input on pin A9 for an Arty A7-35T board." It will produce a working constraint template that you can refine based on your board schematic.</p>
+
+      <h2>Debugging with Claude Code</h2>
+
+      <p>When simulation passes but hardware fails, Claude Code becomes a debugging partner. Describe the symptom in plain English and paste your RTL. Common debugging prompts:</p>
+
+      <ul>
+        <li>"My UART receiver works in simulation but drops bytes at 115200 baud on hardware. What could cause this?"</li>
+        <li>"The Vivado timing report shows a 3 ns setup violation on this path. How do I add a multicycle path constraint?"</li>
+        <li>"This design synthesizes correctly but the usage report shows 40% more LUTs than I expected. Why?"</li>
+      </ul>
+
+      <p>For clock domain crossing issues, one of the most subtle sources of intermittent hardware failures, Claude Code can review your design and flag unsynchronized signals:</p>
+
+      <pre><code>// UNSAFE: signal crosses clock domains without a synchronizer
+always @(posedge clk_b) begin
+ data_clkb &lt;= data_clka; // data_clka is driven by clk_a domain
+end
+
+// SAFE: two-flop synchronizer for single-bit signals
+reg sync_ff1, sync_ff2;
+always @(posedge clk_b) begin
+ sync_ff1 &lt;= data_clka;
+ sync_ff2 &lt;= sync_ff1;
+end
+assign data_synchronized = sync_ff2;</code></pre>
+
+      <p>Ask Claude Code to scan your RTL for patterns like the first example and suggest appropriate synchronizer insertions.</p>
+
+      <h2>Best Practices for AI-Assisted FPGA Development</h2>
+
+      <p><strong>Verify Before Trusting:</strong> Always simulate and verify AI-generated code. LLMs can produce syntactically correct but functionally incorrect implementations, particularly around edge cases like counter overflow or FSM default states.</p>
+
+      <p><strong>Iterative Development:</strong> Start with small, testable modules. Have Claude Code generate a module, simulate it with a targeted testbench, then expand incrementally. This keeps debugging scope narrow and feedback loops fast.</p>
+
+      <p><strong>Maintain Clear Documentation:</strong> Add comments explaining your design intent, not just what the code does. This helps Claude Code provide better assistance when you revisit months later, and it helps synthesis tools apply the right optimization strategies.</p>
+
+      <p><strong>Version Control Everything:</strong> Use Git for your RTL, testbenches, constraints, and scripts. Commit before and after synthesis to track which RTL version produced a given bitstream. Tag passing builds with the timing slack for future reference.</p>
+
+      <p><strong>Create Reusable Skills:</strong> Build Claude Code skills for your specific FPGA family and toolchain. A skill that loads your project context file, opens the constraint template, and runs the lint script saves significant setup time across sessions.</p>
+
+      <p><strong>Use Lint Tools:</strong> Ask Claude Code to help you configure Verilator for RTL linting before simulation. Catching coding style issues early prevents subtle synthesis-simulation mismatches:</p>
+
+      <pre><code>verilator --lint-only -Wall rtl/uart_rx.v</code></pre>
+
+      <p><strong>Document Resource Budgets:</strong> For resource-constrained designs, keep a running estimate of your LUT, DSP, BRAM, and I/O usage. Ask Claude Code to help you review usage reports and flag when a new module consumes more resources than expected.</p>
+
+      <h2>A Complete Iterative Workflow</h2>
+
+      <p>Putting it all together, the Claude Code-assisted FPGA workflow looks like this:</p>
+
+      <ol>
+        <li>Describe the module you need in natural language. Claude Code generates the RTL.</li>
+        <li>Review the generated code for synthesis risks (unintended latches, missing resets, blocking assignments in clocked processes).</li>
+        <li>Ask Claude Code to generate a testbench with meaningful corner-case stimulus.</li>
+        <li>Run simulation with <code>make sim</code>. Fix any failures with Claude Code's help.</li>
+        <li>Ask Claude Code to generate or update your constraint file for new I/O pins.</li>
+        <li>Run <code>make synth</code>. Parse the timing and usage reports with Claude Code's assistance.</li>
+        <li>If timing closure fails, ask Claude Code for pipelining or constraint suggestions.</li>
+        <li>Commit the passing build. Tag the bitstream with the git hash.</li>
+      </ol>
+
+      <p>This loop keeps development velocity high while maintaining the rigor that hardware design demands.</p>
+
+      <h2>Conclusion</h2>
+
+      <p>Claude Code transforms FPGA development by handling routine tasks, generating boilerplate code, and accelerating the learning curve for developers new to hardware design. The gains are particularly significant for testbench authoring, Tcl script generation, constraint file creation, and debugging sessions where a second perspective on an RTL bug can save hours.</p>
+
+      <p>The key is treating AI as an intelligent assistant rather than an oracle, provide clear specifications, verify outputs rigorously through simulation, and maintain human oversight for critical timing and safety decisions. Start with small projects, build your collection of skills and scripts, and progressively tackle more complex FPGA designs with confidence. Over time, the collection of project-specific context files, constraint templates, and simulation scripts you build with Claude Code's help becomes a compounding productivity asset for every future project.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/generator/">Generate a CLAUDE.md for your FPGA project</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-for-fpga-vhdl-development-workflow">Grab the templates — $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> — solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code for FPGA Development (2026)",
+    "description": "Use Claude Code for FPGA development from project setup to simulation and synthesis. Verilog and VHDL code generation with AI-assisted tooling.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-for-fpga-vhdl-development-workflow/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

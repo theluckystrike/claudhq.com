@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Permission Configurator — Build Safe Permission Settings (2026) | ClaudHQ</title>
+  <meta name="description" content="Build Claude Code permission settings interactively. Export as settings.json, CLI flags, or CLAUDE.md rules. Covers --dangerously-skip-permissions, allowlists, and safe CI/CD patterns.">
+  <link rel="canonical" href="https://claudhq.com/permissions/">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Claude Code Permission Configurator — Free Tool">
+  <meta property="og:description" content="Build permission settings for Claude Code. Export as settings.json, CLI flags, or CLAUDE.md rules. Covers --dangerously-skip-permissions and safe alternatives.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://claudhq.com/permissions/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code Permission Configurator (2026)">
+  <meta name="twitter:description" content="Build Claude Code permission settings interactively. Export as settings.json, CLI flags, or CLAUDE.md rules.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does --dangerously-skip-permissions do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The --dangerously-skip-permissions flag disables all permission prompts in Claude Code, allowing it to execute any tool (file edits, shell commands, network requests) without asking for confirmation. This flag is intended exclusively for isolated CI/CD environments where no human is present to approve actions. Using it in development is strongly discouraged because Claude Code could modify or delete files, run arbitrary commands, or make network requests without any safety checks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it safe to use YOLO mode in development?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. YOLO mode (--dangerously-skip-permissions) should never be used during local development. Without permission prompts, Claude Code can execute destructive commands like rm -rf, push to production branches, or overwrite critical files without warning. For development, use Allowlist mode instead: auto-approve safe tools like Read, Grep, and Glob while keeping confirmation prompts for Bash and Write operations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I allow specific bash commands?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In your .claude/settings.json file, add pattern-matched entries to the allow array. For example, 'Bash(npm *)' allows all npm commands, 'Bash(git status)' allows only git status, and 'Bash(python *.py)' allows running Python scripts. Glob-style wildcards (*) are supported. You can combine multiple patterns: {\"permissions\": {\"allow\": [\"Bash(npm *)\", \"Bash(git *)\", \"Bash(python *)\"]}}"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I set different permissions per project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Claude Code supports project-level permissions via a .claude/settings.json file in your project root, which overrides the global settings at ~/.claude/settings.json. This lets you have strict permissions for a production repository while using relaxed permissions for a personal side project. Team-shared permissions can be committed to version control so every contributor uses the same safety rules."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I block dangerous commands?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add patterns to the deny array in your settings.json. Common deny rules include: 'Bash(rm -rf *)' to block recursive deletion, 'Bash(sudo *)' to block privilege escalation, 'Bash(git push --force *)' to block force pushes, and 'Bash(chmod 777 *)' to block overly permissive file modes. Deny rules always take precedence over allow rules, so even if Bash(*) is in your allow list, denied patterns will still be blocked."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What's the difference between allow and deny lists?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The allow list specifies tools that Claude Code can use without asking for confirmation. The deny list specifies tools and commands that Claude Code must never execute, even if they match an allow pattern. Deny rules always win: if 'Bash(git *)' is allowed but 'Bash(git push --force *)' is denied, Claude Code will auto-approve git status but block git push --force. Anything not in either list triggers a confirmation prompt."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do permissions work with MCP servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MCP (Model Context Protocol) server tools follow the same permission system. Each MCP tool appears with a server prefix, like 'mcp__github__create_issue'. You can allow or deny specific MCP tools in your settings.json using the same pattern syntax. For example, 'mcp__github__*' allows all GitHub MCP tools while 'mcp__filesystem__write_file' could be denied to prevent MCP-based file writes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I audit what Claude Code does automatically?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Claude Code logs all actions in its session history. You can review what tools were called, what commands were run, and what files were modified after each session. For CI/CD environments, redirect output to a log file and use the --output-format json flag to get structured logs. Some teams also configure their deny list to prevent destructive actions while keeping a broad allow list, then review session transcripts periodically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What permissions does Claude Code need for CI/CD?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For CI/CD pipelines, Claude Code typically needs: Bash for running build and test commands, Read and Glob for file access, Edit and Write for making changes, and Grep for searching code. In CI/CD you can use --dangerously-skip-permissions since the environment is isolated and ephemeral. However, the safer approach is to use an allowlist that permits only the specific commands your pipeline needs, combined with deny rules for destructive operations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I reset permissions to default?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To reset permissions to the default (ask-every-time) mode, delete or empty your .claude/settings.json file. Running 'rm .claude/settings.json' removes project-level overrides, falling back to global settings. To reset global settings, remove ~/.claude/settings.json. You can also start a new session with 'claude --no-config' to ignore all saved settings for that session. The default mode prompts for confirmation on every tool use."
+        }
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: oklch(0.155 0.007 60);
+      color: oklch(0.80 0.008 70);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: oklch(0.72 0.11 38); text-decoration: none; transition: opacity 0.2s; }
+    a:hover { opacity: 0.85; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid oklch(0.72 0.11 38); outline-offset: 2px; }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    h1 { font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; letter-spacing: -0.02em; font-size: 28px; color: oklch(0.97 0.006 80); margin-bottom: 8px; line-height: 1.3; }
+    .subtitle { color: oklch(0.58 0.010 70); font-size: 15px; margin-bottom: 32px; }
+
+    h2 { font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; font-size: 22px; color: oklch(0.97 0.006 80); margin: 48px 0 16px; }
+    h3 { font-size: 17px; color: oklch(0.97 0.006 80); margin: 24px 0 12px; }
+
+    .input-section {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: oklch(0.97 0.006 80);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-number {
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.155 0.007 60);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Radio buttons */
+    .radio-group { display: flex; flex-direction: column; gap: 12px; }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .radio-option:hover { border-color: oklch(0.72 0.11 38); background: rgba(110, 231, 183, 0.04); }
+    .radio-option.selected { border-color: oklch(0.72 0.11 38); background: rgba(110, 231, 183, 0.08); }
+
+    .radio-option input[type="radio"] {
+      margin-top: 3px;
+      accent-color: oklch(0.72 0.11 38);
+      flex-shrink: 0;
+    }
+
+    .radio-label-text { font-weight: 600; color: oklch(0.97 0.006 80); font-size: 14px; }
+    .radio-desc { color: oklch(0.58 0.010 70); font-size: 13px; margin-top: 2px; }
+
+    /* Warning banner */
+    .yolo-warning {
+      display: none;
+      background: rgba(248, 81, 73, 0.12);
+      border: 1px solid #f85149;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 12px;
+      color: #f85149;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .yolo-warning.visible { display: block; }
+
+    /* Checkboxes */
+    .checkbox-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      transition: border-color 0.2s;
+    }
+    .checkbox-item:hover { border-color: oklch(0.42 0.010 70); }
+    .checkbox-item.checked { border-color: oklch(0.72 0.11 38); background: rgba(110, 231, 183, 0.05); }
+
+    .checkbox-item input[type="checkbox"] { accent-color: oklch(0.72 0.11 38); flex-shrink: 0; }
+    .checkbox-item label { font-size: 14px; color: oklch(0.80 0.008 70); cursor: pointer; flex: 1; }
+    .checkbox-item .tool-desc { color: oklch(0.58 0.010 70); font-size: 12px; }
+
+    .bash-patterns {
+      margin-top: 8px;
+      padding: 8px 12px;
+      width: 100%;
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 6px;
+      color: oklch(0.80 0.008 70);
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      resize: none;
+    }
+    .bash-patterns:focus { border-color: oklch(0.72 0.11 38); outline: none; }
+
+    /* Toggle switches */
+    .toggle-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      gap: 12px;
+    }
+
+    .toggle-label { font-size: 14px; color: oklch(0.80 0.008 70); }
+
+    .toggle-switch {
+      position: relative;
+      width: 42px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: oklch(0.30 0.010 60);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-slider::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: oklch(0.80 0.008 70);
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: oklch(0.72 0.11 38); }
+    .toggle-switch input:checked + .toggle-slider::after { transform: translateX(20px); background: oklch(0.155 0.007 60); }
+
+    /* Output tabs */
+    .output-section {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 12px;
+      margin-top: 24px;
+      overflow: hidden;
+    }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid oklch(0.30 0.010 60);
+      background: oklch(0.155 0.007 60);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      color: oklch(0.58 0.010 70);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: oklch(0.80 0.008 70); }
+    .tab-btn.active { color: oklch(0.72 0.11 38); border-bottom-color: oklch(0.72 0.11 38); }
+
+    .tab-panel {
+      display: none;
+      padding: 20px;
+    }
+    .tab-panel.active { display: block; }
+
+    .output-code {
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: oklch(0.80 0.008 70);
+      white-space: pre-wrap;
+      word-break: break-all;
+      position: relative;
+    }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: 1px solid oklch(0.30 0.010 60);
+      background: oklch(0.235 0.009 60);
+      color: oklch(0.80 0.008 70);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: inherit;
+    }
+    .btn:hover { background: oklch(0.30 0.010 60); border-color: oklch(0.42 0.010 70); }
+    .btn-primary { background: #238636; border-color: #2ea043; color: #fff; }
+    .btn-primary:hover { background: #2ea043; }
+    .btn.copied { background: oklch(0.72 0.11 38); color: oklch(0.155 0.007 60); border-color: oklch(0.72 0.11 38); }
+
+    /* Paywall */
+    .paywall-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(13, 17, 23, 0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .paywall-overlay.visible { display: flex; }
+
+    .paywall-box {
+      background: oklch(0.185 0.008 60);
+      border: 2px solid oklch(0.72 0.11 38);
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .paywall-box h3 { color: oklch(0.97 0.006 80); font-size: 22px; margin-bottom: 12px; }
+    .paywall-box p { color: oklch(0.58 0.010 70); font-size: 15px; margin-bottom: 24px; line-height: 1.6; }
+
+    .paywall-cta {
+      display: inline-block;
+      padding: 14px 32px;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .paywall-cta:hover { opacity: 0.9; color: oklch(0.18 0.04 38); }
+
+    .paywall-dismiss {
+      display: block;
+      margin-top: 16px;
+      color: oklch(0.42 0.010 70);
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    /* SEO content */
+    .seo-content { margin-top: 64px; }
+    .seo-content h2 { border-bottom: 1px solid oklch(0.235 0.009 60); padding-bottom: 8px; }
+
+    .seo-content p {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    .seo-content ul, .seo-content ol {
+      color: oklch(0.58 0.010 70);
+      font-size: 15px;
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    .seo-content li { margin-bottom: 6px; line-height: 1.6; }
+
+    .seo-content code {
+      background: oklch(0.235 0.009 60);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: oklch(0.72 0.11 38);
+    }
+
+    .seo-content pre {
+      background: oklch(0.155 0.007 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .seo-content pre code { background: none; padding: 0; font-size: 13px; color: oklch(0.80 0.008 70); }
+
+    details {
+      background: oklch(0.185 0.008 60);
+      border: 1px solid oklch(0.30 0.010 60);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    details[open] { border-color: oklch(0.72 0.11 38); }
+
+    summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: oklch(0.97 0.006 80);
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: '+ '; color: oklch(0.72 0.11 38); font-weight: 700; }
+    details[open] summary::before { content: '- '; }
+
+    details .faq-answer {
+      padding: 0 18px 16px;
+      color: oklch(0.58 0.010 70);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, rgba(110, 231, 183, 0.1), rgba(84, 54, 218, 0.1));
+      border: 1px solid oklch(0.72 0.11 38);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 32px;
+      text-align: center;
+    }
+    .cta-box p { color: oklch(0.80 0.008 70); margin-bottom: 16px; }
+    .cta-box a {
+      display: inline-block;
+      padding: 12px 28px;
+      background: oklch(0.72 0.11 38);
+      color: oklch(0.18 0.04 38);
+      font-weight: 700;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .cta-box a:hover { opacity: 0.9; color: oklch(0.18 0.04 38); }
+
+    /* Hidden by default */
+    .allowlist-section { display: none; }
+    .allowlist-section.visible { display: block; }
+
+    .blurred { filter: blur(6px); pointer-events: none; user-select: none; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .tab-btn { font-size: 11px; padding: 10px 8px; }
+      .paywall-box { padding: 28px 20px; }
+    }
+
+/* ========== LEARN MORE ========== */
+.learn-more {
+  margin: 48px 0 0;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--line);
+}
+.learn-more .lm-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+.learn-more .lm-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+.learn-more .lm-title em {
+  font-family: var(--serif-alt);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+.learn-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.learn-more-grid a {
+  background: var(--bg-2);
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
+}
+.learn-more-grid a:hover {
+  background: var(--bg-3);
+  color: var(--accent);
+}
+.learn-more-grid a::before {
+  content: '\2192';
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color .15s ease;
+}
+.learn-more-grid a:hover::before {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .learn-more-grid { grid-template-columns: 1fr; }
+  .learn-more .lm-title { font-size: 24px; }
+}
+  </style>
+</head>
+<body>
+
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+
+  <h1>Claude Code Permission Configurator (2026)</h1>
+  <p class="subtitle">Build your permission settings interactively. Export as settings.json, CLI flags, or CLAUDE.md rules.</p>
+
+  <!-- Section 1: Permission Mode -->
+  <div class="input-section">
+    <div class="section-title"><span class="section-number">1</span> Permission Mode</div>
+    <div class="radio-group" id="modeGroup">
+      <label class="radio-option selected" data-mode="default">
+        <input type="radio" name="permMode" value="default" checked>
+        <div>
+          <div class="radio-label-text">Default</div>
+          <div class="radio-desc">Ask every time. Maximum safety. Best for learning.</div>
+        </div>
+      </label>
+      <label class="radio-option" data-mode="allowlist">
+        <input type="radio" name="permMode" value="allowlist">
+        <div>
+          <div class="radio-label-text">Allowlist</div>
+          <div class="radio-desc">Auto-approve specific tools. Best for daily use.</div>
+        </div>
+      </label>
+      <label class="radio-option" data-mode="yolo">
+        <input type="radio" name="permMode" value="yolo">
+        <div>
+          <div class="radio-label-text">YOLO (--dangerously-skip-permissions)</div>
+          <div class="radio-desc">Skip all prompts. CI/CD only. Never use in development.</div>
+        </div>
+      </label>
+    </div>
+    <div class="yolo-warning" id="yoloWarning">
+      This mode skips ALL permission checks. Only use in isolated CI/CD environments with proper sandboxing. Never use --dangerously-skip-permissions in local development or shared workstations.
+    </div>
+  </div>
+
+  <!-- Section 2: Tool Allowlist -->
+  <div class="input-section allowlist-section" id="allowlistSection">
+    <div class="section-title"><span class="section-number">2</span> Tool Allowlist</div>
+    <div class="checkbox-grid" id="toolCheckboxes">
+      <div class="checkbox-item" data-tool="Edit">
+        <input type="checkbox" id="tool-edit">
+        <label for="tool-edit">Edit <span class="tool-desc">(file editing)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="Write">
+        <input type="checkbox" id="tool-write">
+        <label for="tool-write">Write <span class="tool-desc">(file creation)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="Read">
+        <input type="checkbox" id="tool-read" checked>
+        <label for="tool-read">Read <span class="tool-desc">(file reading)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="Bash">
+        <input type="checkbox" id="tool-bash">
+        <label for="tool-bash">Bash <span class="tool-desc">(shell commands)</span></label>
+        <div style="width: 100%; margin-top: 4px;">
+          <textarea class="bash-patterns" id="bashPatterns" rows="2" placeholder='Scope patterns, one per line:&#10;npm *&#10;git *&#10;python *'></textarea>
+        </div>
+      </div>
+      <div class="checkbox-item" data-tool="Glob">
+        <input type="checkbox" id="tool-glob" checked>
+        <label for="tool-glob">Glob <span class="tool-desc">(file search)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="Grep">
+        <input type="checkbox" id="tool-grep" checked>
+        <label for="tool-grep">Grep <span class="tool-desc">(content search)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="mcp">
+        <input type="checkbox" id="tool-mcp">
+        <label for="tool-mcp">MCP tools <span class="tool-desc">(per-server toggle)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="WebFetch">
+        <input type="checkbox" id="tool-webfetch">
+        <label for="tool-webfetch">WebFetch <span class="tool-desc">(URL fetching)</span></label>
+      </div>
+      <div class="checkbox-item" data-tool="NotebookEdit">
+        <input type="checkbox" id="tool-notebook">
+        <label for="tool-notebook">NotebookEdit <span class="tool-desc">(Jupyter notebooks)</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Safety Rules -->
+  <div class="input-section">
+    <div class="section-title"><span class="section-number">3</span> Safety Rules</div>
+    <div class="toggle-list" id="safetyToggles">
+      <div class="toggle-item">
+        <span class="toggle-label">Block <code>rm -rf</code> commands</span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="rm-rf" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-label">Block <code>git push --force</code></span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="force-push" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-label">Block <code>sudo</code> commands</span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="sudo" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-label">Require confirmation for production deploys</span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="prod-deploy">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-label">Log all auto-approved actions</span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="log-actions">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-label">Block file writes outside project directory</span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="restrict-writes">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-item">
+        <span class="toggle-label">Restrict network access to approved domains</span>
+        <label class="toggle-switch">
+          <input type="checkbox" data-rule="restrict-network">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Output -->
+  <div class="output-section" id="outputSection">
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="settings">settings.json</button>
+      <button class="tab-btn" data-tab="cli">CLI Command</button>
+      <button class="tab-btn" data-tab="claude-md">CLAUDE.md</button>
+    </div>
+    <div class="tab-panel active" id="panel-settings">
+      <div class="output-code" id="output-settings"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" data-copy="settings">Copy</button>
+        <button class="btn" data-download="settings" data-filename=".claude/settings.json">Download</button>
+      </div>
+    </div>
+    <div class="tab-panel" id="panel-cli">
+      <div class="output-code" id="output-cli"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" data-copy="cli">Copy</button>
+        <button class="btn" data-download="cli" data-filename="claude-command.sh">Download</button>
+      </div>
+    </div>
+    <div class="tab-panel" id="panel-claude-md">
+      <div class="output-code" id="output-claude-md"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" data-copy="claude-md">Copy</button>
+        <button class="btn" data-download="claude-md" data-filename="CLAUDE.md">Download</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<!-- Paywall overlay -->
+<div class="paywall-overlay" id="paywallOverlay">
+  <div class="paywall-box">
+    <h3>Unlock Unlimited Configurations</h3>
+    <p>You have used your 2 free configurations. Get lifetime access to all Claude Code tools, 200+ guides, and production-ready permission templates.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="paywall-cta">Get Lifetime Access &mdash; $99</a>
+    <button class="paywall-dismiss" id="paywallDismiss">Maybe later</button>
+  </div>
+</div>
+
+<!-- SEO Content -->
+<div class="container seo-content">
+
+  <h2>Understanding Claude Code Permissions</h2>
+  <p>Claude Code is an AI-powered coding assistant that operates directly in your terminal, reading files, writing code, and executing shell commands on your behalf. Because it has real access to your filesystem and can run arbitrary commands, permissions are the primary mechanism for controlling what Claude Code can and cannot do during a session. Without proper permission configuration, you are relying entirely on Claude Code's judgment about which actions to take, which introduces unnecessary risk to your codebase, your credentials, and your production systems.</p>
+  <p>The permission system works on three levels. First, there is the interactive prompt: by default, Claude Code asks you for explicit approval before every tool invocation. Second, there is the allowlist, which lets you pre-approve specific tools and command patterns so Claude Code can use them without interrupting your workflow. Third, there is the deny list, which acts as a hard block on specific actions regardless of what is allowed elsewhere. These three levels combine to give you fine-grained control over Claude Code's behavior, from fully locked down to fully autonomous.</p>
+  <p>Permissions are configured via <code>.claude/settings.json</code> at the project level or <code>~/.claude/settings.json</code> globally. Project-level settings override global settings, which means you can maintain strict defaults while relaxing permissions for trusted repositories. The configurator above generates valid settings files, CLI commands, and CLAUDE.md documentation so you can get started immediately.</p>
+
+  <h2>Permission Modes Explained</h2>
+  <p>Claude Code supports three distinct permission modes, each suited to different workflows and risk tolerances. Choosing the right mode depends on your experience level, the sensitivity of your codebase, and whether a human is present to review actions.</p>
+  <ul>
+    <li><strong>Default mode</strong> prompts for confirmation on every tool use. This is the safest option and the best starting point for new users. You see exactly what Claude Code wants to do before it happens, giving you full visibility and control. The downside is frequent interruptions, which can slow down complex tasks that involve many file edits or command executions.</li>
+    <li><strong>Allowlist mode</strong> lets you pre-approve specific tools and command patterns. For example, you can allow <code>Read</code>, <code>Glob</code>, and <code>Grep</code> (which are read-only and safe) while keeping confirmation prompts for <code>Bash</code> and <code>Write</code>. You can also scope Bash permissions to specific commands: <code>Bash(npm *)</code> allows all npm commands while still prompting for other shell operations. This mode provides the best balance of productivity and safety for daily development.</li>
+    <li><strong>YOLO mode</strong> (<code>--dangerously-skip-permissions</code>) disables all permission checks entirely. Claude Code can read, write, delete, and execute without any human approval. This mode exists exclusively for CI/CD pipelines and automated environments where the environment is isolated, ephemeral, and sandboxed. Using YOLO mode in local development is dangerous: Claude Code could delete files, push to production, or run destructive commands without warning.</li>
+  </ul>
+
+  <h2>Building a Safe Permission Configuration</h2>
+  <p>A well-designed permission configuration follows the principle of least privilege: grant only the access Claude Code needs for your specific workflow, and deny everything else by default. Here is a step-by-step approach to building a safe configuration:</p>
+  <ol>
+    <li><strong>Start with read-only tools.</strong> Allow <code>Read</code>, <code>Glob</code>, and <code>Grep</code> first. These tools cannot modify your filesystem and are safe to auto-approve in any context.</li>
+    <li><strong>Add write tools selectively.</strong> If you trust Claude Code to edit files, add <code>Edit</code> (which modifies existing files) before <code>Write</code> (which creates new files). Edit is safer because it requires an existing file to target.</li>
+    <li><strong>Scope Bash carefully.</strong> Never allow <code>Bash(*)</code> without deny rules. Instead, allow specific command families: <code>Bash(npm *)</code>, <code>Bash(git status)</code>, <code>Bash(git diff *)</code>, <code>Bash(python *)</code>. Keep destructive commands like <code>git push</code>, <code>rm</code>, and <code>sudo</code> behind confirmation prompts.</li>
+    <li><strong>Set deny rules for dangerous patterns.</strong> Always deny <code>Bash(rm -rf *)</code>, <code>Bash(sudo *)</code>, and <code>Bash(git push --force *)</code>. Deny rules override allow rules, so they act as a safety net even if your allow patterns are too broad.</li>
+    <li><strong>Test before committing.</strong> Run a few sessions with your configuration and review what gets auto-approved versus what triggers prompts. Adjust your patterns based on real usage rather than guessing.</li>
+  </ol>
+  <pre><code>{
+  "permissions": {
+    "allow": [
+      "Read", "Glob", "Grep", "Edit",
+      "Bash(npm *)", "Bash(git diff *)", "Bash(git status)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(git push --force *)"
+    ]
+  }
+}</code></pre>
+
+  <h2>CI/CD Permission Patterns</h2>
+  <p>In continuous integration and continuous deployment pipelines, Claude Code runs without a human operator. This requires either <code>--dangerously-skip-permissions</code> or a carefully scoped allowlist that covers every tool the pipeline needs. The safer approach is the allowlist: it provides automation without sacrificing all safety checks.</p>
+  <p>A typical CI/CD configuration allows Bash commands for build tools (<code>npm *</code>, <code>make *</code>, <code>docker *</code>), file operations (<code>Read</code>, <code>Edit</code>, <code>Write</code>, <code>Glob</code>, <code>Grep</code>), and denies destructive operations. If you must use <code>--dangerously-skip-permissions</code>, ensure your CI environment is ephemeral (containers or VMs that are destroyed after each run), has no access to production credentials, and has network restrictions to prevent unauthorized deployments.</p>
+  <pre><code># Safe CI/CD command with scoped permissions
+claude --allowedTools "Edit,Write,Read,Glob,Grep,Bash(npm *),Bash(make *)" \
+       --deniedTools "Bash(rm -rf *),Bash(sudo *),Bash(git push --force *)" \
+       --print "Run the test suite and fix any failures"</code></pre>
+
+  <h2>Common Questions</h2>
+
+  <details>
+    <summary>What does --dangerously-skip-permissions do?</summary>
+    <div class="faq-answer">The <code>--dangerously-skip-permissions</code> flag disables all permission prompts in Claude Code, allowing it to execute any tool (file edits, shell commands, network requests) without asking for confirmation. This flag is intended exclusively for isolated CI/CD environments where no human is present to approve actions. Using it in development is strongly discouraged because Claude Code could modify or delete files, run arbitrary commands, or make network requests without any safety checks.</div>
+  </details>
+
+  <details>
+    <summary>Is it safe to use YOLO mode in development?</summary>
+    <div class="faq-answer">No. YOLO mode (<code>--dangerously-skip-permissions</code>) should never be used during local development. Without permission prompts, Claude Code can execute destructive commands like <code>rm -rf</code>, push to production branches, or overwrite critical files without warning. For development, use Allowlist mode instead: auto-approve safe tools like Read, Grep, and Glob while keeping confirmation prompts for Bash and Write operations.</div>
+  </details>
+
+  <details>
+    <summary>How do I allow specific bash commands?</summary>
+    <div class="faq-answer">In your <code>.claude/settings.json</code> file, add pattern-matched entries to the allow array. For example, <code>Bash(npm *)</code> allows all npm commands, <code>Bash(git status)</code> allows only git status, and <code>Bash(python *.py)</code> allows running Python scripts. Glob-style wildcards (<code>*</code>) are supported. You can combine multiple patterns in the allow array to build a comprehensive set of auto-approved commands.</div>
+  </details>
+
+  <details>
+    <summary>Can I set different permissions per project?</summary>
+    <div class="faq-answer">Yes. Claude Code supports project-level permissions via a <code>.claude/settings.json</code> file in your project root, which overrides the global settings at <code>~/.claude/settings.json</code>. This lets you have strict permissions for a production repository while using relaxed permissions for a personal side project. Team-shared permissions can be committed to version control so every contributor uses the same safety rules.</div>
+  </details>
+
+  <details>
+    <summary>How do I block dangerous commands?</summary>
+    <div class="faq-answer">Add patterns to the deny array in your settings.json. Common deny rules include: <code>Bash(rm -rf *)</code> to block recursive deletion, <code>Bash(sudo *)</code> to block privilege escalation, <code>Bash(git push --force *)</code> to block force pushes, and <code>Bash(chmod 777 *)</code> to block overly permissive file modes. Deny rules always take precedence over allow rules, so even if <code>Bash(*)</code> is in your allow list, denied patterns will still be blocked.</div>
+  </details>
+
+  <details>
+    <summary>What's the difference between allow and deny lists?</summary>
+    <div class="faq-answer">The allow list specifies tools that Claude Code can use without asking for confirmation. The deny list specifies tools and commands that Claude Code must never execute, even if they match an allow pattern. Deny rules always win: if <code>Bash(git *)</code> is allowed but <code>Bash(git push --force *)</code> is denied, Claude Code will auto-approve <code>git status</code> but block <code>git push --force</code>. Anything not in either list triggers a confirmation prompt.</div>
+  </details>
+
+  <details>
+    <summary>How do permissions work with MCP servers?</summary>
+    <div class="faq-answer">MCP (Model Context Protocol) server tools follow the same permission system. Each MCP tool appears with a server prefix, like <code>mcp__github__create_issue</code>. You can allow or deny specific MCP tools in your settings.json using the same pattern syntax. For example, <code>mcp__github__*</code> allows all GitHub MCP tools while <code>mcp__filesystem__write_file</code> could be denied to prevent MCP-based file writes.</div>
+  </details>
+
+  <details>
+    <summary>Can I audit what Claude Code does automatically?</summary>
+    <div class="faq-answer">Yes. Claude Code logs all actions in its session history. You can review what tools were called, what commands were run, and what files were modified after each session. For CI/CD environments, redirect output to a log file and use the <code>--output-format json</code> flag to get structured logs. Some teams also configure their deny list to prevent destructive actions while keeping a broad allow list, then review session transcripts periodically.</div>
+  </details>
+
+  <details>
+    <summary>What permissions does Claude Code need for CI/CD?</summary>
+    <div class="faq-answer">For CI/CD pipelines, Claude Code typically needs: Bash for running build and test commands, Read and Glob for file access, Edit and Write for making changes, and Grep for searching code. In CI/CD you can use <code>--dangerously-skip-permissions</code> since the environment is isolated and ephemeral. However, the safer approach is to use an allowlist that permits only the specific commands your pipeline needs, combined with deny rules for destructive operations.</div>
+  </details>
+
+  <details>
+    <summary>How do I reset permissions to default?</summary>
+    <div class="faq-answer">To reset permissions to the default (ask-every-time) mode, delete or empty your <code>.claude/settings.json</code> file. Running <code>rm .claude/settings.json</code> removes project-level overrides, falling back to global settings. To reset global settings, remove <code>~/.claude/settings.json</code>. You can also start a new session without saved settings. The default mode prompts for confirmation on every tool use.</div>
+  </details>
+
+  <section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+    <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+    <ul style="list-style:none;padding:0;margin:0;">
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+      </li>
+      <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+        <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+      </li>
+      <li style="padding:8px 0;">
+        <a href="/skill-finder/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Skill Finder</a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="learn-more">
+    <div class="lm-eyebrow">&sect; Related &middot; Security</div>
+    <h2 class="lm-title">Keep <em>reading.</em></h2>
+    <div class="learn-more-grid">
+      <a href="/model-selector/">Claude Model Selector</a>
+      <a href="/mcp-config/">MCP Server Config Generator</a>
+      <a href="/commands/">Command Reference</a>
+      <a href="/token-estimator/">Token Usage Estimator</a>
+      <a href="/starter/">Project Starter Wizard</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+      <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+    </div>
+  </section>
+
+  <div class="cta-box">
+    <p>Need production-ready permission templates for teams, CI/CD, and enterprise deployments?</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall">Production permission templates &rarr; Claude Code Mastery Playbook ($99)</a>
+  </div>
+
+</div><!-- end seo-content -->
+
+
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-api-timeout-error-handling-retry-guide/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">API Timeout Fix</a>
+      <a href="/claude-code-ssl-certificate-verification-failed-error/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">SSL Error Fix</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/about.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">About</a>
+      <a href="/prompts.html" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Prompt Library</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Constants ── */
+  var PAYWALL_KEY = 'ccg_permissions_uses';
+  var PAYWALL_LIMIT = 2;
+  var MAX_BASH_PATTERNS = 50;
+  var MAX_PATTERN_LENGTH = 200;
+
+  /* ── Auto-load flag: prevents page-load actions from counting as uses ── */
+  var isAutoLoad = true;
+
+  /* ── DOM refs ── */
+  var modeGroup = document.getElementById('modeGroup');
+  var yoloWarning = document.getElementById('yoloWarning');
+  var allowlistSection = document.getElementById('allowlistSection');
+  var outputSection = document.getElementById('outputSection');
+  var paywallOverlay = document.getElementById('paywallOverlay');
+  var paywallDismiss = document.getElementById('paywallDismiss');
+
+  /* ── Assertions helper ── */
+  function assert(condition, msg) {
+    if (!condition) {
+      throw new Error('Assertion failed: ' + msg);
+    }
+  }
+
+  /* ── State ── */
+  var state = {
+    mode: 'default',
+    tools: { Read: true, Glob: true, Grep: true, Edit: false, Write: false, Bash: false, mcp: false, WebFetch: false, NotebookEdit: false },
+    bashPatterns: [],
+    safety: { 'rm-rf': true, 'force-push': true, 'sudo': true, 'prod-deploy': false, 'log-actions': false, 'restrict-writes': false, 'restrict-network': false },
+    useCount: 0
+  };
+
+  /* ── Init: load use count ── */
+  function loadUseCount() {
+    try {
+      var stored = localStorage.getItem(PAYWALL_KEY);
+      assert(stored === null || typeof stored === 'string', 'stored must be null or string');
+      state.useCount = stored ? parseInt(stored, 10) || 0 : 0;
+    } catch (e) {
+      state.useCount = 0;
+    }
+    assert(typeof state.useCount === 'number', 'useCount must be number');
+  }
+
+  function saveUseCount() {
+    assert(typeof state.useCount === 'number', 'useCount must be number before save');
+    assert(state.useCount >= 0, 'useCount must be non-negative');
+    try {
+      localStorage.setItem(PAYWALL_KEY, String(state.useCount));
+    } catch (e) {
+      /* storage full or disabled */
+    }
+  }
+
+  /* ── Parse bash patterns ── */
+  function parseBashPatterns() {
+    var textarea = document.getElementById('bashPatterns');
+    assert(textarea !== null, 'bashPatterns textarea must exist');
+    var raw = textarea.value || '';
+    assert(typeof raw === 'string', 'raw must be string');
+    var lines = raw.split('\n');
+    var patterns = [];
+    var limit = Math.min(lines.length, MAX_BASH_PATTERNS);
+    for (var i = 0; i < limit; i++) {
+      var line = lines[i].trim();
+      if (line.length > 0 && line.length <= MAX_PATTERN_LENGTH) {
+        patterns.push(line);
+      }
+    }
+    return patterns;
+  }
+
+  /* ── Build allow list ── */
+  function buildAllowList() {
+    assert(typeof state.mode === 'string', 'mode must be string');
+    assert(state.tools !== null && typeof state.tools === 'object', 'tools must be object');
+    var allow = [];
+    if (state.mode !== 'allowlist') { return allow; }
+    var toolNames = ['Read', 'Glob', 'Grep', 'Edit', 'Write', 'WebFetch', 'NotebookEdit'];
+    for (var i = 0; i < toolNames.length; i++) {
+      if (state.tools[toolNames[i]]) {
+        allow.push(toolNames[i]);
+      }
+    }
+    if (state.tools.Bash) {
+      var patterns = parseBashPatterns();
+      if (patterns.length > 0) {
+        for (var j = 0; j < patterns.length; j++) {
+          allow.push('Bash(' + patterns[j] + ')');
+        }
+      } else {
+        allow.push('Bash(*)');
+      }
+    }
+    if (state.tools.mcp) {
+      allow.push('mcp__*');
+    }
+    return allow;
+  }
+
+  /* ── Build deny list ── */
+  function buildDenyList() {
+    assert(state.safety !== null && typeof state.safety === 'object', 'safety must be object');
+    var deny = [];
+    var ruleMap = {
+      'rm-rf': 'Bash(rm -rf *)',
+      'force-push': 'Bash(git push --force *)',
+      'sudo': 'Bash(sudo *)',
+      'prod-deploy': 'Bash(deploy *)',
+      'restrict-writes': 'Write(../*)',
+      'restrict-network': 'WebFetch(*)'
+    };
+    var keys = Object.keys(ruleMap);
+    assert(keys.length <= 10, 'ruleMap must not exceed 10 entries');
+    for (var i = 0; i < keys.length; i++) {
+      if (state.safety[keys[i]]) {
+        deny.push(ruleMap[keys[i]]);
+      }
+    }
+    return deny;
+  }
+
+  /* ── Generate settings.json output ── */
+  function generateSettingsJson() {
+    assert(typeof state.mode === 'string', 'mode required');
+    if (state.mode === 'yolo') {
+      return JSON.stringify({
+        "permissions": {
+          "allow": ["*"],
+          "deny": []
+        },
+        "_comment": "YOLO mode: use --dangerously-skip-permissions flag when launching Claude Code"
+      }, null, 2);
+    }
+    if (state.mode === 'default') {
+      var denyDefault = buildDenyList();
+      return JSON.stringify({
+        "permissions": {
+          "allow": [],
+          "deny": denyDefault
+        }
+      }, null, 2);
+    }
+    var allow = buildAllowList();
+    var deny = buildDenyList();
+    assert(Array.isArray(allow), 'allow must be array');
+    assert(Array.isArray(deny), 'deny must be array');
+    return JSON.stringify({
+      "permissions": {
+        "allow": allow,
+        "deny": deny
+      }
+    }, null, 2);
+  }
+
+  /* ── Generate CLI output ── */
+  function generateCliCommand() {
+    assert(typeof state.mode === 'string', 'mode required');
+    if (state.mode === 'yolo') {
+      return 'claude --dangerously-skip-permissions';
+    }
+    var parts = ['claude'];
+    if (state.mode === 'allowlist') {
+      var allow = buildAllowList();
+      if (allow.length > 0) {
+        parts.push('--allowedTools "' + allow.join(',') + '"');
+      }
+    }
+    var deny = buildDenyList();
+    assert(Array.isArray(deny), 'deny must be array');
+    if (deny.length > 0) {
+      parts.push('--deniedTools "' + deny.join(',') + '"');
+    }
+    return parts.join(' \\\n  ');
+  }
+
+  /* ── Generate CLAUDE.md output ── */
+  function generateClaudeMd() {
+    assert(typeof state.mode === 'string', 'mode required');
+    var lines = ['## Permissions'];
+    if (state.mode === 'yolo') {
+      lines.push('- Mode: YOLO (--dangerously-skip-permissions)');
+      lines.push('- WARNING: All permission checks disabled');
+      lines.push('- Only use in isolated CI/CD environments');
+      return lines.join('\n');
+    }
+    if (state.mode === 'default') {
+      lines.push('- Mode: Default (ask every time)');
+    } else {
+      var allow = buildAllowList();
+      assert(Array.isArray(allow), 'allow must be array');
+      if (allow.length > 0) {
+        lines.push('- Auto-approved: ' + allow.join(', '));
+      }
+      lines.push('- Always ask: All other tools');
+    }
+    var deny = buildDenyList();
+    if (deny.length > 0) {
+      lines.push('- Never allow: ' + deny.join(', '));
+    }
+    /* safety notes */
+    var safetyNotes = [];
+    if (state.safety['log-actions']) { safetyNotes.push('Log all auto-approved actions'); }
+    if (state.safety['restrict-writes']) { safetyNotes.push('Block file writes outside project directory'); }
+    if (state.safety['restrict-network']) { safetyNotes.push('Restrict network access'); }
+    if (safetyNotes.length > 0) {
+      lines.push('');
+      lines.push('### Safety Notes');
+      for (var i = 0; i < safetyNotes.length; i++) {
+        lines.push('- ' + safetyNotes[i]);
+      }
+    }
+    assert(lines.length >= 2, 'output must have at least 2 lines');
+    return lines.join('\n');
+  }
+
+  /* ── Render all outputs ── */
+  function renderOutputs() {
+    var settingsEl = document.getElementById('output-settings');
+    var cliEl = document.getElementById('output-cli');
+    var mdEl = document.getElementById('output-claude-md');
+    assert(settingsEl !== null, 'settings output element must exist');
+    assert(cliEl !== null, 'cli output element must exist');
+    assert(mdEl !== null, 'claude-md output element must exist');
+    settingsEl.textContent = generateSettingsJson();
+    cliEl.textContent = generateCliCommand();
+    mdEl.textContent = generateClaudeMd();
+  }
+
+  /* ── Check paywall ── */
+  function checkPaywall() {
+    assert(typeof state.useCount === 'number', 'useCount must be number');
+    assert(paywallOverlay !== null, 'paywallOverlay must exist');
+    if (state.useCount >= PAYWALL_LIMIT) {
+      outputSection.classList.add('blurred');
+      paywallOverlay.classList.add('visible');
+    }
+  }
+
+  /* ── Increment usage ── */
+  function incrementUsage() {
+    assert(typeof isAutoLoad === 'boolean', 'isAutoLoad must be boolean');
+    assert(typeof state.useCount === 'number', 'useCount must be number before increment');
+    if (!isAutoLoad) {
+      state.useCount++;
+      saveUseCount();
+    }
+    isAutoLoad = false;
+    checkPaywall();
+  }
+
+  /* ── Mode change handler ── */
+  function handleModeChange(newMode) {
+    assert(typeof newMode === 'string', 'newMode must be string');
+    assert(['default', 'allowlist', 'yolo'].indexOf(newMode) !== -1, 'newMode must be valid');
+    state.mode = newMode;
+    /* Update radio visual state */
+    var options = modeGroup.querySelectorAll('.radio-option');
+    for (var i = 0; i < options.length; i++) {
+      var optMode = options[i].getAttribute('data-mode');
+      if (optMode === newMode) {
+        options[i].classList.add('selected');
+      } else {
+        options[i].classList.remove('selected');
+      }
+    }
+    /* YOLO warning */
+    if (newMode === 'yolo') {
+      yoloWarning.classList.add('visible');
+    } else {
+      yoloWarning.classList.remove('visible');
+    }
+    /* Allowlist section visibility */
+    if (newMode === 'allowlist') {
+      allowlistSection.classList.add('visible');
+    } else {
+      allowlistSection.classList.remove('visible');
+    }
+    renderOutputs();
+    incrementUsage();
+  }
+
+  /* ── Checkbox visual state updater ── */
+  function updateCheckboxVisuals() {
+    var items = document.querySelectorAll('.checkbox-item');
+    assert(items !== null, 'checkbox items must exist');
+    for (var i = 0; i < items.length; i++) {
+      var cb = items[i].querySelector('input[type="checkbox"]');
+      if (cb) {
+        if (cb.checked) {
+          items[i].classList.add('checked');
+        } else {
+          items[i].classList.remove('checked');
+        }
+      }
+    }
+  }
+
+  /* ── Tool checkbox handler ── */
+  function handleToolChange(toolName, checked) {
+    assert(typeof toolName === 'string', 'toolName must be string');
+    assert(typeof checked === 'boolean', 'checked must be boolean');
+    state.tools[toolName] = checked;
+    updateCheckboxVisuals();
+    renderOutputs();
+  }
+
+  /* ── Safety toggle handler ── */
+  function handleSafetyChange(rule, checked) {
+    assert(typeof rule === 'string', 'rule must be string');
+    assert(typeof checked === 'boolean', 'checked must be boolean');
+    state.safety[rule] = checked;
+    renderOutputs();
+  }
+
+  /* ── Tab switching ── */
+  function switchTab(tabName) {
+    assert(typeof tabName === 'string', 'tabName must be string');
+    assert(['settings', 'cli', 'claude-md'].indexOf(tabName) !== -1, 'tabName must be valid');
+    var btns = document.querySelectorAll('.tab-btn');
+    var panels = document.querySelectorAll('.tab-panel');
+    for (var i = 0; i < btns.length; i++) {
+      if (btns[i].getAttribute('data-tab') === tabName) {
+        btns[i].classList.add('active');
+      } else {
+        btns[i].classList.remove('active');
+      }
+    }
+    for (var j = 0; j < panels.length; j++) {
+      if (panels[j].id === 'panel-' + tabName) {
+        panels[j].classList.add('active');
+      } else {
+        panels[j].classList.remove('active');
+      }
+    }
+  }
+
+  /* ── Copy to clipboard ── */
+  function copyOutput(target) {
+    assert(typeof target === 'string', 'target must be string');
+    var el = document.getElementById('output-' + target);
+    assert(el !== null, 'output element must exist for copy');
+    var text = el.textContent || '';
+    if (!navigator.clipboard) { return; }
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = document.querySelector('[data-copy="' + target + '"]');
+      if (btn) {
+        btn.classList.add('copied');
+        btn.textContent = 'Copied!';
+        setTimeout(function() {
+          btn.classList.remove('copied');
+          btn.textContent = 'Copy';
+        }, 2000);
+      }
+    });
+  }
+
+  /* ── Download file ── */
+  function downloadOutput(target, filename) {
+    assert(typeof target === 'string', 'target must be string');
+    assert(typeof filename === 'string', 'filename must be string');
+    var el = document.getElementById('output-' + target);
+    assert(el !== null, 'output element must exist for download');
+    var text = el.textContent || '';
+    var blob = new Blob([text], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /* ── Event: mode radios ── */
+  function bindModeRadios() {
+    var radios = modeGroup.querySelectorAll('input[type="radio"]');
+    assert(radios.length === 3, 'must have exactly 3 mode radios');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].addEventListener('change', function() {
+        if (this.checked) {
+          handleModeChange(this.value);
+        }
+      });
+    }
+  }
+
+  /* ── Event: tool checkboxes ── */
+  function bindToolCheckboxes() {
+    var toolMap = {
+      'tool-edit': 'Edit',
+      'tool-write': 'Write',
+      'tool-read': 'Read',
+      'tool-bash': 'Bash',
+      'tool-glob': 'Glob',
+      'tool-grep': 'Grep',
+      'tool-mcp': 'mcp',
+      'tool-webfetch': 'WebFetch',
+      'tool-notebook': 'NotebookEdit'
+    };
+    var ids = Object.keys(toolMap);
+    assert(ids.length === 9, 'must have 9 tool checkboxes');
+    for (var i = 0; i < ids.length; i++) {
+      (function(id, tool) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', function() {
+            handleToolChange(tool, this.checked);
+          });
+        }
+      })(ids[i], toolMap[ids[i]]);
+    }
+  }
+
+  /* ── Event: safety toggles ── */
+  function bindSafetyToggles() {
+    var toggles = document.querySelectorAll('#safetyToggles input[type="checkbox"]');
+    assert(toggles.length === 7, 'must have 7 safety toggles');
+    for (var i = 0; i < toggles.length; i++) {
+      toggles[i].addEventListener('change', function() {
+        var rule = this.getAttribute('data-rule');
+        assert(rule !== null, 'data-rule attribute must exist');
+        handleSafetyChange(rule, this.checked);
+      });
+    }
+  }
+
+  /* ── Event: bash patterns ── */
+  function bindBashPatterns() {
+    var textarea = document.getElementById('bashPatterns');
+    assert(textarea !== null, 'bashPatterns must exist');
+    textarea.addEventListener('input', function() {
+      state.bashPatterns = parseBashPatterns();
+      renderOutputs();
+    });
+  }
+
+  /* ── Event: tabs ── */
+  function bindTabs() {
+    var btns = document.querySelectorAll('.tab-btn');
+    assert(btns.length === 3, 'must have 3 tab buttons');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function() {
+        var tab = this.getAttribute('data-tab');
+        assert(tab !== null, 'data-tab must exist');
+        switchTab(tab);
+      });
+    }
+  }
+
+  /* ── Event: copy buttons ── */
+  function bindCopyButtons() {
+    var btns = document.querySelectorAll('[data-copy]');
+    assert(btns.length === 3, 'must have 3 copy buttons');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function() {
+        var target = this.getAttribute('data-copy');
+        assert(target !== null, 'data-copy must exist');
+        copyOutput(target);
+      });
+    }
+  }
+
+  /* ── Event: download buttons ── */
+  function bindDownloadButtons() {
+    var btns = document.querySelectorAll('[data-download]');
+    assert(btns.length === 3, 'must have 3 download buttons');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function() {
+        var target = this.getAttribute('data-download');
+        var filename = this.getAttribute('data-filename');
+        assert(target !== null, 'data-download must exist');
+        assert(filename !== null, 'data-filename must exist');
+        downloadOutput(target, filename);
+      });
+    }
+  }
+
+  /* ── Event: paywall dismiss ── */
+  function bindPaywallDismiss() {
+    assert(paywallDismiss !== null, 'paywallDismiss must exist');
+    paywallDismiss.addEventListener('click', function() {
+      paywallOverlay.classList.remove('visible');
+    });
+  }
+
+  /* ── Init ── */
+  function init() {
+    assert(modeGroup !== null, 'modeGroup must exist');
+    assert(yoloWarning !== null, 'yoloWarning must exist');
+    assert(allowlistSection !== null, 'allowlistSection must exist');
+    assert(outputSection !== null, 'outputSection must exist');
+    loadUseCount();
+    bindModeRadios();
+    bindToolCheckboxes();
+    bindSafetyToggles();
+    bindBashPatterns();
+    bindTabs();
+    bindCopyButtons();
+    bindDownloadButtons();
+    bindPaywallDismiss();
+    updateCheckboxVisuals();
+    renderOutputs();
+    checkPaywall();
+  }
+
+  /* ── Boot ── */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+
+
+</body>
+</html>

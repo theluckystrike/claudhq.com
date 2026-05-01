@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Bun Crash (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Claude Code crashing when using Bun runtime. Covers memory limits, version conflicts, and Bun-specific workarounds. Tested and working in 2026.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-bun-crash-fix/">
+  <meta property="og:title" content="Fix Claude Code Bun Crash (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Claude Code crashing when using Bun runtime. Covers memory limits, version conflicts, and Bun-specific workarounds. Tested and working in 2026.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-bun-crash-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Bun Crash (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>Claude Code can crash when running under the Bun runtime due to memory limits, incompatible native modules, or Bun-specific bugs. This guide covers the most common Bun crash scenarios and how to fix each one.</p>
+
+      <h2>The Problem</h2>
+
+      <p>You are using Claude Code and it crashes with a Bun-related error, or Bun itself segfaults during Claude Code operations. The crash may appear as <code>bun has crashed</code>, a segfault, or an out-of-memory kill. This disrupts your workflow and can cause lost work if Claude Code was mid-edit.</p>
+
+      <h2>Quick Solution</h2>
+
+      <p><strong>Step 1:</strong> Check your Bun version. Claude Code requires a recent Bun release:</p>
+
+      <pre><code>bun --version</code></pre>
+
+      <p>If you are below version 1.1, upgrade:</p>
+
+      <pre><code>curl -fsSL https://bun.sh/install | bash</code></pre>
+
+      <p><strong>Step 2:</strong> If Claude Code crashes with an out-of-memory error, increase the Bun memory limit:</p>
+
+      <pre><code>BUN_JSC_FORCE_RAM_SIZE=8192 claude</code></pre>
+
+      <p>This sets the JSC (JavaScriptCore) heap limit to 8GB.</p>
+
+      <p><strong>Step 3:</strong> If the crash is a segfault (signal 11), clear the Bun module cache:</p>
+
+      <pre><code>rm -rf ~/.bun/install/cache
+bun install</code></pre>
+
+      <p><strong>Step 4:</strong> If the crash persists, try running Claude Code with Node.js instead of Bun as a diagnostic step:</p>
+
+      <pre><code>which node
+node --version</code></pre>
+
+      <p>If Claude Code works under Node.js but not Bun, the issue is Bun-specific. File a bug at <a href="https://github.com/oven-sh/bun/issues">github.com/oven-sh/bun/issues</a>.</p>
+
+      <p><strong>Step 5:</strong> Check if a specific native module is causing the crash. Run with verbose output:</p>
+
+      <pre><code>BUN_DEBUG_QUIET_LOGS=0 claude 2&gt;&amp;1 | tee /tmp/claude-bun-debug.log</code></pre>
+
+      <p>Review the log for the module that triggers the crash.</p>
+
+      <h2>How It Works</h2>
+
+      <p>Claude Code is a Node.js application that can run under Bun as an alternative JavaScript runtime. Bun uses JavaScriptCore (JSC) instead of V8, which means native Node.js modules need Bun-compatible bindings. When a module uses Node-API (napi) bindings that Bun has not fully implemented, or when JSC's garbage collector behaves differently under heavy allocation patterns, crashes can occur. Claude Code is particularly memory-intensive because it holds conversation context, file contents, and tool results in memory simultaneously. Bun's default memory ceiling can be lower than what Claude Code needs for large codebases.</p>
+
+      <h2>Common Issues</h2>
+
+      <p><strong>Bun version too old.</strong> Bun's Node.js compatibility improves rapidly between releases. Many crashes that occur on Bun 1.0.x are fixed in 1.1+. Always use the latest stable release.</p>
+
+      <p><strong>Native module incompatibility.</strong> Some npm packages used by Claude Code's dependencies rely on Node.js-specific native bindings that Bun does not fully support. If the crash log shows a specific <code>.node</code> file, that module is the culprit. You may need to fall back to Node.js until Bun adds support.</p>
+
+      <p><strong>System-level OOM killer.</strong> On Linux with limited RAM (e.g., 4GB VPS), the OS OOM killer may terminate Bun before it can handle the error gracefully. Monitor with <code>dmesg | tail</code> after a crash to see if the kernel killed the process.</p>
+
+      <h2>Example CLAUDE.md Section</h2>
+
+      <pre><code># Bun Runtime Configuration
+
+## Runtime
+- Using Bun as JavaScript runtime
+- Minimum Bun version: 1.1.0
+- Memory limit set via BUN_JSC_FORCE_RAM_SIZE=8192
+
+## Known Issues
+- Large file reads (&gt;2MB) can spike memory — use line-range reads instead
+- If Bun crashes during install, fall back to: bun install --no-cache
+- Native modules: esbuild, lightningcss work; node-gyp modules may not
+
+## Crash Recovery
+- If a crash occurs mid-edit, check git status for uncommitted changes
+- Claude Code auto-saves aren't guaranteed during crashes — commit often
+- Debug crashes with: BUN_DEBUG_QUIET_LOGS=0 claude 2&gt;&amp;1 | tee debug.log</code></pre>
+
+      <h2>Best Practices</h2>
+
+      <ol>
+        <li><strong>Commit before complex operations.</strong> Before asking Claude Code to refactor multiple files, commit your current state. If Bun crashes mid-operation, you can restore cleanly.</li>
+        <li><strong>Keep Bun updated.</strong> Run <code>bun upgrade</code> weekly. Bun's compatibility and stability improve significantly with each release.</li>
+        <li><strong>Set memory limits explicitly.</strong> Do not rely on Bun's defaults. Export <code>BUN_JSC_FORCE_RAM_SIZE</code> in your shell profile to ensure consistent behavior.</li>
+        <li><strong>Use Node.js as a fallback.</strong> If a Bun crash blocks your work, switch to Node.js temporarily. The functionality is identical — only the runtime differs.</li>
+        <li><strong>Report crashes to the Bun team.</strong> Bun is actively developed and the team is responsive to crash reports. Include the Bun version, OS, and a minimal reproduction.</li>
+      </ol>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-bun-crash-fix">Grab the templates — $99 once, free forever →</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> — solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Bun Crash (2026)",
+    "description": "Resolve Claude Code crashing when using Bun runtime. Covers memory limits, version conflicts, and Bun-specific workarounds. Tested and working in 2026.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-bun-crash-fix/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

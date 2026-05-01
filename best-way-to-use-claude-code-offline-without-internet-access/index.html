@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Offline Mode Setup (2026) | ClaudHQ</title>
+  <meta name="description" content="Use Claude Code offline without internet access. Local model fallbacks, cached skills, and air-gapped workflow patterns for disconnected coding.">
+  <link rel="canonical" href="https://claudhq.com/best-way-to-use-claude-code-offline-without-internet-access/">
+  <meta property="og:title" content="Claude Code Offline Mode Setup (2026) | ClaudHQ">
+  <meta property="og:description" content="Use Claude Code offline without internet access. Local model fallbacks, cached skills, and air-gapped workflow patterns for disconnected coding.">
+  <meta property="og:url" content="https://claudhq.com/best-way-to-use-claude-code-offline-without-internet-access/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Offline Mode Setup (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>Claude Code is powerful, but you don't always need an internet connection to get work done. Whether you're on a flight, working in a secure facility, or just want to avoid latency, this guide shows you how to use Claude Code effectively offline.</p>
+
+      <h2>Understanding Claude Code's Offline Capabilities</h2>
+
+      <p>Claude Code operates in a hybrid mode. It can function with limited connectivity, but some features require internet access while others work entirely locally. The key is knowing which components work offline and how to configure your environment accordingly.</p>
+
+      <p>When Claude Code initializes, it loads skills from your local filesystem. These skills are just Markdown files with YAML front matter, so they're always available locally. The real question is whether you're using local or remote models for inference.</p>
+
+      <h2>Using Local Models for Offline Inference</h2>
+
+      <p>The most important decision for offline Claude Code usage is your choice of model. Claude Code supports multiple model backends, including local models through Ollama and similar providers.</p>
+
+      <h3>Setting Up Ollama for Local Inference</h3>
+
+      <p>Ollama lets you run large language models locally on your machine. Here's how to configure Claude Code to use Ollama:</p>
+
+      <pre><code>Install Ollama first
+brew install ollama
+
+Pull a capable model for offline use
+ollama pull llama3.3
+
+Claude Code uses the ANTHROPIC_BASE_URL and model env vars to point to Ollama
+export ANTHROPIC_BASE_URL=http://localhost:11434
+export ANTHROPIC_MODEL=llama3.3</code></pre>
+
+      <p>Once configured, Claude Code will use your local model instead of Anthropic's API. This means all your coding assistance happens on your machine, no network requests required.</p>
+
+      <h3>Practical Example: Offline Code Review</h3>
+
+      <p>Here's a practical workflow for offline code review using local models:</p>
+
+      <pre><code>Start Claude Code in offline mode
+claude
+
+Create a focused skill for code review that works locally
+In your skill, specify local model preferences:
+---
+name: Code Review
+description: "Analyze code for security, performance, and quality issues"
+---
+
+You are an expert code reviewer. Analyze the provided code for:
+1. Security vulnerabilities
+2. Performance issues
+3. Code quality problems
+4. Best practices violations</code></pre>
+
+      <h2>Offline Skills: Your Local Knowledge Base</h2>
+
+      <p>Skills are the heart of Claude Code's extensibility, and they work perfectly offline since they're stored locally. The key is building a skill library that doesn't depend on web resources.</p>
+
+      <h3>Creating Self-Contained Offline Skills</h3>
+
+      <p>When writing skills for offline use, avoid referencing external URLs or APIs that require internet access. Instead, embed all necessary information directly in the skill:</p>
+
+      <pre><code>---
+name: Docker Commands
+description: "Quick reference for common Docker container management commands"
+---
+
+Docker Commands Reference
+
+Container Management
+
+List Running Containers
+docker ps
+
+List All Containers (Including Stopped)
+docker ps -a
+
+Start a Container
+docker start &lt;container_name&gt;
+
+Image Management
+
+List Images
+docker images
+
+Remove Unused Images
+docker image prune -a</code></pre>
+
+      <p>This skill works entirely offline, no Docker Hub lookups or external documentation needed.</p>
+
+      <h2>Self-Hosted MCP Servers for Offline Tooling</h2>
+
+      <p>Model Context Protocol (MCP) servers extend Claude Code's capabilities. For offline use, you need self-hosted servers that don't require external APIs.</p>
+
+      <h3>Running Local MCP Servers</h3>
+
+      <p>Many MCP servers work offline once installed. Here's how to set up a local file server:</p>
+
+      <pre><code>Install a local filesystem MCP server
+npm install -g @modelcontextprotocol/server-filesystem
+
+Configure Claude Code to use it
+claude mcp add filesystem /path/to/your/projects</code></pre>
+
+      <p>This gives Claude Code access to your local files without any network dependency.</p>
+
+      <h3>Offline Database Tools</h3>
+
+      <p>For database work offline, use local database servers:</p>
+
+      <pre><code>Start a local PostgreSQL instance
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=local postgres:16
+
+Use a local MCP server for database access
+claude mcp add postgres "host=localhost port=5432 dbname=mydb"</code></pre>
+
+      <h2>Optimizing Your Workflow for Offline Use</h2>
+
+      <h3>Pre-Caching Essential Skills</h3>
+
+      <p>Before going offline, prepare your skills by copying the relevant <code>.md</code> files into your project's <code>.claude/</code> directory (or <code>~/.claude/</code> for global availability):</p>
+
+      <pre><code>Skills are .md files. copy them into place before going offline
+mkdir -p .claude
+cp ~/my-skills/code-review.md .claude/
+cp ~/my-skills/docker-helper.md .claude/
+cp ~/my-skills/git-commands.md .claude/
+
+Skills are local files. no network required to use them offline</code></pre>
+
+      <h3>Project-Specific Offline Configurations</h3>
+
+      <p>Create a <code>.claude/</code> directory in your project with offline-ready configuration:</p>
+
+      <pre><code>mkdir -p .claude/skills
+mkdir -p .claude/mcp
+
+Create project-specific skill
+echo '---
+name: Project Helper
+description: "Answer questions about our specific project codebase and conventions"
+---
+
+Project Help
+
+This skill knows about our specific codebase.
+Use this when answering questions about our project.' &gt; .claude/skills/project.md</code></pre>
+
+      <h3>Offline-Friendly Project Patterns</h3>
+
+      <p>For teams working offline, establish these patterns:</p>
+
+      <ol>
+        <li>Local-first documentation: Keep all docs in the repo</li>
+        <li>Embedded examples: Include code examples in skills rather than linking</li>
+        <li>Local linters and formatters: Don't rely on cloud-based tools</li>
+        <li>Offline package caches: Mirror npm/pip registries locally</li>
+      </ol>
+
+      <h2>Limitations to Understand</h2>
+
+      <p>While Claude Code works well offline, be aware of limitations:</p>
+
+      <ul>
+        <li>Model quality: Local models are generally less capable than Claude's API</li>
+        <li>No web search: Looking up documentation online won't work</li>
+        <li>No live updates: Skills won't refresh until you're back online</li>
+        <li>Limited MCP servers: Some servers require cloud APIs</li>
+      </ul>
+
+      <h2>Best Practices for Offline Success</h2>
+
+      <ol>
+        <li>Prepare before going offline: Test your setup while connected</li>
+        <li>Keep skills focused: Smaller, self-contained skills are more reliable offline</li>
+        <li>Use local models wisely: Save local model capacity for complex tasks</li>
+        <li>Document offline workflows: Create skills that document your offline procedures</li>
+        <li>Sync when back online: Regularly sync skills and configurations</li>
+      </ol>
+
+      <h2>Conclusion</h2>
+
+      <p>Claude Code can be a powerful offline coding assistant with the right setup. By using local models through Ollama, building self-contained skills, and running MCP servers locally, you can maintain productivity even without internet access. The key is preparation. Set up your offline environment while connected, and you'll never be stuck without your AI coding assistant.</p>
+
+      <p>Start by installing Ollama and pulling a model, then create a few offline-ready skills for your common tasks. Once you've established your offline workflow, you'll wonder how you ever worked without it.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/generator/">Set up your offline project with the Generator</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=best-way-to-use-claude-code-offline-without-internet-access">Grab the templates — $99 once, free forever →</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> — solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Offline Mode Setup (2026)",
+    "description": "Use Claude Code offline without internet access. Local model fallbacks, cached skills, and air-gapped workflow patterns for disconnected coding.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/best-way-to-use-claude-code-offline-without-internet-access/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

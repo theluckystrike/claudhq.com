@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Skill Finder — Browse 150+ Skills (2026) | ClaudHQ</title>
+<meta name="description" content="Search and discover Claude Code skills by category. Installation commands, descriptions, and source links for 150+ community and official skills.">
+<meta property="og:title" content="Claude Code Skill Finder — Free Tool">
+<meta property="og:description" content="Find the right Claude Code skill for your task. Search 100+ skills by category, difficulty, and use case.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://claudhq.com/skill-finder/">
+<meta name="robots" content="index, follow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code Skill Finder — Browse 150+ Skills (2026)">
+<meta name="twitter:description" content="Search and discover Claude Code skills by category.">
+<link rel="canonical" href="https://claudhq.com/skill-finder/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: oklch(0.155 0.007 60);
+  color: oklch(0.80 0.008 70);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: oklch(0.72 0.11 38); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.85; }
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible { outline: 2px solid oklch(0.72 0.11 38); outline-offset: 2px; }
+code, .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+
+/* ── Layout ── */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* ── Header ── */
+.site-header {
+  padding: 1rem 0;
+  border-bottom: 1px solid oklch(0.80 0.008 70 / 0.08);
+}
+.site-header .container {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+}
+.site-logo {
+  font-size: 1.05rem; font-weight: 600; color: oklch(0.80 0.008 70);
+  letter-spacing: -0.01em;
+}
+.site-nav {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center;
+}
+.site-nav a {
+  font-size: 0.8rem; color: oklch(0.80 0.008 70 / 0.60);
+  transition: color 0.2s; white-space: nowrap;
+}
+.site-nav a:hover { color: oklch(0.80 0.008 70); opacity: 1; }
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 3.5rem 0 2rem;
+}
+.hero h1 {
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  color: oklch(0.97 0.006 80);
+}
+.hero h1 .accent { color: oklch(0.72 0.11 38); }
+.hero .subhead {
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  color: oklch(0.80 0.008 70 / 0.60);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ── Search & Filters ── */
+.controls {
+  background: oklch(0.80 0.008 70 / 0.03);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.search-row {
+  display: flex; gap: 0.75rem; margin-bottom: 1rem;
+}
+.search-input {
+  flex: 1;
+  background: oklch(0.80 0.008 70 / 0.06);
+  border: 1px solid oklch(0.80 0.008 70 / 0.12);
+  border-radius: 8px;
+  color: oklch(0.97 0.006 80);
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  transition: border-color 0.2s;
+}
+.search-input::placeholder { color: oklch(0.80 0.008 70 / 0.35); }
+.search-input:focus { border-color: oklch(0.72 0.11 38); outline: none; }
+.sort-select {
+  background: oklch(0.80 0.008 70 / 0.06);
+  border: 1px solid oklch(0.80 0.008 70 / 0.12);
+  border-radius: 8px;
+  color: oklch(0.97 0.006 80);
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.7rem 2.25rem 0.7rem 0.85rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  cursor: pointer;
+  min-width: 150px;
+}
+.sort-select:focus { border-color: oklch(0.72 0.11 38); outline: none; }
+
+/* ── Category Filters ── */
+.category-filters {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+.cat-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid oklch(0.80 0.008 70 / 0.12);
+  background: oklch(0.80 0.008 70 / 0.04);
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: oklch(0.80 0.008 70 / 0.70);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+  line-height: 1.6;
+}
+.cat-chip:hover {
+  border-color: oklch(0.80 0.008 70 / 0.30);
+  color: oklch(0.97 0.006 80);
+}
+.cat-chip.active {
+  background: oklch(0.72 0.11 38 / 0.12);
+  border-color: oklch(0.72 0.11 38);
+  color: oklch(0.72 0.11 38);
+  font-weight: 500;
+}
+
+/* ── Results Info ── */
+.results-info {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: oklch(0.80 0.008 70 / 0.50);
+}
+
+/* ── Skills Grid ── */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 700px) {
+  .skills-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Skill Card ── */
+.skill-card {
+  background: oklch(0.80 0.008 70 / 0.03);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 10px;
+  padding: 1.25rem;
+  transition: border-color 0.2s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.skill-card:hover {
+  border-color: oklch(0.80 0.008 70 / 0.20);
+  transform: translateY(-1px);
+}
+.skill-card.blurred {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+.skill-card-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.skill-name {
+  font-weight: 600; font-size: 1rem; color: oklch(0.97 0.006 80);
+  word-break: break-word;
+}
+.skill-stars {
+  font-size: 0.75rem; color: oklch(0.80 0.008 70 / 0.45);
+  white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;
+}
+.cat-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.skill-desc {
+  font-size: 0.88rem;
+  color: oklch(0.80 0.008 70 / 0.65);
+  line-height: 1.45;
+}
+.install-row {
+  display: flex; gap: 0.5rem; align-items: stretch;
+}
+.install-cmd {
+  flex: 1;
+  background: oklch(0.155 0.007 60 / 0.35);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.75rem;
+  color: oklch(0.72 0.11 38);
+  overflow-x: auto;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.copy-btn {
+  background: oklch(0.72 0.11 38 / 0.10);
+  border: 1px solid oklch(0.72 0.11 38 / 0.20);
+  border-radius: 6px;
+  color: oklch(0.72 0.11 38);
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 500;
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.copy-btn:hover {
+  background: oklch(0.72 0.11 38 / 0.20);
+}
+.copy-btn.copied {
+  background: oklch(0.72 0.11 38 / 0.25);
+  color: oklch(0.97 0.006 80);
+}
+.skill-links {
+  display: flex; gap: 1rem; font-size: 0.8rem;
+}
+.skill-links a {
+  color: oklch(0.80 0.008 70 / 0.50);
+  transition: color 0.2s;
+}
+.skill-links a:hover { color: oklch(0.72 0.11 38); opacity: 1; }
+
+/* ── Category badge colors ── */
+.cat-Languages { background: oklch(0.72 0.11 38 / 0.15); color: oklch(0.72 0.11 38); }
+.cat-Frameworks { background: oklch(0.68 0.14 300 / 0.15); color: oklch(0.68 0.14 300); }
+.cat-DevOps { background: oklch(0.82 0.14 85 / 0.15); color: oklch(0.82 0.14 85); }
+.cat-Security { background: oklch(0.65 0.18 25 / 0.15); color: oklch(0.65 0.18 25); }
+.cat-Testing { background: oklch(0.64 0.10 38 / 0.15); color: oklch(0.64 0.10 38); }
+.cat-Behavioral { background: oklch(0.72 0.11 38 / 0.15); color: oklch(0.72 0.11 38); }
+.cat-Research { background: oklch(0.68 0.15 350 / 0.15); color: oklch(0.68 0.15 350); }
+.cat-Data { background: oklch(0.72 0.12 175 / 0.15); color: oklch(0.72 0.12 175); }
+.cat-Debugging { background: oklch(0.72 0.15 55 / 0.15); color: oklch(0.72 0.15 55); }
+.cat-Productivity { background: oklch(0.80 0.16 125 / 0.15); color: oklch(0.80 0.16 125); }
+
+/* ── Paywall ── */
+#paywall-overlay {
+  display: none;
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(20, 18, 14, 0.88);
+  z-index: 1000;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+#paywall-overlay.visible {
+  display: flex;
+}
+.paywall-inner {
+  max-width: 480px; text-align: center; padding: 40px;
+  background: oklch(0.185 0.008 60); border: 1px solid oklch(0.30 0.010 60); border-radius: 12px;
+}
+.paywall-inner h2 {
+  color: oklch(0.72 0.11 38); font-size: 24px; margin-bottom: 16px;
+}
+.paywall-inner p {
+  color: oklch(0.80 0.008 70); margin-bottom: 24px; line-height: 1.6;
+}
+.paywall-inner .cta-btn {
+  display: inline-block; padding: 14px 32px;
+  background: oklch(0.72 0.11 38); color: oklch(0.18 0.04 38);
+  font-weight: 700; border-radius: 8px;
+  text-decoration: none; font-size: 16px;
+}
+.paywall-inner .cta-btn:hover { opacity: 0.9; }
+.paywall-inner .fine-print {
+  color: oklch(0.42 0.010 70); font-size: 13px; margin-top: 16px; margin-bottom: 0;
+}
+
+/* ── SEO Content ── */
+.seo-content {
+  max-width: 760px;
+  margin: 3rem auto 0;
+  padding: 0 1.25rem 4rem;
+}
+.seo-content h2 {
+  font-size: 1.5rem; font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; color: oklch(0.97 0.006 80);
+  margin: 2.5rem 0 1rem; letter-spacing: -0.01em;
+}
+.seo-content h3 {
+  font-size: 1.1rem; font-weight: 600; color: oklch(0.97 0.006 80);
+  margin: 1.5rem 0 0.5rem;
+}
+.seo-content p {
+  margin-bottom: 1rem; color: oklch(0.80 0.008 70 / 0.75); line-height: 1.7;
+}
+.seo-content ul, .seo-content ol {
+  margin: 0.5rem 0 1rem 1.5rem;
+  color: oklch(0.80 0.008 70 / 0.75);
+}
+.seo-content li { margin-bottom: 0.4rem; line-height: 1.6; }
+.seo-content code {
+  background: oklch(0.80 0.008 70 / 0.08);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  color: oklch(0.72 0.11 38);
+}
+.seo-content details {
+  background: oklch(0.80 0.008 70 / 0.03);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  padding: 0;
+}
+.seo-content summary {
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  color: oklch(0.97 0.006 80);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.seo-content summary:hover { color: oklch(0.72 0.11 38); }
+.seo-content details[open] summary { border-bottom: 1px solid oklch(0.80 0.008 70 / 0.08); }
+.seo-content details p, .seo-content details ul {
+  padding: 0.75rem 1rem;
+}
+.seo-content .cta-box {
+  background: oklch(0.72 0.11 38 / 0.06);
+  border: 1px solid oklch(0.72 0.11 38 / 0.15);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+.seo-content .cta-box p { color: oklch(0.80 0.008 70); }
+.seo-content .cta-box .cta-btn {
+  display: inline-block; padding: 12px 28px;
+  background: oklch(0.72 0.11 38); color: oklch(0.18 0.04 38);
+  font-weight: 700; border-radius: 8px;
+  text-decoration: none; font-size: 15px;
+  margin-top: 0.75rem;
+}
+.seo-content .internal-links {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+@media (max-width: 500px) {
+  .seo-content .internal-links { grid-template-columns: 1fr; }
+}
+.seo-content .internal-links a {
+  display: block;
+  padding: 0.75rem 1rem;
+  background: oklch(0.80 0.008 70 / 0.03);
+  border: 1px solid oklch(0.80 0.008 70 / 0.08);
+  border-radius: 8px;
+  color: oklch(0.72 0.11 38);
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+.seo-content .internal-links a:hover {
+  border-color: oklch(0.72 0.11 38); opacity: 1;
+}
+
+/* ── Footer ── */
+.site-footer {
+  padding: 2rem 0;
+  border-top: 1px solid oklch(0.80 0.008 70 / 0.08);
+  text-align: center;
+  font-size: 0.8rem;
+  color: oklch(0.80 0.008 70 / 0.35);
+}
+
+/* ========== LEARN MORE ========== */
+.learn-more {
+  margin: 48px 0 0;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--line);
+}
+.learn-more .lm-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
+.learn-more .lm-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+.learn-more .lm-title em {
+  font-family: var(--serif-alt);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+.learn-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.learn-more-grid a {
+  background: var(--bg-2);
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  transition: background .15s ease, color .15s ease;
+}
+.learn-more-grid a:hover {
+  background: var(--bg-3);
+  color: var(--accent);
+}
+.learn-more-grid a::before {
+  content: '\2192';
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color .15s ease;
+}
+.learn-more-grid a:hover::before {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .learn-more-grid { grid-template-columns: 1fr; }
+  .learn-more .lm-title { font-size: 24px; }
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many skills can I install in one project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no hard limit. Most projects use 3 to 6 skills. Skills compose well because each one targets a specific domain. A language skill and a framework skill rarely conflict. If two skills have overlapping instructions, the one listed later in your CLAUDE.md takes precedence."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do skills work with Claude Code on all plans?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Skills are just CLAUDE.md instructions. They work on Claude Pro, Claude Max, Claude Team, and Claude Enterprise. The skills themselves are free and open source. The tool above searches the community catalog."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I write my own custom skills?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. A skill is a structured CLAUDE.md section with a name, description, and instruction set. Create a GitHub repository with your skill file, and anyone can install it with npx skills add your-username/your-skill. See the Skills Reference for the full authoring guide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do skills increase token usage?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Skills add instructions to your context window, which does consume tokens. A typical skill adds 200 to 500 tokens of instructions. For most projects with 3 to 5 skills, this is 1,000 to 2,500 extra tokens per conversation, a negligible cost compared to the improved output quality."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a skill conflicts with my existing CLAUDE.md?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The skill installer appends new sections to your CLAUDE.md. If you already have instructions that conflict, the later instruction wins. Best practice: install skills first, then add your project-specific overrides at the bottom of the file."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are skills updated automatically?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Once installed, a skill's instructions are part of your project files. To update, run the install command again and it will replace the existing section. Check the skill's source repository for changelogs and new versions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use skills with other AI coding tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Skills are designed for Claude Code specifically, but since they are plain-text instructions in a CLAUDE.md file, many of the conventions apply to any AI coding assistant that reads project configuration files. The install command and tooling are Claude Code specific."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where can I find the full list of official skills?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Skill Finder above indexes over 150 community and official skills. For curated, production-tested skills with detailed documentation, check the Claude Code Playbook which includes 200 skills organized by use case."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+
+<header class="site-header" style="position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#2a2a2a);">
+  <nav style="display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:14px 40px;gap:1rem;flex-wrap:wrap;">
+    <a href="/" style="font-family:'Instrument Serif',serif;font-size:22px;color:#faf9f5;text-decoration:none;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,oklch(0.72 0.11 38),oklch(0.56 0.09 38));color:oklch(0.18 0.04 38);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;">&#936;</span>
+      <span>Claud<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">HQ</i></span>
+    </a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="tool-nav-links">
+      <a href="/errors/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Errors</a>
+      <a href="/diagnose/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Diagnose</a>
+      <a href="/calculator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Calculator</a>
+      <a href="/generator/" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.58 0.010 70);text-decoration:none;">Generator</a>
+    </div>
+    <div style="margin-left:auto;">
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" style="display:inline-flex;align-items:center;gap:4px;padding:7px 16px;background:oklch(0.72 0.11 38);color:oklch(0.18 0.04 38);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-decoration:none;">Get Lifetime &#10022;</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <h1>Claude Code <span class="accent">Skill Finder</span></h1>
+    <p class="subhead">Search and discover 150+ skills for Claude Code. Filter by category, copy install commands, and start building faster.</p>
+  </div>
+</section>
+
+<!-- ── Controls ── -->
+<div class="container">
+  <div class="controls">
+    <div class="search-row">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search skills..." autocomplete="off" maxlength="100" aria-label="Search skills">
+      <select class="sort-select" id="sortSelect" aria-label="Sort skills">
+        <option value="popular">Popular</option>
+        <option value="name">Name A-Z</option>
+        <option value="category">Category</option>
+      </select>
+    </div>
+    <div class="category-filters" id="categoryFilters" role="group" aria-label="Filter by category"></div>
+  </div>
+
+  <div class="results-info" id="resultsInfo">
+    <span id="resultCount"></span>
+    <span id="searchesLeft"></span>
+  </div>
+
+  <div class="skills-grid" id="skillsGrid"></div>
+</div>
+
+<!-- ── Paywall Overlay ── -->
+<div id="paywall-overlay">
+  <div class="paywall-inner">
+    <h2>You've used your 2 free searches</h2>
+    <p>Unlock unlimited access to all 5 CCG tools + 200 production-ready CLAUDE.md templates, error fixes, and cost optimization configs.</p>
+    <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="cta-btn">Get Lifetime Access &mdash; $99</a>
+    <p class="fine-print">One-time payment. All tools. All templates. Forever.</p>
+  </div>
+</div>
+
+<!-- ── SEO Content ── -->
+<div class="seo-content">
+
+<h2>What Are Claude Code Skills?</h2>
+<p>Claude Code skills are reusable instruction sets that customize how Claude Code behaves in your projects. Think of them as pre-built <code>CLAUDE.md</code> configurations that encode best practices for specific languages, frameworks, and workflows. Instead of writing long prompt instructions from scratch every time you start a new project, you install a skill and Claude immediately follows the conventions your team expects.</p>
+<p>Skills solve a real problem: Claude Code is powerful out of the box, but it does not know your team's coding standards, your preferred error handling patterns, or whether you use tabs or spaces. A skill fills that gap. When you install the <code>typescript-strict</code> skill, for example, Claude stops using <code>any</code> types, enforces explicit return types, and follows the strict TypeScript compiler options your project already has in <code>tsconfig.json</code>. When you install <code>owasp-top-10</code>, every endpoint Claude writes includes input validation, parameterized queries, and proper authentication checks.</p>
+<p>The skill ecosystem is growing rapidly. As of 2026, there are over 150 community-contributed skills covering every major programming language, dozens of frameworks, and specialized domains like security auditing, database optimization, and infrastructure-as-code. The Skill Finder above lets you search, filter, and install any of them with a single command.</p>
+
+<h2>Skill Categories</h2>
+<h3>Languages</h3>
+<p>Language skills enforce idiomatic patterns for specific programming languages. The <code>typescript-strict</code> skill eliminates <code>any</code> types. The <code>rust-safety</code> skill ensures proper ownership semantics. Each language skill encodes the conventions that experienced developers in that ecosystem consider non-negotiable.</p>
+<h3>Frameworks</h3>
+<p>Framework skills go deeper than language skills. They understand routing conventions, component patterns, and state management strategies for specific frameworks like Next.js, Django, Rails, and Spring Boot. Claude stops generating generic code and starts generating framework-native code.</p>
+<h3>DevOps</h3>
+<p>DevOps skills cover infrastructure as code, CI/CD pipelines, container orchestration, and deployment workflows. Install the <code>terraform-modules</code> skill and Claude writes proper module structures with variable validation and output definitions.</p>
+<h3>Security</h3>
+<p>Security skills apply defensive coding patterns automatically. OWASP Top 10 prevention, authentication best practices, input validation, and secrets management. These skills turn Claude into a security-aware coding assistant.</p>
+<h3>Testing</h3>
+<p>Testing skills enforce proper test structure, mocking patterns, fixture organization, and coverage standards for frameworks like Jest, Pytest, Vitest, and Go's testing package.</p>
+<h3>Behavioral</h3>
+<p>Behavioral skills change how Claude approaches problems, not just what code it writes. Karpathy's guidelines skill makes Claude think step-by-step. NASA Power of 10 enforces safety-critical coding rules including bounded loops and assertion density.</p>
+<h3>Data</h3>
+<p>Data skills cover database patterns, ORM conventions, query optimization, and data pipeline best practices for tools like Prisma, SQLAlchemy, and raw SQL.</p>
+<h3>Debugging</h3>
+<p>Debugging skills improve error handling, structured logging, performance profiling, and root cause analysis patterns in generated code.</p>
+<h3>Research &amp; Productivity</h3>
+<p>Research skills help Claude assist with literature review, data analysis, and technical writing. Productivity skills optimize git workflows, code review processes, and documentation generation.</p>
+
+<h2>How to Install Skills</h2>
+<p>Installing a Claude Code skill takes one command. From your project directory, run:</p>
+<p><code>npx skills add &lt;author&gt;/&lt;skill-name&gt;</code></p>
+<p>This downloads the skill's instruction set and merges it into your project's <code>CLAUDE.md</code> file. You can install multiple skills, and they compose cleanly. For example, a typical TypeScript/Next.js project might use:</p>
+<ul>
+  <li><code>npx skills add ccg/typescript-strict</code> &mdash; strict typing</li>
+  <li><code>npx skills add ccg/nextjs-app-router</code> &mdash; App Router patterns</li>
+  <li><code>npx skills add ccg/jest-patterns</code> &mdash; testing conventions</li>
+  <li><code>npx skills add ccg/owasp-top-10</code> &mdash; security rules</li>
+</ul>
+<p>After installation, Claude Code automatically follows all four sets of conventions. No additional configuration needed. To remove a skill, edit your <code>CLAUDE.md</code> and delete the corresponding section.</p>
+
+<h2>Frequently Asked Questions</h2>
+
+<details>
+  <summary>How many skills can I install in one project?</summary>
+  <p>There is no hard limit. Most projects use 3 to 6 skills. Skills compose well because each one targets a specific domain. A language skill and a framework skill rarely conflict. If two skills have overlapping instructions, the one listed later in your CLAUDE.md takes precedence.</p>
+</details>
+
+<details>
+  <summary>Do skills work with Claude Code on all plans?</summary>
+  <p>Yes. Skills are just CLAUDE.md instructions. They work on Claude Pro, Claude Max, Claude Team, and Claude Enterprise. The skills themselves are free and open source. The tool above searches the community catalog.</p>
+</details>
+
+<details>
+  <summary>Can I write my own custom skills?</summary>
+  <p>Absolutely. A skill is a structured CLAUDE.md section with a name, description, and instruction set. Create a GitHub repository with your skill file, and anyone can install it with <code>npx skills add your-username/your-skill</code>. See our <a href="/skills-reference/">Skills Reference</a> for the full authoring guide.</p>
+</details>
+
+<details>
+  <summary>Do skills increase token usage?</summary>
+  <p>Skills add instructions to your context window, which does consume tokens. A typical skill adds 200 to 500 tokens of instructions. For most projects with 3 to 5 skills, this is 1,000 to 2,500 extra tokens per conversation, a negligible cost compared to the improved output quality. See our <a href="/cost-optimization/">Cost Optimization Guide</a> for detailed token budgeting.</p>
+</details>
+
+<details>
+  <summary>What happens if a skill conflicts with my existing CLAUDE.md?</summary>
+  <p>The skill installer appends new sections to your CLAUDE.md. If you already have instructions that conflict, the later instruction wins. Best practice: install skills first, then add your project-specific overrides at the bottom of the file.</p>
+</details>
+
+<details>
+  <summary>Are skills updated automatically?</summary>
+  <p>No. Once installed, a skill's instructions are part of your project files. To update, run the install command again and it will replace the existing section. Check the skill's source repository for changelogs and new versions.</p>
+</details>
+
+<details>
+  <summary>Can I use skills with other AI coding tools?</summary>
+  <p>Skills are designed for Claude Code specifically, but since they are plain-text instructions in a CLAUDE.md file, many of the conventions apply to any AI coding assistant that reads project configuration files. The install command and tooling are Claude Code specific.</p>
+</details>
+
+<details>
+  <summary>Where can I find the full list of official skills?</summary>
+  <p>The Skill Finder above indexes over 150 community and official skills. For curated, production-tested skills with detailed documentation, check the <a href="/playbook/">Claude Code Playbook</a> which includes 200 skills organized by use case.</p>
+</details>
+
+<div class="cta-box">
+  <p>This finder shows community skills. For 200 curated, production-tested skills with full documentation:</p>
+  <a href="https://zovo.one/lifetime?utm_source=claudhq&utm_medium=paywall" class="cta-btn">Get Lifetime Access &mdash; $99</a>
+</div>
+
+<section style="margin:32px 0;padding:24px;background:oklch(0.185 0.008 60);border:1px solid oklch(0.30 0.010 60);border-radius:12px;">
+  <h2 style="color:oklch(0.97 0.006 80);font-size:20px;margin-bottom:16px;">Related Guides</h2>
+  <ul style="list-style:none;padding:0;margin:0;">
+    <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+      <a href="/errors/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Hub</a>
+    </li>
+    <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+      <a href="/diagnose/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Error Diagnostic Tool</a>
+    </li>
+    <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+      <a href="/calculator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Code Cost Calculator</a>
+    </li>
+    <li style="padding:8px 0;border-bottom:1px solid oklch(0.235 0.009 60);">
+      <a href="/generator/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">CLAUDE.md Generator</a>
+    </li>
+    <li style="padding:8px 0;">
+      <a href="/model-selector/" style="color:oklch(0.72 0.11 38);text-decoration:none;font-size:15px;">Claude Model Selector</a>
+    </li>
+  </ul>
+</section>
+
+<section class="learn-more">
+  <div class="lm-eyebrow">&sect; Related &middot; Skills</div>
+  <h2 class="lm-title">Keep <em>reading.</em></h2>
+  <div class="learn-more-grid">
+    <a href="/permissions/">Permission Configurator</a>
+    <a href="/mcp-config/">MCP Server Config Generator</a>
+    <a href="/commands/">Command Reference</a>
+    <a href="/token-estimator/">Token Usage Estimator</a>
+    <a href="/starter/">Project Starter Wizard</a>
+    <a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a>
+    <a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a>
+    <a href="/claude-code-not-working-vscode/">Claude Code Not Working in VS Code</a>
+    <a href="/claude-code-gitignore-best-practices/">Gitignore Best Practices</a>
+  </div>
+</section>
+
+</div>
+
+<footer style="border-top:1px solid oklch(0.30 0.010 60);background:oklch(0.185 0.008 60);margin-top:48px;">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto;padding:56px 40px 40px;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:#faf9f5;line-height:1;">C<i style="font-family:'Fraunces',serif;font-style:italic;color:oklch(0.72 0.11 38);">H</i></div>
+      <p style="font-size:14px;color:oklch(0.58 0.010 70);margin-top:12px;">Claude Code tools &amp; production guides</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Tools</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Diagnostic</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Cost Calculator</a>
+      <a href="/generator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">CLAUDE.md Generator</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">Guides</h4>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Error Hub</a>
+      <a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Skill Timeout Error Fix</a>
+      <a href="/errors/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Claude Code Error Hub</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <h4 style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:oklch(0.58 0.010 70);margin-bottom:4px;">More</h4>
+      <a href="/diagnose/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Claude Code Error Diagnostic Tool</a>
+      <a href="/calculator/" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Claude Code Cost Calculator</a>
+      <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">Get Lifetime</a>
+      <a href="https://github.com/theluckystrike" style="font-size:14px;color:oklch(0.80 0.008 70);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;max-width:1200px;margin:0 auto;border-top:1px solid oklch(0.30 0.010 60);font-size:13px;color:oklch(0.42 0.010 70);">
+    <span>&copy; 2026 ClaudHQ</span>
+    <span>Built by <a href="https://github.com/theluckystrike" style="color:oklch(0.58 0.010 70);text-decoration:none;">Michael Lip</a></span>
+  </div>
+</footer>
+
+<script>
+(function() {
+'use strict';
+/* ================================================================
+   SKILL FINDER — ClaudHQ
+   All logic in <script>. No external dependencies.
+   IIFE-encapsulated — zero global mutable state (NASA P10 Rule 6).
+   ================================================================ */
+
+/* ── Skill Database (155 skills) — frozen after definition ── */
+const skills = Object.freeze([
+  // ── Behavioral (12) ──
+  { name: "karpathy-guidelines", desc: "Andrej Karpathy's 4 principles for Claude Code", category: "Behavioral", install: "npx skills add forrestchang/andrej-karpathy-skills", source: "https://github.com/forrestchang/andrej-karpathy-skills", stars: 1200, ccgLink: "/karpathy-claude-code-skills-guide/" },
+  { name: "nasa-power-of-10", desc: "NASA's 10 rules for safety-critical code applied to Claude Code", category: "Behavioral", install: "npx skills add ccg/nasa-power-of-10", source: "https://github.com/ccg-skills/nasa-power-of-10", stars: 890, ccgLink: "/nasa-power-of-10-claude-code/" },
+  { name: "think-step-by-step", desc: "Forces chain-of-thought reasoning before writing code", category: "Behavioral", install: "npx skills add ccg/think-step-by-step", source: "https://github.com/ccg-skills/think-step-by-step", stars: 820 },
+  { name: "minimal-diff", desc: "Generate smallest possible diffs — no unnecessary changes", category: "Behavioral", install: "npx skills add ccg/minimal-diff", source: "https://github.com/ccg-skills/minimal-diff", stars: 760 },
+  { name: "test-first", desc: "Always write tests before implementation code", category: "Behavioral", install: "npx skills add ccg/test-first", source: "https://github.com/ccg-skills/test-first", stars: 710 },
+  { name: "explain-before-code", desc: "Require explanation of approach before generating code", category: "Behavioral", install: "npx skills add ccg/explain-before-code", source: "https://github.com/ccg-skills/explain-before-code", stars: 650 },
+  { name: "dry-principles", desc: "Enforce DRY — extract shared logic, avoid duplication", category: "Behavioral", install: "npx skills add ccg/dry-principles", source: "https://github.com/ccg-skills/dry-principles", stars: 580 },
+  { name: "solid-patterns", desc: "SOLID design principles applied to every class and module", category: "Behavioral", install: "npx skills add ccg/solid-patterns", source: "https://github.com/ccg-skills/solid-patterns", stars: 540 },
+  { name: "functional-first", desc: "Prefer pure functions, immutability, and composition", category: "Behavioral", install: "npx skills add ccg/functional-first", source: "https://github.com/ccg-skills/functional-first", stars: 490 },
+  { name: "no-magic-numbers", desc: "Extract all numeric literals into named constants", category: "Behavioral", install: "npx skills add ccg/no-magic-numbers", source: "https://github.com/ccg-skills/no-magic-numbers", stars: 420 },
+  { name: "progressive-disclosure", desc: "Start with simple solutions, add complexity only when needed", category: "Behavioral", install: "npx skills add ccg/progressive-disclosure", source: "https://github.com/ccg-skills/progressive-disclosure", stars: 380 },
+  { name: "defensive-coding", desc: "Validate all inputs, handle all error paths, fail gracefully", category: "Behavioral", install: "npx skills add ccg/defensive-coding", source: "https://github.com/ccg-skills/defensive-coding", stars: 510 },
+
+  // ── Languages (22) ──
+  { name: "typescript-strict", desc: "Strict TypeScript conventions with zero any types", category: "Languages", install: "npx skills add ccg/typescript-strict", source: "https://github.com/ccg-skills/typescript-strict", stars: 750, ccgLink: "/typescript-strict-skill/" },
+  { name: "python-type-hints", desc: "Python type hints and mypy strict mode enforcement", category: "Languages", install: "npx skills add ccg/python-type-hints", source: "https://github.com/ccg-skills/python-type-hints", stars: 620 },
+  { name: "rust-safety", desc: "Rust ownership and borrowing best practices", category: "Languages", install: "npx skills add ccg/rust-safety", source: "https://github.com/ccg-skills/rust-safety", stars: 540, ccgLink: "/rust-safety-skill/" },
+  { name: "go-idioms", desc: "Idiomatic Go patterns — error handling, interfaces, concurrency", category: "Languages", install: "npx skills add ccg/go-idioms", source: "https://github.com/ccg-skills/go-idioms", stars: 480 },
+  { name: "javascript-modern", desc: "Modern ES2024+ patterns — optional chaining, structured clone, modules", category: "Languages", install: "npx skills add ccg/javascript-modern", source: "https://github.com/ccg-skills/javascript-modern", stars: 530 },
+  { name: "java-conventions", desc: "Java coding conventions — naming, streams, Optional patterns", category: "Languages", install: "npx skills add ccg/java-conventions", source: "https://github.com/ccg-skills/java-conventions", stars: 410 },
+  { name: "kotlin-idiomatic", desc: "Idiomatic Kotlin — data classes, sealed types, coroutines", category: "Languages", install: "npx skills add ccg/kotlin-idiomatic", source: "https://github.com/ccg-skills/kotlin-idiomatic", stars: 380 },
+  { name: "swift-modern", desc: "Modern Swift patterns — async/await, actors, Sendable", category: "Languages", install: "npx skills add ccg/swift-modern", source: "https://github.com/ccg-skills/swift-modern", stars: 350 },
+  { name: "csharp-dotnet", desc: "C# .NET patterns — records, pattern matching, LINQ", category: "Languages", install: "npx skills add ccg/csharp-dotnet", source: "https://github.com/ccg-skills/csharp-dotnet", stars: 390 },
+  { name: "ruby-style", desc: "Ruby community style guide with Rubocop alignment", category: "Languages", install: "npx skills add ccg/ruby-style", source: "https://github.com/ccg-skills/ruby-style", stars: 310 },
+  { name: "php-modern", desc: "Modern PHP 8.3+ — typed properties, enums, fibers", category: "Languages", install: "npx skills add ccg/php-modern", source: "https://github.com/ccg-skills/php-modern", stars: 280 },
+  { name: "elixir-patterns", desc: "Elixir patterns — GenServer, supervision trees, pattern matching", category: "Languages", install: "npx skills add ccg/elixir-patterns", source: "https://github.com/ccg-skills/elixir-patterns", stars: 320 },
+  { name: "dart-flutter", desc: "Dart and Flutter conventions — widgets, state, null safety", category: "Languages", install: "npx skills add ccg/dart-flutter", source: "https://github.com/ccg-skills/dart-flutter", stars: 360 },
+  { name: "python-async", desc: "Python asyncio best practices — structured concurrency, TaskGroups", category: "Languages", install: "npx skills add ccg/python-async", source: "https://github.com/ccg-skills/python-async", stars: 440 },
+  { name: "rust-async", desc: "Async Rust with tokio — tasks, channels, proper cancellation", category: "Languages", install: "npx skills add ccg/rust-async", source: "https://github.com/ccg-skills/rust-async", stars: 470 },
+  { name: "go-concurrency", desc: "Go concurrency patterns — goroutines, channels, sync primitives", category: "Languages", install: "npx skills add ccg/go-concurrency", source: "https://github.com/ccg-skills/go-concurrency", stars: 420 },
+  { name: "scala-functional", desc: "Scala functional patterns — for-comprehensions, type classes, effects", category: "Languages", install: "npx skills add ccg/scala-functional", source: "https://github.com/ccg-skills/scala-functional", stars: 260 },
+  { name: "clojure-style", desc: "Clojure idioms — persistent data structures, transducers, specs", category: "Languages", install: "npx skills add ccg/clojure-style", source: "https://github.com/ccg-skills/clojure-style", stars: 210 },
+  { name: "zig-safety", desc: "Zig compile-time safety patterns and allocator best practices", category: "Languages", install: "npx skills add ccg/zig-safety", source: "https://github.com/ccg-skills/zig-safety", stars: 290 },
+  { name: "lua-patterns", desc: "Lua patterns — metatables, coroutines, memory-efficient tables", category: "Languages", install: "npx skills add ccg/lua-patterns", source: "https://github.com/ccg-skills/lua-patterns", stars: 180 },
+  { name: "haskell-style", desc: "Haskell conventions — monads, type inference, algebraic types", category: "Languages", install: "npx skills add ccg/haskell-style", source: "https://github.com/ccg-skills/haskell-style", stars: 230 },
+  { name: "cpp-modern", desc: "Modern C++20/23 — concepts, ranges, smart pointers, RAII", category: "Languages", install: "npx skills add ccg/cpp-modern", source: "https://github.com/ccg-skills/cpp-modern", stars: 450 },
+
+  // ── Frameworks (28) ──
+  { name: "nextjs-app-router", desc: "Next.js App Router patterns with server components", category: "Frameworks", install: "npx skills add ccg/nextjs-app-router", source: "https://github.com/ccg-skills/nextjs-app-router", stars: 920, ccgLink: "/nextjs-app-router-skill/" },
+  { name: "react-hooks", desc: "React hooks best practices and custom hook patterns", category: "Frameworks", install: "npx skills add ccg/react-hooks", source: "https://github.com/ccg-skills/react-hooks", stars: 870 },
+  { name: "fastapi-patterns", desc: "FastAPI endpoint patterns with Pydantic validation", category: "Frameworks", install: "npx skills add ccg/fastapi-patterns", source: "https://github.com/ccg-skills/fastapi-patterns", stars: 560 },
+  { name: "vue-composition", desc: "Vue 3 Composition API patterns — composables, provide/inject", category: "Frameworks", install: "npx skills add ccg/vue-composition", source: "https://github.com/ccg-skills/vue-composition", stars: 510 },
+  { name: "angular-signals", desc: "Angular signals and standalone components — modern Angular patterns", category: "Frameworks", install: "npx skills add ccg/angular-signals", source: "https://github.com/ccg-skills/angular-signals", stars: 440 },
+  { name: "svelte-5", desc: "Svelte 5 runes — $state, $derived, $effect patterns", category: "Frameworks", install: "npx skills add ccg/svelte-5", source: "https://github.com/ccg-skills/svelte-5", stars: 480 },
+  { name: "django-patterns", desc: "Django models, views, serializers with proper queryset optimization", category: "Frameworks", install: "npx skills add ccg/django-patterns", source: "https://github.com/ccg-skills/django-patterns", stars: 530 },
+  { name: "flask-blueprints", desc: "Flask application factory, blueprints, and extension patterns", category: "Frameworks", install: "npx skills add ccg/flask-blueprints", source: "https://github.com/ccg-skills/flask-blueprints", stars: 350 },
+  { name: "express-middleware", desc: "Express.js middleware chains, error handling, and routing patterns", category: "Frameworks", install: "npx skills add ccg/express-middleware", source: "https://github.com/ccg-skills/express-middleware", stars: 420 },
+  { name: "nestjs-modules", desc: "NestJS module architecture — providers, guards, interceptors", category: "Frameworks", install: "npx skills add ccg/nestjs-modules", source: "https://github.com/ccg-skills/nestjs-modules", stars: 490 },
+  { name: "rails-conventions", desc: "Rails conventions — ActiveRecord, concerns, service objects", category: "Frameworks", install: "npx skills add ccg/rails-conventions", source: "https://github.com/ccg-skills/rails-conventions", stars: 380 },
+  { name: "laravel-patterns", desc: "Laravel Eloquent, jobs, events, and service container patterns", category: "Frameworks", install: "npx skills add ccg/laravel-patterns", source: "https://github.com/ccg-skills/laravel-patterns", stars: 410 },
+  { name: "spring-boot", desc: "Spring Boot — dependency injection, JPA repositories, config", category: "Frameworks", install: "npx skills add ccg/spring-boot", source: "https://github.com/ccg-skills/spring-boot", stars: 460 },
+  { name: "gin-handlers", desc: "Gin HTTP handlers — middleware, binding, error responses", category: "Frameworks", install: "npx skills add ccg/gin-handlers", source: "https://github.com/ccg-skills/gin-handlers", stars: 340 },
+  { name: "phoenix-liveview", desc: "Phoenix LiveView — real-time UI, channels, PubSub patterns", category: "Frameworks", install: "npx skills add ccg/phoenix-liveview", source: "https://github.com/ccg-skills/phoenix-liveview", stars: 310 },
+  { name: "react-native", desc: "React Native patterns — navigation, native modules, performance", category: "Frameworks", install: "npx skills add ccg/react-native", source: "https://github.com/ccg-skills/react-native", stars: 450 },
+  { name: "remix-loaders", desc: "Remix loaders, actions, and nested routing patterns", category: "Frameworks", install: "npx skills add ccg/remix-loaders", source: "https://github.com/ccg-skills/remix-loaders", stars: 370 },
+  { name: "astro-islands", desc: "Astro island architecture — partial hydration, content collections", category: "Frameworks", install: "npx skills add ccg/astro-islands", source: "https://github.com/ccg-skills/astro-islands", stars: 390 },
+  { name: "nuxt-3", desc: "Nuxt 3 patterns — auto imports, composables, server routes", category: "Frameworks", install: "npx skills add ccg/nuxt-3", source: "https://github.com/ccg-skills/nuxt-3", stars: 360 },
+  { name: "hono-edge", desc: "Hono edge-first API patterns for Cloudflare Workers and Deno", category: "Frameworks", install: "npx skills add ccg/hono-edge", source: "https://github.com/ccg-skills/hono-edge", stars: 330 },
+  { name: "fastify-plugins", desc: "Fastify plugin architecture — schemas, hooks, decorators", category: "Frameworks", install: "npx skills add ccg/fastify-plugins", source: "https://github.com/ccg-skills/fastify-plugins", stars: 300 },
+  { name: "trpc-routers", desc: "tRPC router definitions — procedures, middleware, subscriptions", category: "Frameworks", install: "npx skills add ccg/trpc-routers", source: "https://github.com/ccg-skills/trpc-routers", stars: 520 },
+  { name: "supabase-edge", desc: "Supabase Edge Functions — auth, storage, realtime patterns", category: "Frameworks", install: "npx skills add ccg/supabase-edge", source: "https://github.com/ccg-skills/supabase-edge", stars: 410 },
+  { name: "tailwind-components", desc: "Tailwind CSS component patterns — utility-first, responsive design", category: "Frameworks", install: "npx skills add ccg/tailwind-components", source: "https://github.com/ccg-skills/tailwind-components", stars: 580 },
+  { name: "htmx-patterns", desc: "HTMX hypermedia patterns — hx-boost, hx-swap, server-side rendering", category: "Frameworks", install: "npx skills add ccg/htmx-patterns", source: "https://github.com/ccg-skills/htmx-patterns", stars: 340 },
+  { name: "electron-main", desc: "Electron main/renderer process patterns with IPC security", category: "Frameworks", install: "npx skills add ccg/electron-main", source: "https://github.com/ccg-skills/electron-main", stars: 270 },
+  { name: "tauri-commands", desc: "Tauri command patterns — Rust backend, TypeScript frontend bridge", category: "Frameworks", install: "npx skills add ccg/tauri-commands", source: "https://github.com/ccg-skills/tauri-commands", stars: 320 },
+  { name: "sveltekit-routes", desc: "SvelteKit routing — load functions, form actions, hooks", category: "Frameworks", install: "npx skills add ccg/sveltekit-routes", source: "https://github.com/ccg-skills/sveltekit-routes", stars: 350 },
+
+  // ── DevOps (18) ──
+  { name: "docker-compose", desc: "Docker Compose multi-service patterns with health checks", category: "DevOps", install: "npx skills add ccg/docker-compose", source: "https://github.com/ccg-skills/docker-compose", stars: 430 },
+  { name: "github-actions", desc: "GitHub Actions CI/CD workflow templates with caching", category: "DevOps", install: "npx skills add ccg/github-actions", source: "https://github.com/ccg-skills/github-actions", stars: 670, ccgLink: "/github-actions-skill/" },
+  { name: "terraform-modules", desc: "Terraform module structure — variables, outputs, state management", category: "DevOps", install: "npx skills add ccg/terraform-modules", source: "https://github.com/ccg-skills/terraform-modules", stars: 520 },
+  { name: "kubernetes-manifests", desc: "Kubernetes manifests — deployments, services, ingress, HPA", category: "DevOps", install: "npx skills add ccg/kubernetes-manifests", source: "https://github.com/ccg-skills/kubernetes-manifests", stars: 490 },
+  { name: "gitlab-ci", desc: "GitLab CI pipeline patterns — stages, artifacts, caching", category: "DevOps", install: "npx skills add ccg/gitlab-ci", source: "https://github.com/ccg-skills/gitlab-ci", stars: 380 },
+  { name: "docker-multistage", desc: "Docker multi-stage builds for minimal production images", category: "DevOps", install: "npx skills add ccg/docker-multistage", source: "https://github.com/ccg-skills/docker-multistage", stars: 410 },
+  { name: "helm-charts", desc: "Helm chart templates — values, helpers, hooks, tests", category: "DevOps", install: "npx skills add ccg/helm-charts", source: "https://github.com/ccg-skills/helm-charts", stars: 350 },
+  { name: "ansible-roles", desc: "Ansible role structure — tasks, handlers, templates, defaults", category: "DevOps", install: "npx skills add ccg/ansible-roles", source: "https://github.com/ccg-skills/ansible-roles", stars: 290 },
+  { name: "pulumi-stacks", desc: "Pulumi infrastructure patterns in TypeScript and Python", category: "DevOps", install: "npx skills add ccg/pulumi-stacks", source: "https://github.com/ccg-skills/pulumi-stacks", stars: 310 },
+  { name: "aws-cdk", desc: "AWS CDK construct patterns — stacks, L2 constructs, aspects", category: "DevOps", install: "npx skills add ccg/aws-cdk", source: "https://github.com/ccg-skills/aws-cdk", stars: 440 },
+  { name: "cloudflare-workers", desc: "Cloudflare Workers patterns — KV, D1, Durable Objects", category: "DevOps", install: "npx skills add ccg/cloudflare-workers", source: "https://github.com/ccg-skills/cloudflare-workers", stars: 390 },
+  { name: "vercel-config", desc: "Vercel deployment config — rewrites, headers, edge functions", category: "DevOps", install: "npx skills add ccg/vercel-config", source: "https://github.com/ccg-skills/vercel-config", stars: 330 },
+  { name: "nginx-config", desc: "Nginx configuration — reverse proxy, caching, SSL termination", category: "DevOps", install: "npx skills add ccg/nginx-config", source: "https://github.com/ccg-skills/nginx-config", stars: 270 },
+  { name: "github-actions-matrix", desc: "GitHub Actions matrix builds — parallel testing across versions", category: "DevOps", install: "npx skills add ccg/github-actions-matrix", source: "https://github.com/ccg-skills/github-actions-matrix", stars: 360 },
+  { name: "docker-security", desc: "Docker security — non-root users, secrets, image scanning", category: "DevOps", install: "npx skills add ccg/docker-security", source: "https://github.com/ccg-skills/docker-security", stars: 420 },
+  { name: "argocd-apps", desc: "ArgoCD application definitions — sync policies, health checks", category: "DevOps", install: "npx skills add ccg/argocd-apps", source: "https://github.com/ccg-skills/argocd-apps", stars: 280 },
+  { name: "nix-flakes", desc: "Nix flake patterns — devShells, packages, overlays", category: "DevOps", install: "npx skills add ccg/nix-flakes", source: "https://github.com/ccg-skills/nix-flakes", stars: 340 },
+  { name: "fly-io-deploy", desc: "Fly.io deployment patterns — fly.toml, machines, volumes", category: "DevOps", install: "npx skills add ccg/fly-io-deploy", source: "https://github.com/ccg-skills/fly-io-deploy", stars: 250 },
+
+  // ── Security (14) ──
+  { name: "owasp-top-10", desc: "OWASP Top 10 vulnerability prevention rules", category: "Security", install: "npx skills add ccg/owasp-top-10", source: "https://github.com/ccg-skills/owasp-top-10", stars: 780, ccgLink: "/owasp-top-10-skill/" },
+  { name: "auth-patterns", desc: "Authentication patterns — JWT, sessions, OAuth 2.0, PKCE flows", category: "Security", install: "npx skills add ccg/auth-patterns", source: "https://github.com/ccg-skills/auth-patterns", stars: 650 },
+  { name: "input-validation", desc: "Input validation and sanitization for all user-facing endpoints", category: "Security", install: "npx skills add ccg/input-validation", source: "https://github.com/ccg-skills/input-validation", stars: 580 },
+  { name: "secrets-management", desc: "Secrets management — env vars, vaults, rotation policies", category: "Security", install: "npx skills add ccg/secrets-management", source: "https://github.com/ccg-skills/secrets-management", stars: 520 },
+  { name: "cors-headers", desc: "Proper CORS configuration — origins, methods, credentials", category: "Security", install: "npx skills add ccg/cors-headers", source: "https://github.com/ccg-skills/cors-headers", stars: 390 },
+  { name: "sql-injection-guard", desc: "SQL injection prevention — parameterized queries, ORM safety", category: "Security", install: "npx skills add ccg/sql-injection-guard", source: "https://github.com/ccg-skills/sql-injection-guard", stars: 470 },
+  { name: "xss-prevention", desc: "Cross-site scripting prevention — output encoding, CSP headers", category: "Security", install: "npx skills add ccg/xss-prevention", source: "https://github.com/ccg-skills/xss-prevention", stars: 440 },
+  { name: "rate-limiting", desc: "Rate limiting patterns — sliding window, token bucket, Redis-backed", category: "Security", install: "npx skills add ccg/rate-limiting", source: "https://github.com/ccg-skills/rate-limiting", stars: 380 },
+  { name: "csrf-protection", desc: "CSRF protection — double submit cookies, SameSite, tokens", category: "Security", install: "npx skills add ccg/csrf-protection", source: "https://github.com/ccg-skills/csrf-protection", stars: 340 },
+  { name: "dependency-audit", desc: "Dependency security audit patterns — lockfile validation, CVE checks", category: "Security", install: "npx skills add ccg/dependency-audit", source: "https://github.com/ccg-skills/dependency-audit", stars: 360 },
+  { name: "encryption-patterns", desc: "Encryption at rest and in transit — AES-GCM, TLS, key derivation", category: "Security", install: "npx skills add ccg/encryption-patterns", source: "https://github.com/ccg-skills/encryption-patterns", stars: 310 },
+  { name: "api-key-security", desc: "API key generation, storage, rotation, and scope patterns", category: "Security", install: "npx skills add ccg/api-key-security", source: "https://github.com/ccg-skills/api-key-security", stars: 350 },
+  { name: "rbac-patterns", desc: "Role-based access control — permissions, policies, middleware", category: "Security", install: "npx skills add ccg/rbac-patterns", source: "https://github.com/ccg-skills/rbac-patterns", stars: 400 },
+  { name: "content-security-policy", desc: "Content Security Policy headers — script-src, frame-ancestors, nonce", category: "Security", install: "npx skills add ccg/content-security-policy", source: "https://github.com/ccg-skills/content-security-policy", stars: 290 },
+
+  // ── Testing (16) ──
+  { name: "jest-patterns", desc: "Jest testing patterns with proper mocking and snapshots", category: "Testing", install: "npx skills add ccg/jest-patterns", source: "https://github.com/ccg-skills/jest-patterns", stars: 590 },
+  { name: "pytest-fixtures", desc: "Pytest fixture patterns and test organization", category: "Testing", install: "npx skills add ccg/pytest-fixtures", source: "https://github.com/ccg-skills/pytest-fixtures", stars: 510 },
+  { name: "vitest-config", desc: "Vitest configuration — workspace, coverage, browser mode", category: "Testing", install: "npx skills add ccg/vitest-config", source: "https://github.com/ccg-skills/vitest-config", stars: 480 },
+  { name: "go-testing", desc: "Go testing patterns — table-driven tests, test helpers, benchmarks", category: "Testing", install: "npx skills add ccg/go-testing", source: "https://github.com/ccg-skills/go-testing", stars: 420 },
+  { name: "playwright-e2e", desc: "Playwright end-to-end test patterns — page objects, fixtures", category: "Testing", install: "npx skills add ccg/playwright-e2e", source: "https://github.com/ccg-skills/playwright-e2e", stars: 530 },
+  { name: "cypress-component", desc: "Cypress component and E2E testing patterns with commands", category: "Testing", install: "npx skills add ccg/cypress-component", source: "https://github.com/ccg-skills/cypress-component", stars: 390 },
+  { name: "testing-library", desc: "Testing Library best practices — queries, user events, a11y", category: "Testing", install: "npx skills add ccg/testing-library", source: "https://github.com/ccg-skills/testing-library", stars: 460 },
+  { name: "rust-testing", desc: "Rust testing — unit tests, integration tests, property-based testing", category: "Testing", install: "npx skills add ccg/rust-testing", source: "https://github.com/ccg-skills/rust-testing", stars: 340 },
+  { name: "java-junit5", desc: "JUnit 5 patterns — parameterized tests, extensions, assertAll", category: "Testing", install: "npx skills add ccg/java-junit5", source: "https://github.com/ccg-skills/java-junit5", stars: 370 },
+  { name: "rspec-patterns", desc: "RSpec patterns — shared examples, custom matchers, factories", category: "Testing", install: "npx skills add ccg/rspec-patterns", source: "https://github.com/ccg-skills/rspec-patterns", stars: 280 },
+  { name: "storybook-stories", desc: "Storybook story patterns — args, decorators, play functions", category: "Testing", install: "npx skills add ccg/storybook-stories", source: "https://github.com/ccg-skills/storybook-stories", stars: 350 },
+  { name: "contract-testing", desc: "Contract testing with Pact — consumer-driven, provider verification", category: "Testing", install: "npx skills add ccg/contract-testing", source: "https://github.com/ccg-skills/contract-testing", stars: 260 },
+  { name: "load-testing", desc: "Load testing patterns with k6 — scenarios, thresholds, checks", category: "Testing", install: "npx skills add ccg/load-testing", source: "https://github.com/ccg-skills/load-testing", stars: 300 },
+  { name: "mutation-testing", desc: "Mutation testing strategies — Stryker, pit, cargo-mutants", category: "Testing", install: "npx skills add ccg/mutation-testing", source: "https://github.com/ccg-skills/mutation-testing", stars: 220 },
+  { name: "api-testing", desc: "API testing patterns — request builders, response assertions, auth", category: "Testing", install: "npx skills add ccg/api-testing", source: "https://github.com/ccg-skills/api-testing", stars: 380 },
+  { name: "snapshot-testing", desc: "Snapshot testing best practices — when to use, when to avoid", category: "Testing", install: "npx skills add ccg/snapshot-testing", source: "https://github.com/ccg-skills/snapshot-testing", stars: 250 },
+
+  // ── Data (14) ──
+  { name: "prisma-schema", desc: "Prisma schema patterns — relations, indexes, migrations", category: "Data", install: "npx skills add ccg/prisma-schema", source: "https://github.com/ccg-skills/prisma-schema", stars: 560 },
+  { name: "sqlalchemy-models", desc: "SQLAlchemy model patterns — relationships, hybrid properties, queries", category: "Data", install: "npx skills add ccg/sqlalchemy-models", source: "https://github.com/ccg-skills/sqlalchemy-models", stars: 430 },
+  { name: "sql-optimization", desc: "SQL query optimization — indexes, explain plans, N+1 prevention", category: "Data", install: "npx skills add ccg/sql-optimization", source: "https://github.com/ccg-skills/sql-optimization", stars: 510 },
+  { name: "drizzle-orm", desc: "Drizzle ORM patterns — schema, queries, migrations, relations", category: "Data", install: "npx skills add ccg/drizzle-orm", source: "https://github.com/ccg-skills/drizzle-orm", stars: 470 },
+  { name: "redis-patterns", desc: "Redis data structure patterns — caching, pub/sub, streams, Lua", category: "Data", install: "npx skills add ccg/redis-patterns", source: "https://github.com/ccg-skills/redis-patterns", stars: 380 },
+  { name: "mongodb-schema", desc: "MongoDB schema design — embedding vs referencing, aggregation", category: "Data", install: "npx skills add ccg/mongodb-schema", source: "https://github.com/ccg-skills/mongodb-schema", stars: 340 },
+  { name: "graphql-schema", desc: "GraphQL schema design — types, resolvers, dataloaders, pagination", category: "Data", install: "npx skills add ccg/graphql-schema", source: "https://github.com/ccg-skills/graphql-schema", stars: 420 },
+  { name: "postgres-advanced", desc: "PostgreSQL advanced patterns — CTEs, window functions, jsonb", category: "Data", install: "npx skills add ccg/postgres-advanced", source: "https://github.com/ccg-skills/postgres-advanced", stars: 460 },
+  { name: "typeorm-entities", desc: "TypeORM entity patterns — decorators, migrations, query builder", category: "Data", install: "npx skills add ccg/typeorm-entities", source: "https://github.com/ccg-skills/typeorm-entities", stars: 310 },
+  { name: "elasticsearch-queries", desc: "Elasticsearch query patterns — bool queries, aggregations, mappings", category: "Data", install: "npx skills add ccg/elasticsearch-queries", source: "https://github.com/ccg-skills/elasticsearch-queries", stars: 280 },
+  { name: "data-migration", desc: "Database migration best practices — zero-downtime, rollback strategies", category: "Data", install: "npx skills add ccg/data-migration", source: "https://github.com/ccg-skills/data-migration", stars: 350 },
+  { name: "caching-strategies", desc: "Application caching — cache invalidation, TTL, stale-while-revalidate", category: "Data", install: "npx skills add ccg/caching-strategies", source: "https://github.com/ccg-skills/caching-strategies", stars: 390 },
+  { name: "event-sourcing", desc: "Event sourcing patterns — aggregates, projections, snapshots", category: "Data", install: "npx skills add ccg/event-sourcing", source: "https://github.com/ccg-skills/event-sourcing", stars: 270 },
+  { name: "vector-db", desc: "Vector database patterns — embeddings, similarity search, pgvector", category: "Data", install: "npx skills add ccg/vector-db", source: "https://github.com/ccg-skills/vector-db", stars: 410 },
+
+  // ── Debugging (12) ──
+  { name: "error-handling", desc: "Structured error handling — custom error classes, error boundaries", category: "Debugging", install: "npx skills add ccg/error-handling", source: "https://github.com/ccg-skills/error-handling", stars: 540 },
+  { name: "structured-logging", desc: "Structured logging — JSON logs, correlation IDs, log levels", category: "Debugging", install: "npx skills add ccg/structured-logging", source: "https://github.com/ccg-skills/structured-logging", stars: 460 },
+  { name: "performance-profiling", desc: "Performance profiling patterns — flame graphs, memory leaks, bottlenecks", category: "Debugging", install: "npx skills add ccg/performance-profiling", source: "https://github.com/ccg-skills/performance-profiling", stars: 380 },
+  { name: "observability-stack", desc: "Observability — OpenTelemetry traces, metrics, structured logs", category: "Debugging", install: "npx skills add ccg/observability-stack", source: "https://github.com/ccg-skills/observability-stack", stars: 420 },
+  { name: "node-debugging", desc: "Node.js debugging — async stack traces, memory profiling, inspector", category: "Debugging", install: "npx skills add ccg/node-debugging", source: "https://github.com/ccg-skills/node-debugging", stars: 350 },
+  { name: "python-debugging", desc: "Python debugging — pdb, traceback, memory profiling, cProfile", category: "Debugging", install: "npx skills add ccg/python-debugging", source: "https://github.com/ccg-skills/python-debugging", stars: 320 },
+  { name: "browser-devtools", desc: "Browser DevTools patterns — network waterfall, memory, performance", category: "Debugging", install: "npx skills add ccg/browser-devtools", source: "https://github.com/ccg-skills/browser-devtools", stars: 290 },
+  { name: "error-boundaries", desc: "React error boundaries — fallback UI, error reporting, recovery", category: "Debugging", install: "npx skills add ccg/error-boundaries", source: "https://github.com/ccg-skills/error-boundaries", stars: 370 },
+  { name: "graceful-degradation", desc: "Graceful degradation — circuit breakers, fallbacks, retry logic", category: "Debugging", install: "npx skills add ccg/graceful-degradation", source: "https://github.com/ccg-skills/graceful-degradation", stars: 340 },
+  { name: "sentry-integration", desc: "Sentry error tracking — breadcrumbs, contexts, performance monitoring", category: "Debugging", install: "npx skills add ccg/sentry-integration", source: "https://github.com/ccg-skills/sentry-integration", stars: 300 },
+  { name: "distributed-tracing", desc: "Distributed tracing — spans, context propagation, Jaeger/Zipkin", category: "Debugging", install: "npx skills add ccg/distributed-tracing", source: "https://github.com/ccg-skills/distributed-tracing", stars: 280 },
+  { name: "memory-leak-detection", desc: "Memory leak detection patterns — heap snapshots, weak refs, finalizers", category: "Debugging", install: "npx skills add ccg/memory-leak-detection", source: "https://github.com/ccg-skills/memory-leak-detection", stars: 310 },
+
+  // ── Research (8) ──
+  { name: "academic-writing", desc: "Academic writing conventions — citations, structure, methodology", category: "Research", install: "npx skills add ccg/academic-writing", source: "https://github.com/ccg-skills/academic-writing", stars: 240 },
+  { name: "data-analysis", desc: "Data analysis patterns — pandas, matplotlib, statistical tests", category: "Research", install: "npx skills add ccg/data-analysis", source: "https://github.com/ccg-skills/data-analysis", stars: 350 },
+  { name: "jupyter-notebooks", desc: "Jupyter notebook best practices — cell organization, reproducibility", category: "Research", install: "npx skills add ccg/jupyter-notebooks", source: "https://github.com/ccg-skills/jupyter-notebooks", stars: 310 },
+  { name: "ml-experiment", desc: "ML experiment tracking — hyperparameters, metrics, reproducibility", category: "Research", install: "npx skills add ccg/ml-experiment", source: "https://github.com/ccg-skills/ml-experiment", stars: 380 },
+  { name: "technical-writing", desc: "Technical writing — API docs, tutorials, README structure", category: "Research", install: "npx skills add ccg/technical-writing", source: "https://github.com/ccg-skills/technical-writing", stars: 290 },
+  { name: "literature-review", desc: "Literature review assistant — paper summaries, gap analysis", category: "Research", install: "npx skills add ccg/literature-review", source: "https://github.com/ccg-skills/literature-review", stars: 200 },
+  { name: "arxiv-explorer", desc: "ArXiv paper exploration — search, summarize, compare findings", category: "Research", install: "npx skills add ccg/arxiv-explorer", source: "https://github.com/ccg-skills/arxiv-explorer", stars: 230 },
+  { name: "prompt-engineering", desc: "Prompt engineering patterns — few-shot, chain-of-thought, system prompts", category: "Research", install: "npx skills add ccg/prompt-engineering", source: "https://github.com/ccg-skills/prompt-engineering", stars: 520 },
+
+  // ── Productivity (11) ──
+  { name: "git-workflow", desc: "Git workflow — conventional commits, branch naming, rebase strategy", category: "Productivity", install: "npx skills add ccg/git-workflow", source: "https://github.com/ccg-skills/git-workflow", stars: 610 },
+  { name: "code-review", desc: "Code review patterns — checklist, approval criteria, feedback style", category: "Productivity", install: "npx skills add ccg/code-review", source: "https://github.com/ccg-skills/code-review", stars: 520 },
+  { name: "documentation", desc: "Documentation patterns — JSDoc, docstrings, inline comments", category: "Productivity", install: "npx skills add ccg/documentation", source: "https://github.com/ccg-skills/documentation", stars: 440 },
+  { name: "monorepo-nx", desc: "Nx monorepo patterns — project boundaries, affected commands", category: "Productivity", install: "npx skills add ccg/monorepo-nx", source: "https://github.com/ccg-skills/monorepo-nx", stars: 380 },
+  { name: "turborepo-config", desc: "Turborepo configuration — pipeline, caching, remote cache", category: "Productivity", install: "npx skills add ccg/turborepo-config", source: "https://github.com/ccg-skills/turborepo-config", stars: 350 },
+  { name: "eslint-config", desc: "ESLint configuration patterns — flat config, custom rules, overrides", category: "Productivity", install: "npx skills add ccg/eslint-config", source: "https://github.com/ccg-skills/eslint-config", stars: 400 },
+  { name: "prettier-setup", desc: "Prettier setup — config, ignore patterns, editor integration", category: "Productivity", install: "npx skills add ccg/prettier-setup", source: "https://github.com/ccg-skills/prettier-setup", stars: 330 },
+  { name: "changelog-gen", desc: "Changelog generation from conventional commits — keep-a-changelog", category: "Productivity", install: "npx skills add ccg/changelog-gen", source: "https://github.com/ccg-skills/changelog-gen", stars: 270 },
+  { name: "pr-template", desc: "Pull request template — description, checklist, reviewer assignment", category: "Productivity", install: "npx skills add ccg/pr-template", source: "https://github.com/ccg-skills/pr-template", stars: 360 },
+  { name: "refactoring-patterns", desc: "Refactoring patterns — extract, inline, move, rename safely", category: "Productivity", install: "npx skills add ccg/refactoring-patterns", source: "https://github.com/ccg-skills/refactoring-patterns", stars: 410 },
+  { name: "task-decomposition", desc: "Break complex tasks into small, testable increments", category: "Productivity", install: "npx skills add ccg/task-decomposition", source: "https://github.com/ccg-skills/task-decomposition", stars: 340 }
+]);
+
+/* ── Constants ── */
+const CATEGORIES = Object.freeze([
+  "Languages", "Frameworks", "DevOps", "Security", "Testing",
+  "Behavioral", "Research", "Data", "Debugging", "Productivity"
+]);
+const MAX_DISPLAY = 200;
+const DEBOUNCE_MS = 300;
+const STORAGE_KEY = "ccg_skillfinder_uses";
+const FREE_USES = 2;
+const BLUR_THRESHOLD = 10;
+
+/* ── State ── */
+var isAutoLoad = true;
+let activeCategories = new Set();
+let debounceTimer = null;
+
+/* ── DOM refs (set in init) ── */
+let searchInput, sortSelect, categoryFiltersEl, skillsGrid, resultCount, searchesLeft, paywallOverlay;
+
+/* ── Utility: sanitize search input ── */
+function sanitizeInput(str) {
+  console.assert(typeof str === 'string', 'sanitizeInput: input must be a string');
+  const div = document.createElement("div");
+  div.textContent = str;
+  const result = div.innerHTML.substring(0, 100);
+  console.assert(typeof result === 'string' && result.length <= 100, 'sanitizeInput: output must be a string <= 100 chars');
+  return result;
+}
+
+/* ── Utility: get usage count ── */
+function getUsageCount() {
+  console.assert(typeof STORAGE_KEY === 'string', 'getUsageCount: STORAGE_KEY must be a string');
+  try {
+    const count = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
+    console.assert(typeof count === 'number' && !isNaN(count) && count >= 0, 'getUsageCount: result must be a non-negative number');
+    return count;
+  } catch (e) {
+    return 0;
+  }
+}
+
+/* ── Utility: increment usage ── */
+function incrementUsage() {
+  console.assert(typeof STORAGE_KEY === 'string', 'incrementUsage: STORAGE_KEY must be a string');
+  try {
+    const count = getUsageCount() + 1;
+    localStorage.setItem(STORAGE_KEY, String(count));
+    console.assert(count >= 1, 'incrementUsage: count must be >= 1 after increment');
+    return count;
+  } catch (e) {
+    return 1;
+  }
+}
+
+/* ── Utility: check paywall ── */
+function isPaywalled() {
+  console.assert(typeof FREE_USES === 'number' && FREE_USES > 0, 'isPaywalled: FREE_USES must be a positive number');
+  const result = getUsageCount() >= FREE_USES;
+  console.assert(typeof result === 'boolean', 'isPaywalled: result must be a boolean');
+  return result;
+}
+
+/* ── Build category filter chips ── */
+function buildCategoryFilters() {
+  console.assert(categoryFiltersEl instanceof HTMLElement, 'buildCategoryFilters: categoryFiltersEl must be an HTMLElement');
+  console.assert(Array.isArray(CATEGORIES) && CATEGORIES.length > 0, 'buildCategoryFilters: CATEGORIES must be a non-empty array');
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < CATEGORIES.length && i < 50; i++) {
+    const cat = CATEGORIES[i];
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "cat-chip";
+    chip.setAttribute("data-cat", cat);
+    chip.setAttribute("aria-pressed", "false");
+    chip.textContent = cat;
+    chip.addEventListener("click", function() {
+      handleCategoryToggle(cat, chip);
+    });
+    frag.appendChild(chip);
+  }
+  categoryFiltersEl.appendChild(frag);
+}
+
+/* ── Handle category toggle ── */
+function handleCategoryToggle(cat, chip) {
+  console.assert(typeof cat === 'string' && CATEGORIES.indexOf(cat) !== -1, 'handleCategoryToggle: cat must be a valid category string');
+  console.assert(chip instanceof HTMLElement, 'handleCategoryToggle: chip must be an HTMLElement');
+  if (activeCategories.has(cat)) {
+    activeCategories.delete(cat);
+    chip.classList.remove("active");
+    chip.setAttribute("aria-pressed", "false");
+  } else {
+    activeCategories.add(cat);
+    chip.classList.add("active");
+    chip.setAttribute("aria-pressed", "true");
+  }
+  renderSkills();
+}
+
+/* ── Filter skills ── */
+function filterSkills() {
+  console.assert(searchInput instanceof HTMLInputElement, 'filterSkills: searchInput must be an HTMLInputElement');
+  const query = sanitizeInput(searchInput.value.trim().toLowerCase());
+  let filtered = skills;
+
+  if (query.length > 0) {
+    filtered = filtered.filter(function(s) {
+      return s.name.toLowerCase().includes(query) ||
+             s.desc.toLowerCase().includes(query) ||
+             s.category.toLowerCase().includes(query);
+    });
+  }
+
+  if (activeCategories.size > 0) {
+    filtered = filtered.filter(function(s) {
+      return activeCategories.has(s.category);
+    });
+  }
+
+  console.assert(Array.isArray(filtered) && filtered.length <= skills.length, 'filterSkills: filtered must be an array no larger than skills');
+  return filtered;
+}
+
+/* ── Sort skills ── */
+function sortSkills(list) {
+  console.assert(Array.isArray(list), 'sortSkills: list must be an array');
+  const mode = sortSelect.value;
+  const sorted = list.slice();
+  if (mode === "popular") {
+    sorted.sort(function(a, b) { return b.stars - a.stars; });
+  } else if (mode === "name") {
+    sorted.sort(function(a, b) { return a.name.localeCompare(b.name); });
+  } else if (mode === "category") {
+    sorted.sort(function(a, b) {
+      const catCmp = a.category.localeCompare(b.category);
+      return catCmp !== 0 ? catCmp : b.stars - a.stars;
+    });
+  }
+  console.assert(sorted.length === list.length, 'sortSkills: sorted output must have same length as input');
+  return sorted;
+}
+
+/* ── Build install row for a skill card ── */
+function buildInstallRow(skill) {
+  console.assert(skill && typeof skill.install === 'string', 'buildInstallRow: skill must have a string install property');
+  const installRow = document.createElement("div");
+  installRow.className = "install-row";
+
+  const cmdEl = document.createElement("div");
+  cmdEl.className = "install-cmd";
+  cmdEl.textContent = skill.install;
+
+  const copyBtn = document.createElement("button");
+  copyBtn.className = "copy-btn";
+  copyBtn.textContent = "Copy";
+  copyBtn.type = "button";
+  copyBtn.addEventListener("click", function() {
+    handleCopy(skill.install, copyBtn);
+  });
+
+  installRow.appendChild(cmdEl);
+  installRow.appendChild(copyBtn);
+  console.assert(installRow.childNodes.length === 2, 'buildInstallRow: install row must have exactly 2 children');
+  return installRow;
+}
+
+/* ── Build links row for a skill card ── */
+function buildLinksRow(skill) {
+  console.assert(skill && typeof skill.name === 'string', 'buildLinksRow: skill must have a name property');
+  const links = document.createElement("div");
+  links.className = "skill-links";
+  if (skill.source) {
+    const srcLink = document.createElement("a");
+    srcLink.href = skill.source;
+    srcLink.target = "_blank";
+    srcLink.rel = "noopener noreferrer";
+    srcLink.textContent = "Source \u2197";
+    links.appendChild(srcLink);
+  }
+  if (skill.ccgLink) {
+    const ccgA = document.createElement("a");
+    ccgA.href = skill.ccgLink;
+    ccgA.textContent = "Learn more \u2192";
+    links.appendChild(ccgA);
+  }
+  console.assert(links instanceof HTMLElement, 'buildLinksRow: must return an HTMLElement');
+  return links;
+}
+
+/* ── Create a single skill card HTML ── */
+function createSkillCard(skill, blurred) {
+  console.assert(skill && typeof skill.name === 'string' && typeof skill.stars === 'number', 'createSkillCard: skill must have name (string) and stars (number)');
+  console.assert(typeof blurred === 'boolean', 'createSkillCard: blurred must be a boolean');
+  const card = document.createElement("div");
+  card.className = "skill-card" + (blurred ? " blurred" : "");
+  card.setAttribute("role", "article");
+
+  const header = document.createElement("div");
+  header.className = "skill-card-header";
+
+  const nameEl = document.createElement("span");
+  nameEl.className = "skill-name";
+  nameEl.textContent = skill.name;
+
+  const starsEl = document.createElement("span");
+  starsEl.className = "skill-stars";
+  starsEl.textContent = "\u2605 " + skill.stars.toLocaleString();
+
+  header.appendChild(nameEl);
+  header.appendChild(starsEl);
+  card.appendChild(header);
+
+  const badge = document.createElement("span");
+  badge.className = "cat-badge cat-" + skill.category;
+  badge.textContent = skill.category;
+  card.appendChild(badge);
+
+  const desc = document.createElement("p");
+  desc.className = "skill-desc";
+  desc.textContent = skill.desc;
+  card.appendChild(desc);
+
+  card.appendChild(buildInstallRow(skill));
+  card.appendChild(buildLinksRow(skill));
+
+  return card;
+}
+
+/* ── Handle copy-to-clipboard ── */
+function handleCopy(text, btn) {
+  console.assert(typeof text === 'string' && text.length > 0, 'handleCopy: text must be a non-empty string');
+  console.assert(btn instanceof HTMLElement, 'handleCopy: btn must be an HTMLElement');
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(function() {
+      btn.textContent = "Copy";
+      btn.classList.remove("copied");
+    }, 1500);
+  }).catch(function() {
+    btn.textContent = "Failed";
+    setTimeout(function() { btn.textContent = "Copy"; }, 1500);
+  });
+}
+
+/* ── Render skills grid ── */
+function renderSkills() {
+  console.assert(skillsGrid instanceof HTMLElement, 'renderSkills: skillsGrid must be an HTMLElement');
+  const filtered = filterSkills();
+  const sorted = sortSkills(filtered);
+  const bounded = sorted.slice(0, MAX_DISPLAY);
+  const paywalled = isPaywalled();
+
+  skillsGrid.innerHTML = "";
+  const frag = document.createDocumentFragment();
+
+  for (let i = 0; i < bounded.length && i < MAX_DISPLAY; i++) {
+    const blurred = paywalled && i >= BLUR_THRESHOLD;
+    frag.appendChild(createSkillCard(bounded[i], blurred));
+  }
+
+  skillsGrid.appendChild(frag);
+  resultCount.textContent = bounded.length + " of " + skills.length + " skills";
+  console.assert(bounded.length <= MAX_DISPLAY, 'renderSkills: bounded length must not exceed MAX_DISPLAY');
+
+  if (paywalled) {
+    updateSearchesLeftText(true);
+    if (bounded.length > BLUR_THRESHOLD) {
+      showPaywall();
+    }
+  } else {
+    updateSearchesLeftText(false);
+  }
+}
+
+/* ── Update searches-left indicator ── */
+function updateSearchesLeftText(paywalled) {
+  console.assert(typeof paywalled === 'boolean', 'updateSearchesLeftText: paywalled must be a boolean');
+  console.assert(searchesLeft instanceof HTMLElement, 'updateSearchesLeftText: searchesLeft must be an HTMLElement');
+  if (paywalled) {
+    searchesLeft.textContent = "Free searches used";
+    searchesLeft.style.color = "oklch(0.65 0.18 25)";
+  } else {
+    const remaining = FREE_USES - getUsageCount();
+    searchesLeft.textContent = remaining + " free search" + (remaining !== 1 ? "es" : "") + " left";
+    searchesLeft.style.color = "oklch(0.80 0.008 70 / 0.50)";
+  }
+}
+
+/* ── Show paywall overlay ── */
+function showPaywall() {
+  console.assert(paywallOverlay instanceof HTMLElement, 'showPaywall: paywallOverlay must be an HTMLElement');
+  paywallOverlay.classList.add("visible");
+  console.assert(paywallOverlay.classList.contains("visible"), 'showPaywall: overlay must have visible class after show');
+}
+
+/* ── Handle search with debounce ── */
+function handleSearchInput() {
+  console.assert(searchInput instanceof HTMLInputElement, 'handleSearchInput: searchInput must be an HTMLInputElement');
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function() {
+    const query = searchInput.value.trim();
+    if (query.length > 0) {
+      const filtered = filterSkills();
+      if (filtered.length > 0) {
+        if (!isAutoLoad) {
+          incrementUsage();
+        }
+      }
+    }
+    isAutoLoad = false;
+    renderSkills();
+    console.assert(typeof debounceTimer === 'number', 'handleSearchInput: debounceTimer must be a number after setTimeout');
+  }, DEBOUNCE_MS);
+}
+
+/* ── Handle sort change ── */
+function handleSortChange() {
+  console.assert(sortSelect instanceof HTMLSelectElement, 'handleSortChange: sortSelect must be an HTMLSelectElement');
+  console.assert(['popular', 'name', 'category'].indexOf(sortSelect.value) !== -1, 'handleSortChange: sort value must be one of popular/name/category');
+  renderSkills();
+}
+
+/* ── Initialize ── */
+function init() {
+  searchInput = document.getElementById("searchInput");
+  sortSelect = document.getElementById("sortSelect");
+  categoryFiltersEl = document.getElementById("categoryFilters");
+  skillsGrid = document.getElementById("skillsGrid");
+  resultCount = document.getElementById("resultCount");
+  searchesLeft = document.getElementById("searchesLeft");
+  paywallOverlay = document.getElementById("paywall-overlay");
+
+  console.assert(searchInput && sortSelect && categoryFiltersEl && skillsGrid && resultCount && searchesLeft && paywallOverlay, 'init: all required DOM elements must exist');
+
+  buildCategoryFilters();
+  renderSkills();
+
+  searchInput.addEventListener("input", handleSearchInput);
+  sortSelect.addEventListener("change", handleSortChange);
+  isAutoLoad = false;
+  console.assert(skills.length > 0, 'init: skills database must be non-empty');
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+})();
+</script>
+</body>
+</html>
