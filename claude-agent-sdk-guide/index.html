@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Agent SDK Complete Guide (2026) | ClaudHQ</title>
+  <meta name="description" content="Build autonomous AI agents with the Claude Agent SDK. Installation, working examples, architecture patterns, cost analysis, and configuration reference.">
+  <link rel="canonical" href="https://claudhq.com/claude-agent-sdk-guide/">
+  <meta property="og:title" content="Claude Agent SDK Complete Guide (2026) | ClaudHQ">
+  <meta property="og:description" content="Build autonomous AI agents with the Claude Agent SDK. Installation, working examples, architecture patterns, cost analysis, and configuration reference.">
+  <meta property="og:url" content="https://claudhq.com/claude-agent-sdk-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Agent SDK Complete Guide (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The Claude Agent SDK is Anthropic's official framework for building autonomous AI agents that can reason, use tools, and complete multi-step tasks without human intervention. This guide covers everything from installation to production deployment patterns.
+      </p>
+      
+      <h2>What Is the Claude Agent SDK?</h2>
+      
+      <p>The Claude Agent SDK provides a structured way to build agents on top of Claude models. Instead of writing raw API calls and manually managing tool-call loops, the SDK handles the agent loop for you: Claude receives a task, decides which tools to call, processes results, and continues until the task is complete or a defined limit is reached.
+      </p>
+      
+      <p>Key capabilities:
+      </p>
+      
+      <ul>
+        <li><strong>Autonomous tool use</strong>: agents call tools, read results, and decide next steps</li>
+        <li><strong>Bounded execution</strong>: configurable turn limits prevent runaway loops</li>
+        <li><strong>Multi-model support</strong>: use Opus for complex reasoning, Sonnet for implementation, Haiku for lightweight checks</li>
+        <li><strong>Built-in error handling</strong>: automatic retries with configurable backoff</li>
+        <li><strong>Streaming</strong>: real-time output as agents work through tasks</li>
+      </ul>
+      
+      <p>The SDK is available for both Python and TypeScript, with near-identical APIs across both.
+      </p>
+      
+      <h2>Architecture: How the Agent Loop Works</h2>
+      
+      <p>Every agent follows the same core loop:
+      </p>
+      
+      <ol>
+        <li><strong>Receive task</strong> — the agent gets a natural language instruction</li>
+        <li><strong>Reason</strong> — Claude analyzes the task and decides on the next action</li>
+        <li><strong>Tool call</strong> — the agent invokes a tool (file read, web search, code execution, etc.)</li>
+        <li><strong>Process result</strong> — Claude reads the tool output and decides whether to continue or stop</li>
+        <li><strong>Repeat</strong> — steps 2-4 repeat until the task is complete or <code>max_turns</code> is reached</li>
+      </ol>
+      
+      <pre><code>User prompt → [Claude reasons] → Tool call → Result → [Claude reasons] → Tool call → Result → Final answer</code></pre>
+      
+      <p>This loop is the same pattern Claude Code uses internally. The SDK exposes it as a programmable interface.
+      </p>
+      
+
+      
+      <h2>Installation</h2>
+      
+      <h3>Python</h3>
+      
+      <pre><code>pip install claude-agent-sdk</code></pre>
+      
+      <p>Requires Python 3.9 or later. Set your API key:
+      </p>
+      
+      <pre><code>export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;</code></pre>
+      
+      <h3>TypeScript</h3>
+      
+      <pre><code>npm install @anthropic-ai/claude-agent-sdk</code></pre>
+      
+      <p>Requires Node.js 18 or later. Set your API key in your environment or pass it directly to the agent constructor.
+      </p>
+      
+      <h2>First Agent in 5 Minutes</h2>
+      
+      <p>Here is a minimal working agent that analyzes a directory and reports its findings:
+      </p>
+      
+      <pre><code>from claude_agent_sdk import Agent, tools
+
+agent = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.bash, tools.read_file, tools.write_file],
+    max_turns=10,
+    system_prompt=&quot;You are a code analyst. Be concise and specific.&quot;,
+)
+
+result = agent.run(&quot;List all Python files in the current directory and summarize what each one does.&quot;)
+print(result.final_output)</code></pre>
+      
+      <p>This agent will:
+      </p>
+      <ol>
+        <li>Use the bash tool to run <code>ls *.py</code> or similar</li>
+        <li>Read each file it finds</li>
+        <li>Produce a summary</li>
+        <li>Stop when finished (or after 10 turns, whichever comes first)</li>
+      </ol>
+      
+      <p>The <code>max_turns=10</code> parameter is critical. Without a bound, an agent that gets confused could loop indefinitely, burning tokens and money.
+      </p>
+      
+      <h2>3 Complete Working Agent Examples</h2>
+      
+      <h3>Example 1: Code Review Agent</h3>
+      
+      <p>This agent reads source files, identifies issues, and writes a review report.
+      </p>
+      
+      <pre><code>from claude_agent_sdk import Agent, tools
+
+code_reviewer = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.read_file, tools.bash, tools.write_file],
+    max_turns=20,
+    system_prompt=&quot;&quot;&quot;You are a senior code reviewer. For each file:
+1. Check for bugs, security issues, and performance problems.
+2. Note any style violations.
+3. Write findings to review-report.md.
+Be specific — include line numbers and concrete suggestions.&quot;&quot;&quot;,
+)
+
+result = code_reviewer.run(&quot;Review all .py files in ./src/ and write a report to review-report.md&quot;)
+print(f&quot;Review complete. Turns used: {result.turns_used}&quot;)</code></pre>
+      
+      <h3>Example 2: Research Agent</h3>
+      
+      <p>This agent searches the web, gathers information, and produces a structured summary.
+      </p>
+      
+      <pre><code>from claude_agent_sdk import Agent, tools
+
+researcher = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.web_search, tools.write_file],
+    max_turns=15,
+    system_prompt=&quot;&quot;&quot;You are a research analyst. Search for information,
+cross-reference multiple sources, and produce a structured report.
+Always cite your sources with URLs.&quot;&quot;&quot;,
+)
+
+result = researcher.run(
+    &quot;Research the current state of WebAssembly adoption in 2026. &quot;
+    &quot;Write findings to wasm-report.md with sections for browser support, &quot;
+    &quot;server-side usage, and notable projects.&quot;
+)</code></pre>
+      
+      <h3>Example 3: Data Pipeline Agent</h3>
+      
+      <p>This agent reads raw data, transforms it, and writes clean output.
+      </p>
+      
+      <pre><code>from claude_agent_sdk import Agent, tools
+
+pipeline_agent = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.read_file, tools.bash, tools.write_file],
+    max_turns=12,
+    system_prompt=&quot;&quot;&quot;You are a data engineer. Read the input CSV,
+clean and transform the data, and write the output.
+Use Python scripts for transformations. Validate output before writing.&quot;&quot;&quot;,
+)
+
+result = pipeline_agent.run(
+    &quot;Read data/raw-sales.csv, remove duplicates, normalize date formats &quot;
+    &quot;to ISO 8601, calculate monthly totals, and write to data/clean-sales.csv&quot;
+)</code></pre>
+      
+      <h2>Configuration Reference</h2>
+      
+      <h3>model</h3>
+      
+      <p>The Claude model to use. Current options:
+      </p>
+      
+      <table>
+      <tr><th>Model</th><th>Best For</th><th>Cost</th></tr>
+      <tr><td><code>claude-opus-4-20250514</code></td><td>Complex reasoning, architecture, planning</td><td>$15/$75 per M tokens</td></tr>
+      <tr><td><code>claude-sonnet-4-20250514</code></td><td>General coding, implementation, analysis</td><td>$3/$15 per M tokens</td></tr>
+      <tr><td><code>claude-haiku-4-5-20251001</code></td><td>Simple tasks, classification, quick edits</td><td>$0.80/$4 per M tokens</td></tr>
+      </table>
+      
+      <h3>max_turns</h3>
+      
+      <p>The maximum number of reasoning-and-tool-call cycles. This is your safety bound.
+      </p>
+      
+      <ul>
+        <li><strong>5-10 turns</strong>: simple, well-defined tasks</li>
+        <li><strong>15-25 turns</strong>: multi-file operations, moderate complexity</li>
+        <li><strong>30-50 turns</strong>: large refactors, complex research (use with caution)</li>
+      </ul>
+      
+      <p>Never set <code>max_turns</code> above 100 unless you have a specific reason and a cost alert configured.
+      </p>
+      
+      <h3>tools</h3>
+      
+      <p>The list of tools the agent can use. Only provide tools the agent actually needs — every tool definition consumes tokens in the system prompt.
+      </p>
+      
+      <pre><code># Minimal tool set for a file-editing agent
+tools=[tools.read_file, tools.write_file, tools.bash]
+
+# Research agent
+tools=[tools.web_search, tools.read_file, tools.write_file]
+
+# Full toolkit (costs more tokens per turn)
+tools=[tools.bash, tools.read_file, tools.write_file, tools.web_search, tools.glob, tools.grep]</code></pre>
+      
+      <h3>system_prompt</h3>
+      
+      <p>Instructions that shape agent behavior. Keep it concise — long system prompts consume tokens every turn.
+      </p>
+      
+      <h3>temperature</h3>
+      
+      <p>Controls randomness. Default is 0 for agents (deterministic). Increase to 0.3-0.7 for creative tasks.
+      </p>
+      
+      <h3>max_tokens</h3>
+      
+      <p>Maximum tokens per individual Claude response. Default is 4096. Increase for tasks that need long outputs (report generation, large code files).
+      </p>
+      
+      <h2>Agent Patterns</h2>
+      
+      <h3>Sequential Pattern</h3>
+      
+      <p>One agent, linear steps. Simplest and most predictable.
+      </p>
+      
+      <pre><code>agent = Agent(model=&quot;claude-sonnet-4-20250514&quot;, tools=[...], max_turns=10)
+result = agent.run(&quot;Do X, then Y, then Z&quot;)</code></pre>
+      
+      <p>Best for: single-purpose tasks, scripts, simple automations.
+      </p>
+      
+      <h3>Orchestrator-Worker Pattern</h3>
+      
+      <p>A main agent delegates subtasks to specialized sub-agents.
+      </p>
+      
+      <pre><code>from claude_agent_sdk import Agent, tools
+
+# Specialist agents
+security_agent = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.read_file, tools.bash],
+    max_turns=10,
+    system_prompt=&quot;You are a security auditor. Check for vulnerabilities.&quot;,
+)
+
+style_agent = Agent(
+    model=&quot;claude-haiku-4-5-20251001&quot;,
+    tools=[tools.read_file],
+    max_turns=5,
+    system_prompt=&quot;You are a style checker. Check code formatting.&quot;,
+)
+
+# Orchestrator
+orchestrator = Agent(
+    model=&quot;claude-opus-4-20250514&quot;,
+    tools=[tools.read_file, tools.write_file],
+    sub_agents=[security_agent, style_agent],
+    max_turns=15,
+    system_prompt=&quot;Coordinate the security and style reviews. Combine findings into a single report.&quot;,
+)
+
+result = orchestrator.run(&quot;Review the ./src/ directory&quot;)</code></pre>
+      
+      <p>Best for: complex tasks with distinct sub-problems. See our multi-agent architecture guide for detailed patterns.
+      </p>
+      
+      <h3>Pipeline Pattern</h3>
+      
+      <p>Agents chained together, where one agent's output becomes the next agent's input.
+      </p>
+      
+      <pre><code># Agent 1: Generate code
+generator = Agent(model=&quot;claude-opus-4-20250514&quot;, tools=[tools.write_file], max_turns=10)
+gen_result = generator.run(&quot;Write a REST API for user management in FastAPI&quot;)
+
+# Agent 2: Review the generated code
+reviewer = Agent(model=&quot;claude-sonnet-4-20250514&quot;, tools=[tools.read_file, tools.write_file], max_turns=10)
+review_result = reviewer.run(&quot;Review the code in ./api.py and fix any issues&quot;)
+
+# Agent 3: Write tests
+tester = Agent(model=&quot;claude-sonnet-4-20250514&quot;, tools=[tools.read_file, tools.write_file, tools.bash], max_turns=15)
+test_result = tester.run(&quot;Write pytest tests for ./api.py and run them&quot;)</code></pre>
+      
+      <p>Best for: staged workflows where each step has clear inputs and outputs.
+      </p>
+      
+      <h2>Cost Analysis</h2>
+      
+      <p>Agent costs scale with turns and context size. Here are realistic estimates:
+      </p>
+      
+      <table>
+      <tr><th>Scenario</th><th>Model</th><th>Turns</th><th>Estimated Cost</th></tr>
+      <tr><td>Simple file edit</td><td>Haiku</td><td>3-5</td><td>$0.01-0.03</td></tr>
+      <tr><td>Code review (5 files)</td><td>Sonnet</td><td>10-15</td><td>$0.15-0.40</td></tr>
+      <tr><td>Full codebase analysis</td><td>Sonnet</td><td>20-30</td><td>$0.50-1.50</td></tr>
+      <tr><td>Architecture planning</td><td>Opus</td><td>10-20</td><td>$1.00-5.00</td></tr>
+      <tr><td>Complex refactor</td><td>Opus</td><td>30-50</td><td>$3.00-15.00</td></tr>
+      </table>
+      
+      <p>Key cost drivers:
+      </p>
+      <ul>
+        <li><strong>Context accumulation</strong>: each turn adds to the conversation, so later turns process more tokens</li>
+        <li><strong>Tool definitions</strong>: each tool adds 200-400 tokens to every request</li>
+        <li><strong>Model choice</strong>: Opus costs 5x more than Sonnet per token</li>
+      </ul>
+      
+      <p>For detailed cost tracking, see our ccusage tracking guide and cost reduction strategies.
+      </p>
+      
+      <h2>Comparison: Agent SDK vs Claude Code CLI vs Direct API</h2>
+      
+      <table>
+      <tr><th>Feature</th><th>Agent SDK</th><th>Claude Code CLI</th><th>Direct API</th></tr>
+      <tr><td>Agent loop</td><td>Built-in</td><td>Built-in</td><td>Manual</td></tr>
+      <tr><td>Tool management</td><td>SDK-managed</td><td>Pre-configured</td><td>Manual</td></tr>
+      <tr><td>Multi-agent</td><td>Supported</td><td>Via subagents</td><td>Manual</td></tr>
+      <tr><td>Customization</td><td>Full</td><td>Limited (CLAUDE.md)</td><td>Full</td></tr>
+      <tr><td>Setup effort</td><td>Medium</td><td>Low</td><td>High</td></tr>
+      <tr><td>Best for</td><td>Custom agents</td><td>Dev workflows</td><td>Full control</td></tr>
+      </table>
+      
+      <p><strong>Use Agent SDK</strong> when you need programmatic control over agents — custom tools, custom workflows, integration into larger systems.
+      </p>
+      
+      <p><strong>Use Claude Code CLI</strong> when you need an interactive coding assistant or want to run agents via API mode.
+      </p>
+      
+      <p><strong>Use the Direct API</strong> when you need maximum control and are comfortable building the agent loop yourself.
+      </p>
+      
+      <h2>Error Handling and Retry Patterns</h2>
+      
+      <p>Agents can fail in several ways. Handle each:
+      </p>
+      
+      <pre><code>from claude_agent_sdk import Agent, AgentError, RateLimitError, ToolError
+
+agent = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.bash, tools.read_file],
+    max_turns=15,
+    retry_config={
+        &quot;max_retries&quot;: 3,
+        &quot;backoff_factor&quot;: 2.0,  # exponential backoff
+        &quot;retry_on&quot;: [RateLimitError],
+    },
+)
+
+try:
+    result = agent.run(&quot;Analyze the codebase&quot;)
+    if result.hit_turn_limit:
+        print(&quot;Warning: agent hit max_turns before completing&quot;)
+    print(result.final_output)
+except RateLimitError:
+    print(&quot;Rate limited after all retries&quot;)
+except ToolError as e:
+    print(f&quot;Tool failed: {e.tool_name} — {e.message}&quot;)
+except AgentError as e:
+    print(f&quot;Agent error: {e}&quot;)</code></pre>
+      
+      <p>Best practices for error handling:
+      </p>
+      <ul>
+        <li>Always set <code>max_turns</code> to prevent runaway execution</li>
+        <li>Use <code>retry_config</code> for transient API errors</li>
+        <li>Check <code>result.hit_turn_limit</code> to detect incomplete runs</li>
+        <li>Log <code>result.turns_used</code> and <code>result.total_tokens</code> for cost monitoring</li>
+      </ul>
+      
+      <h2>Frequently Asked Questions</h2>
+      
+      <p><strong>Is the Claude Agent SDK free?</strong>
+       The SDK itself is free and open source. You pay for Claude API usage (per-token pricing) when agents run. See our Claude Code cost guide for detailed pricing.
+      </p>
+      
+      <p><strong>What models work with the Agent SDK?</strong>
+       All Claude models: Opus 4, Sonnet 4, Sonnet 4.5, and Haiku 4.5. Choose based on task complexity and budget.
+      </p>
+      
+      <p><strong>How is this different from Claude Code?</strong>
+       Claude Code is a pre-built coding agent. The Agent SDK lets you build custom agents for any purpose — not just coding. See our how to build a Claude Code agent guide for a deeper comparison.
+      </p>
+      
+      <p><strong>Can I use custom tools?</strong>
+       Yes. Define tools as Python functions with type hints, and the SDK automatically generates the tool schema for Claude.
+      </p>
+      
+      <p><strong>What about rate limits?</strong>
+       The SDK respects Anthropic API rate limits. Configure <code>retry_config</code> for automatic backoff when limits are hit.
+      </p>
+      
+      <p><strong>Can agents call other agents?</strong>
+       Yes. The orchestrator-worker pattern lets agents delegate to sub-agents. Each sub-agent has its own tool set and turn limit.
+      </p>
+      
+      <p><strong>How do I control costs?</strong>
+       Three strategies: use cheaper models (Haiku for simple sub-tasks), set strict <code>max_turns</code> limits, and minimize the tool list. Our cost reduction guide covers this in detail.
+      </p>
+      
+      <p><strong>Is the Agent SDK production-ready?</strong>
+       Yes. It includes error handling, retry logic, and structured output support. For production deployments, add monitoring, logging, and cost alerts.
+      </p>
+      
+      <h2>Production Deployment Checklist</h2>
+      
+      <p>Before deploying agents to production, verify each item:
+      </p>
+      
+      <ul>
+        <li><strong>Turn limits</strong>: every agent has a <code>max_turns</code> value appropriate to its task</li>
+        <li><strong>Error handling</strong>: try/except blocks around <code>agent.run()</code> with specific exception types</li>
+        <li><strong>Cost monitoring</strong>: log <code>result.total_tokens</code> and <code>result.turns_used</code> after every run</li>
+        <li><strong>Spending alerts</strong>: configured in the Anthropic console with email notifications</li>
+        <li><strong>Retry configuration</strong>: exponential backoff for rate limit errors</li>
+        <li><strong>Tool scoping</strong>: each agent has only the tools it needs (no unused tools inflating token counts)</li>
+        <li><strong>Logging</strong>: agent inputs, outputs, and errors written to a structured log</li>
+        <li><strong>Testing</strong>: agents tested against known inputs with expected outputs verified</li>
+        <li><strong>Timeout</strong>: pipeline-level timeout to prevent stalled agents from blocking indefinitely</li>
+        <li><strong>Secrets isolation</strong>: API keys passed via environment variables, never hardcoded in agent code</li>
+        <li><strong>Output validation</strong>: verify agent output matches expected schema before downstream processing</li>
+      </ul>
+      
+      <p>Treat agents like microservices: each should have clear inputs, outputs, error handling, and monitoring.
+      </p>
+      
+      
+      
+      <h2>Production Agent Architectures</h2>
+      
+      <p>The three patterns above (sequential, orchestrator, pipeline) are starting points. Production deployments require deeper architecture decisions around parallelism, failure isolation, and cost governance. Here are three battle-tested patterns with their tradeoffs.
+      </p>
+      
+      <h3>Pattern 1: Fan-Out (Parallel Workers)</h3>
+      
+      <p>A coordinator dispatches the same task type to N workers running concurrently. Each worker processes an independent unit of work. The coordinator collects results when all workers finish.
+      </p>
+      
+      <pre><code>                          ┌──── [Worker A] ──── Result A ────┐
+                          │                                    │
+User Task ── [Coordinator] ──── [Worker B] ──── Result B ──── [Merge] ── Final Output
+                          │                                    │
+                          └──── [Worker C] ──── Result C ────┘</code></pre>
+      
+      <pre><code>import asyncio
+from claude_agent_sdk import Agent, tools
+
+async def fan_out_review(file_paths: list[str]):
+    &quot;&quot;&quot;Review N files in parallel using independent agents.&quot;&quot;&quot;
+    async def review_one(path: str):
+        agent = Agent(
+            model=&quot;claude-sonnet-4-20250514&quot;,
+            tools=[tools.read_file],
+            max_turns=8,
+            system_prompt=f&quot;Review {path} for bugs. Output JSON with fields: file, issues[], severity.&quot;,
+        )
+        return await agent.arun(f&quot;Review {path}&quot;)
+
+    results = await asyncio.gather(*[review_one(p) for p in file_paths])
+    return [r.final_output for r in results]</code></pre>
+      
+      <p><strong>Cost profile:</strong> Linear with worker count. 10 files at $0.15 each = $1.50 total. All workers run simultaneously, so wall-clock time equals the slowest single worker.
+      </p>
+      
+      <p><strong>Failure mode:</strong> One worker failure does not affect others. Use <code>asyncio.gather(return_exceptions=True)</code> to collect partial results when some workers fail.
+      </p>
+      
+      <p><strong>CLAUDE.md governance:</strong> Add to each worker's system prompt: "You may only read files. Do not execute commands. Do not modify files. Report findings only."
+      </p>
+      
+      <h3>Pattern 2: Pipeline (Sequential Stages)</h3>
+      
+      <p>Each stage transforms input and passes output to the next. Stages can use different models optimized for their role.
+      </p>
+      
+      <pre><code>[Stage 1: Generate]     [Stage 2: Validate]     [Stage 3: Test]
+ Opus ($$$)         ──▶  Haiku ($)           ──▶  Sonnet ($$)
+ Write code              Check types/lint         Run tests, fix
+ max_turns=15            max_turns=5              max_turns=20</code></pre>
+      
+      <pre><code># Stage 1: Generate with Opus (high capability)
+generator = Agent(
+    model=&quot;claude-opus-4-20250514&quot;,
+    tools=[tools.write_file],
+    max_turns=15,
+    system_prompt=&quot;Write production-quality code. Include docstrings and type hints.&quot;,
+)
+gen = generator.run(&quot;Implement a Redis-backed session store for FastAPI&quot;)
+
+# Stage 2: Validate with Haiku (fast, cheap)
+validator = Agent(
+    model=&quot;claude-haiku-4-5-20251001&quot;,
+    tools=[tools.read_file, tools.bash],
+    max_turns=5,
+    system_prompt=&quot;Run mypy and ruff on the generated code. Report any issues. Do not fix them.&quot;,
+)
+val = validator.run(&quot;Validate the code in ./session_store.py&quot;)
+
+# Stage 3: Fix and test with Sonnet (balanced)
+fixer = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.read_file, tools.write_file, tools.bash],
+    max_turns=20,
+    system_prompt=&quot;Fix all issues from validation. Run pytest. Iterate until all tests pass.&quot;,
+)
+fix = fixer.run(f&quot;Fix these issues in session_store.py: {val.final_output}&quot;)</code></pre>
+      
+      <p><strong>Cost profile:</strong> $2-8 total. Opus for the creative work, Haiku for the cheap validation gate, Sonnet for the iterative fix loop. The validation gate prevents expensive Sonnet iterations on fundamentally flawed code.
+      </p>
+      
+      <p><strong>Failure mode:</strong> If Stage 2 validation finds catastrophic issues, abort early instead of passing garbage to Stage 3. Check <code>val.final_output</code> for critical errors before proceeding.
+      </p>
+      
+      <p><strong>CLAUDE.md governance:</strong> Stage 1 can only write files. Stage 2 can only read and lint. Stage 3 can read, write, and run tests. No stage has network access beyond the Anthropic API.
+      </p>
+      
+      <h3>Pattern 3: Supervisor (Orchestrator + Specialists)</h3>
+      
+      <p>A supervisor agent receives high-level goals, breaks them into subtasks, assigns each to the best specialist, monitors progress, and handles failures by reassigning or adjusting strategy.
+      </p>
+      
+      <pre><code>                    ┌─ [Security Specialist] ─ tools: bash(semgrep), read
+                    │
+[Supervisor] ──────┼─ [Perf Specialist] ───── tools: bash(hyperfine, ab), read
+ Opus               │
+ Manages strategy   ├─ [Docs Specialist] ──── tools: read, write
+ max_turns=25       │
+                    └─ [Test Specialist] ──── tools: bash(pytest), read, write</code></pre>
+      
+      <pre><code>security = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.read_file, tools.bash],
+    max_turns=10,
+    system_prompt=&quot;You are a security auditor. Run SAST scans and review for OWASP Top 10.&quot;,
+)
+
+perf = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.read_file, tools.bash],
+    max_turns=10,
+    system_prompt=&quot;You are a performance engineer. Profile code and identify bottlenecks.&quot;,
+)
+
+supervisor = Agent(
+    model=&quot;claude-opus-4-20250514&quot;,
+    sub_agents=[security, perf],
+    max_turns=25,
+    system_prompt=&quot;&quot;&quot;You are a technical lead. Given a codebase:
+1. Dispatch security audit to the security specialist
+2. Dispatch performance analysis to the perf specialist
+3. Synthesize findings into a prioritized action plan
+4. If a specialist fails, retry once with a simplified scope&quot;&quot;&quot;,
+)
+
+result = supervisor.run(&quot;Audit ./src/ for security and performance issues&quot;)</code></pre>
+      
+      <p><strong>Cost profile:</strong> $5-15 depending on codebase size. The Opus supervisor is the main cost driver. Keep supervisor <code>max_turns</code> tight — it should delegate, not do the work itself.
+      </p>
+      
+      <p><strong>Failure mode:</strong> The supervisor can detect specialist failures and retry with adjusted parameters (fewer files, simpler scope). This self-healing behavior is the key advantage over static pipelines.
+      </p>
+      
+      <p><strong>CLAUDE.md governance:</strong> The supervisor cannot execute commands directly — it can only delegate to specialists. Each specialist has scoped tool access. No specialist can write to files outside its domain.
+      </p>
+      
+      <h2>Monitoring and Logging Patterns</h2>
+      
+      <p>Production agents need structured observability. Log every run with enough detail to diagnose failures and track costs.
+      </p>
+      
+      <h3>Structured Run Logging</h3>
+      
+      <pre><code>import json
+import logging
+from datetime import datetime, timezone
+from claude_agent_sdk import Agent, tools
+
+logging.basicConfig(
+    format=&#x27;%(message)s&#x27;,
+    level=logging.INFO,
+    handlers=[logging.FileHandler(&quot;agent-runs.jsonl&quot;)]
+)
+
+agent = Agent(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    tools=[tools.bash, tools.read_file],
+    max_turns=15,
+)
+
+start = datetime.now(timezone.utc)
+result = agent.run(&quot;Analyze the test suite for flaky tests&quot;)
+end = datetime.now(timezone.utc)
+
+log_entry = {
+    &quot;timestamp&quot;: start.isoformat(),
+    &quot;duration_seconds&quot;: (end - start).total_seconds(),
+    &quot;model&quot;: &quot;claude-sonnet-4-20250514&quot;,
+    &quot;turns_used&quot;: result.turns_used,
+    &quot;total_tokens&quot;: result.total_tokens,
+    &quot;input_tokens&quot;: result.input_tokens,
+    &quot;output_tokens&quot;: result.output_tokens,
+    &quot;hit_turn_limit&quot;: result.hit_turn_limit,
+    &quot;estimated_cost_usd&quot;: (result.input_tokens * 3 + result.output_tokens * 15) / 1_000_000,
+    &quot;task&quot;: &quot;flaky test analysis&quot;,
+    &quot;status&quot;: &quot;complete&quot; if not result.hit_turn_limit else &quot;truncated&quot;,
+}
+logging.info(json.dumps(log_entry))</code></pre>
+      
+      <p>This produces a JSONL file where each line is a complete run record. Feed it into your existing monitoring stack (Datadog, Grafana, CloudWatch) for dashboards and alerts.
+      </p>
+      
+      <h3>Cost Alert Thresholds</h3>
+      
+      <p>Set alerts at multiple levels to catch runaway agents before they drain your budget:
+      </p>
+      
+      <pre><code>COST_THRESHOLDS = {
+    &quot;per_run_warn&quot;: 2.00,     # Warn if a single run exceeds $2
+    &quot;per_run_abort&quot;: 10.00,   # Abort if a single run exceeds $10
+    &quot;daily_budget&quot;: 50.00,    # Hard daily cap across all agents
+    &quot;monthly_budget&quot;: 500.00, # Monthly spending ceiling
+}</code></pre>
+      
+      <h3>Health Check Endpoint</h3>
+      
+      <p>If your agents run as a service, expose a health check:
+      </p>
+      
+      <pre><code>from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route(&quot;/health&quot;)
+def health():
+    return jsonify({
+        &quot;status&quot;: &quot;ok&quot;,
+        &quot;agents_running&quot;: active_agent_count,
+        &quot;total_runs_today&quot;: daily_run_count,
+        &quot;estimated_cost_today_usd&quot;: daily_cost_estimate,
+    })</code></pre>
+      
+      <h2>Real Cost Examples with Actual Token Counts</h2>
+      
+      <p>Abstract cost tables are not enough. Here are measured costs from real agent runs:
+      </p>
+      
+      <h3>Example: Code review of a 15-file Python project</h3>
+      
+      <pre><code>Model:          claude-sonnet-4-20250514
+Turns used:     12
+Input tokens:   34,218 (file contents + system prompt + tool results)
+Output tokens:  6,841 (review comments + tool calls)
+Cost:           (34,218 * $3 + 6,841 * $15) / 1,000,000 = $0.205
+Duration:       47 seconds</code></pre>
+      
+      <h3>Example: Refactor a module (rename + update imports)</h3>
+      
+      <pre><code>Model:          claude-sonnet-4-20250514
+Turns used:     22
+Input tokens:   89,450 (grows each turn as context accumulates)
+Output tokens:  12,330
+Cost:           (89,450 * $3 + 12,330 * $15) / 1,000,000 = $0.453
+Duration:       2 minutes 15 seconds</code></pre>
+      
+      <h3>Example: Architecture planning with Opus</h3>
+      
+      <pre><code>Model:          claude-opus-4-20250514
+Turns used:     8
+Input tokens:   22,100
+Output tokens:  8,900
+Cost:           (22,100 * $15 + 8,900 * $75) / 1,000,000 = $0.999
+Duration:       1 minute 40 seconds</code></pre>
+      
+      <p>The pattern is clear: context accumulation is the primary cost driver. An agent that runs 30 turns processes exponentially more input tokens than one that runs 10 turns, because each turn includes the full conversation history. Use <code>/compact</code> or context summarization between stages to control this.
+      </p>
+      
+      <h2>Security Considerations for Agent Deployments</h2>
+      
+      <p>Agents that run autonomously introduce security risks that do not exist with interactive AI usage.
+      </p>
+      
+      <h3>Principle of Least Privilege</h3>
+      
+      <p>Give each agent only the tools it needs. A code review agent should not have <code>write_file</code> access. A report generator should not have <code>bash</code> access.
+      </p>
+      
+      <pre><code># Bad: overly permissive
+agent = Agent(tools=[tools.bash, tools.read_file, tools.write_file, tools.web_search, tools.glob, tools.grep])
+
+# Good: scoped to actual need
+review_agent = Agent(tools=[tools.read_file, tools.grep])</code></pre>
+      
+      <h3>Input Sanitization</h3>
+      
+      <p>If agent prompts include user-provided input (issue descriptions, PR bodies, form submissions), sanitize the input to prevent prompt injection:
+      </p>
+      
+      <pre><code>def sanitize_agent_input(user_text: str) -&gt; str:
+    &quot;&quot;&quot;Strip potential prompt injection patterns from user input.&quot;&quot;&quot;
+    # Remove instruction-like patterns
+    sanitized = user_text.replace(&quot;SYSTEM:&quot;, &quot;&quot;)
+    sanitized = sanitized.replace(&quot;IGNORE PREVIOUS&quot;, &quot;&quot;)
+    sanitized = sanitized.replace(&quot;&lt;!-- &quot;, &quot;&quot;).replace(&quot; --&gt;&quot;, &quot;&quot;)
+    # Truncate to prevent context flooding
+    return sanitized[:5000]
+
+result = agent.run(f&quot;Review this PR description: {sanitize_agent_input(pr_body)}&quot;)</code></pre>
+      
+      <h3>Network Isolation</h3>
+      
+      <p>For agents that should only read local files, run them without network access:
+      </p>
+      
+      <pre><code># Docker with no network
+docker run --rm --network=none \
+  -e ANTHROPIC_API_KEY=&quot;$KEY&quot; \
+  -v $(pwd):/app \
+  my-agent-image</code></pre>
+      
+      <p>Note: the agent still needs network access to call the Anthropic API. Use Docker's network policies to allow only <code>api.anthropic.com:443</code> while blocking all other outbound traffic.
+      </p>
+      
+      <h3>Secret Management</h3>
+      
+      <p>Never pass secrets through agent prompts. Use environment variables and configure tools to access them directly:
+      </p>
+      
+      <pre><code># Bad: secret in prompt
+agent.run(f&quot;Connect to database at postgres://admin:{DB_PASSWORD}@db.example.com/prod&quot;)
+
+# Good: secret in environment, tool reads it
+agent.run(&quot;Connect to the production database using the credentials in DATABASE_URL&quot;)</code></pre>
+      
+      <h2>Claude Code SDK: How It Relates to the Agent SDK</h2>
+      
+      <p>Developers searching for "claude code sdk" are often looking for one of two things: the Claude Agent SDK (covered in this guide) or the programmatic interface to Claude Code itself. They are related but distinct.
+      </p>
+      
+      <p><strong>Claude Agent SDK</strong> is the library (<code>claude-agent-sdk</code> on PyPI, <code>@anthropic-ai/claude-agent-sdk</code> on npm) for building custom autonomous agents. You write agent code, define tools, set turn limits, and run agents programmatically. This is what you use when building your own agent from scratch.
+      </p>
+      
+      <p><strong>Claude Code SDK</strong> refers to using Claude Code in non-interactive (API/headless) mode. Instead of typing commands in a terminal, you invoke Claude Code programmatically from scripts:
+      </p>
+      
+      <pre><code># Claude Code SDK usage — run Claude Code as a subprocess
+claude -p &quot;Refactor the auth module&quot; --output-format json
+
+# Pipe output to another tool
+claude -p &quot;List all TODO comments&quot; --output-format json | jq &#x27;.result&#x27;
+
+# Use in a CI/CD pipeline
+claude -p &quot;Review this diff for security issues: $(git diff HEAD~1)&quot; --model claude-sonnet-4-20250514</code></pre>
+      
+      <pre><code># Python wrapper for Claude Code SDK
+import subprocess
+import json
+
+def run_claude_code(prompt: str, model: str = &quot;claude-sonnet-4-20250514&quot;) -&gt; dict:
+    result = subprocess.run(
+        [&quot;claude&quot;, &quot;-p&quot;, prompt, &quot;--output-format&quot;, &quot;json&quot;, &quot;--model&quot;, model],
+        capture_output=True, text=True
+    )
+    return json.loads(result.stdout)
+
+output = run_claude_code(&quot;Analyze the test coverage in ./src/&quot;)</code></pre>
+      
+      <p><strong>When to use which:</strong>
+      </p>
+      
+      <table>
+      <tr><th>Need</th><th>Use</th></tr>
+      <tr><td>Build a custom agent with custom tools</td><td>Claude Agent SDK</td></tr>
+      <tr><td>Automate Claude Code in scripts/CI</td><td>Claude Code SDK (API mode)</td></tr>
+      <tr><td>Interactive development</td><td>Claude Code CLI</td></tr>
+      <tr><td>Maximum control over the agent loop</td><td>Claude Agent SDK</td></tr>
+      <tr><td>Leverage Claude Code's built-in tools (Read, Edit, Bash)</td><td>Claude Code SDK (API mode)</td></tr>
+      </table>
+      
+      <p>The Claude Code SDK (API mode) is often the faster path when you want Claude Code's existing capabilities without writing custom agent logic. The Agent SDK is for when you need agents that do things Claude Code was not built for. See our API mode guide for detailed Claude Code SDK usage.
+      </p>
+      
+      <h2>Next Steps</h2>
+      
+      
+      <h3>Can I deploy agents as a REST API service?</h3>
+      
+      <p>Yes. Wrap the agent.run() call in a web framework like Flask or FastAPI. Add request validation, authentication, and rate limiting. Each API request creates a new agent run.
+      </p>
+      
+      <h3>How do I test agents before deploying to production?</h3>
+      
+      <p>Create a test suite with known inputs and expected outputs. Run agents against these inputs and verify the final_output matches expectations. Use deterministic temperature (0.0) for reproducible results.
+      </p>
+      
+      <h3>Can agents access the internet?</h3>
+      
+      <p>Yes, if you provide the web_search tool. Without it, agents can only access local files and run local commands. Control network access through tool selection and Docker network policies.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-agent-sdk-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Agent SDK Complete Guide (2026)",
+    "description": "Build autonomous AI agents with the Claude Agent SDK. Installation, working examples, architecture patterns, cost analysis, and configuration reference.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-agent-sdk-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

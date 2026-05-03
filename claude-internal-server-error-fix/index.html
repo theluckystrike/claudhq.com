@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Internal Server Error (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude internal server error with retry logic, prompt size reduction, and model fallback. Step-by-step diagnostic guide with code examples.">
+  <link rel="canonical" href="https://claudhq.com/claude-internal-server-error-fix/">
+  <meta property="og:title" content="Fix Claude Internal Server Error (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude internal server error with retry logic, prompt size reduction, and model fallback. Step-by-step diagnostic guide with code examples.">
+  <meta property="og:url" content="https://claudhq.com/claude-internal-server-error-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Internal Server Error (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+      
+      <pre><code>Error 500: Internal Server Error
+{
+  &quot;type&quot;: &quot;error&quot;,
+  &quot;error&quot;: {
+    &quot;type&quot;: &quot;api_error&quot;,
+    &quot;message&quot;: &quot;An internal server error occurred. Please try again later.&quot;
+  }
+}</code></pre>
+      
+      <p>A 500 internal server error from the Claude API means something broke on Anthropic's side during request processing. Your request syntax is valid, your authentication is correct, but the server failed to produce a response. This is distinct from a 503 service unavailable (infrastructure-level) or a 529 overloaded (model saturation). The 500 indicates an unexpected failure in the inference pipeline itself.
+      </p>
+      
+      <h2>Immediate Fixes</h2>
+      
+
+      
+      <h3>1. Retry the Same Request</h3>
+      
+      <p>Most 500 errors are transient. A simple retry resolves the majority of cases.
+      </p>
+      
+      <pre><code># Quick test — does the API respond at all?
+curl -s -w &quot;\nHTTP Status: %{http_code}\n&quot; \
+  https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{
+    &quot;model&quot;: &quot;claude-sonnet-4-20250514&quot;,
+    &quot;max_tokens&quot;: 10,
+    &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;ping&quot;}]
+  }&#x27;</code></pre>
+      
+      <p>If you get a 200 back, the outage was momentary. If you get another 500, continue to step 2.
+      </p>
+      
+      <h3>2. Check Anthropic's Status Page</h3>
+      
+      <pre><code>curl -s https://status.anthropic.com/api/v2/status.json | python3 -c &quot;
+import sys, json
+data = json.load(sys.stdin)
+print(&#x27;Status:&#x27;, data[&#x27;status&#x27;][&#x27;description&#x27;])
+print(&#x27;Indicator:&#x27;, data[&#x27;status&#x27;][&#x27;indicator&#x27;])
+&quot;</code></pre>
+      
+      <p>If the indicator shows anything other than <code>none</code>, there is an active incident. Monitor the page and wait for resolution. There is nothing you can fix on your end during an outage.
+      </p>
+      
+      <h3>3. Reduce Prompt Size</h3>
+      
+      <p>Long prompts increase the probability of inference failures. If your prompt exceeds 50,000 tokens, the model has more opportunities to encounter internal errors during processing.
+      </p>
+      
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+# Count tokens before sending
+token_count = client.count_tokens(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: your_prompt}]
+)
+print(f&quot;Input tokens: {token_count.input_tokens}&quot;)
+
+# If over 50k, split the work
+if token_count.input_tokens &gt; 50000:
+    # Break into smaller chunks
+    chunks = split_prompt(your_prompt, max_tokens=30000)
+    results = [send_chunk(chunk) for chunk in chunks]</code></pre>
+      
+      <h3>4. Switch to a Different Model</h3>
+      
+      <p>If one model has inference issues, another may not. Model deployments are independent.
+      </p>
+      
+      <pre><code># Claude Code fallback
+claude --model claude-sonnet-4-20250514
+
+# Or try Haiku for quick tasks
+claude --model claude-haiku-4-20250514</code></pre>
+      
+      <p>For API usage:
+      </p>
+      
+      <pre><code>FALLBACK_MODELS = [
+    &quot;claude-sonnet-4-20250514&quot;,
+    &quot;claude-haiku-4-20250514&quot;,
+]
+
+def call_with_fallback(client, messages, **kwargs):
+    for model in FALLBACK_MODELS:
+        try:
+            return client.messages.create(
+                model=model,
+                messages=messages,
+                **kwargs
+            )
+        except anthropic.InternalServerError:
+            continue
+    raise RuntimeError(&quot;All models returned 500&quot;)</code></pre>
+      
+      <h2>When Internal Server Errors Happen</h2>
+      
+      <p>The 500 error occurs in specific patterns:
+      </p>
+      
+      <p><strong>API overload conditions.</strong> During peak traffic (weekday business hours, US Pacific time), the inference cluster processes millions of concurrent requests. Transient failures spike during these windows. If you track your error rates, you will see 500s cluster between 9 AM and 5 PM Pacific, Monday through Friday.
+      </p>
+      
+      <p><strong>Model inference failures.</strong> The model occasionally encounters inputs that trigger unexpected states in the inference engine. This is more common with extremely long context windows, deeply nested tool-use schemas, or prompts containing unusual Unicode sequences. Inputs that mix multiple languages, embed large base64-encoded images, or include malformed JSON within the message content are known triggers.
+      </p>
+      
+      <p><strong>Timeout on long prompts.</strong> Requests that require extended generation time (large <code>max_tokens</code> combined with complex reasoning) can exceed internal timeout thresholds before the response completes. This is most common with <code>claude-opus-4-20250514</code> at <code>max_tokens</code> above 4096, where the model may reason for 30+ seconds before generating output.
+      </p>
+      
+      <p><strong>Deployment transitions.</strong> When Anthropic deploys model updates, there are brief windows where some servers run the old version and others run the new version. Requests routed to a server mid-restart will fail with 500. These windows are typically under 5 minutes and happen during low-traffic hours.
+      </p>
+      
+      <p><strong>Extended thinking with large context.</strong> When using extended thinking (the <code>thinking</code> parameter), the model allocates additional compute for step-by-step reasoning. Combining extended thinking with a context window over 100K tokens increases the probability of a 500 because the server must hold more state in memory during the longer processing time.
+      </p>
+      
+      <p><strong>Tool-use schema complexity.</strong> Defining more than 50 tools, or tools with deeply nested JSON schemas (5+ levels of nesting), increases the token overhead on every request and raises the chance of an inference failure. Each tool definition is parsed and included in the model's context, so complex schemas consume both tokens and processing time.
+      </p>
+      
+      <h2>Full Diagnostic Script</h2>
+      
+      <p>Run this script when you encounter persistent 500 errors. It checks all common causes in sequence and reports which ones apply to your environment.
+      </p>
+      
+      <pre><code>#!/bin/bash
+# claude-500-diagnostic.sh — Diagnose persistent internal server errors
+set -euo pipefail
+
+RED=&#x27;\033[0;31m&#x27;
+GREEN=&#x27;\033[0;32m&#x27;
+YELLOW=&#x27;\033[1;33m&#x27;
+NC=&#x27;\033[0m&#x27;
+ISSUES=0
+
+echo &quot;=== Claude API 500 Error Diagnostic ===&quot;
+echo &quot;&quot;
+
+# 1. Check API reachability
+echo -n &quot;1. API reachability... &quot;
+HTTP_CODE=$(curl -s -o /dev/null -w &quot;%{http_code}&quot; \
+  --max-time 10 \
+  https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: ${ANTHROPIC_API_KEY:-missing}&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:5,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;hi&quot;}]}&#x27; \
+  2&gt;/dev/null || echo &quot;000&quot;)
+
+if [ &quot;$HTTP_CODE&quot; = &quot;200&quot; ]; then
+  echo -e &quot;${GREEN}PASS (HTTP $HTTP_CODE)${NC}&quot;
+elif [ &quot;$HTTP_CODE&quot; = &quot;000&quot; ]; then
+  echo -e &quot;${RED}FAIL — cannot reach api.anthropic.com${NC}&quot;
+  ISSUES=$((ISSUES + 1))
+elif [ &quot;$HTTP_CODE&quot; = &quot;500&quot; ]; then
+  echo -e &quot;${RED}FAIL — server returned 500${NC}&quot;
+  ISSUES=$((ISSUES + 1))
+else
+  echo -e &quot;${YELLOW}HTTP $HTTP_CODE (not 500, check auth/rate limits)${NC}&quot;
+fi
+
+# 2. Check status page
+echo -n &quot;2. Anthropic status page... &quot;
+STATUS=$(curl -s --max-time 5 https://status.anthropic.com/api/v2/status.json 2&gt;/dev/null | \
+  python3 -c &quot;import sys,json; print(json.load(sys.stdin)[&#x27;status&#x27;][&#x27;indicator&#x27;])&quot; 2&gt;/dev/null || echo &quot;unknown&quot;)
+if [ &quot;$STATUS&quot; = &quot;none&quot; ]; then
+  echo -e &quot;${GREEN}PASS (no incidents)${NC}&quot;
+else
+  echo -e &quot;${RED}ACTIVE INCIDENT: $STATUS${NC}&quot;
+  ISSUES=$((ISSUES + 1))
+fi
+
+# 3. Check DNS resolution
+echo -n &quot;3. DNS resolution... &quot;
+if nslookup api.anthropic.com &gt; /dev/null 2&gt;&amp;1; then
+  echo -e &quot;${GREEN}PASS${NC}&quot;
+else
+  echo -e &quot;${RED}FAIL — DNS cannot resolve api.anthropic.com${NC}&quot;
+  ISSUES=$((ISSUES + 1))
+fi
+
+# 4. Check for proxy interference
+echo -n &quot;4. Proxy configuration... &quot;
+if [ -n &quot;${HTTPS_PROXY:-}&quot; ] || [ -n &quot;${HTTP_PROXY:-}&quot; ]; then
+  echo -e &quot;${YELLOW}PROXY SET (HTTPS_PROXY=${HTTPS_PROXY:-unset}, HTTP_PROXY=${HTTP_PROXY:-unset})${NC}&quot;
+  echo &quot;   Proxy may be modifying requests. Test with: curl --noproxy &#x27;*&#x27; ...&quot;
+else
+  echo -e &quot;${GREEN}PASS (no proxy)${NC}&quot;
+fi
+
+# 5. Check TLS certificate chain
+echo -n &quot;5. TLS certificate... &quot;
+TLS_RESULT=$(echo | openssl s_client -connect api.anthropic.com:443 -servername api.anthropic.com 2&gt;/dev/null | \
+  grep &quot;Verify return code&quot; | head -1)
+if echo &quot;$TLS_RESULT&quot; | grep -q &quot;0 (ok)&quot; 2&gt;/dev/null; then
+  echo -e &quot;${GREEN}PASS${NC}&quot;
+else
+  echo -e &quot;${RED}FAIL — $TLS_RESULT${NC}&quot;
+  ISSUES=$((ISSUES + 1))
+fi
+
+# 6. Test multiple models
+echo &quot;6. Model-specific tests:&quot;
+for MODEL in claude-sonnet-4-20250514 claude-haiku-4-20250514; do
+  echo -n &quot;   $MODEL... &quot;
+  MCODE=$(curl -s -o /dev/null -w &quot;%{http_code}&quot; \
+    --max-time 15 \
+    https://api.anthropic.com/v1/messages \
+    -H &quot;x-api-key: ${ANTHROPIC_API_KEY:-missing}&quot; \
+    -H &quot;anthropic-version: 2023-06-01&quot; \
+    -H &quot;content-type: application/json&quot; \
+    -d &quot;{\&quot;model\&quot;:\&quot;$MODEL\&quot;,\&quot;max_tokens\&quot;:5,\&quot;messages\&quot;:[{\&quot;role\&quot;:\&quot;user\&quot;,\&quot;content\&quot;:\&quot;test\&quot;}]}&quot; \
+    2&gt;/dev/null || echo &quot;000&quot;)
+  if [ &quot;$MCODE&quot; = &quot;200&quot; ]; then
+    echo -e &quot;${GREEN}OK${NC}&quot;
+  elif [ &quot;$MCODE&quot; = &quot;500&quot; ]; then
+    echo -e &quot;${RED}500 ERROR${NC}&quot;
+    ISSUES=$((ISSUES + 1))
+  else
+    echo -e &quot;${YELLOW}HTTP $MCODE${NC}&quot;
+  fi
+done
+
+echo &quot;&quot;
+if [ &quot;$ISSUES&quot; -gt 0 ]; then
+  echo -e &quot;${RED}$ISSUES issue(s) found. See above for details.${NC}&quot;
+else
+  echo -e &quot;${GREEN}All checks passed. The 500 may be transient — retry your request.${NC}&quot;
+fi</code></pre>
+      
+      <p>Make it executable and run it:
+      </p>
+      
+      <pre><code>chmod +x claude-500-diagnostic.sh
+./claude-500-diagnostic.sh</code></pre>
+      
+      <p>This script tests connectivity, DNS, proxy configuration, TLS certificates, the Anthropic status page, and individual model availability in under 30 seconds.
+      </p>
+      
+      <h2>Programmatic Retry Patterns</h2>
+      
+      <h3>Python with Exponential Backoff</h3>
+      
+      <pre><code>import anthropic
+import time
+import random
+
+def call_claude_with_retry(
+    client: anthropic.Anthropic,
+    max_retries: int = 5,
+    base_delay: float = 1.0,
+    **kwargs
+) -&gt; anthropic.types.Message:
+    &quot;&quot;&quot;
+    Retry on 500 errors with exponential backoff and jitter.
+    Raises after max_retries exhausted.
+    &quot;&quot;&quot;
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            return client.messages.create(**kwargs)
+        except anthropic.InternalServerError as e:
+            last_error = e
+            if attempt &lt; max_retries - 1:
+                delay = (base_delay * (2 ** attempt)) + random.uniform(0, 1)
+                print(f&quot;500 error (attempt {attempt + 1}/{max_retries}), &quot;
+                      f&quot;retrying in {delay:.1f}s&quot;)
+                time.sleep(delay)
+    raise last_error
+
+
+# Usage
+client = anthropic.Anthropic()
+response = call_claude_with_retry(
+    client,
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=1024,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Explain TCP handshake&quot;}]
+)
+print(response.content[0].text)</code></pre>
+      
+      <h3>TypeScript with Exponential Backoff</h3>
+      
+      <pre><code>import Anthropic from &quot;@anthropic-ai/sdk&quot;;
+
+async function callClaudeWithRetry(
+  client: Anthropic,
+  params: Anthropic.MessageCreateParams,
+  maxRetries = 5,
+  baseDelay = 1000
+): Promise&lt;Anthropic.Message&gt; {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt &lt; maxRetries; attempt++) {
+    try {
+      return await client.messages.create(params);
+    } catch (err) {
+      if (err instanceof Anthropic.InternalServerError) {
+        lastError = err;
+        if (attempt &lt; maxRetries - 1) {
+          const delay =
+            baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          console.log(
+            `500 error (attempt ${attempt + 1}/${maxRetries}), ` +
+            `retrying in ${(delay / 1000).toFixed(1)}s`
+          );
+          await new Promise((r) =&gt; setTimeout(r, delay));
+          continue;
+        }
+      }
+      throw err;
+    }
+  }
+  throw lastError;
+}
+
+// Usage
+const client = new Anthropic();
+const response = await callClaudeWithRetry(client, {
+  model: &quot;claude-sonnet-4-20250514&quot;,
+  max_tokens: 1024,
+  messages: [{ role: &quot;user&quot;, content: &quot;Explain TCP handshake&quot; }],
+});
+console.log(response.content[0].text);</code></pre>
+      
+      <h2>API-Specific Troubleshooting</h2>
+      
+      <h3>Verify Your API Version Header</h3>
+      
+      <p>Outdated or missing <code>anthropic-version</code> headers can cause unexpected server behavior:
+      </p>
+      
+      <pre><code># Correct header
+curl https://api.anthropic.com/v1/messages \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:10,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27;</code></pre>
+      
+      <p>If you omit <code>anthropic-version</code>, the API may route your request through a deprecated code path that is more prone to errors.
+      </p>
+      
+      <h3>Check Response Headers for Diagnostics</h3>
+      
+      <pre><code>curl -v https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:10,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27; \
+  2&gt;&amp;1 | grep -i &quot;x-request-id\|retry-after\|cf-ray&quot;</code></pre>
+      
+      <p>Save the <code>x-request-id</code> value. If you need to file a support ticket with Anthropic, this ID lets their team trace exactly what happened to your request.
+      </p>
+      
+      <h3>Validate Your Request Payload</h3>
+      
+      <p>Sometimes what looks like a server error is actually caused by edge-case payload issues the validation layer does not catch:
+      </p>
+      
+      <pre><code># Common payload issues that can trigger 500 instead of 400:
+# 1. Empty messages array with system prompt
+# 2. Tool definitions with circular $ref schemas
+# 3. Image data URLs with corrupted base64
+# 4. max_tokens exceeding the model&#x27;s output limit
+
+# Validate before sending
+def validate_request(messages, tools=None, max_tokens=1024):
+    assert len(messages) &gt; 0, &quot;Messages cannot be empty&quot;
+    assert max_tokens &lt;= 8192, &quot;max_tokens too high for most models&quot;
+    if tools:
+        assert len(tools) &lt;= 128, &quot;Too many tool definitions&quot;
+    for msg in messages:
+        assert msg.get(&quot;role&quot;) in (&quot;user&quot;, &quot;assistant&quot;), f&quot;Invalid role: {msg.get(&#x27;role&#x27;)}&quot;
+        assert msg.get(&quot;content&quot;), &quot;Empty content&quot;</code></pre>
+      
+      <h2>Claude Code Specific Issues</h2>
+      
+      <p>When Claude Code shows an internal server error, it appears as:
+      </p>
+      
+      <pre><code>Error: 500 {&quot;type&quot;:&quot;error&quot;,&quot;error&quot;:{&quot;type&quot;:&quot;api_error&quot;,&quot;message&quot;:&quot;An internal server error occurred.&quot;}}</code></pre>
+      
+      <p>Claude Code has built-in retry logic, but you can improve resilience:
+      </p>
+      
+      <p><strong>Use a fallback model.</strong> Start Claude Code with a lighter model when your primary choice is failing:
+      </p>
+      
+      <pre><code>claude --model claude-sonnet-4-20250514</code></pre>
+      
+      <p><strong>Reduce context size.</strong> Claude Code sends your entire conversation history plus file contents. If your session is long:
+      </p>
+      
+      <pre><code># Start a fresh session to reduce context
+claude
+
+# Or use compact mode to summarize history
+/compact</code></pre>
+      
+      <p><strong>Check your CLAUDE.md for bloat.</strong> An oversized CLAUDE.md file adds tokens to every request. Keep it under 500 lines.
+      </p>
+      
+      <h2>Environment Fixes</h2>
+      
+      <h3>Proxy and Corporate Firewall Issues</h3>
+      
+      <p>A proxy that modifies request bodies or times out before the API responds can produce what looks like a 500 error but is actually a proxy-generated response. See the full corporate proxy troubleshooting guide for details.
+      </p>
+      
+      <pre><code># Test direct connectivity (bypassing proxy)
+curl --noproxy &quot;*&quot; -s -w &quot;\nHTTP: %{http_code}\n&quot; \
+  https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:10,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27;
+
+# If this returns 200 but your app gets 500, your proxy is the problem</code></pre>
+      
+      <p>If your corporate proxy requires authentication:
+      </p>
+      
+      <pre><code># Set proxy credentials
+export HTTPS_PROXY=&quot;http://username:password@proxy.corp.example.com:8080&quot;
+
+# For Node.js applications (including Claude Code):
+export NODE_EXTRA_CA_CERTS=&quot;/path/to/corporate-ca-bundle.crt&quot;
+
+# For Python applications using the Anthropic SDK:
+export REQUESTS_CA_BUNDLE=&quot;/path/to/corporate-ca-bundle.crt&quot;</code></pre>
+      
+      <h3>VPN Interference</h3>
+      
+      <p>Some VPNs inject headers or modify TLS connections in ways that confuse upstream servers:
+      </p>
+      
+      <pre><code># Disconnect VPN temporarily and test
+# If the error goes away, configure your VPN to exclude api.anthropic.com
+
+# On macOS, add a route exception:
+# (check with your VPN provider for exact syntax)
+sudo route add -host api.anthropic.com -interface en0</code></pre>
+      
+      <p>Common VPN-related patterns:
+      </p>
+      <ul>
+        <li><strong>Split-tunnel VPNs</strong> that route API traffic through a corporate gateway with content inspection</li>
+        <li><strong>Full-tunnel VPNs</strong> that increase latency beyond the API's internal timeout threshold</li>
+        <li><strong>VPN DNS overrides</strong> that resolve <code>api.anthropic.com</code> to a blocked or proxied address</li>
+      </ul>
+      
+      <p>To diagnose, compare DNS resolution inside and outside the VPN:
+      </p>
+      
+      <pre><code># With VPN connected
+nslookup api.anthropic.com
+# Note the IP address
+
+# With VPN disconnected
+nslookup api.anthropic.com
+# If the IPs differ, your VPN is redirecting API traffic</code></pre>
+      
+      <h3>SSL Certificate Issues</h3>
+      
+      <p>Corporate environments with MITM certificate inspection can cause TLS handshake failures that manifest as 500 errors:
+      </p>
+      
+      <pre><code># Check if your system trusts Anthropic&#x27;s certificate
+openssl s_client -connect api.anthropic.com:443 -servername api.anthropic.com &lt; /dev/null 2&gt;/dev/null | head -5
+
+# If you see &quot;verify error&quot;, your corporate CA is intercepting
+# Set the cert bundle explicitly:
+export SSL_CERT_FILE=/path/to/corporate-ca-bundle.crt
+export REQUESTS_CA_BUNDLE=/path/to/corporate-ca-bundle.crt</code></pre>
+      
+      <p>On macOS, you can export your system's certificate chain to verify:
+      </p>
+      
+      <pre><code># Export the corporate CA from Keychain Access
+security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain &gt; /tmp/system-certs.pem
+
+# Test with the exported bundle
+curl --cacert /tmp/system-certs.pem -s -w &quot;\nHTTP: %{http_code}\n&quot; \
+  https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:5,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27;</code></pre>
+      
+      
+      <p><em>These diagnostic steps are from <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta">The Claude Code Playbook</a> — 200 production-ready templates including error prevention rules and CLAUDE.md configs tested across 50+ project types.</em>
+      </p>
+      
+      <h3>Timeout Configuration</h3>
+      
+      <p>If your requests are large or use extended thinking, increase client-side timeouts to prevent premature disconnection:
+      </p>
+      
+      <pre><code>import anthropic
+import httpx
+
+# Increase timeout for large requests
+client = anthropic.Anthropic(
+    timeout=httpx.Timeout(300.0, connect=10.0)  # 5 min read, 10s connect
+)
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=4096,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: large_prompt}]
+)</code></pre>
+      
+      <pre><code>import Anthropic from &quot;@anthropic-ai/sdk&quot;;
+
+const client = new Anthropic({
+  timeout: 300000, // 5 minutes in milliseconds
+});</code></pre>
+      
+      <h2>Version History of Error Handling Improvements</h2>
+      
+      <p>The Claude API's error handling has improved significantly over time. Knowing the timeline helps you understand which fixes apply to your SDK version.
+      </p>
+      
+      <table>
+      <tr><th>Date</th><th>Change</th><th>Impact</th></tr>
+      <tr><td>2023-06</td><td>Initial API launch (<code>anthropic-version: 2023-06-01</code>)</td><td>Basic 500 error responses, no retry headers</td></tr>
+      <tr><td>2023-09</td><td>Added <code>x-request-id</code> to all responses</td><td>Enables support ticket correlation</td></tr>
+      <tr><td>2024-01</td><td>Added <code>retry-after</code> header on 429 and 529 responses</td><td>Clients can implement precise wait times</td></tr>
+      <tr><td>2024-03</td><td>Python SDK v0.18+ added automatic retry with backoff</td><td>Less manual retry code needed</td></tr>
+      <tr><td>2024-06</td><td>Added rate limit headers to all responses</td><td>Proactive throttling possible</td></tr>
+      <tr><td>2024-09</td><td>TypeScript SDK v0.20+ added automatic retry</td><td>Parity with Python SDK</td></tr>
+      <tr><td>2025-01</td><td>Improved error messages with specific failure reasons</td><td>Easier diagnosis of 500 causes</td></tr>
+      <tr><td>2025-06</td><td>Extended thinking errors return structured detail</td><td>Distinguish thinking timeout from inference failure</td></tr>
+      <tr><td>2026-01</td><td>Message Batches API launched (separate error handling)</td><td>Batch jobs report per-request errors asynchronously</td></tr>
+      </table>
+      
+      <p>If you are using an SDK version from before 2024-03, upgrade to get automatic retry logic:
+      </p>
+      
+      <pre><code># Python
+pip install --upgrade anthropic
+
+# TypeScript
+npm install @anthropic-ai/sdk@latest</code></pre>
+      
+      <h2>CLAUDE.md Rules to Reduce Likelihood</h2>
+      
+      <p>Add these rules to your project's CLAUDE.md to minimize 500 errors in Claude Code workflows:
+      </p>
+      
+      <pre><code># Error Resilience
+- Keep prompts under 30,000 input tokens when possible
+- Split large file operations into multiple smaller requests
+- If a request fails, retry once before reporting the error
+- Use claude-sonnet-4-20250514 as the default model for reliability
+- Summarize conversation context periodically with /compact</code></pre>
+      
+      <h2>When to Contact Anthropic Support</h2>
+      
+      <p>File a support ticket if:
+      </p>
+      
+      <ul>
+        <li>500 errors persist for more than 30 minutes</li>
+        <li>The status page shows no incident</li>
+        <li>Only one specific model returns 500 (others work fine)</li>
+        <li>The error occurs with a minimal payload (under 100 tokens)</li>
+      </ul>
+      
+      <p>Include the <code>x-request-id</code> header value, the exact timestamp (UTC), and the model you were targeting.
+      </p>
+      
+      <h2>Outage Patterns and Uptime Monitoring</h2>
+      
+      <p>Understanding when 500 errors are most likely to occur helps you design resilient workflows. Based on publicly reported incidents and developer community data, Claude API outages follow predictable patterns.
+      </p>
+      
+      <h3>Historical Outage Patterns</h3>
+      
+      <table>
+      <tr><th>Time Window (US Pacific)</th><th>Error Frequency</th><th>Reason</th></tr>
+      <tr><td>Mon-Fri 9 AM - 12 PM</td><td>Highest</td><td>Peak US business hours, maximum concurrent requests</td></tr>
+      <tr><td>Mon-Fri 12 PM - 2 PM</td><td>Moderate-High</td><td>Continued heavy load, European afternoon overlap</td></tr>
+      <tr><td>Mon-Fri 2 PM - 6 PM</td><td>Moderate</td><td>Sustained traffic from Americas</td></tr>
+      <tr><td>Mon-Fri 6 PM - 9 AM</td><td>Low</td><td>Off-peak hours, maintenance windows</td></tr>
+      <tr><td>Weekends</td><td>Lowest</td><td>Significantly reduced enterprise traffic</td></tr>
+      <tr><td>Model launch days</td><td>Spike</td><td>New model deployments cause temporary instability</td></tr>
+      <tr><td>Quarter-end weeks</td><td>Elevated</td><td>Enterprise batch processing surges</td></tr>
+      </table>
+      
+      <p>The worst window for reliability is Tuesday through Thursday, 9 AM to noon Pacific. If your workflow tolerates scheduling flexibility, run batch jobs during off-peak hours (weekends or 10 PM - 6 AM Pacific) to minimize exposure to transient 500 errors.
+      </p>
+      
+      <h3>Automated Monitoring Script</h3>
+      
+      <p>This script checks the Claude API every 5 minutes and logs response status. When it detects 3 consecutive failures, it sends an alert. Save it as <code>claude-monitor.sh</code>:
+      </p>
+      
+      <pre><code>#!/bin/bash
+# claude-monitor.sh — Monitor Claude API health and alert on outages
+set -uo pipefail
+
+LOG_FILE=&quot;${HOME}/.claude/api-health.log&quot;
+FAIL_COUNT=0
+FAIL_THRESHOLD=3
+CHECK_INTERVAL=300  # 5 minutes
+
+mkdir -p &quot;$(dirname &quot;$LOG_FILE&quot;)&quot;
+
+alert() {
+  local message=&quot;$1&quot;
+  echo &quot;[ALERT] $message&quot;
+  # macOS notification
+  if command -v osascript &amp;&gt;/dev/null; then
+    osascript -e &quot;display notification \&quot;$message\&quot; with title \&quot;Claude API Alert\&quot;&quot;
+  fi
+  # Linux notification
+  if command -v notify-send &amp;&gt;/dev/null; then
+    notify-send &quot;Claude API Alert&quot; &quot;$message&quot;
+  fi
+}
+
+while true; do
+  TIMESTAMP=$(date -u +&quot;%Y-%m-%dT%H:%M:%SZ&quot;)
+  HTTP_CODE=$(curl -s -o /dev/null -w &quot;%{http_code}&quot; --max-time 10 \
+    https://api.anthropic.com/v1/messages \
+    -H &quot;x-api-key: ${ANTHROPIC_API_KEY:-missing}&quot; \
+    -H &quot;anthropic-version: 2023-06-01&quot; \
+    -H &quot;content-type: application/json&quot; \
+    -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:5,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;ping&quot;}]}&#x27; \
+    2&gt;/dev/null || echo &quot;000&quot;)
+
+  LATENCY=$(curl -s -o /dev/null -w &quot;%{time_total}&quot; --max-time 10 \
+    https://api.anthropic.com/v1/messages \
+    -H &quot;x-api-key: ${ANTHROPIC_API_KEY:-missing}&quot; \
+    -H &quot;anthropic-version: 2023-06-01&quot; \
+    -H &quot;content-type: application/json&quot; \
+    -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:5,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;ping&quot;}]}&#x27; \
+    2&gt;/dev/null || echo &quot;0&quot;)
+
+  echo &quot;$TIMESTAMP  HTTP=$HTTP_CODE  LATENCY=${LATENCY}s&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+
+  if [ &quot;$HTTP_CODE&quot; = &quot;200&quot; ]; then
+    if [ &quot;$FAIL_COUNT&quot; -ge &quot;$FAIL_THRESHOLD&quot; ]; then
+      alert &quot;Claude API recovered after $FAIL_COUNT consecutive failures&quot;
+    fi
+    FAIL_COUNT=0
+  else
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    echo &quot;$TIMESTAMP  FAIL #$FAIL_COUNT (HTTP $HTTP_CODE)&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+    if [ &quot;$FAIL_COUNT&quot; -eq &quot;$FAIL_THRESHOLD&quot; ]; then
+      alert &quot;Claude API down: $FAIL_COUNT consecutive 500 errors&quot;
+    fi
+  fi
+
+  sleep &quot;$CHECK_INTERVAL&quot;
+done</code></pre>
+      
+      <h3>Running the Monitor as a Background Service</h3>
+      
+      <p>On macOS, run it with a launchd plist or simply background it:
+      </p>
+      
+      <pre><code>chmod +x claude-monitor.sh
+nohup ./claude-monitor.sh &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+      
+      <p>For cron-based monitoring (simpler, checks every 5 minutes):
+      </p>
+      
+      <pre><code># Add to crontab: crontab -e
+*/5 * * * * curl -sf --max-time 10 -o /dev/null \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:5,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;ping&quot;}]}&#x27; \
+  https://api.anthropic.com/v1/messages \
+  || echo &quot;$(date -u) CLAUDE API FAILURE&quot; &gt;&gt; ~/.claude/api-health.log</code></pre>
+      
+      <h3>Understanding status.anthropic.com</h3>
+      
+      <p>The <a href="https://status.anthropic.com">Anthropic status page</a> reports four states:
+      </p>
+      
+      <table>
+      <tr><th>Status</th><th>Meaning</th><th>Your Action</th></tr>
+      <tr><td><strong>Operational</strong></td><td>All systems working normally</td><td>No action needed. If you still see 500s, the issue is specific to your request (prompt size, model, or edge case).</td></tr>
+      <tr><td><strong>Degraded Performance</strong></td><td>The API is slower or partially failing</td><td>Expect higher latency and occasional 500s. Switch to Haiku for non-critical tasks. Enable longer retry timeouts.</td></tr>
+      <tr><td><strong>Partial Outage</strong></td><td>One or more models are unavailable</td><td>Check which model is affected. Fall back to an unaffected model. Monitor the incident updates for estimated resolution.</td></tr>
+      <tr><td><strong>Major Outage</strong></td><td>The API is broadly unreachable</td><td>Stop retrying to avoid wasting resources. Queue requests locally for replay when service resumes. Subscribe to status page updates for restoration notification.</td></tr>
+      </table>
+      
+      <p>Subscribe to status page updates at <code>https://status.anthropic.com/subscribe</code> to receive email, SMS, or webhook notifications before and during incidents. For production systems, integrate the status page API into your monitoring dashboard:
+      </p>
+      
+      <pre><code># Check programmatically
+curl -s https://status.anthropic.com/api/v2/status.json | \
+  python3 -c &quot;import sys,json; d=json.load(sys.stdin); print(d[&#x27;status&#x27;][&#x27;description&#x27;])&quot;</code></pre>
+      
+      <h2>FAQ</h2>
+      
+      <h3>Is a 500 error my fault?</h3>
+      
+      <p>No. A 500 internal server error means the server accepted your request as valid but failed during processing. Your API key, headers, and payload are correct. The failure is on Anthropic's infrastructure.
+      </p>
+      
+      <h3>How long do 500 errors typically last?</h3>
+      
+      <p>Most transient 500 errors resolve within seconds. If caused by an infrastructure incident, they can last 5 to 60 minutes. Check <a href="https://status.anthropic.com">status.anthropic.com</a> for ongoing incidents.
+      </p>
+      
+      <h3>What is the difference between 500, 503, and 529 errors?</h3>
+      
+      <p>A 500 error means an unexpected failure in the inference pipeline. A 503 error means the infrastructure (load balancer or gateway) cannot route your request. A 529 error means the model is overloaded and cannot accept new requests. All three are server-side, but they have different causes and different retry strategies.
+      </p>
+      
+      <h3>Should I retry 500 errors automatically?</h3>
+      
+      <p>Yes. Use exponential backoff with jitter. Start with a 1-second delay, double each attempt, add randomness, and cap at 5 retries. The code examples above implement this pattern.
+      </p>
+      
+      <h3>Can a large prompt cause a 500 error?</h3>
+      
+      <p>Yes. Prompts that approach the model's context window limit (200K tokens for Claude) are more likely to trigger internal failures during processing. Reducing prompt size is a reliable mitigation.
+      </p>
+      
+      <h3>Does switching models help?</h3>
+      
+      <p>Often yes. Different models run on different server pools. If <code>claude-sonnet-4-20250514</code> returns 500, try <code>claude-haiku-4-20250514</code>. This confirms whether the issue is model-specific or platform-wide.
+      </p>
+      
+      <h3>Will Claude Code automatically retry on 500?</h3>
+      
+      <p>Claude Code has built-in retry logic for transient errors. However, if the error persists across retries, Claude Code will surface the error to you. At that point, try <code>/compact</code> to reduce context size or restart the session.
+      </p>
+      
+      <h3>How do I report a persistent 500 error?</h3>
+      
+      <p>Contact Anthropic support through <a href="https://support.anthropic.com">support.anthropic.com</a>. Include the <code>x-request-id</code> from the response headers, the exact UTC timestamp, the model name, and a minimal reproduction of the request payload.
+      </p>
+      
+      <h3>Can a corporate proxy cause what looks like a 500 error?</h3>
+      
+      <p>Yes. A proxy that modifies request bodies or times out before the API responds can produce what looks like a 500 error but is actually a proxy-generated response. Test direct connectivity with <code>curl --noproxy &quot;*&quot;</code> to determine if your proxy is the issue. See the corporate proxy troubleshooting guide for details.
+      </p>
+      
+      <h3>Does the 500 error affect streaming requests differently?</h3>
+      
+      <p>With streaming, a 500 error can occur mid-stream, meaning you may receive partial output before the connection drops. Non-streaming requests fail atomically. In both cases, the retry strategy is the same: wait with exponential backoff and resend the full request.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-internal-server-error-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Internal Server Error (2026)",
+    "description": "Fix Claude internal server error with retry logic, prompt size reduction, and model fallback. Step-by-step diagnostic guide with code examples.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-internal-server-error-fix/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

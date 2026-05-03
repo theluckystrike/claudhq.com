@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Docker Networking Workflow (2026) | ClaudHQ</title>
+  <meta name="description" content="Connect Docker containers, troubleshoot network issues, and automate networking with Claude Code. Bridge, overlay, and host network patterns.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-docker-networking-guide/">
+  <meta property="og:title" content="Claude Code Docker Networking Workflow (2026) | ClaudHQ">
+  <meta property="og:description" content="Connect Docker containers, troubleshoot network issues, and automate networking with Claude Code. Bridge, overlay, and host network patterns.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-docker-networking-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Docker Networking Workflow (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Integrating docker networking into a development workflow involves container orchestration complexity and build reproducibility. The approach below walks through how Claude Code addresses each of these docker networking concerns systematically.
+      </p>
+      
+      
+      <p>Claude Code Docker Networking Workflow Guide
+      </p>
+      
+      <p>Docker networking remains one of the most challenging aspects of containerized development. Whether you are connecting frontend services to backend APIs, establishing communication between microservices, or debugging why your containers cannot reach each other, understanding Docker networking patterns is essential. This guide shows you how to use Claude Code to streamline Docker networking workflows, automate repetitive tasks, and troubleshoot network issues efficiently.
+      </p>
+      
+      <h2>Understanding Docker Network Types</h2>
+      
+      <p>Docker provides several network drivers, each suited for different scenarios. The default bridge network works for standalone containers, while the host network removes network isolation entirely. For orchestration scenarios, the overlay network enables multi-host communication, and the macvlan driver assigns a unique MAC address to containers for direct network access.
+      </p>
+      
+      <p>When you launch a container without specifying a network, Docker attaches it to the default bridge. However, containers on the default bridge cannot resolve each other by container name, they must use link aliases or the legacy <code>--link</code> flag, which Docker has deprecated. For modern workflows, you should create custom bridge networks or use Docker Compose to manage networking automatically.
+      </p>
+      
+      <h2>Docker Network Driver Comparison</h2>
+      
+      <p>Understanding which driver to use in a given situation saves considerable debugging time. The following table summarizes the key characteristics of each driver:
+      </p>
+      
+      <table>
+      <tr><th>Driver</th><th>Use Case</th><th>DNS Resolution</th><th>Multi-Host</th><th>Isolation</th></tr>
+      <tr><td>bridge</td><td>Default for single-host containers</td><td>Custom networks only</td><td>No</td><td>Moderate</td></tr>
+      <tr><td>host</td><td>High-performance, no isolation needed</td><td>Host DNS</td><td>No</td><td>None</td></tr>
+      <tr><td>overlay</td><td>Docker Swarm, multi-host communication</td><td>Yes</td><td>Yes</td><td>High</td></tr>
+      <tr><td>macvlan</td><td>Containers need MAC addresses, legacy apps</td><td>Depends on config</td><td>Possible</td><td>Physical net</td></tr>
+      <tr><td>none</td><td>Complete isolation, no networking</td><td>No</td><td>No</td><td>Complete</td></tr>
+      <tr><td>ipvlan</td><td>L2/L3 segmentation, low overhead</td><td>Depends on mode</td><td>Possible</td><td>Physical net</td></tr>
+      </table>
+      
+      <p>The bridge driver is the right default for most single-host development environments. The overlay driver becomes necessary when your application scales across multiple machines or when you adopt Docker Swarm. The host driver is a useful escape hatch for performance-critical workloads, but using it sacrifices the security boundary that networking namespaces provide.
+      </p>
+      
+      <h2>Understanding Container DNS</h2>
+      
+      <p>One of the most common sources of confusion for developers new to Docker networking is how container DNS works. On the default <code>bridge</code> network, Docker does not provide automatic DNS resolution between containers. On any custom-named bridge network, however, Docker runs an embedded DNS server at <code>127.0.0.11</code> that resolves container names and service names automatically.
+      </p>
+      
+      <p>This is why the following pattern works in Docker Compose but fails when you use the default bridge directly:
+      </p>
+      
+      <pre><code>docker-compose.yml. API can reach postgres by name &quot;database&quot;
+services:
+ api:
+ image: my-api
+ database:
+ image: postgres:15</code></pre>
+      
+      <p>Inside the <code>api</code> container, <code>ping database</code> works because Compose creates a custom bridge network. If you ran both containers manually with <code>docker run</code> on the default <code>bridge</code>, you would need to use IP addresses or the deprecated <code>--link</code> flag.
+      </p>
+      
+      <h2>Inspecting Networks with Claude Code</h2>
+      
+      <p>Before making any changes, inspect your current network configuration. Run the following command to list all networks:
+      </p>
+      
+      <pre><code>docker network ls</code></pre>
+      
+      <p>To get detailed information about a specific network, including connected containers and driver settings:
+      </p>
+      
+      <pre><code>docker network inspect bridge</code></pre>
+      
+      <p>You can combine these inspections with other Docker commands to audit your environment. For example, to find all containers not connected to any network:
+      </p>
+      
+      <pre><code>docker ps -a --format &#x27;&#x27; | xargs -I {} docker inspect {} --format &#x27;: &#x27; | grep -v &#x27;:$&#x27;</code></pre>
+      
+      <h2>Extracting Network Data with jq</h2>
+      
+      <p>For scripting and automation purposes, combining <code>docker network inspect</code> with <code>jq</code> gives you precise control over the output. This is particularly useful when you need to extract subnet ranges, gateway IPs, or connected container details:
+      </p>
+      
+      <pre><code>List all containers on a specific network with their IPs
+docker network inspect my_custom_network | jq &#x27;.[0].Containers | to_entries[] | {name: .value.Name, ip: .value.IPv4Address}&#x27;
+
+Extract the subnet and gateway for a network
+docker network inspect my_custom_network | jq &#x27;.[0].IPAM.Config[0]&#x27;
+
+Find all networks a container belongs to
+docker inspect my_container | jq &#x27;.[0].NetworkSettings.Networks | keys&#x27;</code></pre>
+      
+      <p>These commands integrate naturally into Claude Code workflows. You can describe what network information you need in natural language, and Claude Code can generate the appropriate inspection command or write a shell script that extracts and formats the data you need.
+      </p>
+      
+      <h2>Using Claude Code to Audit Network Configuration</h2>
+      
+      <p>When you ask Claude Code to audit your Docker network configuration, it can execute a sequence of inspection commands, parse the JSON output, and summarize the results in plain language. A practical audit session might look like this:
+      </p>
+      
+      <ol>
+        <li>List all networks and identify any with unexpected names or configurations</li>
+        <li>Inspect each network to find containers that have broader network access than required</li>
+        <li>Check for containers attached to both <code>host</code> and a custom network simultaneously</li>
+        <li>Flag any container exposed on port 0.0.0.0 (bound to all interfaces) rather than 127.0.0.1</li>
+      </ol>
+      
+      <p>This kind of systematic review is tedious to do manually but straightforward for Claude Code to automate with a short script.
+      </p>
+      
+      <h2>Connecting Containers Across Networks</h2>
+      
+      <p>Containers can belong to multiple networks, enabling flexible communication patterns. To connect an existing container to a new network:
+      </p>
+      
+      <pre><code>docker network connect my_custom_network container_name</code></pre>
+      
+      <p>To create a new bridge network with custom settings:
+      </p>
+      
+      <pre><code>docker network create --driver bridge --subnet=172.20.0.0/16 my_custom_network</code></pre>
+      
+      <h2>Custom Network Configuration Options</h2>
+      
+      <p>Docker gives you fine-grained control over network parameters when creating custom networks. Here are the most useful options:
+      </p>
+      
+      <pre><code>Create a network with a specific subnet, gateway, and IP range
+docker network create \
+ --driver bridge \
+ --subnet=192.168.10.0/24 \
+ --gateway=192.168.10.1 \
+ --ip-range=192.168.10.128/25 \
+ --opt com.docker.network.bridge.name=my-bridge \
+ production_network
+
+Create an internal network (no external connectivity)
+docker network create \
+ --driver bridge \
+ --internal \
+ --subnet=10.0.0.0/8 \
+ isolated_backend
+
+Create a network and connect a running container with a specific IP
+docker network connect --ip 172.20.0.50 my_custom_network my_container</code></pre>
+      
+      <p>Assigning static IPs to containers is useful when you need predictable addresses for DNS entries, firewall rules, or legacy applications that store IP addresses rather than hostnames.
+      </p>
+      
+      <h2>Multi-Container Application Pattern</h2>
+      
+      <p>A common real-world pattern for a web application involves three containers on two networks. The following example shows how to set this up imperatively with plain Docker commands, giving you visibility into what Docker Compose abstracts away:
+      </p>
+      
+      <pre><code>Create networks
+docker network create --driver bridge --subnet=172.30.0.0/24 frontend_net
+docker network create --driver bridge --subnet=172.31.0.0/24 --internal backend_net
+
+Start the database (backend only)
+docker run -d \
+ --name postgres \
+ --network backend_net \
+ -e POSTGRES_PASSWORD=secret \
+ postgres:15
+
+Start the API (connected to both networks)
+docker run -d \
+ --name api \
+ --network backend_net \
+ -p 127.0.0.1:3000:3000 \
+ my-api-image
+
+docker network connect frontend_net api
+
+Start the nginx proxy (frontend only, proxies to API)
+docker run -d \
+ --name nginx \
+ --network frontend_net \
+ -p 0.0.0.0:80:80 \
+ my-nginx-image</code></pre>
+      
+      <p>In this arrangement, the postgres container has no route to the internet. The nginx container cannot directly reach postgres. The api container can reach both but is only publicly accessible via nginx on port 80.
+      </p>
+      
+      <p>This approach becomes powerful when paired with Claude skills designed for infrastructure automation. Skills like the superMemory skill can help you document network topologies, while tdd skills can validate that your networking configuration meets specified requirements.
+      </p>
+      
+      <h2>Automating Network Troubleshooting</h2>
+      
+      <p>Network connectivity issues often require systematic debugging. Here is a practical workflow:
+      </p>
+      
+      <ol>
+        <li>Verify the container is running: <code>docker ps -a</code></li>
+        <li>Inspect the container's network settings: <code>docker inspect container_name</code></li>
+        <li>Check logs for connection errors: <code>docker logs container_name</code></li>
+        <li>Test connectivity from within the container: <code>docker exec container_name ping target_container</code></li>
+      </ol>
+      
+      <p>For more advanced troubleshooting, run a diagnostic container on the same network:
+      </p>
+      
+      <pre><code>docker run --rm --network container:target_container nicolaka/netshoot curl -v http://target_service:port</code></pre>
+      
+      <h2>The netshoot Toolkit</h2>
+      
+      <p>The <code>nicolaka/netshoot</code> image is a purpose-built network troubleshooting container that includes a comprehensive set of networking tools. It is invaluable for diagnosing Docker networking problems without modifying your production containers.
+      </p>
+      
+      <pre><code>Attach to the same network namespace as a running container
+docker run --rm --network container:my_app nicolaka/netshoot bash
+
+Tools available inside netshoot:
+- curl, wget for HTTP testing
+- nmap for port scanning
+- tcpdump for packet capture
+- dig, nslookup for DNS queries
+- ss, netstat for socket inspection
+- iperf3 for bandwidth testing
+- traceroute, mtr for path analysis
+
+DNS resolution check. verify container DNS is working
+docker run --rm --network my_custom_network nicolaka/netshoot dig database
+
+TCP port connectivity check
+docker run --rm --network my_custom_network nicolaka/netshoot nc -zv database 5432
+
+Capture traffic between containers
+docker run --rm --network my_custom_network \
+ --cap-add NET_ADMIN \
+ nicolaka/netshoot tcpdump -i eth0 -w /tmp/capture.pcap</code></pre>
+      
+      <h2>Systematic Troubleshooting Decision Tree</h2>
+      
+      <p>When containers cannot communicate, work through this decision tree to identify the root cause quickly:
+      </p>
+      
+      <p>Step 1. Confirm both containers are running:
+      </p>
+      <pre><code>docker ps | grep -E &#x27;container_a|container_b&#x27;</code></pre>
+      
+      <p>Step 2. Confirm they share a network:
+      </p>
+      <pre><code>docker inspect container_a | jq &#x27;.[0].NetworkSettings.Networks | keys&#x27;
+docker inspect container_b | jq &#x27;.[0].NetworkSettings.Networks | keys&#x27;</code></pre>
+      
+      <p>Step 3. Test DNS resolution:
+      </p>
+      <pre><code>docker exec container_a nslookup container_b
+If this fails, DNS is broken. check custom network configuration</code></pre>
+      
+      <p>Step 4. Test basic connectivity:
+      </p>
+      <pre><code>docker exec container_a ping -c 3 container_b
+If ping fails but DNS works, check firewall rules or iptables</code></pre>
+      
+      <p>Step 5. Test application port:
+      </p>
+      <pre><code>docker exec container_a nc -zv container_b 8080
+If ping works but port fails, the application may not be listening on 0.0.0.0</code></pre>
+      
+      <p>Step 6. Check application binding address:
+      </p>
+      <pre><code>docker exec container_b ss -tlnp
+A service bound to 127.0.0.1 is not reachable from other containers
+It must bind to 0.0.0.0 or the container&#x27;s eth0 address</code></pre>
+      
+      <p>This final step catches a very common bug: developers run services locally bound to <code>localhost</code>, then containerize them without changing the bind address. The application starts successfully but is unreachable from any other container.
+      </p>
+      
+      <p>You can create a Claude skill that encapsulates this troubleshooting workflow. Define the skill with clear steps and expected outcomes, then invoke it whenever you encounter connectivity issues. The pdf skill can generate network diagnostic reports, while docx skills can create documentation of your network architecture.
+      </p>
+      
+      <h2>Docker Compose Networking Patterns</h2>
+      
+      <p>Docker Compose simplifies network management through declarative configuration. When you define services in a Compose file, they automatically join a default network and can reach each other by service name.
+      </p>
+      
+      <pre><code>version: &#x27;3.8&#x27;
+services:
+ api:
+ build: ./api
+ ports:
+ - &quot;3000:3000&quot;
+ networks:
+ - frontend
+ - backend
+
+ database:
+ image: postgres:15
+ networks:
+ - backend
+
+ redis:
+ image: redis:7
+ networks:
+ - backend
+
+networks:
+ frontend:
+ driver: bridge
+ backend:
+ driver: bridge
+ internal: true</code></pre>
+      
+      <p>This configuration demonstrates several important patterns. The API service spans both networks, enabling it to communicate with both the frontend-facing services and the backend database. The backend network uses the <code>internal: true</code> flag, creating an isolated network where containers cannot receive external traffic, critical for securing databases and cache layers.
+      </p>
+      
+      <h2>Extending Compose Networking for Production</h2>
+      
+      <p>For production deployments, you often need tighter control over networking. The following Compose excerpt shows additional options that teams frequently overlook:
+      </p>
+      
+      <pre><code>version: &#x27;3.8&#x27;
+services:
+ api:
+ image: my-api:latest
+ networks:
+ backend:
+ ipv4_address: 172.28.0.10
+ aliases:
+ - api-service
+ - api.internal
+ healthcheck:
+ test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:3000/health&quot;]
+ interval: 30s
+ timeout: 10s
+ retries: 3
+ start_period: 10s
+ depends_on:
+ database:
+ condition: service_healthy
+
+ database:
+ image: postgres:15
+ networks:
+ - backend
+ healthcheck:
+ test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U postgres&quot;]
+ interval: 10s
+ timeout: 5s
+ retries: 5
+
+networks:
+ backend:
+ driver: bridge
+ internal: true
+ ipam:
+ driver: default
+ config:
+ - subnet: 172.28.0.0/24
+ gateway: 172.28.0.1</code></pre>
+      
+      <p>Key additions here include:
+      </p>
+      <ul>
+        <li>Static IP assignment via <code>ipv4_address</code> for predictable addressing</li>
+        <li>Network aliases that allow other containers to reference the service by multiple names</li>
+        <li>Health checks with <code>depends_on</code> condition so Compose waits for genuine readiness before starting dependent services</li>
+        <li>Explicit IPAM configuration to control the subnet and avoid conflicts with existing networks</li>
+      </ul>
+      
+      <h2>Reusing External Networks in Compose</h2>
+      
+      <p>A common pattern in microservices architectures involves multiple Compose projects that need to communicate. Rather than exposing ports publicly, you can create an external network that multiple projects share:
+      </p>
+      
+      <pre><code>Create the shared network once
+docker network create --driver bridge shared_services</code></pre>
+      
+      <pre><code>project-a/docker-compose.yml
+services:
+ api:
+ image: project-a-api
+ networks:
+ - shared_services
+
+networks:
+ shared_services:
+ external: true</code></pre>
+      
+      <pre><code>project-b/docker-compose.yml
+services:
+ worker:
+ image: project-b-worker
+ networks:
+ - shared_services
+
+networks:
+ shared_services:
+ external: true</code></pre>
+      
+      <p>Services in both projects can now reference each other by container name over the <code>shared_services</code> network without exposing any ports to the host.
+      </p>
+      
+      <h2>Multi-Host Networking with Overlay</h2>
+      
+      <p>For distributed systems spanning multiple Docker hosts, the overlay network driver provides secure, encrypted communication. Before creating an overlay network, you must initialize Docker Swarm or use an external key-value store like Consul or etcd.
+      </p>
+      
+      <pre><code>docker swarm init
+docker network create --driver overlay --attachable my_overlay_network</code></pre>
+      
+      <p>The <code>--attachable</code> flag allows standalone containers to attach to the overlay network, useful for development and testing scenarios.
+      </p>
+      
+      <h2>Overlay Network Performance Considerations</h2>
+      
+      <p>Overlay networks introduce overhead compared to bridge networks because traffic is encapsulated in VXLAN tunnels. For latency-sensitive workloads, measure the overhead before committing to an overlay architecture:
+      </p>
+      
+      <pre><code>Benchmark network throughput between two containers on overlay
+docker run --rm --network my_overlay_network --name iperf-server \
+ networkstatic/iperf3 -s &amp;
+
+docker run --rm --network my_overlay_network \
+ networkstatic/iperf3 -c iperf-server -t 10
+
+Compare against bridge network performance
+docker run --rm --network my_bridge_network --name iperf-server-bridge \
+ networkstatic/iperf3 -s &amp;
+
+docker run --rm --network my_bridge_network \
+ networkstatic/iperf3 -c iperf-server-bridge -t 10</code></pre>
+      
+      <p>Typical overhead is 10–20% for most workloads, but real-time applications and high-throughput pipelines may see more significant impact. For these cases, consider using <code>host</code> networking with application-level routing or switching to a service mesh like Consul Connect or Linkerd.
+      </p>
+      
+      <h2>Security Considerations</h2>
+      
+      <p>Always follow the principle of least privilege when configuring networks. Avoid running containers in host mode unless necessary, as this removes the network namespace isolation. Use internal networks for sensitive services like databases and message queues, exposing only the ports required for legitimate communication.
+      </p>
+      
+      <h2>Preventing Common Network Security Mistakes</h2>
+      
+      <p>Several networking misconfigurations appear repeatedly in production incidents:
+      </p>
+      
+      <p>Binding services to all interfaces by default:
+      </p>
+      <pre><code>Risky. binds to 0.0.0.0, accessible from any network interface on the host
+docker run -p 5432:5432 postgres
+
+Safer. binds only to localhost on the host
+docker run -p 127.0.0.1:5432:5432 postgres</code></pre>
+      
+      <p>Leaving the default bridge network accessible:
+      </p>
+      
+      <p>The default <code>bridge</code> network allows all containers to communicate with each other by IP address even without explicit network connections. If you run untrusted workloads on the same Docker host, create isolated custom networks and avoid adding those containers to any shared network.
+      </p>
+      
+      <p>Not encrypting overlay traffic:
+      </p>
+      
+      <p>By default, overlay network data plane traffic is not encrypted. For production Swarm deployments:
+      </p>
+      
+      <pre><code>docker network create \
+ --driver overlay \
+ --opt encrypted \
+ --attachable \
+ secure_overlay</code></pre>
+      
+      <p>The <code>--opt encrypted</code> flag enables AES-GCM encryption for data plane traffic at a small performance cost.
+      </p>
+      
+      <p>Exposing Docker daemon without TLS:
+      </p>
+      
+      <p>If you expose the Docker socket over TCP for remote management, always require mutual TLS authentication. The Docker daemon has root-equivalent access on the host machine.
+      </p>
+      
+      <p>For production environments, consider implementing network policies using Kubernetes or Docker Enterprise's built-in policies. Regular network audits using tools like frontend-design skills for visualizing infrastructure or custom inspection scripts help maintain a secure environment.
+      </p>
+      
+      <h2>Network Policy Enforcement with iptables</h2>
+      
+      <p>Docker manages iptables rules automatically, but understanding the rule structure helps you debug unexpected connectivity and add custom rules without conflicting with Docker's management:
+      </p>
+      
+      <pre><code>View Docker-managed iptables rules
+sudo iptables -L DOCKER -n -v
+sudo iptables -L DOCKER-ISOLATION-STAGE-1 -n -v
+
+Docker adds rules to DOCKER-USER chain before its own rules
+Add custom DROP rules here to override Docker&#x27;s default ACCEPT
+sudo iptables -I DOCKER-USER -i docker0 -j DROP
+sudo iptables -I DOCKER-USER -i docker0 -s 172.17.0.0/16 -d 192.168.1.0/24 -j ACCEPT</code></pre>
+      
+      <p>The <code>DOCKER-USER</code> chain is the correct place to add custom firewall rules because Docker will not overwrite it, whereas rules added directly to <code>FORWARD</code> is dropped when the Docker daemon restarts.
+      </p>
+      
+      <h2>Integrating with Claude Code Workflows</h2>
+      
+      <p>Claude Code excels at automating repetitive Docker networking tasks. You can create skills that:
+      </p>
+      
+      <ul>
+        <li>Audit network configurations across your infrastructure</li>
+        <li>Generate network diagrams from running containers</li>
+        <li>Validate Docker Compose files for common misconfigurations</li>
+        <li>Automate the creation of development environments with pre-configured networks</li>
+      </ul>
+      
+      <h2>Building a Network Audit Skill</h2>
+      
+      <p>Here is a practical example of a shell script you could encapsulate as a Claude Code skill for auditing Docker network hygiene:
+      </p>
+      
+      <pre><code>#!/bin/bash
+docker-network-audit.sh
+Audits Docker network configuration and reports potential issues
+
+echo &quot;=== Docker Network Audit ===&quot;
+echo &quot;&quot;
+
+echo &quot;--- All Networks ---&quot;
+docker network ls --format &quot;table \t\t&quot;
+echo &quot;&quot;
+
+echo &quot;--- Networks with External Connectivity ---&quot;
+docker network ls --format &#x27;&#x27; | while read net; do
+ internal=$(docker network inspect &quot;$net&quot; | jq -r &#x27;.[0].Options[&quot;com.docker.network.bridge.enable_ip_masquerade&quot;] // &quot;true&quot;&#x27;)
+ is_internal=$(docker network inspect &quot;$net&quot; | jq -r &#x27;.[0].Internal&#x27;)
+ if [ &quot;$is_internal&quot; = &quot;false&quot; ]; then
+ echo &quot; [EXTERNAL] $net&quot;
+ else
+ echo &quot; [INTERNAL] $net&quot;
+ fi
+done
+echo &quot;&quot;
+
+echo &quot;--- Containers with Host Network Mode ---&quot;
+docker ps --format &#x27;&#x27; | while read cname; do
+ net_mode=$(docker inspect &quot;$cname&quot; | jq -r &#x27;.[0].HostConfig.NetworkMode&#x27;)
+ if [ &quot;$net_mode&quot; = &quot;host&quot; ]; then
+ echo &quot; WARNING: $cname uses host networking&quot;
+ fi
+done
+echo &quot;&quot;
+
+echo &quot;--- Ports Bound to 0.0.0.0 ---&quot;
+docker ps --format &#x27;: &#x27; | grep &#x27;0.0.0.0&#x27;
+echo &quot;&quot;
+
+echo &quot;--- Unused Networks (no containers) ---&quot;
+docker network ls --format &#x27;&#x27; | while read net; do
+ container_count=$(docker network inspect &quot;$net&quot; | jq &#x27;.[0].Containers | length&#x27;)
+ if [ &quot;$container_count&quot; -eq 0 ] &amp;&amp; [ &quot;$net&quot; != &quot;bridge&quot; ] &amp;&amp; [ &quot;$net&quot; != &quot;host&quot; ] &amp;&amp; [ &quot;$net&quot; != &quot;none&quot; ]; then
+ echo &quot; ORPHANED: $net&quot;
+ fi
+done</code></pre>
+      
+      <p>Run this script through Claude Code by describing the output and asking for remediation recommendations. Claude Code can interpret the audit results and suggest specific commands to address each finding.
+      </p>
+      
+      <h2>Generating Network Diagrams from Running Containers</h2>
+      
+      <p>Claude Code can generate a Mermaid diagram of your current Docker network topology with a script like this:
+      </p>
+      
+      <pre><code>#!/bin/bash
+generate-network-diagram.sh
+Outputs a Mermaid diagram of the current Docker network topology
+
+echo &quot;graph TD&quot;
+
+docker network ls --format &#x27;&#x27; | while read net; do
+ [[ &quot;$net&quot; == &quot;bridge&quot; || &quot;$net&quot; == &quot;host&quot; || &quot;$net&quot; == &quot;none&quot; ]] &amp;&amp; continue
+ echo &quot; $net[\&quot;Network: $net\&quot;]&quot;
+
+ docker network inspect &quot;$net&quot; | jq -r &#x27;.[0].Containers | to_entries[] | .value.Name&#x27; | while read cname; do
+ safe_name=$(echo &quot;$cname&quot; | tr &#x27;-&#x27; &#x27;_&#x27;)
+ echo &quot; $safe_name[\&quot;$cname\&quot;] --&gt; $net&quot;
+ done
+done</code></pre>
+      
+      <p>Paste the output into any Mermaid-compatible renderer or documentation tool to get an automatically generated network map. The canvas-design skill can help you visualize your network topology, while pptx skills enable you to create presentations explaining network architecture to stakeholders. For teams adopting infrastructure-as-code practices, the xlsx skill can generate spreadsheets tracking network resources across environments.
+      </p>
+      
+      <h2>Automating Development Environment Setup</h2>
+      
+      <p>For teams that need consistent development environments, Claude Code can execute a setup script that creates the complete network topology before any containers start:
+      </p>
+      
+      <pre><code>#!/bin/bash
+dev-environment-setup.sh
+Creates a fully isolated development environment with proper network segmentation
+
+set -e
+
+echo &quot;Creating development networks...&quot;
+
+Frontend network. accessible from host
+docker network create \
+ --driver bridge \
+ --subnet=172.40.0.0/24 \
+ dev_frontend 2&gt;/dev/null || echo &quot;dev_frontend already exists&quot;
+
+Backend network. internal only
+docker network create \
+ --driver bridge \
+ --subnet=172.41.0.0/24 \
+ --internal \
+ dev_backend 2&gt;/dev/null || echo &quot;dev_backend already exists&quot;
+
+Monitoring network. separate from application traffic
+docker network create \
+ --driver bridge \
+ --subnet=172.42.0.0/24 \
+ dev_monitoring 2&gt;/dev/null || echo &quot;dev_monitoring already exists&quot;
+
+echo &quot;Networks created:&quot;
+docker network ls | grep dev_
+
+echo &quot;&quot;
+echo &quot;Development environment ready. Run &#x27;docker compose up -d&#x27; to start services.&quot;</code></pre>
+      
+      <p>This script is idempotent, it will not fail if the networks already exist, making it safe to include in onboarding scripts and CI pipelines.
+      </p>
+      
+      <h2>Conclusion</h2>
+      
+      <p>Docker networking does not have to be a source of frustration. By understanding the core network drivers, using Docker Compose for declarative configurations, and automating troubleshooting workflows, you can build reliable containerized applications. Claude Code amplifies these capabilities by enabling skill-based automation, documentation generation, and systematic debugging approaches.
+      </p>
+      
+      <p>The key principles to carry forward are: use custom bridge networks rather than the default bridge to get automatic DNS resolution; apply the <code>internal: true</code> flag to networks that should not have internet access; always bind host ports to <code>127.0.0.1</code> unless external access is required; and use health checks with <code>depends_on</code> conditions to eliminate race conditions during startup.
+      </p>
+      
+      <p>When you face a networking challenge, start with inspection commands to understand the current state, escalate to the systematic troubleshooting decision tree, and consider how the audit and diagram generation scripts can be integrated into your team's regular maintenance routines. With these patterns in your toolkit, you will spend less time debugging and more time building.
+      </p>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <p><em>Last verified: April 2026. If this approach no longer works, check Mendeley Chrome Extension — Honest Review 2026 for updated steps.</em>
+      </p>
+      
+      <p><div class="mastery-cta">
+      </p>
+      
+      <p>This took me 3 hours to figure out. I put it in a CLAUDE.md so I'd never figure it out again. Now Claude gets it right on the first try, every project.
+      </p>
+      
+      <p>16 framework templates. Next.js, FastAPI, Laravel, Rails, Go, Rust, Terraform, and 9 more. Each one 300+ lines of "here's exactly how this stack works." Copy into your project. Done.
+      </p>
+      
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=ccg&utm_medium=cta-deploy&utm_campaign=claude-code-docker-networking-workflow-guide">See the templates →</a></strong>
+      </p>
+      
+      <p>$99 once. Yours forever. I keep adding templates monthly.
+      </p>
+      
+      <p></div>
+      </p>
+      
+      <p>Related Reading
+      </p>
+      
+      
+      
+      
+      
+      <p><strong>Find the right skill →</strong> Browse 155+ skills in our Skill Finder.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-docker-networking-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Docker Networking Workflow (2026)",
+    "description": "Connect Docker containers, troubleshoot network issues, and automate networking with Claude Code. Bridge, overlay, and host network patterns.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-docker-networking-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

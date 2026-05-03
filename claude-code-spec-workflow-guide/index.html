@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Spec Workflow Guide (2026) | ClaudHQ</title>
+  <meta name="description" content="Spec-driven development with Claude Code. Write specifications first, let Claude implement, then verify against the spec. Full workflow with examples.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-spec-workflow-guide/">
+  <meta property="og:title" content="Claude Code Spec Workflow Guide (2026) | ClaudHQ">
+  <meta property="og:description" content="Spec-driven development with Claude Code. Write specifications first, let Claude implement, then verify against the spec. Full workflow with examples.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-spec-workflow-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Spec Workflow Guide (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The spec workflow is a development pattern where you write a detailed specification before Claude Code writes any code. Instead of describing what you want in a chat prompt and hoping Claude interprets it correctly, you create a structured document that defines inputs, outputs, behavior, edge cases, and constraints. Then Claude implements against that spec.
+      </p>
+      
+      <p>This approach consistently produces better results than freeform prompting because it eliminates ambiguity, provides built-in acceptance criteria, and gives Claude a concrete reference to verify its work against.
+      </p>
+      
+      <h2>Why Specs Work Better Than Prompts</h2>
+      
+      <h3>The Problem with Freeform Prompts</h3>
+      
+      <p>When you tell Claude Code "Build a user registration endpoint," Claude makes dozens of assumptions:
+      </p>
+      
+      <ul>
+        <li>What fields are required?</li>
+        <li>How should passwords be validated?</li>
+        <li>What error format should be used?</li>
+        <li>Should email verification be included?</li>
+        <li>What response shape does the client expect?</li>
+        <li>What status codes should be returned?</li>
+      </ul>
+      
+      <p>Each assumption has a chance of being wrong. With 20 assumptions, even a 90% accuracy rate means 2 assumptions are wrong. You spend time finding and correcting them.
+      </p>
+      
+      <h3>What Specs Solve</h3>
+      
+      <p>A spec removes assumptions by stating decisions explicitly:
+      </p>
+      
+      <pre><code>## POST /api/auth/register
+
+### Request Body
+- email: string (required, RFC 5322 format)
+- password: string (required, min 8 chars, at least 1 uppercase, 1 number)
+- name: string (required, 2-100 chars)
+
+### Success Response (201)
+{ &quot;id&quot;: &quot;uuid&quot;, &quot;email&quot;: &quot;string&quot;, &quot;name&quot;: &quot;string&quot;, &quot;createdAt&quot;: &quot;ISO8601&quot; }
+
+### Error Response (400)
+{ &quot;code&quot;: &quot;VALIDATION_ERROR&quot;, &quot;errors&quot;: [{ &quot;field&quot;: &quot;email&quot;, &quot;message&quot;: &quot;Invalid email format&quot; }] }
+
+### Behavior
+1. Check if email already exists → 409 CONFLICT
+2. Hash password with bcrypt (12 rounds)
+3. Insert user record
+4. Send verification email (async, do not block response)
+5. Return created user (without password)
+
+### Edge Cases
+- Email with leading/trailing whitespace: trim before validation
+- Email case: normalize to lowercase
+- Concurrent registration with same email: database unique constraint handles it, return 409</code></pre>
+      
+      <p>With this spec, Claude has zero ambiguity. Every decision is made. Implementation becomes mechanical.
+      </p>
+      
+      <h2>The Spec Workflow</h2>
+      
+      <h3>Step 1: Write the Spec</h3>
+      
+      <p>Create a spec file in your project. Convention: <code>specs/</code> directory.
+      </p>
+      
+      <pre><code>mkdir -p specs</code></pre>
+      
+      <p>Write the spec in Markdown. Use the template in the next section.
+      </p>
+      
+      <h3>Step 2: Review the Spec</h3>
+      
+      <p>Read through the spec yourself (or with your team). Check for:
+      </p>
+      <ul>
+        <li>Missing edge cases</li>
+        <li>Contradictory requirements</li>
+        <li>Unclear terminology</li>
+        <li>Missing error scenarios</li>
+      </ul>
+      
+      <p>This is where you catch problems before any code is written. Fixing a spec is free. Fixing implemented code costs time.
+      </p>
+      
+      <h3>Step 3: Hand the Spec to Claude</h3>
+      
+      <pre><code>Read specs/user-registration.md and implement it.
+Follow the spec exactly. Do not add features that are not specified.
+Do not skip any specified behavior.</code></pre>
+      
+      <p>The instruction to follow the spec exactly is important. Without it, Claude may "improve" things in ways that deviate from your design.
+      </p>
+      
+      <h3>Step 4: Verify Against the Spec</h3>
+      
+      <p>After Claude implements, verify:
+      </p>
+      
+      <pre><code>Review the implementation against specs/user-registration.md.
+For each requirement in the spec, confirm it is implemented.
+List any deviations or missing items.</code></pre>
+      
+      <p>Claude compares its own code to the spec and reports gaps. This self-verification step catches most issues.
+      </p>
+      
+      <h3>Step 5: Write Tests from the Spec</h3>
+      
+      <pre><code>Using specs/user-registration.md as the reference,
+write tests that verify every requirement.
+Include tests for all edge cases listed in the spec.</code></pre>
+      
+      <p>The spec serves as a test plan. Every specified behavior becomes a test case.
+      </p>
+      
+      <h2>Spec Template</h2>
+      
+      <p>Use this template for feature specs:
+      </p>
+      
+      <pre><code># Feature: [Feature Name]
+
+## Overview
+[1-2 sentences describing what this feature does and why]
+
+## Scope
+### In Scope
+- [What is included]
+
+### Out of Scope
+- [What is explicitly excluded]
+
+## API / Interface
+
+### [Method] [Path/Function]
+
+#### Input
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| field1 | string | Yes | Max 255 chars |
+| field2 | number | No | 0-100, default 0 |
+
+#### Output (Success)</code></pre>
+      <p>{
+       "field": "value"
+       }
+      </p>
+      <pre><code>
+#### Output (Error)</code></pre>
+      <p>{
+       "code": "ERROR_CODE",
+       "message": "Human-readable message"
+       }
+      </p>
+      <pre><code>
+### Behavior
+1. Step one
+2. Step two
+3. Step three
+
+### Edge Cases
+- [Edge case 1]: [Expected behavior]
+- [Edge case 2]: [Expected behavior]
+
+### Error Scenarios
+| Scenario | Status Code | Error Code |
+|----------|-------------|------------|
+| Invalid input | 400 | VALIDATION_ERROR |
+| Not found | 404 | NOT_FOUND |
+| Unauthorized | 401 | UNAUTHORIZED |
+
+## Data Model Changes
+- [Table changes, if any]
+- [New columns, indexes, constraints]
+
+## Dependencies
+- [External services needed]
+- [Libraries to use]
+
+## Security
+- [Authentication requirements]
+- [Authorization rules]
+- [Data sensitivity considerations]
+
+## Performance
+- [Expected load]
+- [Response time requirements]
+- [Caching strategy]
+
+## Testing
+- [Specific test scenarios to cover]
+- [Integration test requirements]</code></pre>
+      
+      <h2>Real Example: Payment Processing Spec</h2>
+      
+      <p>Here is a complete spec for a real feature:
+      </p>
+      
+      <pre><code># Feature: Stripe Subscription Checkout
+
+## Overview
+Allow authenticated users to subscribe to a plan by creating
+a Stripe Checkout session and redirecting to Stripe&#x27;s hosted page.
+
+## Scope
+### In Scope
+- Create Stripe Checkout session
+- Handle successful checkout (webhook)
+- Handle failed/expired checkout
+- Store subscription data in database
+
+### Out of Scope
+- Plan management (existing)
+- Subscription cancellation (separate spec)
+- Invoice handling (separate spec)
+- Free trial logic (Phase 2)
+
+## API
+
+### POST /api/checkout/create-session
+
+#### Input
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| planId | uuid | Yes | Must exist in plans table |
+| successUrl | string | Yes | Valid URL |
+| cancelUrl | string | Yes | Valid URL |
+
+#### Headers
+- Authorization: Bearer &lt;JWT&gt; (required)
+
+#### Output (200)</code></pre>
+      <p>{
+       "sessionId": "cs_live_...",
+       "url": "https://checkout.stripe.com/..."
+       }
+      </p>
+      <pre><code>
+#### Output (400)</code></pre>
+      <p>{
+       "code": "INVALID_PLAN",
+       "message": "Plan not found or inactive"
+       }
+      </p>
+      <pre><code>
+#### Output (409)</code></pre>
+      <p>{
+       "code": "ALREADY_SUBSCRIBED",
+       "message": "User already has an active subscription"
+       }
+      </p>
+      <pre><code>
+### Behavior
+1. Verify user is authenticated (JWT validation)
+2. Fetch plan from database by planId
+3. If plan not found or plan.active is false → 400
+4. Check if user has existing active subscription → 409
+5. Look up or create Stripe customer for user
+   - If user.stripe_customer_id exists, use it
+   - If not, create Stripe customer with user email
+   - Store stripe_customer_id on user record
+6. Create Stripe Checkout session:
+   - mode: &quot;subscription&quot;
+   - customer: stripe_customer_id
+   - line_items: [{ price: plan.stripe_price_id, quantity: 1 }]
+   - success_url: successUrl + &quot;?session_id={CHECKOUT_SESSION_ID}&quot;
+   - cancel_url: cancelUrl
+   - metadata: { userId, planId }
+7. Return session ID and URL
+
+### POST /api/webhooks/stripe (Webhook Handler)
+
+#### Events Handled
+- `checkout.session.completed`
+- `checkout.session.expired`
+
+#### checkout.session.completed
+1. Verify webhook signature using STRIPE_WEBHOOK_SECRET
+2. Extract userId and planId from metadata
+3. Extract subscription ID from session
+4. Insert subscription record:
+   - user_id: metadata.userId
+   - plan_id: metadata.planId
+   - stripe_subscription_id: session.subscription
+   - status: &quot;active&quot;
+   - current_period_start: subscription.current_period_start
+   - current_period_end: subscription.current_period_end
+5. Return 200
+
+#### checkout.session.expired
+1. Verify webhook signature
+2. Log expiration event
+3. No database changes
+4. Return 200
+
+### Edge Cases
+- User creates session, closes browser, never completes:
+  Session expires after 24 hours, webhook fires checkout.session.expired
+- User completes checkout but webhook fails:
+  Stripe retries webhooks for up to 3 days. Handler must be idempotent.
+- Duplicate webhook delivery:
+  Check if subscription with stripe_subscription_id already exists.
+  If yes, skip insert, return 200.
+- Plan price changes between session creation and completion:
+  Stripe uses the price locked at session creation time. No issue.
+- User&#x27;s payment method fails:
+  Stripe handles this on their checkout page. We never see incomplete payments.
+
+### Error Scenarios
+| Scenario | Status | Code | Notes |
+|----------|--------|------|-------|
+| No auth token | 401 | UNAUTHORIZED | |
+| Invalid plan | 400 | INVALID_PLAN | Plan not found or inactive |
+| Already subscribed | 409 | ALREADY_SUBSCRIBED | Active sub exists |
+| Stripe API error | 502 | STRIPE_ERROR | Log full error, return safe message |
+| Invalid webhook signature | 400 | INVALID_SIGNATURE | Do not process |
+
+## Data Model Changes
+- users table: Add stripe_customer_id (text, nullable, unique)
+- subscriptions table: Already exists (from schema spec)
+
+## Dependencies
+- Stripe SDK (stripe npm package)
+- STRIPE_SECRET_KEY (env variable)
+- STRIPE_WEBHOOK_SECRET (env variable)
+- STRIPE_PRICE_ID per plan (stored in plans.stripe_price_id)
+
+## Security
+- Webhook endpoint must verify Stripe signature
+- Never expose Stripe secret key in responses
+- Checkout session metadata cannot be tampered with by user
+- Rate limit: 10 session creations per user per hour
+
+## Performance
+- Stripe API calls: ~200-500ms each
+- Total endpoint latency: &lt; 1 second
+- No caching needed (low volume, always fresh data)
+
+## Testing
+- Unit: createCheckoutSession() with mocked Stripe client
+- Unit: handleCheckoutCompleted() with mocked database
+- Integration: Full checkout flow with Stripe test mode
+- Edge: Duplicate webhook handling (call handler twice, verify single record)
+- Edge: Expired session webhook
+- Error: Invalid plan ID
+- Error: Already subscribed user</code></pre>
+      
+      <h3>Handing This Spec to Claude</h3>
+      
+      <pre><code>Read specs/stripe-checkout.md and implement the following:
+1. API route at src/app/api/checkout/create-session/route.ts
+2. Webhook handler at src/app/api/webhooks/stripe/route.ts
+3. Database migration for users.stripe_customer_id
+4. Unit tests for both endpoints
+5. Follow the spec exactly. Every edge case must be handled.</code></pre>
+      
+      <p>Claude implements each item against the spec. Because every decision is made in the spec, Claude's implementation matches your design intent precisely.
+      </p>
+      
+      
+      <h2>Spec Workflow Variations</h2>
+      
+      <h3>Variation 1: Test-First Spec</h3>
+      
+      <p>Write the spec as tests first, then have Claude implement:
+      </p>
+      
+      <pre><code>I have test specs in tests/checkout.test.ts that define
+the expected behavior. Read them and implement the code
+that makes all tests pass.</code></pre>
+      
+      <p>This is TDD powered by AI. The tests serve as the spec.
+      </p>
+      
+      <h3>Variation 2: Incremental Spec</h3>
+      
+      <p>For large features, break the spec into phases:
+      </p>
+      
+      <pre><code># Phase 1: Basic Checkout (this sprint)
+- Session creation
+- Webhook handling
+- Database storage
+
+# Phase 2: Subscription Management (next sprint)
+- Cancellation
+- Plan changes
+- Invoice history
+
+# Phase 3: Billing Portal (future)
+- Self-service billing
+- Payment method updates</code></pre>
+      
+      <p>Implement Phase 1 first. Phase 2 builds on Phase 1's code.
+      </p>
+      
+      <h3>Variation 3: Architecture Spec</h3>
+      
+      <p>Before feature specs, write an architecture spec:
+      </p>
+      
+      <pre><code># Architecture: Billing Module
+
+## Module Location
+src/features/billing/
+
+## Internal Structure
+- routes/ - API endpoint handlers
+- services/ - Business logic
+- repositories/ - Database access
+- types/ - TypeScript interfaces
+- webhooks/ - Webhook handlers
+- __tests__/ - All tests
+
+## Dependencies
+- Depends on: auth module (user context), database module (queries)
+- Depended on by: dashboard module (subscription status display)
+
+## Patterns
+- Repository pattern for database access
+- Service layer for business logic
+- Route handlers are thin (validation + service call + response)</code></pre>
+      
+      <p>Then Claude follows this architecture for all billing features.
+      </p>
+      
+      <h3>Variation 4: Fix Spec</h3>
+      
+      <p>For bug fixes, write a short spec:
+      </p>
+      
+      <pre><code># Bug Fix: Duplicate Subscriptions
+
+## Problem
+When Stripe sends duplicate checkout.session.completed webhooks,
+we create multiple subscription records for the same user.
+
+## Root Cause
+No idempotency check in webhook handler.
+
+## Fix
+Before inserting subscription, check if stripe_subscription_id
+already exists. If yes, return 200 without inserting.
+
+## Verification
+1. Call webhook handler twice with same session data
+2. Verify only one subscription record exists
+3. Both calls return 200</code></pre>
+      
+      <h2>Tips for Writing Better Specs</h2>
+      
+      <h3>Tip 1: Start with the Interface</h3>
+      
+      <p>Define inputs and outputs before behavior. This forces you to think about the contract before the implementation.
+      </p>
+      
+      <h3>Tip 2: List Every Error Scenario</h3>
+      
+      <p>Most bugs come from unhandled errors. List every way the feature can fail and what should happen.
+      </p>
+      
+      <h3>Tip 3: Include Non-Obvious Constraints</h3>
+      
+      <p>Things Claude would not guess:
+      </p>
+      <ul>
+        <li>"Email comparison must be case-insensitive"</li>
+        <li>"Amounts are in cents, not dollars"</li>
+        <li>"Timezone is always UTC, even for display"</li>
+      </ul>
+      
+      <h3>Tip 4: Reference Existing Patterns</h3>
+      
+      <pre><code>## Implementation Notes
+Follow the same pattern as src/features/auth/services/login.ts:
+- Validate input with Zod
+- Call repository method
+- Map to response type
+- Handle errors with ErrorCode enum</code></pre>
+      
+      <p>This gives Claude a concrete reference in your codebase.
+      </p>
+      
+      <h3>Tip 5: Define What NOT to Do</h3>
+      
+      <pre><code>## Do NOT
+- Do not send verification email synchronously (use a job queue)
+- Do not store the Stripe session ID in the URL visible to the user
+- Do not log the full webhook body (contains sensitive data)</code></pre>
+      
+      <h3>Tip 6: Keep Specs in Version Control</h3>
+      
+      <p>Commit specs to your repo:
+      </p>
+      
+      <pre><code>my-project/
+  specs/
+    user-registration.md
+    stripe-checkout.md
+    notification-system.md
+  src/</code></pre>
+      
+      <p>They serve as living documentation alongside the code.
+      </p>
+      
+      <h2>Integrating Specs with CLAUDE.md</h2>
+      
+      <p>Add a spec workflow section to your CLAUDE.md:
+      </p>
+      
+      <pre><code>## Spec Workflow
+- Feature specs live in specs/ directory
+- Always read the relevant spec before implementing
+- Follow specs exactly. Do not add unspecified features.
+- After implementing, verify against the spec and report gaps.
+- Write tests that cover every spec requirement.</code></pre>
+      
+      <p>This ensures Claude follows the spec workflow automatically when specs exist.
+      </p>
+      
+      <h2>Combining Specs with Claude Code Features</h2>
+      
+      <h3>Specs + Hooks</h3>
+      
+      <p>Use a Stop hook to verify spec compliance before Claude finishes:
+      </p>
+      
+      <pre><code>#!/bin/bash
+# verify-spec.sh (Stop hook)
+if [ -f &quot;specs/current.md&quot; ]; then
+  echo &quot;Verify your implementation against specs/current.md before stopping.&quot;
+  echo &quot;List any unimplemented requirements.&quot;
+fi</code></pre>
+      
+      <h3>Specs + MCP</h3>
+      
+      <p>With Supabase MCP, Claude can verify database changes match the spec:
+      </p>
+      
+      <pre><code>Check the database schema against the data model section
+of specs/stripe-checkout.md. Report any missing columns or constraints.</code></pre>
+      
+      <h3>Specs + Extended Thinking</h3>
+      
+      <p>For complex specs, enable extended thinking so Claude can reason through the requirements before coding:
+      </p>
+      
+      <pre><code>Read specs/notification-system.md. Use extended thinking to plan
+the implementation before writing any code. Then implement.</code></pre>
+      
+      <h2>Frequently Asked Questions</h2>
+      
+      <h3>How detailed should specs be?</h3>
+      <p>Detailed enough that two developers would implement the same behavior independently. If a requirement is ambiguous, specify it further.
+      </p>
+      
+      <h3>Who writes the specs?</h3>
+      <p>The developer, tech lead, or product manager. Writing the spec is the thinking part. Claude handles the mechanical coding part.
+      </p>
+      
+      <h3>How long does it take to write a spec?</h3>
+      <p>A typical feature spec takes 15-45 minutes. This time is more than recovered by reduced back-and-forth with Claude and fewer bugs.
+      </p>
+      
+      <h3>Can Claude write the spec for me?</h3>
+      <p>Yes, but review it carefully. Claude can draft a spec from a high-level description, but you must validate every decision it makes. The spec represents YOUR design intent.
+      </p>
+      
+      <h3>Do I need specs for small changes?</h3>
+      <p>No. For a one-line bug fix or simple refactoring, a clear prompt is sufficient. Specs are for features with multiple requirements, edge cases, or team collaboration.
+      </p>
+      
+      <h3>What if the spec changes during implementation?</h3>
+      <p>Update the spec file and tell Claude: "The spec has been updated. Re-read specs/feature.md and adjust the implementation." Keep the spec as the source of truth.
+      </p>
+      
+      <h3>How do specs work in a team?</h3>
+      <p>Specs go through code review like any other file. Team members review the spec before implementation begins. This catches design issues before any code is written.
+      </p>
+      
+      <h3>Should specs include implementation details?</h3>
+      <p>Include architectural decisions (which patterns, which libraries) but not line-by-line code instructions. Let Claude handle the implementation details within your constraints.
+      </p>
+      
+      <h3>How do specs interact with CLAUDE.md?</h3>
+      <p>CLAUDE.md defines project-wide rules (code style, architecture patterns). Specs define feature-specific requirements. They work together: CLAUDE.md provides the context and constraints, specs provide the feature blueprint. Add a note in CLAUDE.md: "Always read relevant specs from specs/ before implementing."
+      </p>
+      
+      <h3>Can I use specs with MCP servers?</h3>
+      <p>Yes. Specs that involve database changes pair well with Supabase MCP or other database MCP servers. After implementing, Claude can verify database schema changes through MCP match the spec.
+      </p>
+      
+      <h3>Do specs work with Claude Code hooks?</h3>
+      <p>Yes. Use a Stop hook to remind Claude to verify against the spec before completing work. This creates an automated verification loop that catches spec deviations.
+      </p>
+      
+      <h3>Where can I find spec templates for different project types?</h3>
+      <p>Check our CLAUDE.md best practices guide for project-type examples that include spec conventions. The SuperClaude framework also includes spec-related commands like <code>/plan</code> and <code>/design</code>.
+      </p>
+      
+      <h3>How do specs affect Claude Code costs?</h3>
+      <p>Spec files are read as input tokens when Claude processes them. A typical spec is 500-2,000 tokens. This small upfront cost pays for itself by reducing back-and-forth corrections. Track costs with token usage auditing.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-spec-workflow-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Spec Workflow Guide (2026)",
+    "description": "Spec-driven development with Claude Code. Write specifications first, let Claude implement, then verify against the spec. Full workflow with examples.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-spec-workflow-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

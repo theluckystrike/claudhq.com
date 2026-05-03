@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLAUDE.md for Fullstack Projects (2026) | ClaudHQ</title>
+  <meta name="description" content="Master CLAUDE.md files for fullstack development. Learn to create, organize, and deploy Claude Code configurations across frontend and backend.">
+  <link rel="canonical" href="https://claudhq.com/claude-md-fullstack-projects-guide/">
+  <meta property="og:title" content="CLAUDE.md for Fullstack Projects (2026) | ClaudHQ">
+  <meta property="og:description" content="Master CLAUDE.md files for fullstack development. Learn to create, organize, and deploy Claude Code configurations across frontend and backend.">
+  <meta property="og:url" content="https://claudhq.com/claude-md-fullstack-projects-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>CLAUDE.md for Fullstack Projects (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code has evolved into a powerful development assistant that works across the entire fullstack development workflow. The .md skill file format provides a flexible way to define reusable prompts, workflows, and project-specific guidance that accelerates development across frontend, backend, and infrastructure layers.
+      </p>
+      
+      <p>This guide covers everything you need to know about creating and organizing Claude skills in markdown format for fullstack projects, with practical examples you can apply immediately.
+      </p>
+      
+      <h2>Understanding Claude Skill Files</h2>
+      
+      <p>A Claude skill is simply a markdown file with front matter that defines metadata and a body containing the skill's instructions. The format follows this structure:
+      </p>
+      
+      <pre><code>---
+name: skill-name
+description: What this skill does
+---
+
+Skill Instructions
+Your prompt content goes here...</code></pre>
+      
+      <p>The front matter uses YAML syntax to declare the skill's capabilities, while the markdown body provides detailed instructions, examples, and context that Claude uses when responding to queries.
+      </p>
+      
+      <h2>What Makes a Good Skill File</h2>
+      
+      <p>The quality of a skill file is the single biggest factor in the quality of Claude's output. A skill that only says "write clean code" produces mediocre results. A skill that specifies naming conventions, import ordering, error handling patterns, and provides a concrete before/after example produces output you can ship.
+      </p>
+      
+      <p>The anatomy of a high-quality skill file has five parts:
+      </p>
+      
+      <ol>
+        <li>Role declaration: Tell Claude what expert it should act as for this skill</li>
+        <li>Hard rules: Non-negotiable constraints (no class components, always use TypeScript, etc.)</li>
+        <li>Soft preferences: Style choices the developer prefers but can override</li>
+        <li>Examples: At least one complete, realistic code sample showing the expected output</li>
+        <li>Anti-patterns: Explicit list of things the skill should never do</li>
+      </ol>
+      
+      <p>Here is the contrast between a weak and a strong skill:
+      </p>
+      
+      <p>Weak skill (produces inconsistent output):
+      </p>
+      
+      <pre><code>---
+name: react-component
+description: Make React components
+---
+
+Write good React components with hooks.</code></pre>
+      
+      <p>Strong skill (produces consistent, shippable output):
+      </p>
+      
+      <pre><code>---
+name: react-component
+description: Generate production-ready React components following our team conventions
+---
+
+React Component Builder
+
+You are a senior React engineer writing components for a TypeScript + Tailwind project.
+
+Hard Rules
+- Functional components only. no class components ever
+- TypeScript interfaces for all props, no `any` types
+- CSS Modules or Tailwind utility classes. no inline styles
+- `aria-label` or `aria-labelledby` on all interactive elements
+- Export components as named exports, not default exports
+
+Soft Preferences
+- Prefer `const` arrow functions over `function` declarations
+- Co-locate tests in a `__tests__` folder next to the component
+- Group imports: external libs, then internal utils, then styles
+
+Example Output
+</code></pre>
+      <p>import React from 'react';
+       import styles from './Button.module.css';
+      </p>
+      
+      <p>interface ButtonProps {
+       label: string;
+       onClick: () => void;
+       disabled?: boolean;
+       variant?: 'primary' | 'secondary';
+       }
+      </p>
+      
+      <p>export const Button: React.FC<ButtonProps> = ({
+       label,
+       onClick,
+       disabled = false,
+       variant = 'primary',
+       }) => (
+       <button
+       className={styles[variant]}
+       onClick={onClick}
+       disabled={disabled}
+       aria-label={label}
+       type="button"
+       >
+       {label}
+       </button>
+       );
+      </p>
+      <pre><code>
+Anti-patterns
+- Never use `React.FC` without explicit props interface
+- Never use `index` as a key in list renders
+- Never fetch data directly inside render. use custom hooks</code></pre>
+      
+      <p>The second skill generates output that matches your project conventions from the first request, without follow-up corrections.
+      </p>
+      
+      <h2>Creating Skills for Frontend Development</h2>
+      
+      <p>Frontend work with Claude benefits significantly from specialized skills. The <code>frontend-design</code> skill helps generate component structures, styling decisions, and responsive layouts. Here's how to structure a frontend skill:
+      </p>
+      
+      <pre><code>---
+name: react-component-builder
+description: Generate React components with proper structure and styling
+---
+
+React Component Builder
+
+When asked to create React components, follow these rules:
+
+1. Always use functional components with hooks
+2. Include PropTypes or TypeScript interfaces
+3. Extract reusable styles to CSS modules
+4. Add proper accessibility attributes
+
+Example response format:</code></pre>
+      
+      <p>This approach ensures consistent component quality across your project. The <code>canvas-design</code> skill complements frontend work by generating visual assets directly in your project directory, eliminating the need for external design tools.
+      </p>
+      
+      <h2>A Complete Frontend Skill Suite</h2>
+      
+      <p>A production frontend skill library covers more than component scaffolding. These are the skills most teams need when working on a React or Vue codebase:
+      </p>
+      
+      <p>Custom hook generator. Encapsulates data-fetching and stateful logic into reusable hooks:
+      </p>
+      
+      <pre><code>---
+name: react-hook-builder
+description: Generate custom React hooks with proper error handling and loading states
+---
+
+Custom Hook Builder
+
+When generating custom hooks:
+
+1. Always return a consistent shape: `{ data, error, isLoading }`
+2. Handle the AbortController pattern for fetch cleanup on unmount
+3. Use `useCallback` for memoized event handlers returned from hooks
+4. Export the hook as a named export from `src/hooks/`
+
+useFetch hook
+</code></pre>
+      <p>import { useState, useEffect, useRef } from 'react';
+      </p>
+      
+      <p>export function useFetch<T>(url: string) {
+       const [data, setData] = useState<T | null>(null);
+       const [error, setError] = useState<Error | null>(null);
+       const [isLoading, setIsLoading] = useState(true);
+      </p>
+      
+      <p>useEffect(() => {
+       const controller = new AbortController();
+       setIsLoading(true);
+      </p>
+      
+      <p>fetch(url, { signal: controller.signal })
+       .then(res => {
+       if (!res.ok) throw new Error(<code>HTTP ${res.status}</code>);
+       return res.json() as Promise<T>;
+       })
+       .then(setData)
+       .catch(err => {
+       if (err.name !== 'AbortError') setError(err);
+       })
+       .finally(() => setIsLoading(false));
+      </p>
+      
+      <p>return () => controller.abort();
+       }, [url]);
+      </p>
+      
+      <p>return { data, error, isLoading };
+       }
+      </p>
+      <pre><code></code></pre>
+      
+      <p>Form validation skill. Enforces consistent validation patterns across all forms:
+      </p>
+      
+      <pre><code>---
+name: form-validator
+description: Generate form validation logic using React Hook Form and Zod
+---
+
+Form Validation Guidelines
+
+Always pair React Hook Form with Zod for type-safe schema validation.
+
+Schema-first pattern
+</code></pre>
+      <p>import { z } from 'zod';
+       import { useForm } from 'react-hook-form';
+       import { zodResolver } from '@hookform/resolvers/zod';
+      </p>
+      
+      <p>const loginSchema = z.object({
+       email: z.string().email('Invalid email address'),
+       password: z.string().min(8, 'Password must be at least 8 characters'),
+       });
+      </p>
+      
+      <p>type LoginFormData = z.infer<typeof loginSchema>;
+      </p>
+      
+      <p>export function LoginForm() {
+       const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+       resolver: zodResolver(loginSchema),
+       });
+      </p>
+      
+      <p>const onSubmit = (data: LoginFormData) => {
+       // data is fully typed and validated
+       };
+      </p>
+      
+      <p>return (
+       <form onSubmit={handleSubmit(onSubmit)}>
+       <input {...register('email')} aria-describedby="email-error" />
+       {errors.email && <span id="email-error">{errors.email.message}</span>}
+       <input type="password" {...register('password')} />
+       {errors.password && <span>{errors.password.message}</span>}
+       <button type="submit">Login</button>
+       </form>
+       );
+       }
+      </p>
+      <pre><code></code></pre>
+      
+      <h2>Backend Skill Organization</h2>
+      
+      <p>Backend development with Claude requires different skill focuses. Create separate skills for API design, database modeling, and server configuration:
+      </p>
+      
+      <pre><code>---
+name: api-rest-designer
+description: Design RESTful APIs with proper HTTP semantics
+---
+
+REST API Design Guidelines
+
+Follow these conventions for all API endpoints:
+
+- Use plural nouns for resources: /users, /orders, /products
+- Return appropriate HTTP status codes
+- Include pagination for list endpoints
+- Version APIs in the path: /api/v1/resource</code></pre>
+      
+      <p>The <code>tdd</code> skill integrates with backend development by generating test-first implementations. When combined with your API skills, you get comprehensive coverage from design through testing.
+      </p>
+      
+      <h2>Building a Complete Backend Skill Set</h2>
+      
+      <p>A REST API design skill is a start, but backend work involves more surface area. These additional skills round out a Node.js or Python backend:
+      </p>
+      
+      <p>Error handling skill. Standardizes error responses across all routes:
+      </p>
+      
+      <pre><code>---
+name: api-error-handling
+description: Implement consistent error handling for Express APIs
+---
+
+API Error Handling
+
+All Express routes must use a centralized error handler. Never return raw error objects to clients.
+
+Error class hierarchy
+</code></pre>
+      <p>export class AppError extends Error {
+       constructor(
+       public message: string,
+       public statusCode: number,
+       public code: string
+       ) {
+       super(message);
+       this.name = 'AppError';
+       }
+       }
+      </p>
+      
+      <p>export class NotFoundError extends AppError {
+       constructor(resource: string) {
+       super(<code>${resource} not found</code>, 404, 'NOT_FOUND');
+       }
+       }
+      </p>
+      
+      <p>export class ValidationError extends AppError {
+       constructor(message: string) {
+       super(message, 422, 'VALIDATION_ERROR');
+       }
+       }
+      </p>
+      <pre><code>
+Express error middleware
+</code></pre>
+      <p>import { Request, Response, NextFunction } from 'express';
+       import { AppError } from './errors';
+      </p>
+      
+      <p>export function errorHandler(
+       err: Error,
+       req: Request,
+       res: Response,
+       next: NextFunction
+       ) {
+       if (err instanceof AppError) {
+       return res.status(err.statusCode).json({
+       error: { code: err.code, message: err.message }
+       });
+       }
+      </p>
+      
+      <p>console.error('Unhandled error:', err);
+       res.status(500).json({
+       error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' }
+       });
+       }
+      </p>
+      <pre><code></code></pre>
+      
+      <p>Authentication middleware skill. Keeps auth logic consistent across protected routes:
+      </p>
+      
+      <pre><code>---
+name: auth-middleware
+description: Generate JWT authentication middleware for Express routes
+---
+
+Auth Middleware Pattern
+
+Use a `requireAuth` middleware on all protected routes. Never inline token verification logic.
+</code></pre>
+      <p>import jwt from 'jsonwebtoken';
+       import { Request, Response, NextFunction } from 'express';
+      </p>
+      
+      <p>interface AuthRequest extends Request {
+       user?: { id: string; role: string };
+       }
+      </p>
+      
+      <p>export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+       const token = req.headers.authorization?.replace('Bearer ', '');
+       if (!token) return res.status(401).json({ error: { code: 'UNAUTHORIZED' } });
+      </p>
+      
+      <p>try {
+       const payload = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; role: string };
+       req.user = payload;
+       next();
+       } catch {
+       res.status(401).json({ error: { code: 'TOKEN_INVALID' } });
+       }
+       }
+      </p>
+      <pre><code></code></pre>
+      
+      <h2>Database and Infrastructure Skills</h2>
+      
+      <p>Fullstack projects require database skills that work alongside your application code. The <code>pdf</code> skill helps generate database documentation, while custom skills can manage schema migrations:
+      </p>
+      
+      <pre><code>---
+name: postgres-schema-designer
+description: Design PostgreSQL schemas with proper normalization
+---
+
+PostgreSQL Schema Design
+
+When designing schemas:
+
+1. Use appropriate data types (UUID for IDs, TIMESTAMP for dates)
+2. Add indexes for frequently queried columns
+3. Include foreign key constraints for relationships
+4. Add created_at and updated_at timestamps</code></pre>
+      
+      <p>Infrastructure skills using the <code>supermemory</code> skill pattern help maintain context across deployments and environment configurations.
+      </p>
+      
+      <h2>Expanding Your Database Skill Library</h2>
+      
+      <p>The schema design skill handles table creation, but you need additional skills for the full database lifecycle:
+      </p>
+      
+      <p>Migration skill. Generates forward and rollback migration files:
+      </p>
+      
+      <pre><code>---
+name: db-migration
+description: Generate numbered migration files with up and down functions
+---
+
+Database Migration Pattern
+
+Always generate paired up/down migrations. File names follow: `YYYYMMDDHHMMSS_description.ts`
+</code></pre>
+      <p>// 20260314120000_add_refresh_tokens.ts
+       import { Knex } from 'knex';
+      </p>
+      
+      <p>export async function up(knex: Knex): Promise<void> {
+       await knex.schema.createTable('refresh_tokens', (table) => {
+       table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
+       table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
+       table.string('token_hash', 64).notNullable().unique();
+       table.timestamp('expires_at').notNullable();
+       table.timestamp('created_at').defaultTo(knex.fn.now());
+       table.index(['user_id']);
+       table.index(['token_hash']);
+       });
+       }
+      </p>
+      
+      <p>export async function down(knex: Knex): Promise<void> {
+       await knex.schema.dropTableIfExists('refresh_tokens');
+       }
+      </p>
+      <pre><code></code></pre>
+      
+      <p>Query optimization skill. Guides Claude toward performant queries for your specific schema:
+      </p>
+      
+      <pre><code>---
+name: query-optimizer
+description: Write optimized PostgreSQL queries with proper index usage
+---
+
+Query Optimization Rules
+
+1. Always use EXPLAIN ANALYZE before finalizing queries on large tables
+2. Prefer CTEs for readability on complex queries, but inline for performance-critical paths
+3. Never use SELECT * in application code
+4. Use connection pooling (pg-pool or pgBouncer). never open raw connections in request handlers
+5. Parameterize all user input. never interpolate variables into query strings
+
+Paginated query with cursor
+</code></pre>
+      <p>-- Keyset pagination outperforms OFFSET at scale
+       SELECT id, user_id, created_at, amount
+       FROM orders
+       WHERE created_at < $1 -- cursor value from last page
+       AND status = $2
+       ORDER BY created_at DESC
+       LIMIT $3;
+      </p>
+      <pre><code></code></pre>
+      
+      <h2>Comparing Skill Approaches: Inline vs. Dedicated Files</h2>
+      
+      <p>There are two ways to give Claude database guidance: inline in a CLAUDE.md project file, or as dedicated skill files. Each has its place:
+      </p>
+      
+      <table>
+      <tr><th>Approach</th><th>Best For</th><th>Drawback</th></tr>
+      <tr><td>Inline in CLAUDE.md</td><td>Project-wide rules, small teams, single repo</td><td>Gets long; harder to compose selectively</td></tr>
+      <tr><td>Dedicated skill files</td><td>Reusable across projects, team libraries, CI integration</td><td>Requires skill invocation discipline</td></tr>
+      <tr><td>Both combined</td><td>Large fullstack teams with shared conventions</td><td>Initial setup overhead</td></tr>
+      </table>
+      
+      <p>For most solo developers and small teams, start with inline rules in CLAUDE.md. Move to dedicated skill files when you find yourself copying the same instructions across multiple projects.
+      </p>
+      
+      <h2>Cross-Cutting Skills for Fullstack Projects</h2>
+      
+      <p>Beyond layer-specific skills, create skills that span the entire stack:
+      </p>
+      
+      <ul>
+        <li>Code Review Skills: Analyze both frontend and backend changes holistically</li>
+        <li>Debug Skills: Trace issues across API boundaries and database queries</li>
+        <li>Documentation Skills: Generate docs for APIs, components, and databases simultaneously</li>
+        <li>Migration Skills: Handle data and schema migrations across stack updates</li>
+      </ul>
+      
+      <pre><code>---
+name: fullstack-debug
+description: Debug issues across frontend, API, and database layers
+---
+
+Fullstack Debugging Workflow
+
+When debugging issues:
+
+1. Start with frontend error messages and console logs
+2. Trace API requests to understand data flow
+3. Check backend logs for exceptions
+4. Verify database queries and connection states
+5. Reproduce the issue in development before proposing fixes</code></pre>
+      
+      <h2>A Production-Grade Code Review Skill</h2>
+      
+      <p>Code review skills are some of the most valuable in a team library because they encode collective knowledge about what typically goes wrong in your codebase:
+      </p>
+      
+      <pre><code>---
+name: fullstack-code-review
+description: Perform systematic code review across frontend and backend changes
+---
+
+Fullstack Code Review Checklist
+
+Security (block on any of these)
+- [ ] No raw SQL string interpolation. parameterized queries only
+- [ ] No secrets or API keys in source code or client-side bundles
+- [ ] Authentication checks on all protected API routes
+- [ ] Input validation before any database write
+- [ ] No sensitive data in console.log or error responses
+
+Performance
+- [ ] No N+1 query patterns. use joins or batch fetching
+- [ ] Frontend: no unnecessary re-renders (check dependency arrays in useEffect)
+- [ ] API responses paginated for list endpoints
+- [ ] Database indexes exist for all filtered/sorted columns
+
+Correctness
+- [ ] Error states handled and surfaced to the user
+- [ ] Loading states shown during async operations
+- [ ] Form validation matches backend validation rules
+- [ ] Edge cases: empty states, null values, zero counts
+
+Code Quality
+- [ ] No commented-out code
+- [ ] TypeScript `any` types justified with a comment
+- [ ] New environment variables documented in .env.example</code></pre>
+      
+      <h2>A Structured Debugging Workflow Skill</h2>
+      
+      <p>The debugging skill above covers the basics. An extended version guides Claude through a more systematic investigation:
+      </p>
+      
+      <pre><code>---
+name: api-debug
+description: Systematically debug API issues with request/response tracing
+---
+
+API Debugging Protocol
+
+When an API endpoint behaves unexpectedly:
+
+Step 1: Reproduce with curl
+Always start by reproducing outside the browser. Provide a minimal curl command.
+</code></pre>
+      <p>curl -v -X POST https://api.example.com/v1/orders \
+       -H "Authorization: Bearer $TOKEN" \
+       -H "Content-Type: application/json" \
+       -d '{"product_id": "abc123", "quantity": 2}'
+      </p>
+      <pre><code>
+Step 2: Isolate the layer
+- 4xx errors: input validation or auth. check request headers and body
+- 5xx errors: server-side exception. check application logs
+- Timeout: database query or external service. check slow query logs
+
+Step 3: Trace the database
+For 500 errors, log the exact SQL and parameters being executed. Enable query logging in development.
+
+Step 4: Propose fix with test
+Every bug fix must be accompanied by a test that fails before the fix and passes after.</code></pre>
+      
+      <h2>Organizing Your Skill Library</h2>
+      
+      <p>Structure your skill files for discoverability and maintainability:
+      </p>
+      
+      <pre><code>skills/
+ frontend/
+ react-components.md
+ vue-composition.md
+ styling-guide.md
+ backend/
+ api-design.md
+ auth-patterns.md
+ error-handling.md
+ database/
+ postgres-schemas.md
+ migrations.md
+ shared/
+ code-review.md
+ debugging.md</code></pre>
+      
+      <p>This organization mirrors your project structure, making skills easy to find when working in specific areas.
+      </p>
+      
+      <h2>Versioning and Maintaining Skills</h2>
+      
+      <p>Skills are code. They deserve the same maintenance discipline as your application code. Apply these practices:
+      </p>
+      
+      <p>Track skills in git. Commit skill files alongside the code they influence. A PR that changes your API error handling conventions should update <code>skills/backend/error-handling.md</code> in the same commit.
+      </p>
+      
+      <p>Date-stamp major changes. Add a <code>last_updated</code> field to skill front matter so team members know when a skill was last reviewed:
+      </p>
+      
+      <pre><code>---
+name: react-component-builder
+description: Generate React components following team conventions
+last_updated: 2026-03-14
+version: 2.1
+---</code></pre>
+      
+      <p>Review skills after incidents. If Claude generated code that caused a bug or required significant rework, update the relevant skill to prevent recurrence. Add the anti-pattern explicitly to the skill's "Never do" list.
+      </p>
+      
+      <p>Prune stale skills. A skill that describes your old class-component patterns will actively confuse Claude. Delete or archive skills that no longer reflect your codebase.
+      </p>
+      
+      <h2>Sharing Skills Across Projects</h2>
+      
+      <p>When you work on multiple projects with similar tech stacks, a shared skill library reduces duplication. One pattern that works well is a separate git repository for shared skills, included as a git submodule or symlinked into each project:
+      </p>
+      
+      <pre><code>~/dev/
+ skills-library/ # shared skill repo
+ react/
+ node-api/
+ postgres/
+ project-alpha/
+ skills -&gt; ../skills-library # symlink
+ project-beta/
+ skills -&gt; ../skills-library # symlink</code></pre>
+      
+      <p>Project-specific overrides live in the project's own <code>skills/</code> directory at higher precedence. Claude uses the project-specific skill when both exist.
+      </p>
+      
+      <h2>Advanced Skill Composition</h2>
+      
+      <p>Combine multiple skills effectively by understanding their interaction. A typical fullstack session might invoke:
+      </p>
+      
+      <ol>
+        <li><code>frontend-design</code> for UI components</li>
+        <li><code>api-rest-designer</code> for backend endpoints</li>
+        <li><code>tdd</code> for test coverage</li>
+        <li><code>pdf</code> for generating project documentation</li>
+      </ol>
+      
+      <p>Claude automatically selects relevant skills based on context, but you can explicitly invoke skills using the skill invocation syntax.
+      </p>
+      
+      <h2>How Skill Composition Works in Practice</h2>
+      
+      <p>When multiple skills apply to a task, Claude merges their guidance. The order of invocation matters when skills have conflicting instructions. Resolving conflicts explicitly is better than leaving it to chance.
+      </p>
+      
+      <p>For example, your <code>react-component</code> skill might specify named exports, while an older <code>legacy-patterns</code> skill specifies default exports. If both are active, Claude will pick one. and it may not be consistent across requests. Explicit conflict resolution in the skill file prevents this:
+      </p>
+      
+      <pre><code>---
+name: react-component-builder
+description: Generate React components. overrides legacy-patterns for all .tsx files
+---
+
+React Component Builder
+
+Override Note
+This skill supersedes `legacy-patterns` for all component generation tasks.
+Named exports only. ignore any default export guidance from other skills.</code></pre>
+      
+      <h2>Skill Templates for Common Fullstack Stacks</h2>
+      
+      <p>To accelerate setup, here are starter skill configurations for three common stacks:
+      </p>
+      
+      <p>Next.js + PostgreSQL + Prisma:
+      </p>
+      <ul>
+        <li><code>skills/frontend/nextjs-pages.md</code>. page structure, getServerSideProps vs getStaticProps decision tree</li>
+        <li><code>skills/frontend/nextjs-api-routes.md</code>. API route conventions, error handling</li>
+        <li><code>skills/database/prisma-schema.md</code>. model naming, relation conventions, migration workflow</li>
+        <li><code>skills/shared/nextjs-auth.md</code>. NextAuth.js session handling patterns</li>
+      </ul>
+      
+      <p>Express + TypeORM + React:
+      </p>
+      <ul>
+        <li><code>skills/backend/express-routes.md</code>. router organization, middleware order</li>
+        <li><code>skills/database/typeorm-entities.md</code>. entity naming, relation decorators, migration generation</li>
+        <li><code>skills/frontend/react-query.md</code>. TanStack Query patterns, cache invalidation strategies</li>
+        <li><code>skills/shared/monorepo-conventions.md</code>. shared types, import paths across packages</li>
+      </ul>
+      
+      <p>FastAPI + SQLAlchemy + Vue:
+      </p>
+      <ul>
+        <li><code>skills/backend/fastapi-routers.md</code>. router organization, dependency injection patterns</li>
+        <li><code>skills/database/sqlalchemy-models.md</code>. declarative model conventions, Alembic migrations</li>
+        <li><code>skills/frontend/vue-composition.md</code>. Composition API patterns, Pinia store structure</li>
+        <li><code>skills/shared/openapi-types.md</code>. generating TypeScript types from FastAPI's OpenAPI schema</li>
+      </ul>
+      
+      <h2>Real-World Example: Adding a New Feature</h2>
+      
+      <p>Consider adding user authentication to a fullstack application. Your workflow with Claude skills:
+      </p>
+      
+      <ol>
+        <li>Design Phase: Use <code>api-rest-designer</code> to define auth endpoints</li>
+        <li>Backend Implementation: Apply <code>tdd</code> skill for test-driven auth logic</li>
+        <li>Frontend Integration: Invoke <code>frontend-design</code> for login/registration forms</li>
+        <li>Documentation: Use <code>pdf</code> skill to generate API docs</li>
+        <li>Database: Apply <code>postgres-schema-design</code> for users table</li>
+      </ol>
+      
+      <p>Each skill contributes specialized guidance while maintaining consistency across the full stack.
+      </p>
+      
+      <h2>Walking Through the Authentication Feature in Detail</h2>
+      
+      <p>A concrete walkthrough shows how skills interact in a real implementation session.
+      </p>
+      
+      <p>Step 1. API design. You invoke the <code>api-rest-designer</code> skill and ask for authentication endpoints. The skill enforces REST conventions and Claude returns:
+      </p>
+      
+      <pre><code>POST /api/v1/auth/register → 201 Created + { user, token }
+POST /api/v1/auth/login → 200 OK + { user, token, refreshToken }
+POST /api/v1/auth/refresh → 200 OK + { token }
+DELETE /api/v1/auth/logout → 204 No Content</code></pre>
+      
+      <p>Step 2. Database schema. You invoke <code>postgres-schema-designer</code> and describe the users table requirements. The skill enforces UUID primary keys and timestamp columns. Claude generates:
+      </p>
+      
+      <pre><code>CREATE TABLE users (
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ email VARCHAR(255) NOT NULL UNIQUE,
+ password_hash VARCHAR(255) NOT NULL,
+ role VARCHAR(50) NOT NULL DEFAULT &#x27;user&#x27;,
+ email_verified_at TIMESTAMP,
+ created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+ updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users(email);</code></pre>
+      
+      <p>Step 3. Test-driven backend. You invoke <code>tdd</code> and <code>auth-middleware</code> together. Claude writes failing tests first, then the implementation:
+      </p>
+      
+      <pre><code>// auth.test.ts. generated before implementation
+describe(&#x27;POST /api/v1/auth/login&#x27;, () =&gt; {
+ it(&#x27;returns 200 with tokens for valid credentials&#x27;, async () =&gt; {
+ const res = await request(app)
+ .post(&#x27;/api/v1/auth/login&#x27;)
+ .send({ email: &#x27;test@example.com&#x27;, password: &#x27;password123&#x27; });
+ expect(res.status).toBe(200);
+ expect(res.body).toHaveProperty(&#x27;token&#x27;);
+ expect(res.body).toHaveProperty(&#x27;refreshToken&#x27;);
+ });
+
+ it(&#x27;returns 401 for invalid password&#x27;, async () =&gt; {
+ const res = await request(app)
+ .post(&#x27;/api/v1/auth/login&#x27;)
+ .send({ email: &#x27;test@example.com&#x27;, password: &#x27;wrong&#x27; });
+ expect(res.status).toBe(401);
+ });
+});</code></pre>
+      
+      <p>Step 4. Frontend forms. You invoke <code>react-component-builder</code> and <code>form-validator</code>. Claude generates a typed LoginForm component with Zod schema validation and proper aria attributes in one pass, conforming to all your frontend skill rules.
+      </p>
+      
+      <p>This four-step flow produces consistent, reviewable output because every decision. naming, error codes, validation approach, component structure. is governed by a skill file rather than Claude's defaults.
+      </p>
+      
+      <h2>Best Practices</h2>
+      
+      <ul>
+        <li>Keep skills focused: Single-responsibility skills are easier to maintain and compose</li>
+        <li>Use descriptive names: Skill names should indicate their purpose at a glance</li>
+        <li>Include examples: Real code examples in skills improve output quality</li>
+        <li>Version your skills: Track changes in git alongside your project code</li>
+        <li>Test skill outputs: Verify that skill-generated code meets your standards</li>
+      </ul>
+      
+      <h2>Measuring Skill Effectiveness</h2>
+      
+      <p>Measuring Skill Effectiveness is worth tracking whether your skills are actually improving output quality. These are practical signals to watch:
+      </p>
+      
+      <ul>
+        <li>Revision rate: How often do you edit Claude's output before committing? Skills should reduce this over time.</li>
+        <li>Convention violations: Run your linter and type checker on Claude-generated code. Skills should drive violation counts toward zero.</li>
+        <li>Session length: If you need more follow-up prompts to get correct output, the relevant skill needs more specificity.</li>
+        <li>Cross-session consistency: Generate the same type of component in two separate sessions. If the results look meaningfully different, the skill needs stronger constraints.</li>
+      </ul>
+      
+      <p>A well-maintained skill library typically reduces first-draft revision time by 50-70% compared to general-purpose prompting, because Claude is working within your conventions rather than inventing its own.
+      </p>
+      
+      <h2>Conclusion</h2>
+      
+      <p>Claude .md skill files provide a powerful mechanism for standardizing fullstack development workflows. By creating layer-specific skills for frontend, backend, and database work, and combining them with cross-cutting skills for debugging and documentation, you build a personalized development assistant that understands your project conventions and accelerates delivery across the entire stack.
+      </p>
+      
+      <p>Start with skills for your most frequent tasks, then expand as you identify patterns worth codifying. Treat skills as living documents that evolve with your codebase. update them after incidents, after convention changes, and whenever Claude's output requires too many corrections. The investment in creating and maintaining your skill library pays dividends in consistent code quality, faster development cycles, and a team that ships with more confidence.
+      </p>
+      
+      
+      
+      <p><div class="mastery-cta">
+      </p>
+      
+      <p>This site was built by 5 autonomous agents running in tmux while I was in Bali. 2,500 articles. Zero manual work. 100% quality gate pass rate.
+      </p>
+      
+      <p>The orchestration configs, sprint templates, and quality gates that made that possible are in the Zovo Lifetime bundle. Along with 16 CLAUDE.md templates and 80 tested prompts.
+      </p>
+      
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=ccg&utm_medium=cta-skills&utm_campaign=claude-md-for-fullstack-projects-complete-guide">See how the pipeline works →</a></strong>
+      </p>
+      
+      <p>$99 once. I'm a solo dev in Da Nang. This is how I scale.
+      </p>
+      
+      <p></div>
+      </p>
+      
+      <p>Related Reading
+      </p>
+      
+      
+      
+      
+      
+      
+      <p><strong>Find the right skill →</strong> Browse 155+ skills in our Skill Finder.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/generator/">Generate your CLAUDE.md now</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-md-fullstack-projects-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "CLAUDE.md for Fullstack Projects (2026)",
+    "description": "Master CLAUDE.md files for fullstack development. Learn to create, organize, and deploy Claude Code configurations across frontend and backend.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-md-fullstack-projects-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Use Claude Code: Beginner Guide (2026) | ClaudHQ</title>
+  <meta name="description" content="Step-by-step beginner guide to Claude Code. Install, first session, CLAUDE.md setup, commands, workflows, and tips for productive AI-assisted coding.">
+  <link rel="canonical" href="https://claudhq.com/how-to-use-claude-code-beginner-guide/">
+  <meta property="og:title" content="How to Use Claude Code: Beginner Guide (2026) | ClaudHQ">
+  <meta property="og:description" content="Step-by-step beginner guide to Claude Code. Install, first session, CLAUDE.md setup, commands, workflows, and tips for productive AI-assisted coding.">
+  <meta property="og:url" content="https://claudhq.com/how-to-use-claude-code-beginner-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>How to Use Claude Code: Beginner Guide (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code is a terminal-based AI coding assistant made by Anthropic. You type what you want in plain English, and Claude reads your code, writes new code, runs commands, and makes edits directly in your project. It works in your terminal alongside your existing tools.
+      </p>
+      
+      <p>This guide takes you from zero to productive. No prior AI coding experience required. Every step includes what to type and what to expect.
+      </p>
+      
+      <h2>What Claude Code Can Do</h2>
+      
+      <p>Before installing, here is what Claude Code actually does:
+      </p>
+      
+      <ul>
+        <li><strong>Read your entire codebase</strong>: Claude sees your files, understands your project structure, and follows your patterns</li>
+        <li><strong>Write and edit code</strong>: Creates new files, edits existing ones, adds features, fixes bugs</li>
+        <li><strong>Run terminal commands</strong>: Executes build scripts, tests, git commands, anything your terminal can do</li>
+        <li><strong>Search across files</strong>: Finds functions, variables, patterns, and references faster than manual searching</li>
+        <li><strong>Debug issues</strong>: Reads error messages, traces problems, and applies fixes</li>
+        <li><strong>Explain code</strong>: Walks through unfamiliar code in plain language</li>
+      </ul>
+      
+      <p>Claude Code is not an IDE plugin. It runs in your terminal as a standalone program. You can use it alongside VS Code, Vim, JetBrains, or any editor.
+      </p>
+      
+      <h2>Prerequisites</h2>
+      
+      <p>You need three things:
+      </p>
+      
+      <ol>
+        <li><strong>Node.js 18 or later</strong>: Check with <code>node --version</code> in your terminal</li>
+        <li><strong>A terminal</strong>: Terminal.app (Mac), Windows Terminal, iTerm2, or any modern terminal</li>
+        <li><strong>An Anthropic account</strong>: Either a Pro/Max subscription ($20-$200/month) or an API key</li>
+      </ol>
+      
+      <h3>Which Plan Should You Choose?</h3>
+      
+      <ul>
+        <li><strong>Pro plan ($20/month)</strong>: Best for getting started. Includes Claude Code access with usage limits</li>
+        <li><strong>API key</strong>: Pay per use. Better for heavy users or teams. See pricing details</li>
+        <li><strong>Max plan ($100-$200/month)</strong>: Best for full-time use. Higher rate limits. See plan comparison</li>
+      </ul>
+      
+      <h2>Step 1: Install Claude Code</h2>
+      
+      <p>Open your terminal and run:
+      </p>
+      
+      <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+      
+      <p>If you use yarn:
+      </p>
+      
+      <pre><code>yarn global add @anthropic-ai/claude-code</code></pre>
+      
+      <p>Verify the installation:
+      </p>
+      
+      <pre><code>claude --version</code></pre>
+      
+      <p>You should see a version number. If you get "command not found," make sure your global npm bin directory is in your PATH.
+      </p>
+      
+      <h3>Troubleshooting Installation</h3>
+      
+      <p><strong>Permission error on Mac/Linux:</strong>
+      </p>
+      <pre><code>sudo npm install -g @anthropic-ai/claude-code</code></pre>
+      
+      <p><strong>npm not found:</strong>
+       Install Node.js from nodejs.org or use nvm:
+      </p>
+      <pre><code>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+nvm install 22</code></pre>
+      
+      <p><strong>Windows specific:</strong>
+       Use Windows Terminal (not cmd.exe). PowerShell works but may need execution policy adjustment:
+      </p>
+      <pre><code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code></pre>
+      
+      <h2>Step 2: Authenticate</h2>
+      
+      <p>Run Claude Code for the first time:
+      </p>
+      
+      <pre><code>claude</code></pre>
+      
+      <p>It will prompt you to log in. You have two options:
+      </p>
+      
+      <h3>Option A: Subscription Login (Pro/Max)</h3>
+      
+      <ol>
+        <li>Claude Code opens a browser window</li>
+        <li>Log in to your Anthropic account</li>
+        <li>Authorize Claude Code</li>
+        <li>Return to your terminal (authentication completes automatically)</li>
+      </ol>
+      
+      <h3>Option B: API Key</h3>
+      
+      <p>Set your API key as an environment variable:
+      </p>
+      
+      <pre><code>export ANTHROPIC_API_KEY=&quot;sk-ant-your-key-here&quot;</code></pre>
+      
+      <p>Add this line to your shell profile (<code>~/.zshrc</code> or <code>~/.bashrc</code>) so it persists:
+      </p>
+      
+      <pre><code>echo &#x27;export ANTHROPIC_API_KEY=&quot;sk-ant-your-key-here&quot;&#x27; &gt;&gt; ~/.zshrc
+source ~/.zshrc</code></pre>
+      
+      <p>Then start Claude Code:
+      </p>
+      
+      <pre><code>claude</code></pre>
+      
+      <h2>Step 3: Your First Session</h2>
+      
+      <p>Navigate to a project directory and start Claude Code:
+      </p>
+      
+      <pre><code>cd ~/projects/my-app
+claude</code></pre>
+      
+      <p>You will see a prompt where you can type. Try these first commands:
+      </p>
+      
+      <h3>Understanding Your Project</h3>
+      
+      <p>Type:
+      </p>
+      <pre><code>What does this project do? Give me a high-level overview.</code></pre>
+      
+      <p>Claude reads your files and explains the project structure. It looks at package.json, README files, source code, and configuration to understand the project.
+      </p>
+      
+      <h3>Making a Simple Change</h3>
+      
+      <p>Type:
+      </p>
+      <pre><code>Add a health check endpoint at GET /health that returns { status: &quot;ok&quot; }</code></pre>
+      
+      <p>Claude will:
+      </p>
+      <ol>
+        <li>Find your server file</li>
+        <li>Show you the proposed change</li>
+        <li>Ask for permission to edit the file</li>
+        <li>Apply the change</li>
+      </ol>
+      
+      <p>You will see a permission prompt like:
+      </p>
+      
+      <pre><code>Claude wants to edit src/server.ts
+Allow? (y/n)</code></pre>
+      
+      <p>Type <code>y</code> to approve. After a few sessions, you can configure auto-approval for trusted operations.
+      </p>
+      
+      <h3>Running a Command</h3>
+      
+      <p>Type:
+      </p>
+      <pre><code>Run the tests and tell me if anything fails</code></pre>
+      
+      <p>Claude will propose running your test command. You will see:
+      </p>
+      
+      <pre><code>Claude wants to run: npm test
+Allow? (y/n)</code></pre>
+      
+      <p>Approve it, and Claude runs the tests, reads the output, and tells you the results.
+      </p>
+      
+      <h2>Step 4: Understanding Permissions</h2>
+      
+      <p>Claude Code asks for permission before:
+      </p>
+      <ul>
+        <li>Writing or editing files</li>
+        <li>Running shell commands</li>
+        <li>Searching the web</li>
+      </ul>
+      
+      <p>The permission prompt shows exactly what Claude wants to do. You always have the choice to:
+      </p>
+      <ul>
+        <li><strong>y (yes)</strong>: Allow this specific action</li>
+        <li><strong>n (no)</strong>: Deny this action</li>
+        <li><strong>always</strong>: Always allow this type of action for this session</li>
+      </ul>
+      
+      <h3>Safe Defaults</h3>
+      
+      <p>When starting out, approve each action individually. This teaches you what Claude does for different requests. After you are comfortable, you can allow common operations automatically.
+      </p>
+      
+      <h2>Step 5: Set Up CLAUDE.md</h2>
+      
+      <p>A CLAUDE.md file tells Claude about your project's specific rules and preferences. Create one in your project root:
+      </p>
+      
+      <pre><code>touch CLAUDE.md</code></pre>
+      
+      <p>Add project-specific instructions. Here is a starter template:
+      </p>
+      
+      <pre><code># Project: My App
+
+## Stack
+- Runtime: Node.js 22
+- Framework: Express
+- Database: PostgreSQL
+- Language: TypeScript
+
+## Rules
+- Use async/await, never callbacks
+- All functions must have TypeScript return types
+- Keep functions under 50 lines
+- Use descriptive variable names (not abbreviations)
+- Always handle errors with try/catch
+
+## Testing
+- Run tests with: npm test
+- Test framework: Jest
+- Every new function needs a test
+
+## File Structure
+- src/routes/ - API endpoints
+- src/services/ - Business logic
+- src/models/ - Database models
+- src/utils/ - Helper functions</code></pre>
+      
+      <p>Claude reads this file at the start of every session. It follows these rules automatically. For advanced configuration, see our CLAUDE.md best practices guide.
+      </p>
+      
+      <h2>Step 6: Common Workflows</h2>
+      
+      <h3>Writing New Features</h3>
+      
+      <pre><code>Create a user registration endpoint that:
+- Accepts email and password
+- Validates email format
+- Hashes the password with bcrypt
+- Stores the user in the database
+- Returns the user ID</code></pre>
+      
+      <p>Claude will create the route file, service file, and potentially a test file. It follows your CLAUDE.md rules for code style.
+      </p>
+      
+      <h3>Fixing Bugs</h3>
+      
+      <pre><code>Users are reporting a 500 error when uploading large files.
+The error log shows &quot;PayloadTooLargeError&quot;.
+Find the issue and fix it.</code></pre>
+      
+      <p>Claude searches your codebase for file upload handling, identifies the body parser limit, and fixes it.
+      </p>
+      
+      <h3>Refactoring</h3>
+      
+      <pre><code>The function processOrder in src/services/orders.ts is 200 lines long.
+Break it into smaller functions, each under 50 lines.</code></pre>
+      
+      <p>Claude reads the function, identifies logical sections, extracts them into separate functions, updates the call sites, and verifies the refactoring with your tests.
+      </p>
+      
+      <h3>Adding Tests</h3>
+      
+      <pre><code>Write tests for src/services/auth.ts. Cover the happy path
+and edge cases: invalid email, weak password, duplicate user.</code></pre>
+      
+      <h3>Understanding Unfamiliar Code</h3>
+      
+      <pre><code>I just joined this project. Explain how the authentication flow
+works, from login to token verification.</code></pre>
+      
+      <p>Claude traces the code path and explains each step in plain language.
+      </p>
+      
+      <h3>Git Operations</h3>
+      
+      <pre><code>Show me what changed since the last commit, then create a commit
+with a clear message.</code></pre>
+      
+      <p>Claude runs <code>git diff</code>, analyzes the changes, and creates an appropriate commit.
+      </p>
+      
+      <h2>Step 7: Essential Commands</h2>
+      
+      <p>Within a Claude Code session, you can use these slash commands:
+      </p>
+      
+      <table>
+      <tr><th>Command</th><th>What It Does</th></tr>
+      <tr><td><code>/help</code></td><td>Show available commands</td></tr>
+      <tr><td><code>/clear</code></td><td>Clear conversation history</td></tr>
+      <tr><td><code>/compact</code></td><td>Summarize conversation to save context</td></tr>
+      <tr><td><code>/model</code></td><td>Switch between models (Sonnet, Opus, Haiku)</td></tr>
+      <tr><td><code>/cost</code></td><td>Show token usage and costs for this session</td></tr>
+      <tr><td><code>/permissions</code></td><td>View and modify permission settings</td></tr>
+      </table>
+      
+      <h3>The /compact Command</h3>
+      
+      <p>As your conversation grows, Claude's context window fills up. When you see messages about approaching context limits, use <code>/compact</code>:
+      </p>
+      
+      <pre><code>/compact</code></pre>
+      
+      <p>Claude summarizes the conversation history into a shorter form, freeing context space while retaining key information.
+      </p>
+      
+      <h3>Switching Models</h3>
+      
+      <p>By default, Claude Code uses Sonnet 4 (fast and capable). For complex tasks, switch to Opus:
+      </p>
+      
+      <pre><code>/model opus</code></pre>
+      
+      <p>For quick, simple tasks, switch to Haiku:
+      </p>
+      
+      <pre><code>/model haiku</code></pre>
+      
+      <p>Switch back when the task is done to save tokens and cost.
+      </p>
+      
+      <h2>Understanding the Permission System</h2>
+      
+      <p>Claude Code's permission system protects you from unintended changes. Here is how each permission level works in practice.
+      </p>
+      
+      <h3>File Read Permissions</h3>
+      
+      <p>Claude reads files freely without asking permission. This is safe because reading does not modify anything. When Claude says "Let me look at your code," it is reading files silently.
+      </p>
+      
+      <h3>File Write Permissions</h3>
+      
+      <p>Claude asks permission before creating or modifying files:
+      </p>
+      
+      <pre><code>Claude wants to write to src/services/auth.ts
+Allow? (y/n/always)</code></pre>
+      
+      <p>Choose "always" to auto-approve all file writes for this session. This is safe if you are using git (you can always revert).
+      </p>
+      
+      <h3>Bash Command Permissions</h3>
+      
+      <p>Claude asks permission before running any terminal command:
+      </p>
+      
+      <pre><code>Claude wants to run: npm install bcrypt
+Allow? (y/n/always)</code></pre>
+      
+      <p>Be cautious with "always" for bash commands. Some commands are destructive. A good practice: approve "always" for safe commands (npm test, npm run lint) but approve individually for others.
+      </p>
+      
+      <h3>Web Access Permissions</h3>
+      
+      <p>Claude asks before making any web requests:
+      </p>
+      
+      <pre><code>Claude wants to fetch: https://api.github.com/repos/...
+Allow? (y/n)</code></pre>
+      
+      <h3>Setting Up Auto-Approve Rules</h3>
+      
+      <p>After you are comfortable with Claude Code, configure auto-approval in <code>.claude/settings.json</code>:
+      </p>
+      
+      <pre><code>{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Read&quot;,
+      &quot;Write&quot;,
+      &quot;Edit&quot;,
+      &quot;Glob&quot;,
+      &quot;Grep&quot;
+    ]
+  }
+}</code></pre>
+      
+      <p>This auto-approves file operations while still requiring approval for bash commands and web access. It is a good balance of convenience and safety.
+      </p>
+      
+      <h3>The Importance of Git</h3>
+      
+      <p>Always work with git initialized. Before a Claude Code session:
+      </p>
+      
+      <pre><code>git status  # Make sure working tree is clean
+git stash   # Or commit current changes</code></pre>
+      
+      <p>After a session:
+      </p>
+      
+      <pre><code>git diff    # Review all changes
+git add -p  # Stage changes selectively</code></pre>
+      
+      <p>If Claude made a mistake, revert specific files:
+      </p>
+      
+      <pre><code>git checkout -- src/broken-file.ts</code></pre>
+      
+      <h2>Step 8: Working with Multiple Files</h2>
+      
+      <p>Claude Code handles multi-file operations naturally. Just describe what you want:
+      </p>
+      
+      <pre><code>Create a complete CRUD API for a &quot;products&quot; resource with:
+- Route file in src/routes/products.ts
+- Service file in src/services/products.ts
+- Type definitions in src/types/product.ts
+- Tests in tests/products.test.ts</code></pre>
+      
+      <p>Claude creates all four files with consistent types and imports between them.
+      </p>
+      
+      <h3>Large Codebase Navigation</h3>
+      
+      <p>For large projects, tell Claude where to focus:
+      </p>
+      
+      <pre><code>Look only in the src/billing/ directory. Find where we calculate
+tax rates and add support for Canadian provinces.</code></pre>
+      
+      <p>This prevents Claude from searching your entire codebase when you know where the relevant code lives.
+      </p>
+      
+      <h2>Step 9: Tips for Better Results</h2>
+      
+      <h3>Be Specific</h3>
+      
+      <pre><code># Vague (Claude has to guess)
+Make the API faster
+
+# Specific (Claude knows exactly what to do)
+Add Redis caching to the GET /users/:id endpoint with a 5-minute TTL</code></pre>
+      
+      <h3>Provide Context</h3>
+      
+      <pre><code># Without context
+Fix the login bug
+
+# With context
+Users on Safari cannot log in. The error is &quot;SameSite cookie not set&quot;.
+The login endpoint is in src/routes/auth.ts and uses express-session.</code></pre>
+      
+      <h3>Break Large Tasks into Steps</h3>
+      
+      <p>Instead of:
+      </p>
+      <pre><code>Rebuild the entire authentication system with OAuth, MFA,
+password reset, email verification, and rate limiting</code></pre>
+      
+      <p>Do this:
+      </p>
+      <pre><code>Step 1: Add OAuth2 login with Google. Just the basic flow first.</code></pre>
+      
+      <p>Then after that works:
+      </p>
+      <pre><code>Step 2: Add MFA with TOTP (Google Authenticator compatible).</code></pre>
+      
+      <h3>Use CLAUDE.md for Repeated Instructions</h3>
+      
+      <p>If you find yourself telling Claude the same thing every session, add it to CLAUDE.md:
+      </p>
+      
+      <pre><code>## Always
+- Run `npm run lint` after editing TypeScript files
+- Use named exports, not default exports
+- Add JSDoc comments to public functions</code></pre>
+      
+      <h3>Review Before Approving</h3>
+      
+      <p>Read Claude's proposed changes before pressing <code>y</code>. Claude is good but not perfect. Look for:
+      </p>
+      <ul>
+        <li>Correct file paths</li>
+        <li>Matching code style</li>
+        <li>No hardcoded values that should be environment variables</li>
+        <li>No accidental deletions</li>
+      </ul>
+      
+      <h2>Step 10: Next Steps</h2>
+      
+      <p>Once you are comfortable with the basics:
+      </p>
+      
+      <ol>
+        <li><strong>Set up hooks</strong>: Automate linting, formatting, and testing after Claude edits files</li>
+        <li><strong>Connect MCP servers</strong>: Give Claude access to your database, GitHub issues, or other tools</li>
+        <li><strong>Try spec-driven workflows</strong>: Write specs first, then have Claude implement them</li>
+        <li><strong>Explore cost optimization</strong>: Track and reduce your token spending</li>
+        <li><strong>Learn advanced commands</strong>: Power features for experienced users</li>
+      </ol>
+      
+      
+      <h2>Common Mistakes to Avoid</h2>
+      
+      <h3>Mistake 1: Not Using CLAUDE.md</h3>
+      
+      <p>Without a CLAUDE.md, Claude guesses your preferences. It might use tabs when you use spaces, or CommonJS when you use ESM. Always create a CLAUDE.md.
+      </p>
+      
+      <h3>Mistake 2: Context Window Overflow</h3>
+      
+      <p>Long sessions accumulate context. When Claude starts forgetting earlier instructions or making mistakes, use <code>/compact</code> or start a new session.
+      </p>
+      
+      <h3>Mistake 3: Never Checking Claude's Work</h3>
+      
+      <p>Claude can introduce subtle bugs. Always run your test suite after changes:
+      </p>
+      
+      <pre><code>Run the tests to verify nothing is broken</code></pre>
+      
+      <h3>Mistake 4: Too-Large Requests</h3>
+      
+      <p>Asking Claude to build an entire application in one prompt leads to errors. Break work into features, each building on the last.
+      </p>
+      
+      <h3>Mistake 5: Ignoring Cost</h3>
+      
+      <p>If using an API key, long sessions with Opus 4 can cost $10-50+. Check costs with <code>/cost</code> regularly. Use Sonnet 4 for most work and Opus 4 only for complex reasoning tasks.
+      </p>
+      
+      <h3>Mistake 6: Not Reading Error Messages</h3>
+      
+      <p>When Claude encounters errors, it shows you what happened. Read the error messages. They often indicate a simple fix like a missing package or wrong file path.
+      </p>
+      
+      <h2>Working with Different Project Types</h2>
+      
+      <h3>JavaScript/TypeScript Projects</h3>
+      
+      <p>Claude Code works best with typed languages. For JS/TS projects:
+      </p>
+      
+      <pre><code># Claude understands package.json, tsconfig.json, and .eslintrc
+# It follows your existing patterns automatically
+
+Add a new Express middleware that validates JWT tokens
+and attaches the user object to req.user</code></pre>
+      
+      <p>Claude reads your existing middleware, matches the pattern, and generates compatible code.
+      </p>
+      
+      <h3>Python Projects</h3>
+      
+      <pre><code># Claude understands requirements.txt, pyproject.toml, and setup.py
+
+Add a FastAPI endpoint that accepts CSV file uploads
+and returns a summary statistics JSON response</code></pre>
+      
+      <p>Claude uses your existing dependency versions and coding patterns.
+      </p>
+      
+      <h3>Full-Stack Projects</h3>
+      
+      <p>For projects with separate frontend and backend:
+      </p>
+      
+      <pre><code>Add a &quot;forgot password&quot; feature. This needs:
+1. A POST /api/auth/forgot-password endpoint
+2. An email sending function using our Resend integration
+3. A React form at /forgot-password that calls the endpoint</code></pre>
+      
+      <p>Claude handles cross-cutting features by working in both directories.
+      </p>
+      
+      <h3>Monorepos</h3>
+      
+      <p>Tell Claude about your monorepo structure in CLAUDE.md:
+      </p>
+      
+      <pre><code>## Monorepo Structure
+This is a pnpm workspace monorepo.
+- packages/api/ - Express API server
+- packages/web/ - Next.js frontend
+- packages/shared/ - Shared types and utilities
+- packages/email/ - Email templates
+
+When changing shared types, update both api and web packages.</code></pre>
+      
+      <h2>Keyboard Shortcuts</h2>
+      
+      <table>
+      <tr><th>Shortcut</th><th>Action</th></tr>
+      <tr><td><code>Ctrl+C</code></td><td>Cancel current Claude response</td></tr>
+      <tr><td><code>Ctrl+D</code></td><td>Exit Claude Code</td></tr>
+      <tr><td><code>Up arrow</code></td><td>Recall previous message</td></tr>
+      <tr><td><code>Enter</code></td><td>Send message</td></tr>
+      <tr><td><code>Shift+Enter</code></td><td>New line in message</td></tr>
+      <tr><td><code>Esc</code></td><td>Cancel current input</td></tr>
+      </table>
+      
+      <h2>Getting Help</h2>
+      
+      <ul>
+        <li><strong>In-session</strong>: Type <code>/help</code> for available commands</li>
+        <li><strong>Community resources</strong>: Check the Claude Code repos on GitHub for examples and templates</li>
+        <li><strong>Error guides</strong>: If you hit specific errors, see our troubleshooting guides</li>
+        <li><strong>Learning paths</strong>: Follow structured courses for deeper knowledge</li>
+        <li><strong>Feature announcements</strong>: Stay current with Claude Code news</li>
+      </ul>
+      
+      <h2>Frequently Asked Questions</h2>
+      
+      <h3>Do I need to be a programmer to use Claude Code?</h3>
+      <p>Basic terminal knowledge helps (navigating directories, running commands), but you do not need to be an experienced programmer. Claude Code explains what it does at each step.
+      </p>
+      
+      <h3>Does Claude Code work with any programming language?</h3>
+      <p>Yes. Claude Code supports Python, JavaScript, TypeScript, Go, Rust, Java, C++, Ruby, PHP, Swift, and many more. It is strongest with Python, JavaScript/TypeScript, and Rust.
+      </p>
+      
+      <h3>Will Claude Code mess up my code?</h3>
+      <p>Claude Code asks for permission before making changes. You can review every edit before approving. Use git so you can always revert. Running <code>git diff</code> after a session shows exactly what changed.
+      </p>
+      
+      <h3>How much does it cost?</h3>
+      <p>With a Pro subscription ($20/month), Claude Code is included with usage limits. With an API key, a typical session costs $0.10-$5.00 depending on complexity and model choice.
+      </p>
+      
+      <h3>Can Claude Code access the internet?</h3>
+      <p>Yes, but only when you approve it. Claude Code can search the web and fetch URLs. It asks for permission before accessing any external resource.
+      </p>
+      
+      <h3>Does my code get sent to Anthropic?</h3>
+      <p>Yes, code you discuss with Claude is sent to Anthropic's API for processing. Anthropic states they do not train on API/Claude Code data. For sensitive code, review Anthropic's data policies.
+      </p>
+      
+      <h3>Can multiple people on my team use Claude Code?</h3>
+      <p>Yes. Each person needs their own authentication (subscription or API key). Share a CLAUDE.md file through your git repo so everyone has the same project configuration.
+      </p>
+      
+      <h3>What is the difference between Claude Code and Claude.ai?</h3>
+      <p>Claude.ai is a web chat interface. Claude Code is a terminal application that can read, write, and execute code in your actual project. Claude Code is built for developers; Claude.ai is for general-purpose conversations.
+      </p>
+      
+      <h3>Can I use Claude Code in CI/CD pipelines?</h3>
+      <p>Yes. Use <code>claude --print &quot;your prompt&quot;</code> for non-interactive mode. This works in GitHub Actions, Jenkins, and other CI systems.
+      </p>
+      
+      <h3>How do I update Claude Code?</h3>
+      <pre><code>npm update -g @anthropic-ai/claude-code</code></pre>
+      
+      <p>Run this periodically to get new features and bug fixes.
+      </p>
+      
+      <h3>Can Claude Code work offline?</h3>
+      <p>No. Claude Code requires an internet connection to communicate with Anthropic's API. All processing happens on Anthropic's servers, not locally. Your code is sent to the API for analysis and the response is streamed back.
+      </p>
+      
+      <h3>What editors work with Claude Code?</h3>
+      <p>Claude Code runs in the terminal independently of your editor. You can use it alongside VS Code, Vim, Neovim, Emacs, JetBrains IDEs, Sublime Text, or any other editor. Changes Claude makes to files appear in your editor when the editor detects file changes on disk. There is also a dedicated VS Code extension that integrates Claude Code directly into the editor interface.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=how-to-use-claude-code-beginner-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "How to Use Claude Code: Beginner Guide (2026)",
+    "description": "Step-by-step beginner guide to Claude Code. Install, first session, CLAUDE.md setup, commands, workflows, and tips for productive AI-assisted coding.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/how-to-use-claude-code-beginner-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Rate Exceeded Error (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude rate exceeded errors across all 5 rate limit types. Includes retry code, token budgeting, and tier upgrade paths for the Anthropic API.">
+  <link rel="canonical" href="https://claudhq.com/claude-rate-exceeded-error-fix/">
+  <meta property="og:title" content="Fix Claude Rate Exceeded Error (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude rate exceeded errors across all 5 rate limit types. Includes retry code, token budgeting, and tier upgrade paths for the Anthropic API.">
+  <meta property="og:url" content="https://claudhq.com/claude-rate-exceeded-error-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Rate Exceeded Error (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+      
+      <pre><code>Error 429: Rate Limit Exceeded
+{
+  &quot;type&quot;: &quot;error&quot;,
+  &quot;error&quot;: {
+    &quot;type&quot;: &quot;rate_limit_error&quot;,
+    &quot;message&quot;: &quot;Number of request tokens has exceeded your per-minute rate limit&quot;
+  }
+}</code></pre>
+      
+      <p>A rate exceeded error means you have hit one of Anthropic's usage limits. Your API key is valid and the service is operational, but you have sent too many requests or too many tokens within a time window. This is the single most common error developers encounter when scaling Claude API usage.
+      </p>
+      
+
+      
+      <h2>The 5 Types of Rate Limits</h2>
+      
+      <p>Anthropic enforces five distinct rate limits. Each has different triggers, different headers, and different solutions.
+      </p>
+      
+      <h3>1. Requests Per Minute (RPM)</h3>
+      
+      <p>The simplest limit: too many API calls in a 60-second window, regardless of their size.
+      </p>
+      
+      <p><strong>How to detect it:</strong>
+      </p>
+      
+      <pre><code># Check your current RPM allocation
+curl -s -D - https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:10,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27; \
+  2&gt;&amp;1 | grep -i &quot;anthropic-ratelimit-requests&quot;</code></pre>
+      
+      <p>Look for these headers in the response:
+      </p>
+      <ul>
+        <li><code>anthropic-ratelimit-requests-limit</code> -- your RPM cap</li>
+        <li><code>anthropic-ratelimit-requests-remaining</code> -- requests left this window</li>
+        <li><code>anthropic-ratelimit-requests-reset</code> -- when the window resets (ISO 8601)</li>
+      </ul>
+      
+      <p><strong>Fix:</strong> Add request queuing with a rate limiter:
+      </p>
+      
+      <pre><code>import time
+import threading
+
+class RateLimiter:
+    def __init__(self, max_rpm: int):
+        self.max_rpm = max_rpm
+        self.tokens = max_rpm
+        self.lock = threading.Lock()
+        self.last_refill = time.monotonic()
+
+    def acquire(self):
+        while True:
+            with self.lock:
+                now = time.monotonic()
+                elapsed = now - self.last_refill
+                self.tokens = min(
+                    self.max_rpm,
+                    self.tokens + elapsed * (self.max_rpm / 60)
+                )
+                self.last_refill = now
+                if self.tokens &gt;= 1:
+                    self.tokens -= 1
+                    return
+            time.sleep(0.1)
+
+# Usage
+limiter = RateLimiter(max_rpm=50)  # Adjust to your tier
+for prompt in prompts:
+    limiter.acquire()
+    response = client.messages.create(
+        model=&quot;claude-sonnet-4-20250514&quot;,
+        max_tokens=1024,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}]
+    )</code></pre>
+      
+      <h3>2. Tokens Per Minute (TPM)</h3>
+      
+      <p>You have sent too many input or output tokens within a 60-second window. Large prompts burn through this limit fast.
+      </p>
+      
+      <p><strong>How to detect it:</strong>
+      </p>
+      
+      <p>The error message will specifically mention tokens:
+      </p>
+      <pre><code>&quot;Number of request tokens has exceeded your per-minute rate limit&quot;</code></pre>
+      
+      <p>Response headers:
+      </p>
+      <ul>
+        <li><code>anthropic-ratelimit-tokens-limit</code></li>
+        <li><code>anthropic-ratelimit-tokens-remaining</code></li>
+        <li><code>anthropic-ratelimit-tokens-reset</code></li>
+      </ul>
+      
+      <p><strong>Fix:</strong> Estimate token usage before sending and throttle accordingly:
+      </p>
+      
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+def estimate_and_send(messages, model=&quot;claude-sonnet-4-20250514&quot;, max_tokens=1024):
+    # Count input tokens first
+    count = client.count_tokens(model=model, messages=messages)
+    total_estimated = count.input_tokens + max_tokens
+
+    print(f&quot;Estimated total tokens: {total_estimated}&quot;)
+
+    # If this would exceed your budget, wait or split
+    if total_estimated &gt; 40000:
+        print(&quot;Large request — consider splitting&quot;)
+
+    return client.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=messages
+    )</code></pre>
+      
+      <h3>3. Tokens Per Day (TPD)</h3>
+      
+      <p>A daily cap on total token usage. Once exhausted, all requests fail until the 24-hour window resets.
+      </p>
+      
+      <p><strong>How to detect it:</strong>
+      </p>
+      
+      <pre><code>&quot;You have exceeded your daily token limit&quot;</code></pre>
+      
+      <p><strong>Fix:</strong> Implement daily usage tracking. See the detailed guide on token-per-day limits.
+      </p>
+      
+      <pre><code>import json
+from pathlib import Path
+from datetime import date
+
+USAGE_FILE = Path(&quot;token_usage.json&quot;)
+
+def track_usage(input_tokens: int, output_tokens: int):
+    today = str(date.today())
+    usage = json.loads(USAGE_FILE.read_text()) if USAGE_FILE.exists() else {}
+    day_usage = usage.get(today, {&quot;input&quot;: 0, &quot;output&quot;: 0})
+    day_usage[&quot;input&quot;] += input_tokens
+    day_usage[&quot;output&quot;] += output_tokens
+    usage[today] = day_usage
+    USAGE_FILE.write_text(json.dumps(usage, indent=2))
+    return day_usage
+
+def check_budget(daily_limit: int = 1_000_000) -&gt; bool:
+    today = str(date.today())
+    usage = json.loads(USAGE_FILE.read_text()) if USAGE_FILE.exists() else {}
+    day_usage = usage.get(today, {&quot;input&quot;: 0, &quot;output&quot;: 0})
+    total = day_usage[&quot;input&quot;] + day_usage[&quot;output&quot;]
+    return total &lt; daily_limit</code></pre>
+      
+      <h3>4. Concurrent Requests</h3>
+      
+      <p>Too many in-flight requests at the same time. This limit prevents any single API key from monopolizing server resources.
+      </p>
+      
+      <p><strong>How to detect it:</strong>
+      </p>
+      
+      <pre><code>&quot;Too many concurrent requests&quot;</code></pre>
+      
+      <p><strong>Fix:</strong> Use a semaphore to cap parallelism:
+      </p>
+      
+      <pre><code>import asyncio
+import anthropic
+
+MAX_CONCURRENT = 5  # Adjust to your tier
+
+async def process_batch(prompts: list[str]):
+    client = anthropic.AsyncAnthropic()
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT)
+
+    async def send_one(prompt: str):
+        async with semaphore:
+            return await client.messages.create(
+                model=&quot;claude-sonnet-4-20250514&quot;,
+                max_tokens=1024,
+                messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}]
+            )
+
+    tasks = [send_one(p) for p in prompts]
+    return await asyncio.gather(*tasks)</code></pre>
+      
+      <p>TypeScript equivalent:
+      </p>
+      
+      <pre><code>import Anthropic from &quot;@anthropic-ai/sdk&quot;;
+import pLimit from &quot;p-limit&quot;;
+
+const client = new Anthropic();
+const limit = pLimit(5); // Max 5 concurrent
+
+async function processBatch(prompts: string[]) {
+  const tasks = prompts.map((prompt) =&gt;
+    limit(() =&gt;
+      client.messages.create({
+        model: &quot;claude-sonnet-4-20250514&quot;,
+        max_tokens: 1024,
+        messages: [{ role: &quot;user&quot;, content: prompt }],
+      })
+    )
+  );
+  return Promise.all(tasks);
+}</code></pre>
+      
+      <h3>5. Monthly Spend Limits</h3>
+      
+      <p>Anthropic enforces per-organization spending caps. When reached, all API calls fail until the next billing cycle or until you request a limit increase.
+      </p>
+      
+      <p><strong>How to detect it:</strong>
+      </p>
+      
+      <pre><code>&quot;Monthly spend limit reached&quot;</code></pre>
+      
+      <p><strong>Fix:</strong> Monitor spending in the Anthropic Console under Settings > Billing. Set up alerts at 50%, 75%, and 90% thresholds. Request a limit increase through the Console if your usage justifies it.
+      </p>
+      
+      <h2>Rate Limit Tiers</h2>
+      
+      <p>Anthropic's rate limits scale with your usage tier. As you spend more, your limits automatically increase.
+      </p>
+      
+      <table>
+      <tr><th>Tier</th><th>RPM</th><th>TPM (Input)</th><th>TPM (Output)</th><th>Requirement</th></tr>
+      <tr><td>Free</td><td>5</td><td>20,000</td><td>4,000</td><td>Sign up</td></tr>
+      <tr><td>Build (Tier 1)</td><td>50</td><td>40,000</td><td>8,000</td><td>$5 spend</td></tr>
+      <tr><td>Build (Tier 2)</td><td>1,000</td><td>80,000</td><td>16,000</td><td>$40 spend</td></tr>
+      <tr><td>Build (Tier 3)</td><td>2,000</td><td>160,000</td><td>32,000</td><td>$200 spend</td></tr>
+      <tr><td>Build (Tier 4)</td><td>4,000</td><td>400,000</td><td>80,000</td><td>$1,000 spend</td></tr>
+      <tr><td>Scale</td><td>Custom</td><td>Custom</td><td>Custom</td><td>Contact sales</td></tr>
+      <tr><td>Enterprise</td><td>Custom</td><td>Custom</td><td>Custom</td><td>Annual contract</td></tr>
+      </table>
+      
+      <p>These numbers are for <code>claude-sonnet-4-20250514</code>. Limits vary by model -- Haiku typically has higher RPM allowances, and Opus has lower ones.
+      </p>
+      
+      <p>Check your current tier:
+      </p>
+      
+      <pre><code># Your tier is visible in the Anthropic Console
+# Direct API check: look at the rate limit headers from any successful response
+curl -s -D - https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:10,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27; \
+  2&gt;&amp;1 | grep &quot;anthropic-ratelimit&quot;</code></pre>
+      
+      <h2>Rate Limit Tiers by Plan: Complete Reference</h2>
+      
+      <p>Anthropic enforces different rate limits depending on your subscription plan (Claude.ai) or your API spending tier. This table consolidates every known limit across all access methods.
+      </p>
+      
+      <h3>Claude.ai and Claude Code Subscription Plans</h3>
+      
+      <table>
+      <tr><th>Plan</th><th>Monthly Cost</th><th>Claude Code Access</th><th>Messages/Day (Estimate)</th><th>Throttle Behavior</th></tr>
+      <tr><td>Free</td><td>$0</td><td>No</td><td>~30 messages</td><td>Hard cutoff, resets daily</td></tr>
+      <tr><td>Pro</td><td>$20</td><td>Limited</td><td>~100-150 messages</td><td>Soft throttle, slower responses after limit</td></tr>
+      <tr><td>Max 5x</td><td>$100</td><td>Full (heavy)</td><td>~500+ messages</td><td>5x Pro rate, extended thinking included</td></tr>
+      <tr><td>Max 20x</td><td>$200</td><td>Full (very heavy)</td><td>~2,000+ messages</td><td>20x Pro rate, priority during peak</td></tr>
+      <tr><td>Team</td><td>$30/user</td><td>Full (team)</td><td>~150/user</td><td>Per-seat limits, admin controls</td></tr>
+      <tr><td>Enterprise</td><td>Custom</td><td>Full (managed)</td><td>Custom</td><td>SLA-backed, dedicated capacity</td></tr>
+      </table>
+      
+      <p>Note: Claude.ai message limits are approximate and vary by model and message complexity. Anthropic does not publish exact per-message quotas for subscription plans.
+      </p>
+      
+      <h3>API Tier Limits (Detailed)</h3>
+      
+      <table>
+      <tr><th>Tier</th><th>Unlock Spend</th><th>RPM</th><th>Input TPM</th><th>Output TPM</th><th>Max Concurrent</th><th>Daily Token Cap</th></tr>
+      <tr><td>Free</td><td>$0</td><td>5</td><td>20,000</td><td>4,000</td><td>1</td><td>300,000</td></tr>
+      <tr><td>Tier 1</td><td>$5</td><td>50</td><td>40,000</td><td>8,000</td><td>5</td><td>1,000,000</td></tr>
+      <tr><td>Tier 2</td><td>$40</td><td>1,000</td><td>80,000</td><td>16,000</td><td>10</td><td>2,500,000</td></tr>
+      <tr><td>Tier 3</td><td>$200</td><td>2,000</td><td>160,000</td><td>32,000</td><td>20</td><td>5,000,000</td></tr>
+      <tr><td>Tier 4</td><td>$1,000</td><td>4,000</td><td>400,000</td><td>80,000</td><td>50</td><td>Unlimited</td></tr>
+      <tr><td>Scale</td><td>Contact sales</td><td>Custom</td><td>Custom</td><td>Custom</td><td>Custom</td><td>Custom</td></tr>
+      </table>
+      
+      <p>These limits apply to <code>claude-sonnet-4-20250514</code>. Different models have different limits:
+      </p>
+      
+      <table>
+      <tr><th>Model</th><th>RPM Modifier</th><th>TPM Modifier</th></tr>
+      <tr><td>Claude Opus 4</td><td>0.5x (half the RPM)</td><td>0.5x</td></tr>
+      <tr><td>Claude Sonnet 4</td><td>1x (baseline)</td><td>1x</td></tr>
+      <tr><td>Claude Haiku 4.5</td><td>2x (double the RPM)</td><td>2x</td></tr>
+      </table>
+      
+      <p>So if your tier allows 1,000 RPM for Sonnet, you get ~500 RPM for Opus and ~2,000 RPM for Haiku.
+      </p>
+      
+      <h3>How to Check Your Current Tier and Remaining Quota</h3>
+      
+      <p><strong>Method 1: Anthropic Console</strong>
+       Log into <a href="https://console.anthropic.com">console.anthropic.com</a>, go to Settings > Plans. Your current tier and usage are displayed.
+      </p>
+      
+      <p><strong>Method 2: API Response Headers</strong>
+       Every successful API response includes your current limits and remaining quota:
+      </p>
+      
+      <pre><code>curl -s -D - https://api.anthropic.com/v1/messages \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;model&quot;:&quot;claude-sonnet-4-20250514&quot;,&quot;max_tokens&quot;:5,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;test&quot;}]}&#x27; \
+  2&gt;&amp;1 | grep &quot;anthropic-ratelimit&quot;</code></pre>
+      
+      <p>Output:
+      </p>
+      <pre><code>anthropic-ratelimit-requests-limit: 1000
+anthropic-ratelimit-requests-remaining: 998
+anthropic-ratelimit-requests-reset: 2026-04-24T15:01:00Z
+anthropic-ratelimit-tokens-limit: 80000
+anthropic-ratelimit-tokens-remaining: 79200
+anthropic-ratelimit-tokens-reset: 2026-04-24T15:01:00Z</code></pre>
+      
+      <p><strong>Method 3: Programmatic Tier Detection</strong>
+      </p>
+      
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=5,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;test&quot;}]
+)
+
+headers = response._response.headers
+rpm_limit = int(headers.get(&quot;anthropic-ratelimit-requests-limit&quot;, 0))
+
+tier_map = {5: &quot;Free&quot;, 50: &quot;Tier 1&quot;, 1000: &quot;Tier 2&quot;, 2000: &quot;Tier 3&quot;, 4000: &quot;Tier 4&quot;}
+current_tier = tier_map.get(rpm_limit, f&quot;Custom ({rpm_limit} RPM)&quot;)
+remaining_rpm = headers.get(&quot;anthropic-ratelimit-requests-remaining&quot;)
+reset_time = headers.get(&quot;anthropic-ratelimit-requests-reset&quot;)
+
+print(f&quot;Current tier: {current_tier}&quot;)
+print(f&quot;RPM remaining: {remaining_rpm}&quot;)
+print(f&quot;Resets at: {reset_time}&quot;)</code></pre>
+      
+      <h3>When Rate Limits Reset</h3>
+      
+      <table>
+      <tr><th>Limit Type</th><th>Reset Window</th><th>Reset Behavior</th></tr>
+      <tr><td>RPM (Requests/Min)</td><td>60 seconds</td><td>Rolling window from your first request in the period</td></tr>
+      <tr><td>TPM (Tokens/Min)</td><td>60 seconds</td><td>Rolling window, input + output tokens combined</td></tr>
+      <tr><td>TPD (Tokens/Day)</td><td>~24 hours</td><td>Resets approximately 24 hours from your first request of the day</td></tr>
+      <tr><td>Concurrent</td><td>Immediate</td><td>Frees up as soon as an in-flight request completes</td></tr>
+      <tr><td>Monthly Spend</td><td>Billing cycle</td><td>Resets on your billing renewal date</td></tr>
+      </table>
+      
+      <p>The per-minute windows are rolling, not fixed. This means sending 50 requests at 2:00:00 PM does not guarantee 50 more requests at 2:01:00 PM. The window tracks the trailing 60 seconds continuously. Space requests evenly to avoid bursting against the limit.
+      </p>
+      
+      <h2>Rate Limit Response Headers</h2>
+      
+      <p>Every successful API response includes rate limit headers. Parse them to build proactive throttling:
+      </p>
+      
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=100,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello&quot;}]
+)
+
+# Access headers from the raw response
+# The Python SDK exposes these on the response object
+print(f&quot;Requests remaining: {response._response.headers.get(&#x27;anthropic-ratelimit-requests-remaining&#x27;)}&quot;)
+print(f&quot;Tokens remaining: {response._response.headers.get(&#x27;anthropic-ratelimit-tokens-remaining&#x27;)}&quot;)
+print(f&quot;Resets at: {response._response.headers.get(&#x27;anthropic-ratelimit-tokens-reset&#x27;)}&quot;)</code></pre>
+      
+      <p>When a 429 response arrives, the <code>retry-after</code> header tells you exactly how many seconds to wait:
+      </p>
+      
+      <pre><code>import anthropic
+import time
+
+try:
+    response = client.messages.create(
+        model=&quot;claude-sonnet-4-20250514&quot;,
+        max_tokens=1024,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}]
+    )
+except anthropic.RateLimitError as e:
+    retry_after = int(e.response.headers.get(&quot;retry-after&quot;, 60))
+    print(f&quot;Rate limited. Waiting {retry_after} seconds.&quot;)
+    time.sleep(retry_after)</code></pre>
+      
+      <h2>Exponential Backoff Implementation</h2>
+      
+      <p>The correct retry strategy for 429 errors uses exponential backoff with jitter and respects the <code>retry-after</code> header.
+      </p>
+      
+      <h3>Python</h3>
+      
+      <pre><code>import anthropic
+import time
+import random
+
+def call_with_backoff(client, max_retries=8, **kwargs):
+    for attempt in range(max_retries):
+        try:
+            return client.messages.create(**kwargs)
+        except anthropic.RateLimitError as e:
+            if attempt == max_retries - 1:
+                raise
+
+            # Prefer retry-after header if available
+            retry_after = e.response.headers.get(&quot;retry-after&quot;)
+            if retry_after:
+                delay = int(retry_after)
+            else:
+                delay = min(
+                    (2 ** attempt) + random.uniform(0, 1),
+                    120  # Cap at 2 minutes
+                )
+
+            print(f&quot;Rate limited (attempt {attempt + 1}), &quot;
+                  f&quot;waiting {delay:.1f}s&quot;)
+            time.sleep(delay)
+    raise RuntimeError(&quot;Max retries exhausted&quot;)</code></pre>
+      
+      <h3>TypeScript</h3>
+      
+      <pre><code>import Anthropic from &quot;@anthropic-ai/sdk&quot;;
+
+async function callWithBackoff(
+  client: Anthropic,
+  params: Anthropic.MessageCreateParams,
+  maxRetries = 8
+): Promise&lt;Anthropic.Message&gt; {
+  for (let attempt = 0; attempt &lt; maxRetries; attempt++) {
+    try {
+      return await client.messages.create(params);
+    } catch (err) {
+      if (
+        err instanceof Anthropic.RateLimitError &amp;&amp;
+        attempt &lt; maxRetries - 1
+      ) {
+        const retryAfter = err.headers?.get(&quot;retry-after&quot;);
+        const delay = retryAfter
+          ? parseInt(retryAfter, 10) * 1000
+          : Math.min(Math.pow(2, attempt) * 1000 + Math.random() * 1000, 120000);
+
+        console.log(
+          `Rate limited (attempt ${attempt + 1}), waiting ${(delay / 1000).toFixed(1)}s`
+        );
+        await new Promise((r) =&gt; setTimeout(r, delay));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error(&quot;Max retries exhausted&quot;);
+}</code></pre>
+      
+      <h2>Token Budgeting Strategies</h2>
+      
+      <p>Proactive token management prevents rate limit errors entirely.
+      </p>
+      
+      <h3>Pre-flight Token Estimation</h3>
+      
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+def budget_aware_call(messages, max_tokens=1024, budget_remaining=40000):
+    &quot;&quot;&quot;Only send if we have budget remaining in this window.&quot;&quot;&quot;
+    count = client.count_tokens(
+        model=&quot;claude-sonnet-4-20250514&quot;,
+        messages=messages
+    )
+    estimated_total = count.input_tokens + max_tokens
+
+    if estimated_total &gt; budget_remaining:
+        raise ValueError(
+            f&quot;Request needs ~{estimated_total} tokens, &quot;
+            f&quot;but only {budget_remaining} remain in this window&quot;
+        )
+
+    return client.messages.create(
+        model=&quot;claude-sonnet-4-20250514&quot;,
+        max_tokens=max_tokens,
+        messages=messages
+    )</code></pre>
+      
+      <h3>Sliding Window Token Tracker</h3>
+      
+      <pre><code>import time
+from collections import deque
+
+class TokenWindow:
+    def __init__(self, tpm_limit: int, window_seconds: int = 60):
+        self.tpm_limit = tpm_limit
+        self.window = window_seconds
+        self.usage = deque()  # (timestamp, tokens)
+
+    def record(self, tokens: int):
+        self.usage.append((time.monotonic(), tokens))
+        self._prune()
+
+    def available(self) -&gt; int:
+        self._prune()
+        used = sum(t for _, t in self.usage)
+        return max(0, self.tpm_limit - used)
+
+    def _prune(self):
+        cutoff = time.monotonic() - self.window
+        while self.usage and self.usage[0][0] &lt; cutoff:
+            self.usage.popleft()
+
+# Usage
+window = TokenWindow(tpm_limit=80000)
+
+for prompt in prompts:
+    estimated = estimate_tokens(prompt)
+    if window.available() &lt; estimated:
+        wait_time = 60 - (time.monotonic() - window.usage[0][0])
+        time.sleep(max(0, wait_time))
+    response = client.messages.create(...)
+    total_tokens = response.usage.input_tokens + response.usage.output_tokens
+    window.record(total_tokens)</code></pre>
+      
+      <h2>Circuit Breaker Pattern for Production Systems</h2>
+      
+      <p>Simple retry logic is not enough for production applications. When the API is persistently rate-limited, retrying every request wastes time and compute. A circuit breaker stops sending requests entirely when failure rates are high, then gradually resumes.
+      </p>
+      
+      <pre><code>import time
+import threading
+from enum import Enum
+
+class CircuitState(Enum):
+    CLOSED = &quot;closed&quot;        # Normal operation
+    OPEN = &quot;open&quot;            # Blocking all requests
+    HALF_OPEN = &quot;half_open&quot;  # Testing if API recovered
+
+class CircuitBreaker:
+    def __init__(self, failure_threshold=5, recovery_timeout=60):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.state = CircuitState.CLOSED
+        self.failure_count = 0
+        self.last_failure_time = 0
+        self.lock = threading.Lock()
+
+    def can_execute(self) -&gt; bool:
+        with self.lock:
+            if self.state == CircuitState.CLOSED:
+                return True
+            if self.state == CircuitState.OPEN:
+                if time.monotonic() - self.last_failure_time &gt; self.recovery_timeout:
+                    self.state = CircuitState.HALF_OPEN
+                    return True
+                return False
+            # HALF_OPEN: allow one test request
+            return True
+
+    def record_success(self):
+        with self.lock:
+            self.failure_count = 0
+            self.state = CircuitState.CLOSED
+
+    def record_failure(self):
+        with self.lock:
+            self.failure_count += 1
+            self.last_failure_time = time.monotonic()
+            if self.failure_count &gt;= self.failure_threshold:
+                self.state = CircuitState.OPEN
+
+# Usage with Anthropic SDK
+import anthropic
+
+client = anthropic.Anthropic()
+breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=30)
+
+def call_with_circuit_breaker(messages, **kwargs):
+    if not breaker.can_execute():
+        raise RuntimeError(&quot;Circuit breaker OPEN — API rate limited, waiting for recovery&quot;)
+
+    try:
+        result = client.messages.create(messages=messages, **kwargs)
+        breaker.record_success()
+        return result
+    except anthropic.RateLimitError:
+        breaker.record_failure()
+        raise</code></pre>
+      
+      <p>The circuit breaker transitions through three states: CLOSED (normal), OPEN (all requests blocked), and HALF_OPEN (one test request allowed). This prevents your application from hammering a rate-limited API and gives the rate limit window time to reset.
+      </p>
+      
+      
+      <p><em>These diagnostic steps are from <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta">The Claude Code Playbook</a> — 200 production-ready templates including error prevention rules and CLAUDE.md configs tested across 50+ project types.</em>
+      </p>
+      
+      <h2>Cost of Rate Limiting vs Batching</h2>
+      
+      <p>When you regularly hit rate limits, consider whether the Message Batches API is more cost-effective than real-time requests with retry logic.
+      </p>
+      
+      <table>
+      <tr><th>Approach</th><th>Cost per 1M tokens (input)</th><th>Latency</th><th>Rate limit impact</th></tr>
+      <tr><td>Real-time API</td><td>$3.00 (Sonnet)</td><td>1-10 seconds</td><td>Counts against RPM and TPM</td></tr>
+      <tr><td>Real-time + retries</td><td>$3.00 + wasted compute on failed attempts</td><td>Variable (retries add delay)</td><td>Exacerbates the problem</td></tr>
+      <tr><td>Message Batches API</td><td>$1.50 (Sonnet, 50% discount)</td><td>Minutes to hours</td><td>Does not count against real-time limits</td></tr>
+      </table>
+      
+      <p>For workloads that do not need immediate responses (nightly code analysis, bulk data processing, report generation), batching is strictly better: half the cost and zero rate limit pressure on your real-time quota.
+      </p>
+      
+      <p>For workloads that need responses within seconds (user-facing chat, interactive coding, CI pipeline steps), real-time with a circuit breaker is the right pattern.
+      </p>
+      
+      <h2>Upgrading Rate Limits</h2>
+      
+      <h3>Automatic Tier Progression</h3>
+      
+      <p>Anthropic automatically upgrades your tier based on cumulative spend. No action required -- once you cross a spend threshold, your limits increase within 24 hours.
+      </p>
+      
+      <h3>Requesting Custom Limits</h3>
+      
+      <p>For Scale and Enterprise tiers, contact Anthropic sales through the Console. Provide:
+      </p>
+      
+      <ul>
+        <li>Your current usage patterns (RPM, TPM averages and peaks)</li>
+        <li>Your projected growth over the next 3 months</li>
+        <li>Your use case (batch processing, real-time chat, agent workflows)</li>
+      </ul>
+      
+      <h3>Batching as a Rate Limit Bypass</h3>
+      
+      <p>The <a href="https://docs.anthropic.com/en/docs/build-with-claude/batch-processing">Message Batches API</a> processes requests asynchronously at 50% cost and does not count against your real-time rate limits:
+      </p>
+      
+      <pre><code># Batch API for non-urgent workloads
+batch = client.batches.create(
+    requests=[
+        {
+            &quot;custom_id&quot;: f&quot;req_{i}&quot;,
+            &quot;params&quot;: {
+                &quot;model&quot;: &quot;claude-sonnet-4-20250514&quot;,
+                &quot;max_tokens&quot;: 1024,
+                &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}]
+            }
+        }
+        for i, prompt in enumerate(prompts)
+    ]
+)
+print(f&quot;Batch created: {batch.id}&quot;)</code></pre>
+      
+      <h2>Claude Code and Rate Limits</h2>
+      
+      <p>Claude Code manages rate limits internally. When it hits a 429, it automatically waits and retries. You will see a message like:
+      </p>
+      
+      <pre><code>Waiting for rate limit to reset (retrying in 32s)...</code></pre>
+      
+      <p>To reduce how often this happens:
+      </p>
+      
+      <ol>
+        <li><strong>Use <code>/compact</code> frequently.</strong> Long conversations accumulate tokens. Compacting summarizes history and reduces the token payload on each subsequent request.</li>
+      </ol>
+      
+      <ol>
+        <li><strong>Avoid unnecessary file reads.</strong> Each file Claude Code reads adds to the input token count. Be specific about which files you want it to examine.</li>
+      </ol>
+      
+      <ol>
+        <li><strong>Set <code>max_tokens</code> in CLAUDE.md.</strong> This does not directly control Claude Code's behavior but signals intent for any API wrappers.</li>
+      </ol>
+      
+      <ol>
+        <li><strong>Switch models for simple tasks.</strong> Use <code>claude --model claude-haiku-4-20250514</code> for tasks that do not need deep reasoning. Haiku has higher rate limits and costs fewer tokens.</li>
+      </ol>
+      
+      <p>See the 429 retry-after guide for Claude Code specific troubleshooting.
+      </p>
+      
+      <h2>When "Rate Exceeded" Is Actually Overload (529)</h2>
+      
+      <p>If you receive a 529 error instead of 429, the issue is not your rate limit -- it is Anthropic's capacity. The 529 means the model is saturated across all users. Your retry strategy should be longer delays (start at 30 seconds) and you should consider falling back to a smaller model.
+      </p>
+      
+      <p>The key difference:
+      </p>
+      <ul>
+        <li><strong>429</strong>: You specifically have exceeded your allocation. Other users may be fine.</li>
+        <li><strong>529</strong>: The entire model is overloaded. All users are affected.</li>
+      </ul>
+      
+      <h2>CLAUDE.md Rules to Reduce Token Usage</h2>
+      
+      <pre><code># Token Efficiency
+- Always use the smallest model that can handle the task
+- Prefer targeted file reads over directory-wide searches
+- Summarize long outputs before including them in follow-up prompts
+- Use structured output (JSON) to reduce response verbosity
+- Batch related questions into single prompts instead of multiple calls
+- Set explicit max_tokens limits in every API call
+- Use system prompts for persistent instructions (avoids repeating in user messages)</code></pre>
+      
+      <h2>FAQ</h2>
+      
+      <h3>How do I check my current rate limit tier?</h3>
+      
+      <p>Log into the <a href="https://console.anthropic.com">Anthropic Console</a>. Navigate to Settings > Plans to see your current tier. Alternatively, inspect the <code>anthropic-ratelimit-requests-limit</code> header from any successful API response.
+      </p>
+      
+      <h3>Do rate limits apply per API key or per organization?</h3>
+      
+      <p>Rate limits apply at the organization level. Multiple API keys within the same organization share the same rate limit pool. Creating additional API keys does not increase your limits.
+      </p>
+      
+      <h3>Does the Anthropic Python SDK handle rate limits automatically?</h3>
+      
+      <p>The official SDK includes automatic retry logic with exponential backoff for 429 responses. However, the defaults may not suit your use case. For high-volume applications, implement custom retry logic as shown in the examples above.
+      </p>
+      
+      <h3>How do I handle rate limits in a multi-user application?</h3>
+      
+      <p>Implement request queuing at the application level. Use a shared rate limiter (Redis-backed for distributed systems) that tracks usage across all users and delays requests that would exceed the limit.
+      </p>
+      
+      <h3>Can I get higher rate limits without paying more?</h3>
+      
+      <p>No. Rate limits are tied to your spending tier. The only ways to increase them are to spend more (triggering automatic tier upgrades) or to contact Anthropic sales for a custom enterprise agreement.
+      </p>
+      
+      <h3>What happens if I hit the daily token limit?</h3>
+      
+      <p>All API requests will return 429 until the 24-hour window resets. The reset time is based on when your first request of the day was made, not midnight UTC. Plan your workloads to spread token usage across the full day.
+      </p>
+      
+      <h3>Are rate limits different for streaming vs non-streaming requests?</h3>
+      
+      <p>No. Streaming and non-streaming requests count equally against RPM and TPM limits. Streaming does not provide any rate limit advantage, though it can improve perceived latency.
+      </p>
+      
+      <h3>How do rate limits work with tool use and function calling?</h3>
+      
+      <p>Tool definitions count as input tokens. Each tool in your request schema adds tokens to the input count. If you define 20 tools, you may be sending 5,000-10,000 extra tokens per request. Prune unused tools to stay within TPM limits. See the tool token cost guide for details.
+      </p>
+      
+      <h3>Does prompt caching help with rate limits?</h3>
+      
+      <p>Yes. Prompt caching reduces the number of input tokens counted against your TPM limit for cached content. When your system prompt and conversation history are cached, subsequent requests consume fewer tokens from your per-minute allowance, effectively increasing your throughput without upgrading your tier.
+      </p>
+      
+      <h3>Can I use multiple API keys to bypass rate limits?</h3>
+      
+      <p>No. Rate limits are enforced at the organization level, not per API key. Creating additional keys within the same organization shares the same limit pool. The correct approach is to upgrade your tier through increased spend or contact Anthropic sales for custom limits.
+      </p>
+      
+      
+      
+      <p><strong>Estimate usage →</strong> Calculate your token consumption with our Token Estimator.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-rate-exceeded-error-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Rate Exceeded Error (2026)",
+    "description": "Fix Claude rate exceeded errors across all 5 rate limit types. Includes retry code, token budgeting, and tier upgrade paths for the Anthropic API.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-rate-exceeded-error-fix/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

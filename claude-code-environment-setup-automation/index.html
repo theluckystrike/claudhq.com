@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automate Claude Code Environment Setup (2026) | ClaudHQ</title>
+  <meta name="description" content="Automate your Claude Code environment setup with skills, hooks, and custom scripts. Save hours on configuration with reproducible dev environments.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-environment-setup-automation/">
+  <meta property="og:title" content="Automate Claude Code Environment Setup (2026) | ClaudHQ">
+  <meta property="og:description" content="Automate your Claude Code environment setup with skills, hooks, and custom scripts. Save hours on configuration with reproducible dev environments.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-environment-setup-automation/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Automate Claude Code Environment Setup (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Setting up a new development environment from scratch takes time. Installing dependencies, configuring tools, organizing project structures, and ensuring consistency across machines can consume hours. Claude Code offers powerful automation capabilities through its skills system and hook configurations, allowing you to automate repetitive environment setup tasks and get productive faster.
+      </p>
+      
+      <h2>Understanding the Automation Landscape</h2>
+      
+      <p>Claude Code provides two primary automation mechanisms: skills and hooks. Skills are specialized capability modules you invoke with commands like <code>/skill-name</code>, while hooks are shell commands that execute automatically before or after Claude processes your requests. Together, they form a comprehensive automation toolkit for environment setup.
+      </p>
+      
+      <p>The skills ecosystem includes dozens of pre-built solutions for common tasks. The <code>pdf</code> skill handles document processing, the <code>tdd</code> skill scaffolds test-driven development workflows, and the <code>frontend-design</code> skill accelerates UI component creation. When combined with custom hooks, you can build fully automated environment provisioning pipelines.
+      </p>
+      
+      <h2>Automation Mechanism Comparison</h2>
+      
+      <p>Understanding when to use skills versus hooks is the foundation of good automation design:
+      </p>
+      
+      <table>
+      <tr><th>Mechanism</th><th>Trigger</th><th>Scope</th><th>Best For</th></tr>
+      <tr><td>Skills</td><td>Manual invocation (<code>/skill-name</code>)</td><td>Session-wide</td><td>Project scaffolding, code generation, one-off operations</td></tr>
+      <tr><td>Hooks (PreToolUse)</td><td>Before any tool execution</td><td>Global or per-project</td><td>Validation, environment checks, safety gates</td></tr>
+      <tr><td>Hooks (PostToolUse)</td><td>After tool execution</td><td>Global or per-project</td><td>Logging, cleanup, follow-up actions</td></tr>
+      <tr><td>Hooks (AfterThinking)</td><td>After Claude plans a response</td><td>Global or per-project</td><td>Environment activation, dependency checks</td></tr>
+      <tr><td>Hooks (Stop)</td><td>When Claude finishes</td><td>Global or per-project</td><td>Summary reporting, test triggers</td></tr>
+      <tr><td>CLAUDE.md</td><td>Project load</td><td>Per-directory</td><td>Persistent context, project-specific rules</td></tr>
+      </table>
+      
+      <p>Skills are ideal for interactive, on-demand operations. Hooks are better suited for automatic, always-on enforcement that should happen regardless of what you ask Claude to do.
+      </p>
+      
+      <h2>Automating Python Environment Setup</h2>
+      
+      <p>Python projects require careful dependency management. Claude Code works exceptionally well with Python environments, and you can automate virtual environment creation and package installation.
+      </p>
+      
+      <p>Create a hook in your <code>~/.claude/settings.json</code> to automatically activate Python virtual environments:
+      </p>
+      
+      <pre><code>{
+ &quot;hooks&quot;: {
+ &quot;AfterThinking&quot;: [
+ &quot;if [ -f .venv/bin/activate ]; then source .venv/bin/activate; fi&quot;
+ ]
+ }
+}</code></pre>
+      
+      <p>This hook activates your virtual environment whenever Claude starts working in a directory containing one. You can extend this pattern to automatically install missing dependencies:
+      </p>
+      
+      <pre><code>Check and install requirements
+if [ -f requirements.txt ]; then
+ uv pip install -r requirements.txt
+fi</code></pre>
+      
+      <p>The <code>uv</code> package manager, recommended for modern Python workflows, installs packages significantly faster than pip and handles dependency resolution more reliably.
+      </p>
+      
+      <h2>Full Python Environment Bootstrap Hook</h2>
+      
+      <p>For a more complete Python setup, combine environment creation, activation, and dependency installation into a single hook script:
+      </p>
+      
+      <pre><code>#!/usr/bin/env bash
+~/.claude/hooks/python-env-setup.sh
+
+PYTHON_MIN_VERSION=&quot;3.11&quot;
+
+Check Python version meets minimum requirement
+python_version=$(python3 --version 2&gt;&amp;1 | awk &#x27;{print $2}&#x27;)
+if ! python3 -c &quot;import sys; sys.exit(0 if sys.version_info &gt;= (3, 11) else 1)&quot;; then
+ echo &quot;Warning: Python $python_version detected, minimum $PYTHON_MIN_VERSION required&quot;
+fi
+
+Create virtual environment if it doesn&#x27;t exist
+if [ ! -d .venv ]; then
+ echo &quot;Creating virtual environment with uv...&quot;
+ uv venv .venv
+fi
+
+Activate virtual environment
+source .venv/bin/activate
+
+Install or sync dependencies based on what&#x27;s available
+if [ -f pyproject.toml ]; then
+ uv sync
+elif [ -f requirements.txt ]; then
+ uv pip install -r requirements.txt
+fi
+
+Set environment variables from .env if present
+if [ -f .env ]; then
+ set -a
+ source .env
+ set +a
+fi
+
+echo &quot;Python environment ready: $(python --version)&quot;</code></pre>
+      
+      <p>Register this script in your <code>settings.json</code>:
+      </p>
+      
+      <pre><code>{
+ &quot;hooks&quot;: {
+ &quot;AfterThinking&quot;: [
+ &quot;bash ~/.claude/hooks/python-env-setup.sh&quot;
+ ]
+ }
+}</code></pre>
+      
+      <h2>Package Manager Comparison for Python</h2>
+      
+      <p>Different package managers suit different workflows. Here is how they compare for Claude Code automation:
+      </p>
+      
+      <table>
+      <tr><th>Tool</th><th>Speed</th><th>Lock Files</th><th>Workspace Support</th><th>Recommended Use Case</th></tr>
+      <tr><td>pip</td><td>Baseline</td><td><code>requirements.txt</code> (manual)</td><td>No</td><td>Legacy projects</td></tr>
+      <tr><td>pip + pip-tools</td><td>Moderate</td><td><code>requirements.txt</code> (compiled)</td><td>No</td><td>Pinned reproducible builds</td></tr>
+      <tr><td>uv</td><td>10–100x faster</td><td><code>uv.lock</code> (automatic)</td><td>Yes</td><td>Modern projects, CI</td></tr>
+      <tr><td>poetry</td><td>Moderate</td><td><code>poetry.lock</code></td><td>Yes</td><td>Projects with PyPI publishing</td></tr>
+      <tr><td>conda</td><td>Slow</td><td><code>environment.yml</code></td><td>Yes</td><td>Data science, non-Python deps</td></tr>
+      </table>
+      
+      <p>For Claude Code automation, <code>uv</code> is the clear winner due to its speed and deterministic resolution. A fresh <code>uv sync</code> on a 50-package project takes under 2 seconds on a warm cache versus 40+ seconds with pip.
+      </p>
+      
+      <h2>Project Initialization with Custom Skills</h2>
+      
+      <p>Rather than manually creating project structures, build a custom skill that scaffolds your preferred architecture. Create <code>~/.claude/skills/project-init.md</code>:
+      </p>
+      
+      <pre><code>Project Initialization Skill
+
+This skill creates a standard project structure with testing, documentation, and CI/CD configuration.
+
+Commands
+
+/scaffold python-api
+/scaffold react-app
+/scaffold node-service
+
+Implementation
+
+For Python API projects, create:
+- src/ directory with __init__.py
+- tests/ directory with conftest.py
+- pyproject.toml with standard configuration
+- .env.example for environment variables
+- Makefile with common targets</code></pre>
+      
+      <p>Invoke this skill in any new project directory with <code>/project-init</code> followed by your desired template. The skill executes immediately, creating the complete directory structure and configuration files.
+      </p>
+      
+      <h2>Detailed Python API Scaffold</h2>
+      
+      <p>When the skill runs, it should produce a project layout like this:
+      </p>
+      
+      <pre><code>my-api/
+ src/
+ my_api/
+ __init__.py
+ main.py # FastAPI/Flask entry point
+ routers/ # Route handlers
+ models/ # Pydantic/SQLAlchemy models
+ services/ # Business logic
+ config.py # Settings via pydantic-settings
+ tests/
+ conftest.py # Shared fixtures
+ unit/
+ integration/
+ .github/
+ workflows/
+ ci.yml
+ cd.yml
+ pyproject.toml
+ .env.example
+ .env # Gitignored
+ Makefile
+ CLAUDE.md # Claude context for this project</code></pre>
+      
+      <p>The <code>CLAUDE.md</code> file is especially important, it gives Claude Code persistent context about your project conventions without requiring you to re-explain them each session:
+      </p>
+      
+      <pre><code>Project: my-api
+
+Architecture
+FastAPI service with PostgreSQL (via asyncpg), Redis caching, deployed to AWS ECS.
+
+Code Conventions
+- Use async/await throughout; no synchronous DB calls
+- Pydantic models for all request/response schemas
+- Services layer handles all business logic; routers are thin
+- 100% type annotations required
+
+Testing
+Run tests: `make test`
+Run with coverage: `make coverage`
+
+Local Development
+Start services: `docker compose up -d`
+Run API: `make dev`</code></pre>
+      
+      <h2>Makefile Template for Automation</h2>
+      
+      <p>A well-designed <code>Makefile</code> reduces the mental overhead of remembering commands:
+      </p>
+      
+      <pre><code>.PHONY: dev test coverage lint format install clean
+
+Install dependencies
+install:
+	uv sync
+
+Start development server
+dev:
+	uv run uvicorn src.my_api.main:app --reload --port 8000
+
+Run tests
+test:
+	uv run pytest tests/ -v
+
+Run tests with coverage report
+coverage:
+	uv run pytest tests/ --cov=src --cov-report=html --cov-report=term-missing
+
+Lint code
+lint:
+	uv run ruff check src/ tests/
+	uv run mypy src/
+
+Format code
+format:
+	uv run ruff format src/ tests/
+
+Clean build artifacts
+clean:
+	rm -rf .venv dist build __pycache__ .pytest_cache .mypy_cache htmlcov
+
+Initialize local database
+db-init:
+	createdb myapp_dev || true
+	uv run alembic upgrade head
+
+Generate database migration
+db-migrate:
+	uv run alembic revision --autogenerate -m &quot;$(message)&quot;</code></pre>
+      
+      <h2>Automating Development Tool Installation</h2>
+      
+      <p>Development environments require consistent tool versions across team members. Use Claude Code hooks to enforce tool installation automatically.
+      </p>
+      
+      <p>Add a pre-processing hook that validates required tools:
+      </p>
+      
+      <pre><code>Verify required tools are installed
+required_tools=(&quot;node&quot; &quot;npm&quot; &quot;python3&quot; &quot;uv&quot; &quot;docker&quot;)
+
+for tool in &quot;${required_tools[@]}&quot;; do
+ if ! command -v $tool &amp;&gt; /dev/null; then
+ echo &quot;Warning: $tool is not installed&quot;
+ fi
+done</code></pre>
+      
+      <p>This runs before every Claude Code interaction, alerting you to missing dependencies. Extend the hook to automatically install tools using your preferred package manager.
+      </p>
+      
+      <h2>Automated Tool Installation by Platform</h2>
+      
+      <p>Detecting the platform and installing the right way saves time on new machine setup:
+      </p>
+      
+      <pre><code>#!/usr/bin/env bash
+~/.claude/hooks/ensure-tools.sh
+
+install_if_missing() {
+ local tool=$1
+ local install_cmd_mac=$2
+ local install_cmd_linux=$3
+
+ if command -v &quot;$tool&quot; &amp;&gt; /dev/null; then
+ return 0
+ fi
+
+ echo &quot;Installing missing tool: $tool&quot;
+ if [[ &quot;$OSTYPE&quot; == &quot;darwin&quot;* ]]; then
+ eval &quot;$install_cmd_mac&quot;
+ elif [[ &quot;$OSTYPE&quot; == &quot;linux-gnu&quot;* ]]; then
+ eval &quot;$install_cmd_linux&quot;
+ fi
+}
+
+Install uv (Python package manager)
+install_if_missing &quot;uv&quot; \
+ &quot;brew install uv&quot; \
+ &quot;curl -LsSf https://astral.sh/uv/install.sh | sh&quot;
+
+Install Docker if missing
+install_if_missing &quot;docker&quot; \
+ &quot;brew install --cask docker&quot; \
+ &quot;curl -fsSL https://get.docker.com | sh&quot;
+
+Install Node via fnm (fast node manager)
+install_if_missing &quot;fnm&quot; \
+ &quot;brew install fnm&quot; \
+ &quot;curl -fsSL https://fnm.vercel.app/install | bash&quot;
+
+Load fnm and install correct Node version if .node-version exists
+if command -v fnm &amp;&gt; /dev/null &amp;&amp; [ -f .node-version ]; then
+ eval &quot;$(fnm env)&quot;
+ fnm use --install-if-missing
+fi</code></pre>
+      
+      <h2>Tool Version Pinning</h2>
+      
+      <p>Pinning tool versions prevents "works on my machine" problems. Use these files in your project root:
+      </p>
+      
+      <pre><code>.node-version. used by fnm, nodenv
+20.11.0
+
+.python-version. used by pyenv, uv
+3.12.2
+
+.tool-versions. used by asdf (multi-tool)
+nodejs 20.11.0
+python 3.12.2
+terraform 1.7.4</code></pre>
+      
+      <p>Claude Code hooks can read these files and automatically switch to the correct versions before executing any commands.
+      </p>
+      
+      <h2>Database and Service Configuration</h2>
+      
+      <p>Modern applications depend on databases, caches, and external services. Automate their setup using the <code>supermemory</code> skill to persist configuration across sessions.
+      </p>
+      
+      <p>The <code>supermemory</code> skill stores and retrieves contextual information:
+      </p>
+      
+      <pre><code>/supermemory add database config: host=localhost, port=5432, name=myapp
+/supermemory get database config</code></pre>
+      
+      <p>Combine this with project-specific hooks that initialize local databases automatically:
+      </p>
+      
+      <pre><code>Initialize local database if it doesn&#x27;t exist
+if ! psql -lqt -U $USER | grep -q myapp_dev; then
+ createdb myapp_dev
+ psql -d myapp_dev -f schema.sql
+fi</code></pre>
+      
+      <h2>Docker Compose for Full Service Stacks</h2>
+      
+      <p>For multi-service applications, a <code>docker-compose.yml</code> at the project root lets Claude Code spin up the complete stack automatically:
+      </p>
+      
+      <pre><code>docker-compose.yml
+services:
+ postgres:
+ image: postgres:16-alpine
+ environment:
+ POSTGRES_DB: myapp_dev
+ POSTGRES_USER: myapp
+ POSTGRES_PASSWORD: localdev
+ ports:
+ - &quot;5432:5432&quot;
+ volumes:
+ - postgres_data:/var/lib/postgresql/data
+ - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+ healthcheck:
+ test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U myapp&quot;]
+ interval: 5s
+ timeout: 5s
+ retries: 5
+
+ redis:
+ image: redis:7-alpine
+ ports:
+ - &quot;6379:6379&quot;
+ healthcheck:
+ test: [&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]
+ interval: 5s
+ timeout: 3s
+ retries: 5
+
+ mailhog:
+ image: mailhog/mailhog:latest
+ ports:
+ - &quot;1025:1025&quot; # SMTP
+ - &quot;8025:8025&quot; # Web UI
+
+volumes:
+ postgres_data:</code></pre>
+      
+      <p>Add this hook to auto-start services when Claude Code opens a project with a <code>docker-compose.yml</code>:
+      </p>
+      
+      <pre><code>In project-level .claude/settings.json
+{
+ &quot;hooks&quot;: {
+ &quot;AfterThinking&quot;: [
+ &quot;if [ -f docker-compose.yml ] &amp;&amp; ! docker compose ps | grep -q &#x27;running&#x27;; then docker compose up -d; fi&quot;
+ ]
+ }
+}</code></pre>
+      
+      <h2>Service Readiness Checking</h2>
+      
+      <p>Starting services is not enough, you need to wait for them to be healthy before running migrations or tests:
+      </p>
+      
+      <pre><code>#!/usr/bin/env bash
+scripts/wait-for-services.sh
+
+wait_for_service() {
+ local name=$1
+ local check_cmd=$2
+ local max_attempts=30
+ local attempt=0
+
+ echo &quot;Waiting for $name...&quot;
+ until eval &quot;$check_cmd&quot; &amp;&gt; /dev/null; do
+ attempt=$((attempt + 1))
+ if [ $attempt -ge $max_attempts ]; then
+ echo &quot;Error: $name did not become ready after $max_attempts attempts&quot;
+ exit 1
+ fi
+ sleep 1
+ done
+ echo &quot;$name is ready&quot;
+}
+
+wait_for_service &quot;PostgreSQL&quot; &quot;pg_isready -h localhost -U myapp&quot;
+wait_for_service &quot;Redis&quot; &quot;redis-cli -h localhost ping&quot;</code></pre>
+      
+      <h2>Streamlining Frontend Development</h2>
+      
+      <p>Frontend projects benefit significantly from automated setup. The <code>frontend-design</code> skill accelerates component creation, but you should also automate your build tooling.
+      </p>
+      
+      <p>Configure a post-clone hook in your project:
+      </p>
+      
+      <pre><code>Auto-install npm dependencies on first clone
+if [ ! -d node_modules ]; then
+ npm install
+fi
+
+Run type checking
+npm run type-check</code></pre>
+      
+      <p>This ensures every team member starts with identical dependency versions and catches type errors immediately.
+      </p>
+      
+      <h2>Complete Frontend Environment Hook</h2>
+      
+      <p>A production-grade frontend hook handles Node version switching, dependency installation, and environment variable validation:
+      </p>
+      
+      <pre><code>#!/usr/bin/env bash
+~/.claude/hooks/frontend-env-setup.sh
+
+Switch to correct Node version
+if command -v fnm &amp;&gt; /dev/null; then
+ eval &quot;$(fnm env)&quot;
+ if [ -f .node-version ] || [ -f .nvmrc ]; then
+ fnm use --install-if-missing 2&gt;/dev/null
+ fi
+fi
+
+Install dependencies if needed
+if [ -f package.json ]; then
+ if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then
+ echo &quot;Installing Node dependencies...&quot;
+ if [ -f pnpm-lock.yaml ]; then
+ pnpm install --frozen-lockfile
+ elif [ -f yarn.lock ]; then
+ yarn install --frozen-lockfile
+ else
+ npm ci
+ fi
+ fi
+fi
+
+Check required env vars are set
+if [ -f .env.example ]; then
+ missing_vars=()
+ while IFS= read -r line; do
+ # Extract variable names (skip comments and empty lines)
+ var_name=$(echo &quot;$line&quot; | grep -oP &#x27;^[A-Z_]+(?==)&#x27; || true)
+ if [ -n &quot;$var_name&quot; ] &amp;&amp; [ -z &quot;${!var_name}&quot; ]; then
+ missing_vars+=(&quot;$var_name&quot;)
+ fi
+ done &lt; .env.example
+
+ if [ ${#missing_vars[@]} -gt 0 ]; then
+ echo &quot;Warning: Missing environment variables: ${missing_vars[*]}&quot;
+ echo &quot;Copy .env.example to .env and fill in values&quot;
+ fi
+fi</code></pre>
+      
+      <h2>Frontend Tooling Comparison</h2>
+      
+      <p>Choosing the right tooling stack affects automation speed significantly:
+      </p>
+      
+      <table>
+      <tr><th>Category</th><th>Option</th><th>Build Speed</th><th>Dev Server HMR</th><th>Recommendation</th></tr>
+      <tr><td>Package Manager</td><td>npm</td><td>Baseline</td><td>.</td><td>Legacy projects</td></tr>
+      <tr><td>Package Manager</td><td>yarn</td><td>~2x faster</td><td>.</td><td>Monorepos</td></tr>
+      <tr><td>Package Manager</td><td>pnpm</td><td>~3x faster</td><td>.</td><td>New projects</td></tr>
+      <tr><td>Bundler</td><td>Webpack 5</td><td>Slow</td><td>~1-3s</td><td>Avoid for new projects</td></tr>
+      <tr><td>Bundler</td><td>Vite</td><td>Fast startup</td><td><100ms</td><td>New projects</td></tr>
+      <tr><td>Bundler</td><td>Turbopack</td><td>Very fast</td><td><50ms</td><td>Next.js projects</td></tr>
+      <tr><td>Type Checking</td><td>tsc</td><td>Moderate</td><td>.</td><td>All TS projects</td></tr>
+      <tr><td>Linting</td><td>ESLint</td><td>Moderate</td><td>.</td><td>All JS/TS projects</td></tr>
+      <tr><td>Linting</td><td>Biome</td><td>10–30x faster</td><td>.</td><td>Performance-critical CI</td></tr>
+      </table>
+      
+      <p>For Claude Code automation, pnpm with Vite gives the fastest feedback loop during environment setup and development.
+      </p>
+      
+      <h2>Continuous Integration Environment Setup</h2>
+      
+      <p>Automated environment setup extends to CI/CD pipelines. Use Claude Code to generate pipeline configurations that match your local setup:
+      </p>
+      
+      <pre><code>/tdd generate github-actions workflow for Python API with pytest coverage</code></pre>
+      
+      <p>The <code>tdd</code> skill creates test scaffolding and generates CI workflows with appropriate triggers, caching strategies, and test reporting. This ensures your local development environment precisely matches what runs in production.
+      </p>
+      
+      <h2>GitHub Actions Workflow with Caching</h2>
+      
+      <p>A well-optimized CI workflow uses caching to keep environment setup fast:
+      </p>
+      
+      <pre><code>.github/workflows/ci.yml
+name: CI
+
+on:
+ push:
+ branches: [main, develop]
+ pull_request:
+ branches: [main]
+
+jobs:
+ test:
+ runs-on: ubuntu-latest
+ services:
+ postgres:
+ image: postgres:16-alpine
+ env:
+ POSTGRES_DB: myapp_test
+ POSTGRES_USER: myapp
+ POSTGRES_PASSWORD: testpass
+ ports:
+ - 5432:5432
+ options: &gt;-
+ --health-cmd pg_isready
+ --health-interval 10s
+ --health-timeout 5s
+ --health-retries 5
+
+ steps:
+ - uses: actions/checkout@v4
+
+ - name: Install uv
+ uses: astral-sh/setup-uv@v4
+ with:
+ version: &quot;latest&quot;
+ enable-cache: true
+
+ - name: Set up Python
+ run: uv python install 3.12
+
+ - name: Install dependencies
+ run: uv sync --all-extras
+
+ - name: Run linting
+ run: |
+ uv run ruff check src/ tests/
+ uv run mypy src/
+
+ - name: Run tests
+ env:
+ DATABASE_URL: postgresql://myapp:testpass@localhost:5432/myapp_test
+ run: |
+ uv run alembic upgrade head
+ uv run pytest tests/ --cov=src --cov-report=xml -v
+
+ - name: Upload coverage
+ uses: codecov/codecov-action@v4
+ with:
+ files: coverage.xml</code></pre>
+      
+      <h2>CI vs Local Environment Parity</h2>
+      
+      <p>The most common source of CI failures is environment drift between local and CI. This table shows what to align:
+      </p>
+      
+      <table>
+      <tr><th>Concern</th><th>Local</th><th>CI</th><th>Alignment Strategy</th></tr>
+      <tr><td>Python version</td><td><code>.python-version</code></td><td><code>uv python install</code> from same file</td><td>Commit <code>.python-version</code></td></tr>
+      <tr><td>Dependencies</td><td><code>uv.lock</code></td><td><code>uv sync --frozen</code></td><td>Always commit <code>uv.lock</code></td></tr>
+      <tr><td>Environment vars</td><td><code>.env</code> (local)</td><td>GitHub Secrets</td><td>Map secrets to same var names</td></tr>
+      <tr><td>Services</td><td><code>docker-compose.yml</code></td><td><code>services:</code> block</td><td>Keep versions identical</td></tr>
+      <tr><td>Database schema</td><td><code>alembic upgrade head</code></td><td>Same command</td><td>Run in both</td></tr>
+      </table>
+      
+      <h2>Practical Workflow Example</h2>
+      
+      <p>Here's a complete automation sequence for starting a new Python web service:
+      </p>
+      
+      <ol>
+        <li>Create project directory: <code>mkdir my-api &amp;&amp; cd my-api</code></li>
+        <li>Initialize with your custom skill: <code>/scaffold python-api</code></li>
+        <li>Activate virtual environment (automatic via hook)</li>
+        <li>Install dependencies (automatic via hook)</li>
+        <li>Run initial tests: <code>/tdd run</code></li>
+      </ol>
+      
+      <p>Each step executes automatically, transforming a blank directory into a production-ready project within seconds.
+      </p>
+      
+      <h2>End-to-End Timing Comparison</h2>
+      
+      <p>Here is what automated setup saves compared to manual setup on a typical Python API project:
+      </p>
+      
+      <table>
+      <tr><th>Task</th><th>Manual Time</th><th>Automated Time</th><th>Savings</th></tr>
+      <tr><td>Create directory structure</td><td>5 min</td><td>5 sec</td><td>~4.9 min</td></tr>
+      <tr><td>Create <code>pyproject.toml</code></td><td>10 min</td><td>0 sec (template)</td><td>10 min</td></tr>
+      <tr><td>Set up virtual environment</td><td>2 min</td><td>10 sec</td><td>~1.8 min</td></tr>
+      <tr><td>Install dependencies</td><td>3 min</td><td>30 sec (uv)</td><td>~2.5 min</td></tr>
+      <tr><td>Configure linting/typing</td><td>8 min</td><td>0 sec (template)</td><td>8 min</td></tr>
+      <tr><td>Write <code>Makefile</code></td><td>10 min</td><td>0 sec (template)</td><td>10 min</td></tr>
+      <tr><td>Write <code>CLAUDE.md</code></td><td>5 min</td><td>2 min (assisted)</td><td>3 min</td></tr>
+      <tr><td>Set up GitHub Actions</td><td>15 min</td><td>2 min (tdd skill)</td><td>13 min</td></tr>
+      <tr><td>Total</td><td>~58 min</td><td>~5 min</td><td>~53 min</td></tr>
+      </table>
+      
+      <p>That saving compounds across every project you create and every new team member who onboards.
+      </p>
+      
+      <h2>Organizing Your Automation as a Library</h2>
+      
+      <p>As your hooks and skills grow, organize them into a versioned library you can share across machines:
+      </p>
+      
+      <pre><code>~/.claude/
+ settings.json # Global hooks configuration
+ skills/
+ project-init.md # Project scaffolding skill
+ db-setup.md # Database initialization skill
+ ci-gen.md # CI/CD generation skill
+ hooks/
+ python-env-setup.sh # Python environment bootstrap
+ frontend-env-setup.sh # Node/frontend bootstrap
+ ensure-tools.sh # Tool installation checks
+ wait-for-services.sh # Service readiness helper</code></pre>
+      
+      <p>Store this directory in a private dotfiles repository and sync it across machines:
+      </p>
+      
+      <pre><code>Clone dotfiles on a new machine
+git clone git@github.com:yourname/dotfiles.git ~/dotfiles
+
+Symlink Claude configuration
+ln -s ~/dotfiles/.claude ~/.claude
+
+Permissions for hook scripts
+chmod +x ~/.claude/hooks/*.sh</code></pre>
+      
+      <h2>Best Practices for Environment Automation</h2>
+      
+      <p>Keep your automation maintainable by organizing hooks and skills logically. Group related hooks by functionality, document custom skills with clear commands and examples, and version control your automation scripts alongside your projects.
+      </p>
+      
+      <p>Test automation thoroughly before relying on it. Run hooks manually first to verify behavior, then add error handling for edge cases. Claude Code's hook system provides sufficient flexibility for complex scenarios, but simpler solutions are easier to maintain.
+      </p>
+      
+      <p>Additional practices that prevent common problems:
+      </p>
+      
+      <p>Idempotency: Every hook should be safe to run multiple times. Check whether a virtual environment exists before creating it. Check whether a database exists before creating it. This prevents destructive side effects when hooks run in loops.
+      </p>
+      
+      <p>Graceful degradation: Hooks should warn, not fail, when optional tools are missing. A missing Redis installation should print a warning, not crash your entire Claude Code session.
+      </p>
+      
+      <p>Environment isolation: Use project-level <code>.claude/settings.json</code> for project-specific hooks rather than polluting your global <code>~/.claude/settings.json</code>. This keeps automation scoped to where it is relevant.
+      </p>
+      
+      <p>Logging: Write hook output to a log file for debugging. Use <code>tee ~/.claude/hooks.log</code> to capture output without suppressing it from the terminal.
+      </p>
+      
+      <h2>Conclusion</h2>
+      
+      <p>Claude Code environment setup automation transforms repetitive configuration tasks into one-command operations. By using skills like <code>pdf</code>, <code>tdd</code>, <code>supermemory</code>, and <code>frontend-design</code> alongside custom hooks, you can build powerful automation pipelines that provision complete development environments automatically.
+      </p>
+      
+      <p>Start with simple automations, virtual environment activation, dependency installation, and progressively add sophistication as your needs grow. The time invested in setup automation pays dividends across every project you create.
+      </p>
+      
+      
+      
+      
+      <p><div class="mastery-cta">
+      </p>
+      
+      <p>This took me 3 hours to figure out. I put it in a CLAUDE.md so I'd never figure it out again. Now Claude gets it right on the first try, every project.
+      </p>
+      
+      <p>16 framework templates. Next.js, FastAPI, Laravel, Rails, Go, Rust, Terraform, and 9 more. Each one 300+ lines of "here's exactly how this stack works." Copy into your project. Done.
+      </p>
+      
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=ccg&utm_medium=cta-config&utm_campaign=claude-code-environment-setup-automation">See the templates →</a></strong>
+      </p>
+      
+      <p>$99 once. Yours forever. I keep adding templates monthly.
+      </p>
+      
+      <p></div>
+      </p>
+      
+      <p>Related Reading
+      </p>
+      
+      
+      
+      
+      
+      
+      <p><strong>Get started →</strong> Generate your project setup with our Project Starter.
+      </p>
+      
+      <p><strong>Configure permissions →</strong> Build your settings with our Permission Configurator.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-environment-setup-automation">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Automate Claude Code Environment Setup (2026)",
+    "description": "Automate your Claude Code environment setup with skills, hooks, and custom scripts. Save hours on configuration with reproducible dev environments.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-environment-setup-automation/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

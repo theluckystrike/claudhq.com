@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Git Workflow Best Practices (2026) | ClaudHQ</title>
+  <meta name="description" content="Claude Code git workflow best practices: formatting conventions, commit patterns, and documentation that improve AI-assisted development. Tested 2026.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-git-workflow-best-practices/">
+  <meta property="og:title" content="Claude Code Git Workflow Best Practices (2026) | ClaudHQ">
+  <meta property="og:description" content="Claude Code git workflow best practices: formatting conventions, commit patterns, and documentation that improve AI-assisted development. Tested 2026.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-git-workflow-best-practices/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Git Workflow Best Practices (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code transforms how developers interact with Git by providing intelligent assistance throughout the version control lifecycle. This guide covers practical workflows, command patterns, and skill integrations that will make your Git experience smoother and more productive.
+      </p>
+      
+      <h2>Setting Up Claude Code for Git Operations</h2>
+      
+      <p>Before diving into workflows, ensure Claude Code has access to your repository context. When working in a Git repository, Claude automatically detects the environment and can assist with operations ranging from simple commits to complex rebases.
+      </p>
+      
+      <p>The key to effective Git workflows with Claude Code lies in providing clear context. Always specify the repository path and describe your intent clearly:
+      </p>
+      
+      <pre><code>I&#x27;m working in ~/projects/myapp and need to create a feature branch for user authentication.</code></pre>
+      
+      <p>Claude will then guide you through the process, suggest appropriate branch names following your team's conventions, and help set up the branch correctly.
+      </p>
+      
+      <h2>What Claude Code Can and Cannot Do with Git</h2>
+      
+      <p>Understanding the boundaries of Claude Code's Git capabilities prevents surprises:
+      </p>
+      
+      <table>
+      <tr><th>Task</th><th>Claude Code Capability</th><th>Notes</th></tr>
+      <tr><td>Composing commit messages</td><td>Excellent. reads diffs, understands context</td><td>Works best when you describe the intent too</td></tr>
+      <tr><td>Branch naming</td><td>Good. follows your stated conventions</td><td>Tell Claude your naming pattern once</td></tr>
+      <tr><td>Merge conflict resolution</td><td>Good. understands both sides</td><td>Always review suggestions before accepting</td></tr>
+      <tr><td>Interactive rebase planning</td><td>Moderate. can plan, you execute</td><td><code>git rebase -i</code> requires your input</td></tr>
+      <tr><td>Git bisect</td><td>Moderate. can guide the process</td><td>You run the test commands</td></tr>
+      <tr><td>Force push protection</td><td>Passive. will warn if asked</td><td>Does not block you from doing it</td></tr>
+      <tr><td>Gitignore generation</td><td>Excellent. knows common patterns</td><td>Specify your stack</td></tr>
+      <tr><td>Pre-commit hook setup</td><td>Excellent</td><td>Can write the hook script for you</td></tr>
+      </table>
+      
+      <p>The short version: Claude Code is excellent at the high-judgment tasks (what should this commit say? which files belong in this commit? what caused this conflict?) and comfortable guiding the procedural tasks. You remain in control of all destructive operations.
+      </p>
+      
+      <h2>Commit Message Best Practices</h2>
+      
+      <p>Writing clear, descriptive commit messages is crucial for project maintainability. Claude Code excels at helping craft messages that follow conventional commit formats while accurately describing changes.
+      </p>
+      
+      <h2>Using Claude for Commit Composition</h2>
+      
+      <p>Instead of generic messages like "fixed stuff," use Claude's understanding of your changes:
+      </p>
+      
+      <pre><code>Stage your changes first
+git add -A
+
+Ask Claude to analyze and propose a commit message
+In your Claude session, say:
+&quot;Review the staged changes and suggest a conventional commit message&quot;</code></pre>
+      
+      <p>Claude will analyze the diff, identify the scope of changes, and propose messages in formats like:
+      </p>
+      
+      <pre><code>feat(auth): add OAuth2 login flow with Google provider
+
+- Implement OAuth2 authentication using passport.js
+- Add user session management with express-session
+- Store provider tokens securely in database
+- Add login/logout endpoints</code></pre>
+      
+      <h2>Understanding Conventional Commit Types</h2>
+      
+      <p>Conventional Commits is the format most tools (semantic-release, changelogen, release-please) use to automate versioning and changelogs. Claude Code knows these types and applies them correctly:
+      </p>
+      
+      <table>
+      <tr><th>Type</th><th>Meaning</th><th>Triggers Version Bump</th></tr>
+      <tr><td><code>feat</code></td><td>New feature</td><td>Minor (1.x.0)</td></tr>
+      <tr><td><code>fix</code></td><td>Bug fix</td><td>Patch (1.0.x)</td></tr>
+      <tr><td><code>perf</code></td><td>Performance improvement</td><td>Patch</td></tr>
+      <tr><td><code>refactor</code></td><td>Code change that neither fixes a bug nor adds a feature</td><td>None</td></tr>
+      <tr><td><code>docs</code></td><td>Documentation only</td><td>None</td></tr>
+      <tr><td><code>test</code></td><td>Adding or correcting tests</td><td>None</td></tr>
+      <tr><td><code>build</code></td><td>Build system or dependency changes</td><td>None</td></tr>
+      <tr><td><code>ci</code></td><td>CI configuration changes</td><td>None</td></tr>
+      <tr><td><code>chore</code></td><td>Other changes that don't modify src or test files</td><td>None</td></tr>
+      <tr><td><code>revert</code></td><td>Reverts a previous commit</td><td>Patch</td></tr>
+      <tr><td><code>BREAKING CHANGE</code></td><td>Any type with <code>!</code> or footer note</td><td>Major (x.0.0)</td></tr>
+      </table>
+      
+      <p>A breaking change looks like this:
+      </p>
+      
+      <pre><code>feat(api)!: change user endpoint response shape
+
+BREAKING CHANGE: the /api/users endpoint now returns a paginated
+response object instead of a flat array. Consumers must update
+to destructure `data.users` instead of using the response directly.</code></pre>
+      
+      <p>When you ask Claude to compose a commit message, mention whether the change breaks the public API and it will add the <code>!</code> and the <code>BREAKING CHANGE</code> footer accordingly.
+      </p>
+      
+      <h2>A Practical Commit Workflow</h2>
+      
+      <p>Here is a concrete example of staging work and using Claude to write the commit message:
+      </p>
+      
+      <pre><code>You&#x27;ve just fixed a null pointer in the payment module and added a test
+git status
+modified: src/payments/processor.ts
+modified: src/payments/processor.test.ts
+
+git diff src/payments/processor.ts
+(shows the null check you added)
+
+Ask Claude:
+&quot;I just fixed a null pointer error in payments/processor.ts where
+chargeUser() would crash if the user had no payment method on file.
+I also added a test for that case. Write a conventional commit message.&quot;</code></pre>
+      
+      <p>Claude will produce something like:
+      </p>
+      
+      <pre><code>fix(payments): handle missing payment method in chargeUser
+
+Previously chargeUser() would throw &#x27;Cannot read property id of null&#x27;
+when a user had no payment method on file. The function now returns
+an early error result instead of crashing.
+
+Closes #312</code></pre>
+      
+      <p>That message will be far more useful to your team six months from now than <code>fix: null error</code>.
+      </p>
+      
+      <h2>Conventional Commits Integration</h2>
+      
+      <p>For teams using automated releases, conventional commits enable semantic versioning. The super memory skill can help maintain a changelog by tracking these commits across your project history. When combined with GitHub Actions or similar CI systems, you get automatic version bumps and release notes.
+      </p>
+      
+      <p>Here is a minimal <code>release-please</code> configuration that works with conventional commits:
+      </p>
+      
+      <pre><code>.github/workflows/release.yml
+on:
+ push:
+ branches:
+ - main
+
+jobs:
+ release-please:
+ runs-on: ubuntu-latest
+ steps:
+ - uses: google-github-actions/release-please-action@v3
+ with:
+ release-type: node
+ package-name: my-package</code></pre>
+      
+      <p>With this in place, every merge to main that includes a <code>feat</code> or <code>fix</code> commit will automatically open a release PR with an updated <code>CHANGELOG.md</code> and bumped <code>package.json</code> version.
+      </p>
+      
+      <h2>Branch Management Strategies</h2>
+      
+      <p>Effective branch management prevents integration nightmares. Claude Code helps enforce your team's branching strategy without requiring you to memorize every rule.
+      </p>
+      
+      <h2>Comparing Common Branching Strategies</h2>
+      
+      <p>Before choosing a strategy, understand the tradeoffs:
+      </p>
+      
+      <table>
+      <tr><th>Strategy</th><th>Best For</th><th>Branch Lifespan</th><th>Merge Frequency</th><th>CI Complexity</th></tr>
+      <tr><td>GitHub Flow</td><td>Small teams, SaaS, frequent deploys</td><td>Hours to days</td><td>High</td><td>Low</td></tr>
+      <tr><td>Git Flow</td><td>Libraries, scheduled releases</td><td>Days to weeks</td><td>Medium</td><td>Medium</td></tr>
+      <tr><td>Trunk-Based Development</td><td>Large teams, CI/CD mature orgs</td><td>Hours</td><td>Very high</td><td>High</td></tr>
+      <tr><td>Release Branch</td><td>Regulated industries, multiple versions</td><td>Weeks to months</td><td>Low</td><td>High</td></tr>
+      </table>
+      
+      <p>For most web application teams deploying multiple times per day, GitHub Flow (main + short-lived feature branches) hits the best balance. Claude Code's assistance is especially effective here because the workflow is simple enough to describe conversationally.
+      </p>
+      
+      <h2>Feature Branch Workflow</h2>
+      
+      <p>When starting new work, describe your task to Claude:
+      </p>
+      
+      <pre><code>&quot;Create a feature branch for adding payment processing&quot;</code></pre>
+      
+      <p>Claude will:
+      </p>
+      <ol>
+        <li>Check the current branch status</li>
+        <li>Pull latest changes from main</li>
+        <li>Create a properly-named feature branch</li>
+        <li>Switch to that branch</li>
+      </ol>
+      
+      <p>A concrete example showing the actual Git commands Claude would guide you through:
+      </p>
+      
+      <pre><code>Claude checks your current state
+git status
+git log --oneline -5
+
+Pulls latest main
+git checkout main
+git pull origin main
+
+Creates and switches to the feature branch
+git checkout -b feat/payment-processing
+
+Confirms the branch
+git branch --show-current
+feat/payment-processing</code></pre>
+      
+      <h2>Branch Naming Conventions</h2>
+      
+      <p>Consistent branch names make <code>git branch -a</code> readable and enable CI rules (like requiring certain test suites only on <code>release/*</code> branches). Tell Claude your convention once:
+      </p>
+      
+      <pre><code>&quot;My team uses the pattern: type/short-description
+where type is feat, fix, chore, refactor, docs, or hotfix.
+Use this convention when suggesting branch names.&quot;</code></pre>
+      
+      <p>Common conventions:
+      </p>
+      
+      <pre><code>feat/user-authentication
+fix/login-null-crash
+chore/upgrade-dependencies
+refactor/extract-payment-service
+docs/api-reference-update
+hotfix/critical-payment-bug
+release/v2.3.0</code></pre>
+      
+      <h2>Quick Branch Switching</h2>
+      
+      <p>For rapid navigation, simply tell Claude where you need to go:
+      </p>
+      
+      <pre><code>&quot;Switch to the bugfix/login-validation branch and show recent commits&quot;</code></pre>
+      
+      <p>This works smoothly whether you're working with short-lived feature branches or long-running release branches.
+      </p>
+      
+      <p>Claude will translate that to:
+      </p>
+      
+      <pre><code>git checkout bugfix/login-validation
+git log --oneline -10</code></pre>
+      
+      <p>And then summarize what you're looking at, useful when returning to a branch after a few days away.
+      </p>
+      
+      <h2>Keeping Feature Branches Up to Date</h2>
+      
+      <p>Long-running feature branches accumulate drift. Ask Claude to help rebase:
+      </p>
+      
+      <pre><code>&quot;My feat/new-dashboard branch is 15 commits behind main.
+Help me rebase it without losing my changes.&quot;</code></pre>
+      
+      <p>Claude's approach:
+      </p>
+      
+      <pre><code>Check the current state
+git log --oneline main..feat/new-dashboard
+git log --oneline feat/new-dashboard..main
+
+Rebase onto main
+git checkout feat/new-dashboard
+git rebase main
+
+If conflicts arise, Claude will explain each one
+git status # shows conflicted files</code></pre>
+      
+      <h2>Practical Examples with Claude Skills</h2>
+      
+      <p>The real power emerges when combining Git workflows with specialized Claude skills. Here are practical integrations:
+      </p>
+      
+      <h2>PDF Documentation Generation</h2>
+      
+      <p>After completing a feature, use the pdf skill to generate documentation:
+      </p>
+      
+      <pre><code>In your Claude session with pdf skill loaded:
+&quot;Generate a PDF summary of all commits since v2.0.0 including author and date&quot;</code></pre>
+      
+      <p>This is invaluable for release notes, stakeholder updates, or compliance documentation.
+      </p>
+      
+      <p>The underlying Git command Claude builds from:
+      </p>
+      
+      <pre><code>git log v2.0.0..HEAD \
+ --pretty=format:&quot;%h | %an | %ad | %s&quot; \
+ --date=short</code></pre>
+      
+      <p>Combined with the pdf skill, this becomes a formatted document you can share with non-technical stakeholders without any manual formatting work.
+      </p>
+      
+      <h2>Test-Driven Development Workflow</h2>
+      
+      <p>The tdd skill transforms how you approach development:
+      </p>
+      
+      <pre><code>Start with a clear intent
+&quot;Using tdd, implement user registration with email verification&quot;</code></pre>
+      
+      <p>Claude will:
+      </p>
+      <ol>
+        <li>Create a new branch following your conventions</li>
+        <li>Write failing tests first</li>
+        <li>Implement the feature to pass tests</li>
+        <li>Commit each logical step with descriptive messages</li>
+      </ol>
+      
+      <p>This workflow produces a clean commit history that tells the story of your implementation. A typical TDD session with Claude might produce commits like:
+      </p>
+      
+      <pre><code>test(auth): add failing test for email verification flow
+feat(auth): implement email token generation
+feat(auth): add token storage in database
+feat(auth): implement token validation endpoint
+test(auth): add integration test for full verification flow
+refactor(auth): extract token service to dedicated module</code></pre>
+      
+      <p>Each commit is small, passes all tests, and the message explains the purpose. This is the kind of history that makes code review fast and <code>git blame</code> useful.
+      </p>
+      
+      <h2>Code Review Assistance</h2>
+      
+      <p>Before pushing, get Claude to review your changes:
+      </p>
+      
+      <pre><code>&quot;Review the staged changes for potential issues and suggest improvements&quot;</code></pre>
+      
+      <p>The code-review or claude-skills for code review will analyze your diff for:
+      </p>
+      <ul>
+        <li>Code style violations</li>
+        <li>Potential bugs</li>
+        <li>Missing error handling</li>
+        <li>Security concerns</li>
+        <li>Test coverage gaps</li>
+      </ul>
+      
+      <p>A more targeted review request:
+      </p>
+      
+      <pre><code>Get the diff against main
+git diff main...feat/payment-processing &gt; /tmp/feature.diff
+
+&quot;Review /tmp/feature.diff with a focus on:
+1. Any SQL injection or input validation issues in the payment code
+2. Missing error handling in async functions
+3. Whether the test coverage covers the error paths&quot;</code></pre>
+      
+      <p>Claude reads the actual diff content and gives specific, line-referenced feedback rather than generic advice.
+      </p>
+      
+      <h2>Automated Changelog Generation</h2>
+      
+      <p>Combine Git log with Claude Code to produce changelogs without a dedicated tool:
+      </p>
+      
+      <pre><code>&quot;List all commits between v1.5.0 and HEAD that have type feat or fix.
+Group them by scope and format them as a markdown changelog section.&quot;</code></pre>
+      
+      <p>Claude will run:
+      </p>
+      
+      <pre><code>git log v1.5.0..HEAD --pretty=format:&quot;%s&quot; | grep -E &quot;^(feat|fix)&quot;</code></pre>
+      
+      <p>And produce:
+      </p>
+      
+      <pre><code>What&#x27;s Changed
+
+Features
+- auth: add OAuth2 login flow with Google provider
+- payments: support Apple Pay as a checkout option
+- dashboard: add export to CSV functionality
+
+Bug Fixes
+- payments: handle missing payment method in chargeUser
+- auth: fix session expiry not refreshing on activity</code></pre>
+      
+      <h2>Handling Merge Conflicts</h2>
+      
+      <p>Merge conflicts are inevitable in collaborative projects. Claude Code makes resolution straightforward:
+      </p>
+      
+      <ol>
+        <li>Start the merge or rebase</li>
+        <li>When conflicts occur, ask Claude to explain each conflict</li>
+        <li>Request resolution suggestions for specific files</li>
+        <li>Review the proposed changes before staging</li>
+      </ol>
+      
+      <pre><code>&quot;Show me the current merge conflicts in auth/user.js and suggest how to resolve them&quot;</code></pre>
+      
+      <p>Claude understands the context of both branches, making its suggestions more accurate than generic conflict markers.
+      </p>
+      
+      <h2>Reading Conflict Markers</h2>
+      
+      <p>When a file has conflicts, Git inserts markers that Claude can parse and explain:
+      </p>
+      
+      <pre><code>function getUser(id) {
+ return db.users.findOne({ id, deletedAt: null });
+}</code></pre>
+      
+      <p>Tell Claude:
+      </p>
+      
+      <pre><code>&quot;Explain this merge conflict in auth/user.js.
+HEAD is the current main branch. The incoming change is the mongoose migration branch.
+Which version should we keep and why?&quot;</code></pre>
+      
+      <p>Claude will explain that the incoming version uses the new Mongoose model and async/await, while HEAD uses a legacy db object. It will recommend keeping the incoming version if the Mongoose migration is intended to replace the old db layer, and flag that the <code>deletedAt: null</code> filter from HEAD may need to be preserved.
+      </p>
+      
+      <h2>Preventing Merge Conflicts</h2>
+      
+      <p>The best merge conflicts are the ones you avoid. Claude Code can help identify high-contention files:
+      </p>
+      
+      <pre><code>&quot;Look at the git log for the past 30 days. Which files have been modified most
+frequently by different authors? These are likely conflict hotspots.&quot;</code></pre>
+      
+      <pre><code>git log --since=&quot;30 days ago&quot; --name-only --format=&quot;&quot; | sort | uniq -c | sort -rn | head -20</code></pre>
+      
+      <p>Files that appear often in this list are candidates for refactoring into smaller, more focused modules, reducing the surface area for conflicts.
+      </p>
+      
+      <h2>Daily Git Workflow with Claude</h2>
+      
+      <p>Here's a practical daily workflow:
+      </p>
+      
+      <pre><code>Morning: Sync with team
+&quot;Pull latest changes from main and show me what changed&quot;
+
+During development
+&quot;Stage the changes in src/api/ and commit them with an appropriate message&quot;
+
+Before submitting
+&quot;Run git diff --stat and review what I&#x27;m about to push&quot;
+
+After code review feedback
+&quot;Create a fix branch from main for addressing PR comments&quot;</code></pre>
+      
+      <h2>A Full Morning Routine</h2>
+      
+      <p>Here is a concrete version of that morning sync with the actual commands Claude would run:
+      </p>
+      
+      <pre><code>Check where you left off
+git status
+git stash list
+
+Sync with team
+git checkout main
+git pull origin main --ff-only
+
+Show what changed
+git log --oneline ORIG_HEAD..HEAD
+git diff --stat ORIG_HEAD..HEAD
+
+Return to your feature branch
+git checkout feat/current-task
+git rebase main # or merge, depending on team preference</code></pre>
+      
+      <p>Claude will show you a plain-English summary of what merged: "Two bug fixes and one new feature landed while you were away. The fix to auth/session.ts is relevant to your current branch since you're also working in that area."
+      </p>
+      
+      <h2>Stash Management</h2>
+      
+      <p>Stashes are easy to forget and lose. Claude Code helps you manage them:
+      </p>
+      
+      <pre><code>&quot;Show all my stashes and what files each one contains&quot;</code></pre>
+      
+      <pre><code>git stash list
+git stash show stash@{0} --stat
+git stash show stash@{1} --stat</code></pre>
+      
+      <p>And when you need to find a specific stash:
+      </p>
+      
+      <pre><code>&quot;I stashed some work on the payment form validation last week.
+Find the stash that contains changes to payments/form.ts&quot;</code></pre>
+      
+      <pre><code>for i in $(git stash list | awk -F: &#x27;{print $1}&#x27;); do
+ echo &quot;=== $i ===&quot;;
+ git stash show $i --stat | grep &quot;payments/form&quot;;
+done</code></pre>
+      
+      <h2>Super Memory for Git History</h2>
+      
+      <p>The super memory skill complements Git perfectly by:
+      </p>
+      <ul>
+        <li>Remembering why certain decisions were made</li>
+        <li>Tracking context across branches</li>
+        <li>Helping you find relevant past commits</li>
+        <li>Maintaining institutional knowledge</li>
+      </ul>
+      
+      <p>When combined with well-structured commits, your project becomes truly searchable and understandable.
+      </p>
+      
+      <p>A practical use: you need to understand why a particular approach was chosen six months ago. The <code>git log</code> gives you the commit message; super memory gives you the surrounding context, the Slack thread, the architecture doc, the PR discussion, that explains the reasoning.
+      </p>
+      
+      <h2>Using Git Bisect with Claude</h2>
+      
+      <p>When a bug appears and you don't know which commit introduced it, <code>git bisect</code> is the right tool. Claude Code can run the entire bisect session:
+      </p>
+      
+      <pre><code>&quot;A bug appeared sometime in the last two weeks where user sessions
+expire immediately after login. Help me run git bisect to find the
+commit that introduced it.&quot;</code></pre>
+      
+      <p>Claude will:
+      </p>
+      
+      <pre><code>git bisect start
+git bisect bad HEAD # current commit has the bug
+git bisect good v2.1.0 # this tag was before the bug appeared
+
+Git checks out the midpoint
+Claude asks: &quot;Does the bug happen at this commit? Test the login flow.&quot;
+
+git bisect good # or
+git bisect bad
+
+Repeat until Git identifies the culprit commit
+git bisect reset</code></pre>
+      
+      <p>After bisect completes, Claude reads the commit that introduced the bug and explains what changed, saving you from manual archaeology.
+      </p>
+      
+      <h2>Automating Git Hygiene with Claude</h2>
+      
+      <p>Over time, repositories accumulate cruft: merged branches that weren't deleted, stale remotes, large binary files that shouldn't be in version control. Claude Code can audit and clean these up.
+      </p>
+      
+      <h2>Finding and Deleting Stale Branches</h2>
+      
+      <pre><code>&quot;List all branches that have been merged into main
+and are more than 30 days old. Then delete the ones that
+belong to me (author is theluckystrike).&quot;</code></pre>
+      
+      <p>Claude runs:
+      </p>
+      
+      <pre><code>Find merged branches older than 30 days
+git branch --merged main | grep -v &quot;^* main&quot; | while read branch; do
+ age=$(git log -1 --format=&quot;%ar&quot; $branch);
+ author=$(git log -1 --format=&quot;%an&quot; $branch);
+ echo &quot;$branch | $author | $age&quot;;
+done</code></pre>
+      
+      <p>Then deletes the matching ones:
+      </p>
+      
+      <pre><code>git branch -d feat/old-payment-work
+git push origin --delete feat/old-payment-work</code></pre>
+      
+      <h2>Checking for Accidentally Committed Secrets</h2>
+      
+      <p>Before pushing, verify that no secrets or credentials have been staged:
+      </p>
+      
+      <pre><code>&quot;Check my staged changes for anything that looks like an API key,
+password, or secret. Look for patterns like sk-*, password=, secret=,
+API_KEY=, and PEM headers.&quot;</code></pre>
+      
+      <p>Claude reads the diff and flags any suspicious patterns. This is a fast sanity check, not a replacement for a proper secrets scanner like <code>gitleaks</code> or <code>truffleHog</code>, but useful as a last-minute check before pushing.
+      </p>
+      
+      <h2>Conclusion</h2>
+      
+      <p>Claude Code transforms Git from a version control tool into an intelligent partner in your development workflow. By providing clear context, using specialized skills, and following consistent patterns, you create better commits, maintain cleaner history, and reduce cognitive overhead.
+      </p>
+      
+      <p>The most valuable thing Claude Code does for Git workflows is raise the quality of the narrative your commits tell. Future contributors, including you in six months, will be able to understand what happened, why it happened, and what each change was trying to accomplish. That narrative lives in commit messages, branch names, and the structure of your history.
+      </p>
+      
+      <p>Start with these practices: write descriptive commits, use branches intentionally, and let Claude skills like tdd, pdf, and super memory enhance your workflow. The investment in good Git habits pays dividends throughout your project's lifetime.
+      </p>
+      
+      
+      
+      
+      <p><div class="mastery-cta">
+      </p>
+      
+      <p>This site was built by 5 autonomous agents running in tmux while I was in Bali. 2,500 articles. Zero manual work. 100% quality gate pass rate.
+      </p>
+      
+      <p>The orchestration configs, sprint templates, and quality gates that made that possible are in the Zovo Lifetime bundle. Along with 16 CLAUDE.md templates and 80 tested prompts.
+      </p>
+      
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=ccg&utm_medium=cta-skills&utm_campaign=claude-code-git-workflow-best-practices-guide">See how the pipeline works →</a></strong>
+      </p>
+      
+      <p>$99 once. I'm a solo dev in Da Nang. This is how I scale.
+      </p>
+      
+      <p></div>
+      </p>
+      
+      <p>Related Reading
+      </p>
+      
+      
+      
+      
+      <p><strong>Find the right skill →</strong> Browse 155+ skills in our Skill Finder.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-git-workflow-best-practices">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Git Workflow Best Practices (2026)",
+    "description": "Claude Code git workflow best practices: formatting conventions, commit patterns, and documentation that improve AI-assisted development. Tested 2026.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-git-workflow-best-practices/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude API Pricing Complete Guide (2026) | ClaudHQ</title>
+  <meta name="description" content="Complete Claude API pricing for all models and plans. Per-token costs, rate limits, batch discounts, prompt caching savings, and plan comparisons.">
+  <link rel="canonical" href="https://claudhq.com/claude-api-pricing-guide/">
+  <meta property="og:title" content="Claude API Pricing Complete Guide (2026) | ClaudHQ">
+  <meta property="og:description" content="Complete Claude API pricing for all models and plans. Per-token costs, rate limits, batch discounts, prompt caching savings, and plan comparisons.">
+  <meta property="og:url" content="https://claudhq.com/claude-api-pricing-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude API Pricing Complete Guide (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Anthropic offers Claude through consumer subscriptions (Free, Pro, Max) and developer API access with per-token billing. The pricing structure has evolved significantly through 2025 and 2026, with the introduction of new model tiers, batch processing discounts, and prompt caching.
+      </p>
+      
+      <p>This guide breaks down every pricing dimension so you can calculate your actual costs before committing to a plan or API integration.
+      </p>
+      
+      <h2>Consumer Plans Overview</h2>
+      
+      <p>These plans give you access to Claude through claude.ai and mobile apps. They do not provide API access.
+      </p>
+      
+      <h3>Free Tier</h3>
+      <ul>
+        <li><strong>Cost</strong>: $0/month</li>
+        <li><strong>Model access</strong>: Claude Sonnet 4 (limited)</li>
+        <li><strong>Usage</strong>: Limited messages per day (varies by demand)</li>
+        <li><strong>Features</strong>: Basic chat, file uploads, web search</li>
+        <li><strong>Context window</strong>: Standard</li>
+        <li><strong>No API access</strong></li>
+      </ul>
+      
+      <h3>Pro Plan</h3>
+      <ul>
+        <li><strong>Cost</strong>: $20/month</li>
+        <li><strong>Model access</strong>: Claude Sonnet 4, Claude Opus 4, Claude Haiku</li>
+        <li><strong>Usage</strong>: 5x more than Free tier</li>
+        <li><strong>Features</strong>: Projects, extended thinking, priority access, Claude Code access</li>
+        <li><strong>Context window</strong>: 200K tokens</li>
+        <li><strong>Rate limit</strong>: Usage cap with 5-hour rolling window (details)</li>
+      </ul>
+      
+      <h3>Max Plan (5x)</h3>
+      <ul>
+        <li><strong>Cost</strong>: $100/month</li>
+        <li><strong>Model access</strong>: All models including Opus 4</li>
+        <li><strong>Usage</strong>: 5x more than Pro</li>
+        <li><strong>Features</strong>: Everything in Pro plus higher rate limits</li>
+        <li><strong>Context window</strong>: 200K tokens</li>
+        <li><strong>Claude Code</strong>: Included with higher limits</li>
+      </ul>
+      
+      <h3>Max Plan (20x)</h3>
+      <ul>
+        <li><strong>Cost</strong>: $200/month</li>
+        <li><strong>Model access</strong>: All models</li>
+        <li><strong>Usage</strong>: 20x more than Pro</li>
+        <li><strong>Features</strong>: Everything in Max 5x plus highest rate limits</li>
+        <li><strong>Context window</strong>: 200K tokens</li>
+        <li><strong>Claude Code</strong>: Included with highest limits</li>
+      </ul>
+      
+      <h2>API Pricing by Model</h2>
+      
+      <p>API pricing is per-token, measured separately for input and output tokens. All prices are per million tokens (MTok).
+      </p>
+      
+      <h3>Claude Opus 4 (claude-opus-4-0520)</h3>
+      
+      <p>Anthropic's most capable model. Best for complex reasoning, multi-step analysis, and agentic workflows.
+      </p>
+      
+      <table>
+      <tr><th>Metric</th><th>Price</th></tr>
+      <tr><td>Input tokens</td><td>$15.00 / MTok</td></tr>
+      <tr><td>Output tokens</td><td>$75.00 / MTok</td></tr>
+      <tr><td>Context window</td><td>200K tokens</td></tr>
+      <tr><td>Max output</td><td>32K tokens</td></tr>
+      <tr><td>Training data cutoff</td><td>Early 2025</td></tr>
+      </table>
+      
+      <p><strong>Cost example</strong>: A 2,000-token prompt with a 1,000-token response costs:
+      </p>
+      <ul>
+        <li>Input: 2,000 / 1,000,000 * $15.00 = $0.03</li>
+        <li>Output: 1,000 / 1,000,000 * $75.00 = $0.075</li>
+        <li><strong>Total: $0.105 per request</strong></li>
+      </ul>
+      
+      <h3>Claude Sonnet 4 (claude-sonnet-4-0514)</h3>
+      
+      <p>Balanced model for most production workloads. Strong coding, analysis, and writing capabilities at a lower price point than Opus.
+      </p>
+      
+      <table>
+      <tr><th>Metric</th><th>Price</th></tr>
+      <tr><td>Input tokens</td><td>$3.00 / MTok</td></tr>
+      <tr><td>Output tokens</td><td>$15.00 / MTok</td></tr>
+      <tr><td>Context window</td><td>200K tokens</td></tr>
+      <tr><td>Max output</td><td>16K tokens</td></tr>
+      <tr><td>Training data cutoff</td><td>Early 2025</td></tr>
+      </table>
+      
+      <p><strong>Cost example</strong>: Same 2,000-token prompt with 1,000-token response:
+      </p>
+      <ul>
+        <li>Input: 2,000 / 1,000,000 * $3.00 = $0.006</li>
+        <li>Output: 1,000 / 1,000,000 * $15.00 = $0.015</li>
+        <li><strong>Total: $0.021 per request</strong> (5x cheaper than Opus 4)</li>
+      </ul>
+      
+      <h3>Claude Haiku 3.5 (claude-3-5-haiku-20241022)</h3>
+      
+      <p>Fastest model. Best for high-volume, latency-sensitive tasks like classification, extraction, and simple Q&A.
+      </p>
+      
+      <table>
+      <tr><th>Metric</th><th>Price</th></tr>
+      <tr><td>Input tokens</td><td>$0.80 / MTok</td></tr>
+      <tr><td>Output tokens</td><td>$4.00 / MTok</td></tr>
+      <tr><td>Context window</td><td>200K tokens</td></tr>
+      <tr><td>Max output</td><td>8K tokens</td></tr>
+      <tr><td>Training data cutoff</td><td>Early 2024</td></tr>
+      </table>
+      
+      <p><strong>Cost example</strong>: Same prompt:
+      </p>
+      <ul>
+        <li>Input: 2,000 / 1,000,000 * $0.80 = $0.0016</li>
+        <li>Output: 1,000 / 1,000,000 * $4.00 = $0.004</li>
+        <li><strong>Total: $0.0056 per request</strong> (19x cheaper than Opus 4)</li>
+      </ul>
+      
+      <h3>Model Comparison Table</h3>
+      
+      <table>
+      <tr><th>Model</th><th>Input/MTok</th><th>Output/MTok</th><th>Speed</th><th>Best For</th></tr>
+      <tr><td>Opus 4</td><td>$15.00</td><td>$75.00</td><td>Slowest</td><td>Complex reasoning, agentic tasks</td></tr>
+      <tr><td>Sonnet 4</td><td>$3.00</td><td>$15.00</td><td>Medium</td><td>General production, coding</td></tr>
+      <tr><td>Haiku 3.5</td><td>$0.80</td><td>$4.00</td><td>Fastest</td><td>High volume, classification</td></tr>
+      </table>
+      
+      <h2>Prompt Caching</h2>
+      
+      <p>Prompt caching reduces costs when you send the same prompt prefix repeatedly. This is critical for applications that include large system prompts, CLAUDE.md files, or static context in every request.
+      </p>
+      
+      <h3>How Prompt Caching Works</h3>
+      
+      <ol>
+        <li>First request: Full price for all tokens. Cached tokens incur a 25% write surcharge.</li>
+        <li>Subsequent requests: Cached portion is charged at a reduced read rate.</li>
+        <li>Cache lifetime: 5 minutes from last use (extends with each hit).</li>
+      </ol>
+      
+      <h3>Prompt Caching Prices</h3>
+      
+      <table>
+      <tr><th>Model</th><th>Cache Write (per MTok)</th><th>Cache Read (per MTok)</th><th>Savings vs Input</th></tr>
+      <tr><td>Opus 4</td><td>$18.75 (+25%)</td><td>$1.50</td><td>90% on reads</td></tr>
+      <tr><td>Sonnet 4</td><td>$3.75 (+25%)</td><td>$0.30</td><td>90% on reads</td></tr>
+      <tr><td>Haiku 3.5</td><td>$1.00 (+25%)</td><td>$0.08</td><td>90% on reads</td></tr>
+      </table>
+      
+      <h3>Cache Savings Example</h3>
+      
+      <p>Imagine a chatbot with a 4,000-token system prompt using Sonnet 4:
+      </p>
+      
+      <p><strong>Without caching</strong> (100 requests):
+      </p>
+      <ul>
+        <li>System prompt: 100 <em> 4,000 / 1M </em> $3.00 = $1.20</li>
+      </ul>
+      
+      <p><strong>With caching</strong> (100 requests):
+      </p>
+      <ul>
+        <li>First request (write): 4,000 / 1M * $3.75 = $0.015</li>
+        <li>99 subsequent (read): 99 <em> 4,000 / 1M </em> $0.30 = $0.119</li>
+        <li><strong>Total: $0.134</strong> (89% savings)</li>
+      </ul>
+      
+      <h3>Cache Requirements</h3>
+      
+      <ul>
+        <li>Minimum cacheable prefix: 1,024 tokens (Haiku), 2,048 tokens (Sonnet/Opus)</li>
+        <li>Cache is per-organization, not per-API-key</li>
+        <li>Cached content must be identical byte-for-byte</li>
+        <li>Cache blocks use 128-token granularity</li>
+      </ul>
+      
+      <h2>Batch API</h2>
+      
+      <p>The Batch API processes requests asynchronously at a 50% discount. Results are returned within 24 hours.
+      </p>
+      
+      <h3>Batch API Prices</h3>
+      
+      <table>
+      <tr><th>Model</th><th>Input/MTok</th><th>Output/MTok</th><th>Discount</th></tr>
+      <tr><td>Opus 4</td><td>$7.50</td><td>$37.50</td><td>50%</td></tr>
+      <tr><td>Sonnet 4</td><td>$1.50</td><td>$7.50</td><td>50%</td></tr>
+      <tr><td>Haiku 3.5</td><td>$0.40</td><td>$2.00</td><td>50%</td></tr>
+      </table>
+      
+      <h3>When to Use Batch API</h3>
+      
+      <ul>
+        <li><strong>Content generation</strong>: Generating hundreds of product descriptions, articles, or summaries</li>
+        <li><strong>Data processing</strong>: Classifying, extracting, or transforming large datasets</li>
+        <li><strong>Evaluation</strong>: Running model evaluations across test suites</li>
+        <li><strong>Migration</strong>: Processing existing content through Claude for reformatting</li>
+      </ul>
+      
+      <h3>Batch API Limitations</h3>
+      
+      <ul>
+        <li>No streaming</li>
+        <li>No real-time responses (up to 24-hour SLA)</li>
+        <li>Maximum 100,000 requests per batch</li>
+        <li>Each request limited to standard model context window</li>
+        <li>No prompt caching within batches</li>
+      </ul>
+      
+      <h2>Extended Thinking Pricing</h2>
+      
+      <p>Extended thinking allows Claude to "think" before responding, improving performance on complex tasks. Thinking tokens are billed as output tokens.
+      </p>
+      
+      <table>
+      <tr><th>Model</th><th>Thinking Token Price</th><th>Same As</th></tr>
+      <tr><td>Opus 4</td><td>$75.00 / MTok</td><td>Output rate</td></tr>
+      <tr><td>Sonnet 4</td><td>$15.00 / MTok</td><td>Output rate</td></tr>
+      </table>
+      
+      <p><strong>Important</strong>: Extended thinking can generate thousands of thinking tokens before the visible response. A request that appears to have a 500-token response may actually consume 5,000+ tokens when thinking tokens are included.
+      </p>
+      
+      <h3>Controlling Extended Thinking Costs</h3>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=16000,
+    thinking={
+        &quot;type&quot;: &quot;enabled&quot;,
+        &quot;budget_tokens&quot;: 5000  # Cap thinking tokens
+    },
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Your prompt&quot;}]
+)</code></pre>
+      
+      <p>Setting <code>budget_tokens</code> caps the thinking cost. Without it, Claude may use the full output token limit for thinking.
+      </p>
+      
+      <h2>Rate Limits</h2>
+      
+      <p>Rate limits vary by plan tier and are measured in requests per minute (RPM) and tokens per minute (TPM).
+      </p>
+      
+      <h3>API Rate Limits by Tier</h3>
+      
+      <table>
+      <tr><th>Tier</th><th>RPM</th><th>Input TPM</th><th>Output TPM</th><th>Spend Requirement</th></tr>
+      <tr><td>Tier 1 (Free)</td><td>50</td><td>40,000</td><td>8,000</td><td>$0</td></tr>
+      <tr><td>Tier 2</td><td>1,000</td><td>80,000</td><td>16,000</td><td>$40 credit</td></tr>
+      <tr><td>Tier 3</td><td>2,000</td><td>160,000</td><td>32,000</td><td>$200 credit</td></tr>
+      <tr><td>Tier 4</td><td>4,000</td><td>400,000</td><td>80,000</td><td>$400+ spend</td></tr>
+      </table>
+      
+      <p>Rate limit headers are included in every API response:
+      </p>
+      
+      <pre><code>x-ratelimit-limit-requests: 1000
+x-ratelimit-limit-tokens: 80000
+x-ratelimit-remaining-requests: 999
+x-ratelimit-remaining-tokens: 79000
+x-ratelimit-reset-requests: 2026-04-24T12:00:01Z
+x-ratelimit-reset-tokens: 2026-04-24T12:00:01Z</code></pre>
+      
+      <h3>Handling Rate Limits</h3>
+      
+      <p>When you hit a rate limit, the API returns a 429 error. Best practices:
+      </p>
+      
+      <ol>
+        <li>Implement exponential backoff with jitter</li>
+        <li>Track remaining tokens from response headers</li>
+        <li>Use request queuing for high-volume applications</li>
+        <li>Consider the Batch API for non-real-time workloads</li>
+      </ol>
+      
+      <pre><code>import time
+import random
+
+def call_with_backoff(func, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            return func()
+        except anthropic.RateLimitError:
+            wait = (2 ** attempt) + random.uniform(0, 1)
+            time.sleep(wait)
+    raise Exception(&quot;Max retries exceeded&quot;)</code></pre>
+      
+      <h2>Claude Code Pricing</h2>
+      
+      <p>Claude Code uses the API under the hood. When you use Claude Code with your own API key, you pay standard API rates for whichever model you select.
+      </p>
+      
+      <h3>Claude Code with Subscription Plans</h3>
+      
+      <ul>
+        <li><strong>Pro ($20/mo)</strong>: Claude Code access included. Uses Sonnet 4 by default. Subject to 5-hour usage limits.</li>
+        <li><strong>Max 5x ($100/mo)</strong>: Higher Claude Code limits. Can use Opus 4.</li>
+        <li><strong>Max 20x ($200/mo)</strong>: Highest limits. Full Opus 4 access.</li>
+      </ul>
+      
+      <h3>Claude Code with API Key</h3>
+      
+      <p>When using <code>ANTHROPIC_API_KEY</code>, you pay per-token at standard API rates. A typical Claude Code session costs:
+      </p>
+      
+      <ul>
+        <li><strong>Light session</strong> (simple edits): $0.05-0.50</li>
+        <li><strong>Medium session</strong> (feature implementation): $0.50-5.00</li>
+        <li><strong>Heavy session</strong> (large refactoring): $5.00-50.00+</li>
+      </ul>
+      
+      <p>Track your Claude Code costs with token usage auditing.
+      </p>
+      
+      <h3>Claude Code with OpenRouter</h3>
+      
+      <p>You can route Claude Code through OpenRouter for potentially different pricing and access to multiple model providers through a single API key.
+      </p>
+      
+      
+      <h2>Cost Optimization Strategies</h2>
+      
+      <h3>1. Choose the Right Model</h3>
+      
+      <p>Use Haiku 3.5 for simple tasks, Sonnet 4 for most work, and Opus 4 only when you need maximum quality. A common pattern:
+      </p>
+      
+      <pre><code># Route by task complexity
+def get_model(task_type):
+    if task_type == &quot;classification&quot;:
+        return &quot;claude-3-5-haiku-20241022&quot;  # $0.80/MTok input
+    elif task_type == &quot;coding&quot;:
+        return &quot;claude-sonnet-4-20250514&quot;   # $3.00/MTok input
+    elif task_type == &quot;architecture&quot;:
+        return &quot;claude-opus-4-0520&quot;         # $15.00/MTok input</code></pre>
+      
+      <h3>2. Maximize Prompt Caching</h3>
+      
+      <p>Structure your prompts with static content first:
+      </p>
+      
+      <pre><code>messages = [
+    {
+        &quot;role&quot;: &quot;user&quot;,
+        &quot;content&quot;: [
+            {
+                &quot;type&quot;: &quot;text&quot;,
+                &quot;text&quot;: large_static_system_prompt,  # Cached
+                &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;}
+            },
+            {
+                &quot;type&quot;: &quot;text&quot;,
+                &quot;text&quot;: dynamic_user_query  # Not cached
+            }
+        ]
+    }
+]</code></pre>
+      
+      <h3>3. Use Batch API for Non-Urgent Work</h3>
+      
+      <p>If your workload can tolerate 24-hour latency, the 50% batch discount is substantial:
+      </p>
+      
+      <table>
+      <tr><th>Monthly Volume</th><th>Real-time (Sonnet)</th><th>Batch (Sonnet)</th><th>Savings</th></tr>
+      <tr><td>10M input tokens</td><td>$30.00</td><td>$15.00</td><td>$15.00</td></tr>
+      <tr><td>10M output tokens</td><td>$150.00</td><td>$75.00</td><td>$75.00</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>$180.00</strong></td><td><strong>$90.00</strong></td><td><strong>$90.00</strong></td></tr>
+      </table>
+      
+      <h3>4. Optimize Token Usage</h3>
+      
+      <ul>
+        <li>Trim unnecessary context from prompts</li>
+        <li>Use structured output to reduce verbose responses</li>
+        <li>Set appropriate <code>max_tokens</code> limits</li>
+      </ul>
+      
+      <h3>5. Monitor and Alert</h3>
+      
+      <p>Set up cost alerts to catch unexpected usage spikes before they become expensive.
+      </p>
+      
+      <h2>Comparing Claude API to Competitors</h2>
+      
+      <h3>Claude vs OpenAI GPT-4o</h3>
+      
+      <table>
+      <tr><th>Metric</th><th>Claude Sonnet 4</th><th>GPT-4o</th></tr>
+      <tr><td>Input/MTok</td><td>$3.00</td><td>$2.50</td></tr>
+      <tr><td>Output/MTok</td><td>$15.00</td><td>$10.00</td></tr>
+      <tr><td>Context window</td><td>200K</td><td>128K</td></tr>
+      <tr><td>Batch discount</td><td>50%</td><td>50%</td></tr>
+      <tr><td>Caching discount</td><td>90% on reads</td><td>50% on reads</td></tr>
+      </table>
+      
+      <h3>Claude vs Google Gemini 2.5</h3>
+      
+      <table>
+      <tr><th>Metric</th><th>Claude Sonnet 4</th><th>Gemini 2.5 Pro</th></tr>
+      <tr><td>Input/MTok</td><td>$3.00</td><td>$1.25</td></tr>
+      <tr><td>Output/MTok</td><td>$15.00</td><td>$10.00</td></tr>
+      <tr><td>Context window</td><td>200K</td><td>1M</td></tr>
+      <tr><td>Batch discount</td><td>50%</td><td>None</td></tr>
+      <tr><td>Caching</td><td>90% reads</td><td>Free after 128K</td></tr>
+      </table>
+      
+      <h3>When Claude Is More Cost-Effective</h3>
+      
+      <ul>
+        <li>Applications with heavy prompt caching (90% read discount beats competitors)</li>
+        <li>Batch processing workloads (consistent 50% discount)</li>
+        <li>Complex coding tasks where fewer iterations save total token spend</li>
+        <li>Applications requiring 200K context with strong instruction following</li>
+      </ul>
+      
+      <h2>Token Counting: What Costs Money</h2>
+      
+      <p>Understanding what counts as tokens is critical for cost prediction. Many developers are surprised by the actual token counts in their API calls.
+      </p>
+      
+      <h3>Text Tokens</h3>
+      
+      <p>English text averages 4 characters per token. Examples:
+      </p>
+      <ul>
+        <li>"Hello" = 1 token</li>
+        <li>"The quick brown fox jumps over the lazy dog" = 10 tokens</li>
+        <li>A 500-word blog post = ~650 tokens</li>
+        <li>A typical CLAUDE.md file = 500-2,000 tokens</li>
+      </ul>
+      
+      <p>Code is less token-efficient than prose because of syntax characters:
+      </p>
+      <ul>
+        <li>A 100-line Python function = ~400-600 tokens</li>
+        <li>A 100-line TypeScript function = ~500-800 tokens (types add tokens)</li>
+        <li>A package.json with 30 dependencies = ~300 tokens</li>
+      </ul>
+      
+      <h3>System Prompt Tokens</h3>
+      
+      <p>Every API call includes a system prompt (even if you do not specify one, Anthropic adds a default). System prompts count as input tokens on every request.
+      </p>
+      
+      <p>For applications with a 2,000-token system prompt making 1,000 API calls per day using Sonnet 4:
+      </p>
+      <ul>
+        <li>Daily system prompt cost: 1,000 <em> 2,000 / 1M </em> $3.00 = $6.00</li>
+        <li>Monthly: $180 just for system prompts</li>
+      </ul>
+      
+      <p>This is why prompt caching is critical for production applications.
+      </p>
+      
+      <h3>Conversation History Tokens</h3>
+      
+      <p>In multi-turn conversations, the entire history is sent with each new message. A conversation with 10 turns where each turn averages 500 tokens:
+      </p>
+      
+      <ul>
+        <li>Turn 1: 500 tokens input</li>
+        <li>Turn 2: 1,000 tokens input (500 history + 500 new)</li>
+        <li>Turn 3: 1,500 tokens input</li>
+        <li>Turn 10: 5,000 tokens input</li>
+      </ul>
+      
+      <p>Total input tokens for 10 turns: 27,500 tokens (not 5,000)
+      </p>
+      
+      <p>This quadratic growth is why long conversations get expensive fast, and why context management matters.
+      </p>
+      
+      <h3>Tool Use Tokens</h3>
+      
+      <p>When you define tools for Claude, the tool definitions are included as input tokens on every request. Each tool definition costs roughly 200-500 tokens. If you define 10 tools:
+      </p>
+      
+      <ul>
+        <li>Tool definitions: ~3,000 tokens per request</li>
+        <li>At 100 requests/day with Sonnet 4: 100 <em> 3,000 / 1M </em> $3.00 = $0.90/day</li>
+      </ul>
+      
+      <p>When Claude calls a tool, the tool call JSON is output tokens and the tool result is input tokens.
+      </p>
+      
+      <h3>Image Tokens</h3>
+      
+      <p>Images are converted to tokens based on resolution:
+      </p>
+      
+      <table>
+      <tr><th>Image Size</th><th>Approximate Tokens</th></tr>
+      <tr><td>100x100</td><td>~100 tokens</td></tr>
+      <tr><td>512x512</td><td>~800 tokens</td></tr>
+      <tr><td>1024x1024</td><td>~1,600 tokens</td></tr>
+      <tr><td>2048x2048</td><td>~3,200 tokens</td></tr>
+      <tr><td>Full screenshot (1920x1080)</td><td>~2,400 tokens</td></tr>
+      </table>
+      
+      <p>For image-heavy applications, these token costs add up quickly.
+      </p>
+      
+      <h3>PDF Tokens</h3>
+      
+      <p>PDF pages are converted to a combination of text and image tokens. A typical document page costs 1,000-3,000 tokens depending on content complexity.
+      </p>
+      
+      <h2>Cost Calculator Examples</h2>
+      
+      <h3>Example 1: Customer Support Chatbot</h3>
+      
+      <ul>
+        <li>500 conversations per day</li>
+        <li>Average 5 turns per conversation</li>
+        <li>200-token system prompt</li>
+        <li>Using Sonnet 4 with prompt caching</li>
+      </ul>
+      
+      <p><strong>Without caching:</strong>
+      </p>
+      <ul>
+        <li>System prompt: 500 <em> 5 </em> 200 / 1M * $3.00 = $1.50/day</li>
+        <li>User messages: 500 <em> 5 </em> 150 / 1M * $3.00 = $1.13/day</li>
+        <li>History replay: ~500 <em> 10 </em> 150 / 1M * $3.00 = $2.25/day</li>
+        <li>Responses: 500 <em> 5 </em> 300 / 1M * $15.00 = $11.25/day</li>
+        <li><strong>Daily total: ~$16.13 ($484/month)</strong></li>
+      </ul>
+      
+      <p><strong>With prompt caching (system prompt cached):</strong>
+      </p>
+      <ul>
+        <li>System prompt (cached reads): 500 <em> 5 </em> 200 / 1M * $0.30 = $0.15/day (90% savings)</li>
+        <li>Other costs remain similar</li>
+        <li><strong>Daily total: ~$14.78 ($443/month)</strong></li>
+      </ul>
+      
+      <h3>Example 2: Code Review Automation</h3>
+      
+      <ul>
+        <li>50 PRs per day</li>
+        <li>Average diff: 2,000 tokens</li>
+        <li>System prompt with review guidelines: 1,500 tokens</li>
+        <li>Using Sonnet 4 with batch API</li>
+      </ul>
+      
+      <p><strong>Real-time:</strong>
+      </p>
+      <ul>
+        <li>Input: 50 <em> 3,500 / 1M </em> $3.00 = $0.53/day</li>
+        <li>Output: 50 <em> 1,000 / 1M </em> $15.00 = $0.75/day</li>
+        <li><strong>Daily total: $1.28 ($38/month)</strong></li>
+      </ul>
+      
+      <p><strong>Batch API (50% discount):</strong>
+      </p>
+      <ul>
+        <li>Input: 50 <em> 3,500 / 1M </em> $1.50 = $0.26/day</li>
+        <li>Output: 50 <em> 1,000 / 1M </em> $7.50 = $0.38/day</li>
+        <li><strong>Daily total: $0.64 ($19/month)</strong></li>
+      </ul>
+      
+      <h3>Example 3: Document Analysis Pipeline</h3>
+      
+      <ul>
+        <li>100 documents per day</li>
+        <li>Average document: 10,000 tokens</li>
+        <li>Summary output: 500 tokens per document</li>
+        <li>Using Haiku 3.5 (speed and cost priority)</li>
+      </ul>
+      
+      <ul>
+        <li>Input: 100 <em> 10,000 / 1M </em> $0.80 = $0.80/day</li>
+        <li>Output: 100 <em> 500 / 1M </em> $4.00 = $0.20/day</li>
+        <li><strong>Daily total: $1.00 ($30/month)</strong></li>
+      </ul>
+      
+      <p>Same pipeline with Sonnet 4 would cost $4.50/day ($135/month). Model choice matters.
+      </p>
+      
+      <h2>Billing and Payment</h2>
+      
+      <h3>API Billing</h3>
+      
+      <ul>
+        <li>Billed monthly in arrears</li>
+        <li>Usage tracked in real-time on the Anthropic Console</li>
+        <li>Prepaid credits available (required for tier upgrades)</li>
+        <li>No minimum commitment</li>
+      </ul>
+      
+      <h3>Subscription Billing</h3>
+      
+      <ul>
+        <li>Billed monthly (no annual discount currently)</li>
+        <li>Cancel anytime, access continues through billing period</li>
+        <li>Downgrades take effect at next billing cycle</li>
+      </ul>
+      
+      <h2>Frequently Asked Questions</h2>
+      
+      <h3>How do I check my current API spending?</h3>
+      <p>Visit the Anthropic Console at console.anthropic.com. The Usage page shows real-time token counts and costs broken down by model and day.
+      </p>
+      
+      <h3>Are there free API credits for new accounts?</h3>
+      <p>Anthropic occasionally offers trial credits. Check the Console for current promotions. The free tier gives limited access without credit card.
+      </p>
+      
+      <h3>Can I set a spending limit?</h3>
+      <p>Yes. In the Console, navigate to Settings and set a monthly spending limit. The API will return errors once the limit is reached.
+      </p>
+      
+      <h3>Do thinking tokens count against rate limits?</h3>
+      <p>Yes. Extended thinking tokens count as output tokens for both billing and rate limit purposes.
+      </p>
+      
+      <h3>Is there a difference between MTok pricing and per-token pricing?</h3>
+      <p>No. MTok (million tokens) is just the unit. $15.00/MTok equals $0.000015 per token. The per-million convention avoids tiny decimal numbers.
+      </p>
+      
+      <h3>How are images priced?</h3>
+      <p>Images are converted to tokens based on their dimensions. A typical 1024x1024 image costs approximately 1,600 tokens at input rates.
+      </p>
+      
+      <h3>Can I negotiate volume discounts?</h3>
+      <p>For large-scale enterprise usage, contact Anthropic's sales team. Volume commitments can lead to custom pricing.
+      </p>
+      
+      <h3>What happens if I exceed my rate limit?</h3>
+      <p>You receive a 429 HTTP error. The response headers indicate when the limit resets. Implement retry logic to handle this gracefully.
+      </p>
+      
+      <h3>How does Claude API pricing compare to running local models?</h3>
+      <p>Local models (via Ollama, llama.cpp) have zero per-token cost but require GPU hardware ($2,000-$10,000+). For most developers, API access is cheaper unless you process millions of tokens daily. The breakeven point depends on your hardware cost, electricity, and usage volume.
+      </p>
+      
+      <h3>Can I use multiple API keys for higher rate limits?</h3>
+      <p>Each API key shares the organization-level rate limit. Multiple keys do not increase your total throughput. To get higher limits, upgrade your API tier by adding prepaid credits.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/calculator/">Estimate your Claude Code costs</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-api-pricing-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude API Pricing Complete Guide (2026)",
+    "description": "Complete Claude API pricing for all models and plans. Per-token costs, rate limits, batch discounts, prompt caching savings, and plan comparisons.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-api-pricing-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

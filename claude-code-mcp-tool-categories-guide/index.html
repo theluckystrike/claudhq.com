@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code MCP Tool Categories and Use Cases (2026) | ClaudHQ</title>
+  <meta name="description" content="Guide to MCP tool categories in Claude Code with practical examples for developers building AI-powered workflows.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-mcp-tool-categories-guide/">
+  <meta property="og:title" content="Claude Code MCP Tool Categories and Use Cases (2026) | ClaudHQ">
+  <meta property="og:description" content="Guide to MCP tool categories in Claude Code with practical examples for developers building AI-powered workflows.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-mcp-tool-categories-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code MCP Tool Categories and Use Cases (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The Model Context Protocol (MCP) serves as the backbone for Claude Code's extensibility, enabling developers to create powerful integrations that extend Claude's capabilities beyond its core features. Understanding MCP tool categories and their practical applications is essential for anyone looking to build sophisticated AI-powered development workflows.
+      </p>
+      
+      <h2>Understanding MCP and Tool Categories</h2>
+      
+      <p>MCP provides a standardized way for Claude Code to interact with external services, APIs, and development tools. Rather than building isolated integrations, MCP creates a unified interface where tools are organized into logical categories based on their function and domain.
+      </p>
+      
+      <h2>How MCP Works Under the Hood</h2>
+      
+      <p>Before diving into categories, it helps to understand the communication model. MCP operates on a client-server architecture where Claude Code acts as the MCP client and each integration (GitHub, filesystem, databases) runs as an MCP server. Communication happens over a defined protocol. either via stdio (for local processes) or HTTP with Server-Sent Events (for remote servers).
+      </p>
+      
+      <pre><code>Claude Code (MCP Client)
+ |
+ |--- stdio/HTTP ---&gt; MCP Server: Filesystem
+ |--- stdio/HTTP ---&gt; MCP Server: GitHub
+ |--- stdio/HTTP ---&gt; MCP Server: PostgreSQL
+ |--- stdio/HTTP ---&gt; MCP Server: Custom API</code></pre>
+      
+      <p>Each MCP server exposes a set of named tools with typed input schemas. When Claude Code receives a task, it selects the appropriate tools, constructs valid arguments, and sends requests to the servers. The servers execute the actions and return structured results.
+      </p>
+      
+      <h2>MCP Tool Configuration</h2>
+      
+      <p>Tools are declared in your Claude Code configuration file, typically at <code>.claude/settings.json</code> or in a project-level <code>CLAUDE.md</code>. A minimal configuration looks like this:
+      </p>
+      
+      <pre><code>{
+ &quot;mcpServers&quot;: {
+ &quot;filesystem&quot;: {
+ &quot;command&quot;: &quot;npx&quot;,
+ &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-filesystem&quot;, &quot;/path/to/project&quot;]
+ },
+ &quot;github&quot;: {
+ &quot;command&quot;: &quot;npx&quot;,
+ &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-github&quot;],
+ &quot;env&quot;: {
+ &quot;GITHUB_PERSONAL_ACCESS_TOKEN&quot;: &quot;${GITHUB_TOKEN}&quot;
+ }
+ },
+ &quot;postgres&quot;: {
+ &quot;command&quot;: &quot;npx&quot;,
+ &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-postgres&quot;],
+ &quot;env&quot;: {
+ &quot;DATABASE_URL&quot;: &quot;${DATABASE_URL}&quot;
+ }
+ }
+ }
+}</code></pre>
+      
+      <p>Each server entry specifies how to launch the server process and what environment variables it needs. The <code>${VARIABLE}</code> syntax pulls from your shell environment, keeping secrets out of config files.
+      </p>
+      
+      <h2>MCP vs. Direct Claude Code Tools: Key Differences</h2>
+      
+      <p>Claude Code ships with built-in tools (Read, Write, Bash, Glob, Grep) that work without any MCP configuration. MCP servers extend beyond these defaults. Here is how they compare:
+      </p>
+      
+      <table>
+      <tr><th>Capability</th><th>Built-in Tools</th><th>MCP Servers</th></tr>
+      <tr><td>Read local files</td><td>Yes (Read tool)</td><td>Yes (filesystem server)</td></tr>
+      <tr><td>Write local files</td><td>Yes (Write tool)</td><td>Yes (filesystem server)</td></tr>
+      <tr><td>Run shell commands</td><td>Yes (Bash tool)</td><td>Via custom servers</td></tr>
+      <tr><td>GitHub API</td><td>No</td><td>Yes (github server)</td></tr>
+      <tr><td>Database queries</td><td>No</td><td>Yes (postgres/sqlite servers)</td></tr>
+      <tr><td>Browser automation</td><td>No</td><td>Yes (playwright/puppeteer servers)</td></tr>
+      <tr><td>Custom business logic</td><td>No</td><td>Yes (build your own)</td></tr>
+      <tr><td>Authentication context</td><td>No</td><td>Yes (server handles auth)</td></tr>
+      <tr><td>Remote execution</td><td>No</td><td>Yes (HTTP-based servers)</td></tr>
+      </table>
+      
+      <p>The practical rule: use built-in tools for local file and command operations, reach for MCP servers when you need authenticated external services or specialized capabilities.
+      </p>
+      
+      <h2>File Operations and System Tools</h2>
+      
+      <p>The most fundamental category encompasses file operations and system interactions. These tools allow Claude Code to read, write, and manipulate files across your project, execute shell commands, and interact with the local filesystem.
+      </p>
+      
+      <p>Practical Example:
+      </p>
+      
+      <pre><code>Reading a configuration file
+read_file(path: &quot;config/development.json&quot;)
+
+Executing a build command
+bash(command: &quot;npm run build&quot;, timeout: 300)
+
+Writing generated documentation
+write_file(content: documentation_content, path: &quot;docs/api-reference.md&quot;)</code></pre>
+      
+      <p>These tools are essential for automated code generation, documentation workflows, and project scaffolding. A common use case involves reading existing code patterns and generating similar implementations across your codebase.
+      </p>
+      
+      <h2>Advanced File Operations Patterns</h2>
+      
+      <p>Beyond basic read/write, the filesystem MCP server exposes directory listing, search, and metadata operations. Here is how you combine them for a practical scaffolding workflow:
+      </p>
+      
+      <pre><code>Scaffold a new module by reading an existing one as a template
+async def scaffold_module(module_name: str, template_name: str):
+ # Read the template module structure
+ template_files = await list_directory(f&quot;src/modules/{template_name}&quot;)
+
+ for file_path in template_files:
+ # Read template content
+ content = await read_file(file_path)
+
+ # Replace template references with new module name
+ new_content = content.replace(template_name, module_name)
+ new_content = new_content.replace(
+ template_name.upper(),
+ module_name.upper()
+ )
+
+ # Write to new module directory
+ new_path = file_path.replace(
+ f&quot;modules/{template_name}&quot;,
+ f&quot;modules/{module_name}&quot;
+ )
+ await write_file(path=new_path, content=new_content)
+
+ print(f&quot;Scaffolded {module_name} from {template_name}&quot;)</code></pre>
+      
+      <p>This pattern is especially useful when your codebase uses consistent module conventions. Rather than copying folders manually and doing find-and-replace, you delegate the entire scaffolding task to Claude with a single instruction.
+      </p>
+      
+      <h2>File Watching and Change Detection</h2>
+      
+      <p>Some filesystem MCP servers support change notification via subscriptions. This enables reactive workflows:
+      </p>
+      
+      <pre><code>{
+ &quot;tool&quot;: &quot;watch_directory&quot;,
+ &quot;arguments&quot;: {
+ &quot;path&quot;: &quot;src/schemas&quot;,
+ &quot;pattern&quot;: &quot;/*.graphql&quot;,
+ &quot;on_change&quot;: &quot;regenerate_types&quot;
+ }
+}</code></pre>
+      
+      <p>When GraphQL schema files change, the workflow automatically regenerates TypeScript types. no manual step needed.
+      </p>
+      
+      <h2>Development Tools and IDE Integration</h2>
+      
+      <p>This category includes tools that interact with your development environment, version control systems, and code analysis tools. MCP servers in this space connect to GitHub, GitLab, CI/CD pipelines, and integrated development environments.
+      </p>
+      
+      <p>Practical Example:
+      </p>
+      
+      <pre><code>Using Git operations through MCP
+from mcp.servers import git
+
+Commit changes with auto-generated message
+git.commit(message: &quot;feat: add user authentication module&quot;)
+
+Create a pull request
+git.create_pull_request(
+ title: &quot;Add OAuth2 support&quot;,
+ base: &quot;main&quot;,
+ head: &quot;feature/oauth2&quot;
+)</code></pre>
+      
+      <p>Development tools excel at automating repetitive tasks like running tests across multiple environments, managing branches, and synchronizing code between repositories.
+      </p>
+      
+      <h2>GitHub MCP Server: Real Workflow Examples</h2>
+      
+      <p>The GitHub MCP server is among the most widely used because it covers the entire pull request lifecycle. Here are concrete examples of what it enables:
+      </p>
+      
+      <pre><code>Find all open PRs with failing CI checks
+async def find_broken_prs(repo: str):
+ prs = await github.list_pull_requests(
+ repo=repo,
+ state=&quot;open&quot;
+ )
+
+ broken = []
+ for pr in prs:
+ checks = await github.get_check_runs(
+ repo=repo,
+ ref=pr[&quot;head&quot;][&quot;sha&quot;]
+ )
+ failed_checks = [c for c in checks if c[&quot;conclusion&quot;] == &quot;failure&quot;]
+ if failed_checks:
+ broken.append({
+ &quot;pr_number&quot;: pr[&quot;number&quot;],
+ &quot;title&quot;: pr[&quot;title&quot;],
+ &quot;author&quot;: pr[&quot;user&quot;][&quot;login&quot;],
+ &quot;failed_checks&quot;: [c[&quot;name&quot;] for c in failed_checks]
+ })
+
+ return broken</code></pre>
+      
+      <pre><code>Auto-label PRs based on changed files
+async def label_pr_by_changes(repo: str, pr_number: int):
+ files = await github.list_pull_request_files(
+ repo=repo,
+ pull_number=pr_number
+ )
+
+ labels = set()
+ for file in files:
+ if file[&quot;filename&quot;].startswith(&quot;src/api/&quot;):
+ labels.add(&quot;api-change&quot;)
+ if file[&quot;filename&quot;].startswith(&quot;migrations/&quot;):
+ labels.add(&quot;database-migration&quot;)
+ if file[&quot;filename&quot;].endswith(&quot;.test.ts&quot;):
+ labels.add(&quot;has-tests&quot;)
+ if &quot;package.json&quot; in file[&quot;filename&quot;]:
+ labels.add(&quot;dependency-change&quot;)
+
+ if labels:
+ await github.add_labels_to_issue(
+ repo=repo,
+ issue_number=pr_number,
+ labels=list(labels)
+ )</code></pre>
+      
+      <p>These workflows run inside Claude Code sessions, meaning you can trigger them with natural language: "Label all open PRs in myorg/myrepo based on what files they change."
+      </p>
+      
+      <h2>CI/CD Integration via MCP</h2>
+      
+      <p>Beyond GitHub, MCP servers exist for Jenkins, CircleCI, and GitHub Actions. Here is a pattern for triggering and monitoring a deployment:
+      </p>
+      
+      <pre><code>Trigger a deployment and wait for completion
+async def deploy_to_staging(image_tag: str):
+ # Trigger the workflow
+ run = await github_actions.create_workflow_dispatch(
+ workflow_id=&quot;deploy-staging.yml&quot;,
+ ref=&quot;main&quot;,
+ inputs={&quot;image_tag&quot;: image_tag}
+ )
+
+ run_id = run[&quot;id&quot;]
+
+ # Poll until complete
+ while True:
+ status = await github_actions.get_workflow_run(run_id=run_id)
+ if status[&quot;status&quot;] == &quot;completed&quot;:
+ if status[&quot;conclusion&quot;] == &quot;success&quot;:
+ print(f&quot;Deployed {image_tag} to staging successfully&quot;)
+ else:
+ raise Exception(f&quot;Deployment failed: {status[&#x27;conclusion&#x27;]}&quot;)
+ break
+
+ await asyncio.sleep(10)</code></pre>
+      
+      <h2>Data Processing and Analysis Tools</h2>
+      
+      <p>For tasks involving data transformation, analysis, and processing, this category provides tools that handle structured and unstructured data at scale. These tools connect to databases, data warehouses, and processing frameworks.
+      </p>
+      
+      <p>Practical Example:
+      </p>
+      
+      <pre><code>Query a database and process results
+data = database.query(&quot;&quot;&quot;
+ SELECT user_id, COUNT(*) as login_count
+ FROM login_events
+ WHERE created_at &gt; NOW() - INTERVAL &#x27;30 days&#x27;
+ GROUP BY user_id
+&quot;&quot;&quot;)
+
+Transform and export
+transformed = data.map(lambda row: {
+ &quot;user_id&quot;: row.user_id,
+ &quot;activity_level&quot;: &quot;high&quot; if row.login_count &gt; 20 else &quot;low&quot;
+})
+
+export_to_csv(transformed, &quot;user_activity_report.csv&quot;)</code></pre>
+      
+      <h2>Database MCP Servers in Practice</h2>
+      
+      <p>The PostgreSQL and SQLite MCP servers expose query and schema inspection tools. This makes Claude Code genuinely useful for database work:
+      </p>
+      
+      <pre><code>-- Ask Claude: &quot;Find all users who signed up in the last 7 days but never completed their profile&quot;
+-- Claude constructs and executes:
+SELECT
+ u.id,
+ u.email,
+ u.created_at,
+ CASE
+ WHEN p.user_id IS NULL THEN &#x27;no_profile&#x27;
+ WHEN p.bio IS NULL AND p.avatar_url IS NULL THEN &#x27;empty_profile&#x27;
+ ELSE &#x27;partial_profile&#x27;
+ END AS profile_status
+FROM users u
+LEFT JOIN user_profiles p ON p.user_id = u.id
+WHERE u.created_at &gt;= NOW() - INTERVAL &#x27;7 days&#x27;
+ AND (p.user_id IS NULL OR (p.bio IS NULL AND p.avatar_url IS NULL))
+ORDER BY u.created_at DESC;</code></pre>
+      
+      <p>Beyond running queries, Claude can use schema inspection tools to understand your database structure before writing any SQL:
+      </p>
+      
+      <pre><code>Claude inspects schema before writing queries
+async def analyze_schema(table_name: str):
+ columns = await postgres.describe_table(table=table_name)
+ indexes = await postgres.list_indexes(table=table_name)
+ foreign_keys = await postgres.list_foreign_keys(table=table_name)
+
+ return {
+ &quot;columns&quot;: columns,
+ &quot;indexes&quot;: indexes,
+ &quot;foreign_keys&quot;: foreign_keys
+ }</code></pre>
+      
+      <p>This schema awareness is what separates MCP-powered database workflows from simple "execute SQL" approaches. Claude can reason about performance implications, suggest appropriate indexes, and avoid queries that would result in sequential scans on large tables.
+      </p>
+      
+      <h2>Comparison of Database MCP Servers</h2>
+      
+      <table>
+      <tr><th>Server</th><th>Database</th><th>Best For</th><th>Limitations</th></tr>
+      <tr><td><code>server-postgres</code></td><td>PostgreSQL</td><td>Production app databases, complex queries</td><td>Read-only mode available; writes require explicit config</td></tr>
+      <tr><td><code>server-sqlite</code></td><td>SQLite</td><td>Local dev databases, test fixtures</td><td>Single-file databases only</td></tr>
+      <tr><td><code>server-mysql</code></td><td>MySQL/MariaDB</td><td>Legacy app databases</td><td>Community-maintained</td></tr>
+      <tr><td><code>server-bigquery</code></td><td>BigQuery</td><td>Analytics workloads, data warehousing</td><td>Requires GCP credentials</td></tr>
+      <tr><td>Custom</td><td>Any</td><td>Proprietary databases, internal tooling</td><td>Requires building an MCP server</td></tr>
+      </table>
+      
+      <h2>Web and API Tools</h2>
+      
+      <p>This category enables interaction with external APIs, web services, and HTTP-based integrations. These tools are crucial for building workflows that span multiple services or require real-time data.
+      </p>
+      
+      <p>Practical Example:
+      </p>
+      
+      <pre><code>// Fetch and process external API data
+const response = await http.request({
+ url: &quot;https://api.weather.example.com/forecast&quot;,
+ method: &quot;GET&quot;,
+ headers: {
+ &quot;Authorization&quot;: &quot;Bearer ${API_KEY}&quot;
+ }
+});
+
+const forecast = response.body.forecast.map(day =&gt; ({
+ date: day.date,
+ temp_high: day.temperature.max,
+ conditions: day.weather.description
+}));</code></pre>
+      
+      <h2>Building a Custom MCP Server for Internal APIs</h2>
+      
+      <p>Many teams have internal APIs that no off-the-shelf MCP server covers. Building a custom server is more approachable than it sounds. Here is a minimal TypeScript MCP server that wraps an internal feature-flag API:
+      </p>
+      
+      <pre><code>import { Server } from &quot;@modelcontextprotocol/sdk/server/index.js&quot;;
+import { StdioServerTransport } from &quot;@modelcontextprotocol/sdk/server/stdio.js&quot;;
+
+const server = new Server(
+ { name: &quot;feature-flags&quot;, version: &quot;1.0.0&quot; },
+ { capabilities: { tools: {} } }
+);
+
+server.setRequestHandler(&quot;tools/list&quot;, async () =&gt; ({
+ tools: [
+ {
+ name: &quot;get_flag&quot;,
+ description: &quot;Get the current value of a feature flag&quot;,
+ inputSchema: {
+ type: &quot;object&quot;,
+ properties: {
+ flag_name: { type: &quot;string&quot;, description: &quot;Feature flag identifier&quot; },
+ environment: {
+ type: &quot;string&quot;,
+ enum: [&quot;production&quot;, &quot;staging&quot;, &quot;development&quot;],
+ default: &quot;production&quot;
+ }
+ },
+ required: [&quot;flag_name&quot;]
+ }
+ },
+ {
+ name: &quot;set_flag&quot;,
+ description: &quot;Enable or disable a feature flag&quot;,
+ inputSchema: {
+ type: &quot;object&quot;,
+ properties: {
+ flag_name: { type: &quot;string&quot; },
+ enabled: { type: &quot;boolean&quot; },
+ environment: { type: &quot;string&quot;, enum: [&quot;staging&quot;, &quot;development&quot;] }
+ },
+ required: [&quot;flag_name&quot;, &quot;enabled&quot;, &quot;environment&quot;]
+ }
+ }
+ ]
+}));
+
+server.setRequestHandler(&quot;tools/call&quot;, async (request) =&gt; {
+ const { name, arguments: args } = request.params;
+
+ if (name === &quot;get_flag&quot;) {
+ const response = await fetch(
+ `${process.env.FLAGS_API_URL}/flags/${args.flag_name}?env=${args.environment || &quot;production&quot;}`,
+ { headers: { Authorization: `Bearer ${process.env.FLAGS_API_TOKEN}` } }
+ );
+ const data = await response.json();
+ return { content: [{ type: &quot;text&quot;, text: JSON.stringify(data) }] };
+ }
+
+ if (name === &quot;set_flag&quot;) {
+ const response = await fetch(
+ `${process.env.FLAGS_API_URL}/flags/${args.flag_name}`,
+ {
+ method: &quot;PATCH&quot;,
+ headers: {
+ Authorization: `Bearer ${process.env.FLAGS_API_TOKEN}`,
+ &quot;Content-Type&quot;: &quot;application/json&quot;
+ },
+ body: JSON.stringify({ enabled: args.enabled, environment: args.environment })
+ }
+ );
+ const data = await response.json();
+ return { content: [{ type: &quot;text&quot;, text: JSON.stringify(data) }] };
+ }
+
+ throw new Error(`Unknown tool: ${name}`);
+});
+
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+      
+      <p>Once registered in your Claude Code config, you can ask Claude: "Check if the new-checkout feature flag is enabled in production" or "Enable the beta-dashboard flag in staging for testing." Claude calls your custom server and returns structured results.
+      </p>
+      
+      <h2>Building Use Cases with MCP Tools</h2>
+      
+      <h2>Automated Code Review Workflow</h2>
+      
+      <p>One of the most powerful applications combines multiple tool categories. A code review workflow might:
+      </p>
+      
+      <ol>
+        <li>Use file operations to fetch changed files from a pull request</li>
+        <li>Invoke development tools to run static analysis</li>
+        <li>Use data processing to aggregate review comments</li>
+        <li>Employ web tools to post results back to the PR</li>
+      </ol>
+      
+      <pre><code>Example workflow configuration
+workflow:
+ name: &quot;Automated Code Review&quot;
+ triggers:
+ - pull_request.opened
+ - pull_request.synchronize
+
+ steps:
+ - name: &quot;Fetch changes&quot;
+ tool: &quot;git diff&quot;
+ output: &quot;changes&quot;
+
+ - name: &quot;Run linting&quot;
+ tool: &quot;bash&quot;
+ command: &quot;npm run lint --json&quot;
+ output: &quot;lint_results&quot;
+
+ - name: &quot;Analyze complexity&quot;
+ tool: &quot;mcp.code-analysis&quot;
+ input: changes
+ output: &quot;analysis&quot;
+
+ - name: &quot;Post review&quot;
+ tool: &quot;github.create-review-comment&quot;
+ input: analysis</code></pre>
+      
+      <h2>A More Complete Code Review Implementation</h2>
+      
+      <p>The YAML above captures the concept but omits the glue code. Here is what the actual Claude Code session looks like when you wire these tools together:
+      </p>
+      
+      <pre><code>async def automated_code_review(repo: str, pr_number: int):
+ # Step 1: Fetch the diff
+ pr = await github.get_pull_request(repo=repo, pull_number=pr_number)
+ files = await github.list_pull_request_files(repo=repo, pull_number=pr_number)
+
+ review_comments = []
+
+ for file in files:
+ if not file[&quot;filename&quot;].endswith((&quot;.ts&quot;, &quot;.tsx&quot;, &quot;.js&quot;)):
+ continue
+
+ # Step 2: Read file content at the PR head commit
+ content = await github.get_file_contents(
+ repo=repo,
+ path=file[&quot;filename&quot;],
+ ref=pr[&quot;head&quot;][&quot;sha&quot;]
+ )
+
+ # Step 3: Run static analysis via bash tool
+ analysis_result = await bash(
+ command=f&quot;npx eslint --stdin --stdin-filename {file[&#x27;filename&#x27;]} --format json&quot;,
+ stdin=content
+ )
+
+ lint_issues = json.loads(analysis_result.stdout)
+
+ # Step 4: Convert lint issues to PR review comments
+ for issue in lint_issues[0].get(&quot;messages&quot;, []):
+ review_comments.append({
+ &quot;path&quot;: file[&quot;filename&quot;],
+ &quot;line&quot;: issue[&quot;line&quot;],
+ &quot;body&quot;: f&quot;{issue[&#x27;ruleId&#x27;]}: {issue[&#x27;message&#x27;]}&quot;
+ })
+
+ # Step 5: Post all comments as a single PR review
+ if review_comments:
+ await github.create_pull_request_review(
+ repo=repo,
+ pull_number=pr_number,
+ event=&quot;COMMENT&quot;,
+ comments=review_comments,
+ body=f&quot;Automated lint review found {len(review_comments)} issue(s).&quot;
+ )
+ else:
+ await github.create_pull_request_review(
+ repo=repo,
+ pull_number=pr_number,
+ event=&quot;APPROVE&quot;,
+ body=&quot;No lint issues found. Automated review passed.&quot;
+ )</code></pre>
+      
+      <h2>Documentation Generation Pipeline</h2>
+      
+      <p>Another common pattern involves generating and maintaining documentation automatically. This workflow uses file reading to understand your codebase, then uses template tools to produce formatted documentation.
+      </p>
+      
+      <pre><code>Documentation generation workflow
+async def generate_api_docs():
+ # Discover API endpoints
+ endpoints = await file_operations.scan_directory(
+ path: &quot;src/api&quot;,
+ pattern: &quot;/*controller.ts&quot;
+ )
+
+ # Parse each endpoint
+ docs = []
+ for endpoint in endpoints:
+ content = await read_file(endpoint)
+ parsed = parse_openapi(content)
+ docs.append(format_documentation(parsed))
+
+ # Generate consolidated docs
+ output = render_template(&quot;api-docs.md&quot;, endpoints=docs)
+
+ # Write to output directory
+ await write_file(
+ path: &quot;docs/api/latest.md&quot;,
+ content: output
+ )</code></pre>
+      
+      <h2>Documentation Pipeline with Version Publishing</h2>
+      
+      <p>Extending the above example, you can wire the documentation pipeline into a full publishing workflow:
+      </p>
+      
+      <pre><code>async def publish_docs(version: str):
+ # Generate docs (as above)
+ await generate_api_docs()
+
+ # Commit the generated docs
+ await bash(command=&quot;git add docs/api/latest.md&quot;)
+ await bash(command=f&#x27;git commit -m &quot;docs: regenerate API reference for {version}&quot;&#x27;)
+
+ # Push to the docs branch
+ await bash(command=&quot;git push origin main&quot;)
+
+ # Trigger the GitHub Pages deployment
+ await github_actions.create_workflow_dispatch(
+ workflow_id=&quot;deploy-docs.yml&quot;,
+ ref=&quot;main&quot;,
+ inputs={&quot;version&quot;: version}
+ )
+
+ # Post a notification to Slack
+ await http.request(
+ url=os.environ[&quot;SLACK_WEBHOOK_URL&quot;],
+ method=&quot;POST&quot;,
+ json={
+ &quot;text&quot;: f&quot;API docs for version {version} published to docs.myapp.com&quot;
+ }
+ )</code></pre>
+      
+      <p>This single workflow replaces what would otherwise be a manual multi-step process prone to human error.
+      </p>
+      
+      <h2>Testing and Quality Assurance</h2>
+      
+      <p>MCP tools excel at building comprehensive testing pipelines that run across multiple environments and generate unified reports.
+      </p>
+      
+      <pre><code>Run tests across multiple frameworks
+test_suites:
+ - name: &quot;Unit Tests&quot;
+ command: &quot;npm test -- --coverage&quot;
+ framework: &quot;jest&quot;
+
+ - name: &quot;Integration Tests&quot;
+ command: &quot;python -m pytest tests/integration&quot;
+ framework: &quot;pytest&quot;
+
+ - name: &quot;E2E Tests&quot;
+ command: &quot;cypress run&quot;
+ framework: &quot;cypress&quot;
+
+Aggregate results
+test_results = []
+for suite in test_suites:
+ results = await bash(suite.command)
+ test_results.append(parse_results(results))
+
+summary = generate_summary(test_results)
+notify_team(summary)</code></pre>
+      
+      <h2>Structured Test Result Aggregation</h2>
+      
+      <p>The pattern above captures the concept. Here is a concrete implementation that normalizes results across Jest, pytest, and Cypress into a unified report:
+      </p>
+      
+      <pre><code>import json
+from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class TestSuiteResult:
+ name: str
+ framework: str
+ passed: int
+ failed: int
+ skipped: int
+ duration_seconds: float
+ failures: List[dict]
+
+async def run_all_test_suites() -&gt; List[TestSuiteResult]:
+ suites = [
+ (&quot;Unit Tests&quot;, &quot;jest&quot;, &quot;npm test -- --coverage --json&quot;),
+ (&quot;Integration Tests&quot;, &quot;pytest&quot;, &quot;python -m pytest tests/integration --json-report --json-report-file=/tmp/pytest.json&quot;),
+ (&quot;E2E Tests&quot;, &quot;cypress&quot;, &quot;cypress run --reporter json&quot;)
+ ]
+
+ results = []
+
+ for name, framework, command in suites:
+ output = await bash(command=command, ignore_errors=True)
+
+ if framework == &quot;jest&quot;:
+ data = json.loads(output.stdout)
+ results.append(TestSuiteResult(
+ name=name,
+ framework=framework,
+ passed=data[&quot;numPassedTests&quot;],
+ failed=data[&quot;numFailedTests&quot;],
+ skipped=data[&quot;numPendingTests&quot;],
+ duration_seconds=data[&quot;testResults&quot;][0][&quot;perfStats&quot;][&quot;end&quot;] / 1000,
+ failures=[
+ {&quot;test&quot;: t[&quot;fullName&quot;], &quot;message&quot;: t[&quot;failureMessages&quot;][0]}
+ for suite in data[&quot;testResults&quot;]
+ for t in suite[&quot;testResults&quot;]
+ if t[&quot;status&quot;] == &quot;failed&quot;
+ ]
+ ))
+
+ elif framework == &quot;pytest&quot;:
+ with open(&quot;/tmp/pytest.json&quot;) as f:
+ data = json.load(f)
+ results.append(TestSuiteResult(
+ name=name,
+ framework=framework,
+ passed=data[&quot;summary&quot;][&quot;passed&quot;],
+ failed=data[&quot;summary&quot;].get(&quot;failed&quot;, 0),
+ skipped=data[&quot;summary&quot;].get(&quot;skipped&quot;, 0),
+ duration_seconds=data[&quot;duration&quot;],
+ failures=[
+ {&quot;test&quot;: t[&quot;nodeid&quot;], &quot;message&quot;: t[&quot;call&quot;][&quot;longrepr&quot;]}
+ for t in data[&quot;tests&quot;]
+ if t[&quot;outcome&quot;] == &quot;failed&quot;
+ ]
+ ))
+
+ return results
+
+async def post_test_summary_to_pr(repo: str, pr_number: int, results: List[TestSuiteResult]):
+ total_passed = sum(r.passed for r in results)
+ total_failed = sum(r.failed for r in results)
+
+ status = &quot;All tests passed&quot; if total_failed == 0 else f&quot;{total_failed} test(s) failed&quot;
+
+ table = &quot;| Suite | Passed | Failed | Duration |\n|---|---|---|---|\n&quot;
+ for r in results:
+ table += f&quot;| {r.name} | {r.passed} | {r.failed} | {r.duration_seconds:.1f}s |\n&quot;
+
+ body = f&quot;## Test Results: {status}\n\n{table}&quot;
+
+ if total_failed &gt; 0:
+ body += &quot;\n### Failures\n&quot;
+ for r in results:
+ for failure in r.failures[:3]: # Cap at 3 per suite
+ body += f&quot;\n{r.name}. `{failure[&#x27;test&#x27;]}`\n```\n{failure[&#x27;message&#x27;][:500]}\n```\n&quot;
+
+ await github.create_issue_comment(
+ repo=repo,
+ issue_number=pr_number,
+ body=body
+ )</code></pre>
+      
+      <h2>Best Practices for MCP Tool Usage</h2>
+      
+      <p>When designing workflows that use MCP tools, consider these guidelines:
+      </p>
+      
+      <p>Start with core tools: Begin with file operations and bash commands before adding specialized MCP servers. This builds familiarity with the pattern.
+      </p>
+      
+      <p>Chain tools deliberately: Each tool should have a clear input and output. Avoid forcing tools to handle data formats they weren't designed for.
+      </p>
+      
+      <p>Handle errors gracefully: Network calls and external services can fail. Build retry logic and fallback behaviors into your workflows.
+      </p>
+      
+      <p>Limit tool scope: Rather than giving Claude access to every possible tool, define narrow tool sets for specific skills. This improves reliability and reduces unintended actions.
+      </p>
+      
+      <h2>MCP Security and Scope Control</h2>
+      
+      <p>Narrowing tool scope is not just a reliability concern. it is a security practice. Here is how to define a restricted tool set for a specific Claude Code skill:
+      </p>
+      
+      <pre><code>{
+ &quot;skills&quot;: {
+ &quot;pr-review&quot;: {
+ &quot;description&quot;: &quot;Automated PR review workflow&quot;,
+ &quot;allowedTools&quot;: [
+ &quot;Read&quot;,
+ &quot;Bash&quot;,
+ &quot;mcp__github__get_pull_request&quot;,
+ &quot;mcp__github__list_pull_request_files&quot;,
+ &quot;mcp__github__create_pull_request_review&quot;
+ ]
+ }
+ }
+}</code></pre>
+      
+      <p>By allowlisting only the tools a skill needs, you prevent a runaway workflow from accidentally pushing code, deleting files, or sending notifications to unintended channels.
+      </p>
+      
+      <h2>Idempotent Tool Design</h2>
+      
+      <p>Build workflows that can be safely re-run without causing duplicate side effects. The check-then-act pattern prevents duplicate comments, commits, and API calls:
+      </p>
+      
+      <pre><code>async def ensure_pr_labeled(repo: str, pr_number: int, label: str):
+ # Check before acting
+ existing_labels = await github.list_labels_for_issue(
+ repo=repo,
+ issue_number=pr_number
+ )
+
+ existing_names = [l[&quot;name&quot;] for l in existing_labels]
+
+ if label not in existing_names:
+ await github.add_labels_to_issue(
+ repo=repo,
+ issue_number=pr_number,
+ labels=[label]
+ )
+ print(f&quot;Added label &#x27;{label}&#x27;&quot;)
+ else:
+ print(f&quot;Label &#x27;{label}&#x27; already present, skipping&quot;)</code></pre>
+      
+      <p>This pattern is particularly important for workflows triggered by webhooks that may fire multiple times for the same event.
+      </p>
+      
+      <h2>Choosing Between MCP Tool Categories: Decision Guide</h2>
+      
+      <table>
+      <tr><th>Situation</th><th>Recommended Category</th><th>Specific Tool</th></tr>
+      <tr><td>Read/write project files</td><td>File Operations</td><td><code>server-filesystem</code></td></tr>
+      <tr><td>Run build commands</td><td>System Tools</td><td>Built-in Bash tool</td></tr>
+      <tr><td>Create PR from code changes</td><td>Development Tools</td><td><code>server-github</code></td></tr>
+      <tr><td>Query application database</td><td>Data Processing</td><td><code>server-postgres</code></td></tr>
+      <tr><td>Fetch third-party API data</td><td>Web and API Tools</td><td><code>server-fetch</code> or custom</td></tr>
+      <tr><td>Search and index documents</td><td>Data Processing</td><td><code>server-qdrant</code> or <code>server-chroma</code></td></tr>
+      <tr><td>Automate browser actions</td><td>Web Tools</td><td><code>server-playwright</code></td></tr>
+      <tr><td>Manage Kubernetes resources</td><td>Development Tools</td><td>Custom MCP server</td></tr>
+      <tr><td>Send Slack notifications</td><td>Web and API Tools</td><td><code>server-slack</code></td></tr>
+      <tr><td>Interact with AWS resources</td><td>Development Tools</td><td>Custom or <code>server-aws-kb-retrieval</code></td></tr>
+      </table>
+      
+      <h2>Conclusion</h2>
+      
+      <p>MCP tool categories provide a structured approach to extending Claude Code's capabilities. By understanding the strengths of each category, file operations, development tools, data processing, and web APIs, you can build sophisticated automation workflows that transform how you develop software. Start with simple workflows and progressively add complexity as you become more comfortable with the patterns.
+      </p>
+      
+      <p>The key to success lies in combining tools thoughtfully rather than relying on any single category. Most powerful workflows emerge from the interaction between multiple tool types, enabling automation that would be impossible with isolated tools alone. The automated code review example. which touches file operations, static analysis, and GitHub API in a single coherent workflow. demonstrates exactly this: each tool handles what it does best, and Claude coordinates the entire sequence with context that no human-written script could match.
+      </p>
+      
+      <p>As you build out your MCP integrations, invest time in error handling, idempotency, and scope control. Workflows that are solid to partial failures and safe to re-run are workflows that your team will actually trust and rely on in production.
+      </p>
+      
+      
+      
+      
+      <p><div class="mastery-cta">
+      </p>
+      
+      <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.
+      </p>
+      
+      <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use. Not theory — production configs.
+      </p>
+      
+      <p><strong><a href="https://zovo.one/lifetime?utm_source=ccg&utm_medium=cta-mcp&utm_campaign=claude-code-mcp-tool-categories-use-cases-guide">Grab the templates — $99 once, free forever →</a></strong>
+      </p>
+      
+      <p>47/500 founding spots. Price goes up when they're gone.
+      </p>
+      
+      <p></div>
+      </p>
+      
+      <p>Related Reading
+      </p>
+      
+      
+      
+      
+      <p><strong>Configure it →</strong> Build your MCP config with our MCP Config Generator.
+      </p>
+      
+      <p><strong>Configure permissions →</strong> Build your settings with our Permission Configurator.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-mcp-tool-categories-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code MCP Tool Categories and Use Cases (2026)",
+    "description": "Guide to MCP tool categories in Claude Code with practical examples for developers building AI-powered workflows.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-mcp-tool-categories-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

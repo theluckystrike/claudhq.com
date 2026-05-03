@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLAUDE.md Best Practices: Definitive Guide (2026) | ClaudHQ</title>
+  <meta name="description" content="The definitive guide to CLAUDE.md files. Structure, rules, project configs, team standards, and real examples for productive AI-assisted coding.">
+  <link rel="canonical" href="https://claudhq.com/claude-md-best-practices-guide/">
+  <meta property="og:title" content="CLAUDE.md Best Practices: Definitive Guide (2026) | ClaudHQ">
+  <meta property="og:description" content="The definitive guide to CLAUDE.md files. Structure, rules, project configs, team standards, and real examples for productive AI-assisted coding.">
+  <meta property="og:url" content="https://claudhq.com/claude-md-best-practices-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>CLAUDE.md Best Practices: Definitive Guide (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>CLAUDE.md is the most important file in any project that uses Claude Code. It tells Claude who your project is, what rules to follow, what patterns to use, and what mistakes to avoid. A good CLAUDE.md turns Claude from a generic assistant into a team member who understands your codebase.
+      </p>
+      
+      <p>This guide is the definitive reference. It covers structure, content strategy, real examples from five project types, team configuration, and advanced techniques including Karpathy's principles and NASA Power of 10 integration.
+      </p>
+      
+      <h2>Why CLAUDE.md Matters</h2>
+      
+      <p>Without a CLAUDE.md, Claude Code starts every session blind. It reads your files but has no context about:
+      </p>
+      
+      <ul>
+        <li>Your team's coding conventions</li>
+        <li>Which patterns are preferred vs. forbidden</li>
+        <li>How to run tests, build, and deploy</li>
+        <li>What the project's architecture looks like</li>
+        <li>Domain-specific rules (regulatory requirements, API constraints)</li>
+      </ul>
+      
+      <p>With a well-written CLAUDE.md, Claude Code produces code that looks like your team wrote it. First-draft quality goes from "needs significant revision" to "ready to merge with minor tweaks."
+      </p>
+      
+      <h3>The Compounding Effect</h3>
+      
+      <p>CLAUDE.md instructions apply to every interaction. A rule you write once saves you from repeating it hundreds of times:
+      </p>
+      
+      <ul>
+        <li>5-minute CLAUDE.md setup saves 5 seconds per Claude Code interaction</li>
+        <li>At 50 interactions per day, that is 4 minutes saved daily</li>
+        <li>Over a month: 2 hours saved from a 5-minute investment</li>
+        <li>Over a year: 24+ hours from typing a few paragraphs</li>
+      </ul>
+      
+      <p>But the real value is not time savings. It is consistency. Every function, every component, every test follows the same patterns without you having to remember to ask.
+      </p>
+      
+      <h2>File Location Hierarchy</h2>
+      
+      <p>Claude Code looks for CLAUDE.md files in multiple locations, with a priority order:
+      </p>
+      
+      <h3>1. Project Root (Highest Priority)</h3>
+      <pre><code>my-project/
+  CLAUDE.md          ← Project-specific rules
+  src/
+  package.json</code></pre>
+      
+      <h3>2. Subdirectories</h3>
+      <pre><code>my-project/
+  CLAUDE.md          ← Project-wide rules
+  src/
+    CLAUDE.md        ← Rules specific to src/
+  tests/
+    CLAUDE.md        ← Rules specific to tests/</code></pre>
+      
+      <p>Subdirectory CLAUDE.md files add to (not replace) the root file. Use them for directory-specific rules.
+      </p>
+      
+      <h3>3. User Home Directory</h3>
+      <pre><code>~/.claude/CLAUDE.md  ← Personal rules across all projects</code></pre>
+      
+      <p>Personal preferences that apply everywhere: your name, preferred comment style, timezone.
+      </p>
+      
+      <h3>Priority Order</h3>
+      
+      <p>When rules conflict:
+      </p>
+      <ol>
+        <li>Subdirectory CLAUDE.md (most specific)</li>
+        <li>Project root CLAUDE.md</li>
+        <li>User home CLAUDE.md (most general)</li>
+      </ol>
+      
+      <p>More specific rules override more general ones.
+      </p>
+      
+      <h2>Anatomy of a Good CLAUDE.md</h2>
+      
+      <h3>Section 1: Project Identity</h3>
+      
+      <p>Tell Claude what the project is in 2-3 sentences. Include the tech stack.
+      </p>
+      
+      <pre><code># Project: Acme Dashboard
+
+Real-time analytics dashboard for e-commerce stores.
+Built with Next.js 15, TypeScript, Tailwind CSS, Supabase (PostgreSQL + Auth + Edge Functions), deployed on Vercel.</code></pre>
+      
+      <p>Why this matters: Claude uses this context for every decision. "Supabase" tells it to use Supabase client libraries. "Vercel" tells it to use Vercel deployment patterns. "Next.js 15" tells it to use App Router conventions.
+      </p>
+      
+      <h3>Section 2: Commands</h3>
+      
+      <p>List the commands Claude needs to know. Be explicit about what works.
+      </p>
+      
+      <pre><code>## Commands
+- Dev server: `pnpm dev` (port 3000)
+- Build: `pnpm build`
+- Tests: `pnpm test` (Jest + React Testing Library)
+- Single test: `pnpm test -- --testPathPattern=&quot;filename&quot;`
+- Lint: `pnpm lint` (ESLint + Prettier)
+- Type check: `pnpm typecheck` (tsc --noEmit)
+- Database migrations: `supabase migration new &lt;name&gt;` then `supabase db push`
+- Deploy: Automatic on push to main (Vercel)</code></pre>
+      
+      <h3>Section 3: Coding Standards</h3>
+      
+      <p>Be specific and actionable. Vague rules produce vague results.
+      </p>
+      
+      <pre><code>## Coding Standards
+
+### TypeScript
+- Strict mode enabled. No `any` types.
+- Use `interface` for object shapes, `type` for unions and intersections.
+- All function parameters and return types must be explicitly typed.
+- Use `as const` for literal types instead of type assertions.
+- Prefer `unknown` over `any` for untyped values.
+
+### Functions
+- Maximum 50 lines per function.
+- Single responsibility: one function does one thing.
+- Pure functions preferred. Side effects only in clearly labeled functions.
+- Use early returns for guard clauses.
+- Minimum 2 assertions per function for input validation.
+
+### Error Handling
+- All async functions use try/catch.
+- Errors must be typed: `catch (error: unknown)` then narrow.
+- Never swallow errors silently. Log or rethrow.
+- User-facing errors use error codes (E001-E999) from src/errors/codes.ts.
+
+### Naming
+- Files: kebab-case (user-profile.ts, not UserProfile.ts or userProfile.ts)
+- Components: PascalCase (UserProfile.tsx)
+- Functions/variables: camelCase
+- Constants: SCREAMING_SNAKE_CASE
+- Database columns: snake_case
+- Boolean variables: prefix with is/has/should (isActive, hasPermission)</code></pre>
+      
+      <h3>Section 4: Architecture Rules</h3>
+      
+      <p>Tell Claude where things go and how they connect.
+      </p>
+      
+      <pre><code>## Architecture
+
+### Directory Structure
+- `src/app/` - Next.js App Router pages and layouts
+- `src/components/` - Reusable UI components (no business logic)
+- `src/components/ui/` - Primitive components (Button, Input, Card)
+- `src/features/` - Feature modules (auth, billing, analytics)
+- `src/lib/` - Shared utilities and configurations
+- `src/lib/supabase/` - Supabase client and helpers
+- `src/types/` - Shared TypeScript type definitions
+- `supabase/migrations/` - Database migration files
+
+### Patterns
+- Feature modules are self-contained: components, hooks, types, and tests together.
+- Server components by default. Client components only when interactivity is needed.
+- Data fetching in Server Components or Route Handlers. Never in client components directly.
+- All database access goes through src/lib/supabase/queries.ts (not scattered across components).</code></pre>
+      
+      <h3>Section 5: Testing Rules</h3>
+      
+      <pre><code>## Testing
+- Every new function gets a test file.
+- Test file location: same directory as source, with .test.ts suffix.
+- Test structure: describe(&quot;functionName&quot;, () =&gt; { it(&quot;should...&quot;) })
+- Minimum coverage: 80% for new code.
+- Mock external services (Supabase, Stripe). Never hit real APIs in tests.
+- Use factories for test data (src/test/factories/).
+- Integration tests for API routes. Unit tests for utilities.
+- Run tests after every change: `pnpm test --changed`</code></pre>
+      
+      <h3>Section 6: What NOT to Do</h3>
+      
+      <p>Negative rules are as important as positive ones. Tell Claude what you have seen go wrong.
+      </p>
+      
+      <pre><code>## Do NOT
+- Do not use default exports. Use named exports only.
+- Do not import from barrel files (index.ts). Import from the specific file.
+- Do not use `console.log` for debugging. Use the logger from src/lib/logger.ts.
+- Do not store secrets in code. Use environment variables.
+- Do not add dependencies without checking bundle size impact.
+- Do not use `useEffect` for data fetching. Use React Server Components or SWR.
+- Do not write SQL strings directly. Use the query builder or Supabase client.
+- Do not modify migration files after they have been applied.</code></pre>
+      
+      <h3>Section 7: Context and Domain Knowledge</h3>
+      
+      <p>Information Claude cannot infer from code alone.
+      </p>
+      
+      <pre><code>## Domain Context
+- We serve Shopify store owners. All analytics are e-commerce metrics.
+- &quot;Conversion rate&quot; always means orders/sessions, not orders/visitors.
+- Currency is always USD. Multi-currency is on the roadmap but not yet supported.
+- GDPR compliance is required. PII must be encrypted at rest.
+- Free trial is 14 days. Billing starts on day 15.
+- Stripe handles all payment processing. We never store card numbers.</code></pre>
+      
+      <h2>Real Examples by Project Type</h2>
+      
+      <h3>Example 1: SaaS Web Application</h3>
+      
+      <pre><code># Project: MetricsDash
+
+SaaS analytics dashboard. Next.js 15, TypeScript, Supabase, Stripe, Vercel.
+
+## Commands
+- Dev: `pnpm dev`
+- Build: `pnpm build`
+- Test: `pnpm test`
+- Lint: `pnpm lint`
+- DB migrate: `supabase migration new &lt;name&gt; &amp;&amp; supabase db push`
+
+## Stack Rules
+- Next.js App Router (not Pages Router)
+- Server Components by default
+- Supabase for auth, database, storage
+- Stripe for billing (webhooks in src/app/api/webhooks/)
+- Tailwind CSS for styling (no CSS modules, no styled-components)
+- Zod for all input validation
+
+## Code Standards
+- TypeScript strict mode, no `any`
+- Functions under 50 lines
+- Named exports only
+- Error codes from src/constants/errors.ts
+- All API responses use ApiResponse&lt;T&gt; type from src/types/api.ts
+
+## Do NOT
+- Never use client-side data fetching for initial page loads
+- Never store Stripe customer IDs in local storage
+- Never skip webhook signature verification
+- Never use `dangerouslySetInnerHTML`</code></pre>
+      
+      <h3>Example 2: CLI Tool</h3>
+      
+      <pre><code># Project: deploy-tool
+
+CLI tool for deploying containerized applications. Node.js, TypeScript, Commander.js.
+
+## Commands
+- Build: `pnpm build` (outputs to dist/)
+- Test: `pnpm test` (Vitest)
+- Run locally: `node dist/index.js`
+- Link for testing: `pnpm link --global`
+
+## CLI Rules
+- All commands use Commander.js patterns from src/commands/
+- Output uses chalk for colors: green=success, red=error, yellow=warning, cyan=info
+- Progress indicators use ora spinners
+- User input uses inquirer prompts
+- Exit codes: 0=success, 1=general error, 2=config error, 3=network error
+
+## Code Standards
+- All async operations have timeout (30 seconds default)
+- File operations use fs/promises (not fs sync methods)
+- Config file: ~/.deploy-tool/config.json
+- Logs go to ~/.deploy-tool/logs/
+- No interactive prompts when --yes flag is set (CI mode)
+
+## Do NOT
+- Never use process.exit() directly. Throw typed errors.
+- Never print secrets to stdout
+- Never modify files outside the project directory without explicit --force flag</code></pre>
+      
+      <h3>Example 3: API Backend</h3>
+      
+      <pre><code># Project: order-service
+
+Microservice for order processing. Go 1.22, Chi router, PostgreSQL, gRPC.
+
+## Commands
+- Run: `go run cmd/server/main.go`
+- Test: `go test ./...`
+- Lint: `golangci-lint run`
+- Generate protos: `buf generate`
+- Migrate: `goose -dir migrations postgres &quot;$DATABASE_URL&quot; up`
+
+## Go Standards
+- Follow Effective Go and Go Code Review Comments
+- Errors: wrap with fmt.Errorf(&quot;operation: %w&quot;, err)
+- Context: pass context.Context as first param to all functions that do I/O
+- Interfaces: define at the consumer, not the implementer
+- Package names: short, lowercase, no underscores
+
+## Architecture
+- cmd/ - Entry points
+- internal/domain/ - Business logic (no external dependencies)
+- internal/handler/ - HTTP and gRPC handlers
+- internal/repository/ - Database access (implements domain interfaces)
+- internal/service/ - Application services (orchestrates domain + repository)
+- pkg/ - Shared libraries (only if truly reusable)
+
+## Do NOT
+- Never use init() functions
+- Never use global variables (except for package-level loggers)
+- Never return nil errors with nil values
+- Never use panic for recoverable errors</code></pre>
+      
+      <h3>Example 4: Mobile App (React Native)</h3>
+      
+      <pre><code># Project: FitTrack
+
+Fitness tracking app. React Native 0.76, Expo, TypeScript, Supabase.
+
+## Commands
+- Dev: `npx expo start`
+- iOS: `npx expo run:ios`
+- Android: `npx expo run:android`
+- Test: `pnpm test`
+- Lint: `pnpm lint`
+
+## Mobile-Specific Rules
+- Use React Navigation v7 for routing
+- Screens go in src/screens/, components in src/components/
+- Platform-specific code uses .ios.tsx / .android.tsx suffixes
+- Animations use react-native-reanimated (not Animated API)
+- All text must use the Text component from src/components/ui/Text.tsx (handles font scaling)
+
+## Performance Rules
+- FlatList for all lists (never ScrollView with .map())
+- Memoize expensive components with React.memo
+- Images must specify width and height (no layout shifts)
+- Avoid inline styles in render (use StyleSheet.create)
+
+## Do NOT
+- Never use pixel values. Use the spacing scale from src/theme.ts
+- Never use setTimeout for animations. Use Reanimated.
+- Never store auth tokens in AsyncStorage (use expo-secure-store)</code></pre>
+      
+      <h3>Example 5: Data Pipeline</h3>
+      
+      <pre><code># Project: etl-pipeline
+
+ETL pipeline for processing customer event data. Python 3.12, Polars, DuckDB, Prefect.
+
+## Commands
+- Run pipeline: `python -m pipeline.main`
+- Test: `pytest`
+- Lint: `ruff check .`
+- Format: `ruff format .`
+- Type check: `mypy .`
+
+## Python Standards
+- Type hints on all functions (PEP 484)
+- Docstrings on all public functions (Google style)
+- dataclasses for data containers
+- Pydantic for external data validation
+- pathlib.Path instead of os.path
+
+## Pipeline Rules
+- Each transform is a pure function: DataFrame in, DataFrame out
+- Side effects (file I/O, API calls) only in pipeline orchestration layer
+- Schema validation at every pipeline stage boundary
+- Logging at INFO level for stage start/complete, DEBUG for row counts
+- All SQL queries in sql/ directory, loaded at runtime
+
+## Do NOT
+- Never use pandas (we use Polars for performance)
+- Never hardcode file paths. Use config from pipeline/config.py
+- Never catch broad exceptions (except at pipeline top level)
+- Never use mutable default arguments</code></pre>
+      
+      <h2>Team Configuration</h2>
+      
+      <h3>Shared CLAUDE.md in Git</h3>
+      
+      <p>Commit your project CLAUDE.md to version control. Every team member gets the same rules:
+      </p>
+      
+      <pre><code>my-project/
+  CLAUDE.md              ← Committed to git
+  .claude/
+    settings.json        ← Committed (shared hooks config)
+    settings.local.json  ← .gitignored (personal settings)</code></pre>
+      
+      <p>Add <code>.claude/settings.local.json</code> to <code>.gitignore</code> for personal overrides.
+      </p>
+      
+      <h3>Personal CLAUDE.md</h3>
+      
+      <p>Each developer can add personal preferences in <code>~/.claude/CLAUDE.md</code>:
+      </p>
+      
+      <pre><code># Personal Preferences
+
+## Identity
+My name is Sarah. I work on the billing team.
+
+## Style
+- I prefer detailed explanations with code
+- Show me the full function, not just the diff
+- Always run tests after making changes
+- Remind me to update CHANGELOG.md for user-facing changes
+
+## Context
+- My timezone is US/Pacific
+- I use VS Code with Vim keybindings
+- I prefer pnpm over npm</code></pre>
+      
+      <h3>Onboarding New Team Members</h3>
+      
+      <p>A good CLAUDE.md doubles as onboarding documentation. New developers learn:
+      </p>
+      <ul>
+        <li>How to run the project</li>
+        <li>What patterns to follow</li>
+        <li>What mistakes to avoid</li>
+        <li>Where code goes</li>
+      </ul>
+      
+      <p>Include a "Getting Started" section:
+      </p>
+      
+      <pre><code>## Getting Started (New Developers)
+1. Clone the repo
+2. Copy .env.example to .env and fill in values (ask #team-channel for secrets)
+3. Run `pnpm install`
+4. Run `supabase start` for local database
+5. Run `pnpm dev` to start dev server
+6. Read src/features/README.md for feature module conventions</code></pre>
+      
+      <h2>Advanced Techniques</h2>
+      
+      <h3>Karpathy's Principles</h3>
+      
+      <p>Andrej Karpathy shared principles for working with AI coding assistants that translate well to CLAUDE.md rules:
+      </p>
+      
+      <pre><code>## AI Collaboration Rules (Karpathy-Inspired)
+- Keep files under 300 lines. Split large files proactively.
+- Every function should be understandable without reading other functions.
+- Tests serve as documentation. Write tests that explain behavior.
+- Comments explain WHY, not WHAT. The code explains what.
+- When refactoring, change structure OR behavior, never both at once.
+- Verify every change with a test run before considering it done.</code></pre>
+      
+      <h3>NASA Power of 10 Integration</h3>
+      
+      <p>The <a href="https://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code">NASA Power of 10 rules</a> for safety-critical code adapt well for high-reliability projects:
+      </p>
+      
+      <pre><code>## Reliability Rules (NASA Power of 10 Adapted)
+1. No recursion. Use iterative solutions.
+2. All loops must have a fixed upper bound.
+3. No dynamic memory allocation after initialization (where applicable).
+4. Functions must not exceed 60 lines (including comments).
+5. Minimum 2 assertions per function for precondition validation.
+6. Data objects declared at the smallest possible scope.
+7. Return values of all non-void functions must be checked.
+8. Preprocessor/macro use limited to file includes and simple constants.
+9. Pointer use restricted (TypeScript: no `any`, no type assertions).
+10. All code must compile with zero warnings at the highest warning level.</code></pre>
+      
+      <h3>Conditional Rules</h3>
+      
+      <p>Use sections that only apply in certain contexts:
+      </p>
+      
+      <pre><code>## When Working on API Routes
+- Validate all inputs with Zod schemas
+- Return structured errors with { code, message, details }
+- Add rate limiting headers
+- Log request metadata (method, path, status, duration)
+
+## When Working on Components
+- Use Storybook for isolated development
+- Include at least 3 states: default, loading, error
+- Support dark mode through CSS variables
+- Test with screen reader (VoiceOver)
+
+## When Working on Database
+- Always use migrations (never manual SQL)
+- Include rollback migration (down)
+- Test migration on a copy before applying to staging
+- Update TypeScript types after schema changes</code></pre>
+      
+      <h3>Dynamic CLAUDE.md</h3>
+      
+      <p>For monorepos with multiple services, generate CLAUDE.md dynamically:
+      </p>
+      
+      <pre><code>#!/bin/bash
+# generate-claude-md.sh
+# Run: ./generate-claude-md.sh &gt; CLAUDE.md
+
+cat base-claude.md
+
+echo &quot;&quot;
+echo &quot;## Services&quot;
+for dir in services/*/; do
+  service=$(basename &quot;$dir&quot;)
+  echo &quot;### $service&quot;
+  cat &quot;$dir/CLAUDE_SECTION.md&quot; 2&gt;/dev/null || echo &quot;No specific rules.&quot;
+  echo &quot;&quot;
+done</code></pre>
+      
+      
+      <h2>Common Mistakes</h2>
+      
+      <h3>Mistake 1: Too Vague</h3>
+      
+      <pre><code># Bad
+Write good code.
+
+# Good
+Functions must be under 50 lines, use TypeScript strict mode,
+handle errors with typed catch blocks, and include JSDoc comments.</code></pre>
+      
+      <h3>Mistake 2: Too Verbose</h3>
+      
+      <p>A 10-page CLAUDE.md wastes tokens on every interaction. Keep it under 500 lines. Move detailed documentation to separate files and reference them:
+      </p>
+      
+      <pre><code>## API Conventions
+See docs/api-conventions.md for full API design guidelines.
+Key rules: REST naming, JSON:API format, pagination via cursor.</code></pre>
+      
+      <h3>Mistake 3: Contradictory Rules</h3>
+      
+      <pre><code># Contradictory (Claude gets confused)
+- Use CSS Modules for styling
+- Use Tailwind for all styling
+
+# Clear
+- Use Tailwind for all styling. No CSS Modules, no styled-components.</code></pre>
+      
+      <h3>Mistake 4: Rules Without Rationale</h3>
+      
+      <p>Claude follows rules better when it understands why:
+      </p>
+      
+      <pre><code># Without rationale
+- No barrel exports
+
+# With rationale (Claude follows this more consistently)
+- No barrel exports (index.ts re-exports).
+  Reason: They break tree-shaking and make imports ambiguous.
+  Import from the specific file: import { Button } from &#x27;./Button&#x27;</code></pre>
+      
+      <h3>Mistake 5: Never Updating</h3>
+      
+      <p>Your CLAUDE.md should evolve with your project. When you find yourself correcting Claude repeatedly, add the correction to CLAUDE.md. Schedule a monthly review to prune outdated rules.
+      </p>
+      
+      <h2>Measuring CLAUDE.md Effectiveness</h2>
+      
+      <p>Track these metrics before and after implementing a CLAUDE.md:
+      </p>
+      
+      <ol>
+        <li><strong>First-draft acceptance rate</strong>: What percentage of Claude's code goes to production without edits?</li>
+        <li><strong>Correction frequency</strong>: How often do you tell Claude to change something it should have known?</li>
+        <li><strong>Style consistency</strong>: Does Claude-generated code match your existing codebase style?</li>
+        <li><strong>Onboarding time</strong>: How quickly do new team members understand the project through CLAUDE.md?</li>
+      </ol>
+      
+      <p>A good CLAUDE.md achieves 70%+ first-draft acceptance rate. An excellent one hits 85%+.
+      </p>
+      
+      <h2>Frequently Asked Questions</h2>
+      
+      <h3>How long should CLAUDE.md be?</h3>
+      <p>Aim for 100-300 lines. Under 100 is too sparse; over 500 wastes tokens. Every line should pull its weight.
+      </p>
+      
+      <h3>Should I commit CLAUDE.md to git?</h3>
+      <p>Yes. It is a project configuration file. Team members need it. Treat it like .eslintrc or tsconfig.json.
+      </p>
+      
+      <h3>Can I have multiple CLAUDE.md files?</h3>
+      <p>Yes. Root-level for project-wide rules, subdirectory-level for module-specific rules. Claude merges them with subdirectory rules taking priority.
+      </p>
+      
+      <h3>Does CLAUDE.md work with Claude.ai (web)?</h3>
+      <p>CLAUDE.md is specifically for Claude Code (the terminal tool). On claude.ai, use the Projects feature to set persistent instructions.
+      </p>
+      
+      <h3>How do I know if Claude is following my CLAUDE.md?</h3>
+      <p>Review its first few outputs carefully. If Claude violates a rule, remind it. If it keeps violating the same rule, the rule may be unclear. Rewrite it with an example.
+      </p>
+      
+      <h3>Should I include examples in CLAUDE.md?</h3>
+      <p>Yes, for complex or ambiguous rules. A before/after example communicates more clearly than a paragraph of description.
+      </p>
+      
+      <h3>Can CLAUDE.md reference other files?</h3>
+      <p>Yes. Use phrases like "See docs/api-guide.md for API conventions." Claude will read the referenced file when the rule is relevant.
+      </p>
+      
+      <h3>How does CLAUDE.md interact with hooks?</h3>
+      <p>Hooks enforce rules mechanically (block dangerous commands, auto-format). CLAUDE.md teaches Claude behavioral rules (code style, architecture). Use both together for maximum effectiveness.
+      </p>
+      
+      <h3>Does CLAUDE.md affect token costs?</h3>
+      <p>Yes. The CLAUDE.md content is included in every request as context tokens. A 300-line CLAUDE.md adds roughly 1,000-2,000 tokens per request. Monitor impact with token usage auditing and see cost optimization strategies for balancing quality vs cost.
+      </p>
+      
+      <h3>Can I use CLAUDE.md with the spec workflow?</h3>
+      <p>Yes. CLAUDE.md defines project-wide rules while spec files define feature-specific requirements. They complement each other: CLAUDE.md says "how we code" and specs say "what to build." Add a rule to CLAUDE.md like "Always read the relevant spec from specs/ before implementing."
+      </p>
+      
+      <h3>How does CLAUDE.md work with MCP servers?</h3>
+      <p>CLAUDE.md can reference MCP server capabilities. For example: "Use the Supabase MCP server for all database queries. Do not write raw SQL through Bash." This guides Claude to use the right tools. See our Supabase MCP guide for integration details.
+      </p>
+      
+      <h3>Can I use CLAUDE.md with SuperClaude?</h3>
+      <p>Yes. SuperClaude generates a CLAUDE.md during installation. You can customize it or merge SuperClaude's generated file with your existing CLAUDE.md. Project-specific rules in your CLAUDE.md take precedence over SuperClaude's defaults.
+      </p>
+      
+      <h3>How do I handle CLAUDE.md for different environments?</h3>
+      <p>Use conditional sections. For example, add "When running in CI mode (--print flag), skip interactive prompts and always run tests." For environment-specific configuration, reference separate config files rather than embedding environment details directly.
+      </p>
+      
+      <h3>Does CLAUDE.md work with OpenRouter?</h3>
+      <p>Yes. CLAUDE.md is a local configuration file that Claude Code loads regardless of the API provider. Whether you use the direct Anthropic API, OpenRouter, or another compatible endpoint, CLAUDE.md instructions apply identically.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/generator/">Generate your CLAUDE.md now</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-md-best-practices-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "CLAUDE.md Best Practices: Definitive Guide (2026)",
+    "description": "The definitive guide to CLAUDE.md files. Structure, rules, project configs, team standards, and real examples for productive AI-assisted coding.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-md-best-practices-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

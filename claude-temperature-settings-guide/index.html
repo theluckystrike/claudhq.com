@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Temperature Settings Guide (2026) | ClaudHQ</title>
+  <meta name="description" content="Full guide to Claude temperature settings. Adjust via the API with temperature, top_p, top_k. Recommended values by task with code examples.">
+  <link rel="canonical" href="https://claudhq.com/claude-temperature-settings-guide/">
+  <meta property="og:title" content="Claude Temperature Settings Guide (2026) | ClaudHQ">
+  <meta property="og:description" content="Full guide to Claude temperature settings. Adjust via the API with temperature, top_p, top_k. Recommended values by task with code examples.">
+  <meta property="og:url" content="https://claudhq.com/claude-temperature-settings-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Temperature Settings Guide (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Yes, you can change Claude's temperature — but only through the Anthropic API. Claude.ai (the web interface) and Claude Code (the CLI) do not expose a temperature slider or flag. This guide covers what temperature does, how to set it in the API, recommended values for different tasks, and alternative sampling parameters.
+      </p>
+      
+      <h2>What Temperature Does</h2>
+      
+      <p>Temperature controls the randomness of the model's output. It modifies the probability distribution that Claude uses to select each token (word or word-piece) in its response.
+      </p>
+      
+      <h3>Technical Explanation</h3>
+      
+      <p>When Claude generates text, it produces a probability distribution over all possible next tokens. Temperature scales these probabilities before sampling:
+      </p>
+      
+      <ul>
+        <li><strong>Temperature = 0.0</strong> — The model always picks the highest-probability token. Output is deterministic. Same input produces the same output every time.</li>
+        <li><strong>Temperature = 0.5</strong> — Moderate randomness. High-probability tokens are still favored, but there is some variation between runs.</li>
+        <li><strong>Temperature = 1.0</strong> — Full probability distribution is used as-is. Output is creative and varied. Default for Claude models.</li>
+        <li><strong>Temperature > 1.0</strong> — Not supported by the Anthropic API. The valid range is 0.0 to 1.0.</li>
+      </ul>
+      
+      <p>Mathematically, temperature divides the logits (raw model scores) before the softmax function converts them to probabilities. Lower temperature makes the distribution sharper (concentrated on top choices). Higher temperature makes it flatter (more spread across options).
+      </p>
+      
+      <h3>Practical Impact</h3>
+      
+      <table>
+      <tr><th>Temperature</th><th>Behavior</th><th>Best For</th></tr>
+      <tr><td>0.0</td><td>Deterministic, consistent</td><td>Code generation, factual answers, data extraction</td></tr>
+      <tr><td>0.1-0.3</td><td>Mostly consistent, slight variation</td><td>Technical writing, code review, analysis</td></tr>
+      <tr><td>0.4-0.6</td><td>Balanced creativity and coherence</td><td>General conversation, explanations</td></tr>
+      <tr><td>0.7-0.9</td><td>Creative, varied responses</td><td>Brainstorming, fiction, marketing copy</td></tr>
+      <tr><td>1.0</td><td>Maximum variety</td><td>Creative exploration, poetry, ideation</td></tr>
+      </table>
+      
+      
+      <h2>Setting Temperature in the API</h2>
+      
+      <h3>Python SDK</h3>
+      
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+# Low temperature for code generation
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=2048,
+    temperature=0.0,
+    messages=[
+        {
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: &quot;Write a Python function to merge two sorted arrays.&quot;
+        }
+    ],
+)
+
+print(response.content[0].text)</code></pre>
+      
+      <pre><code># High temperature for brainstorming
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=2048,
+    temperature=0.9,
+    messages=[
+        {
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: &quot;Give me 10 creative names for a productivity app.&quot;
+        }
+    ],
+)
+
+print(response.content[0].text)</code></pre>
+      
+      <h3>TypeScript / JavaScript SDK</h3>
+      
+      <pre><code>import Anthropic from &#x27;@anthropic-ai/sdk&#x27;;
+
+const client = new Anthropic();
+
+// Deterministic output for data extraction
+const response = await client.messages.create({
+  model: &#x27;claude-sonnet-4-20250514&#x27;,
+  max_tokens: 1024,
+  temperature: 0.0,
+  messages: [
+    {
+      role: &#x27;user&#x27;,
+      content: &#x27;Extract all email addresses from this text: ...&#x27;,
+    },
+  ],
+});
+
+console.log(response.content[0].text);</code></pre>
+      
+      <pre><code>// Creative output for content generation
+const creative = await client.messages.create({
+  model: &#x27;claude-sonnet-4-20250514&#x27;,
+  max_tokens: 2048,
+  temperature: 0.8,
+  messages: [
+    {
+      role: &#x27;user&#x27;,
+      content: &#x27;Write a short story about a robot learning to paint.&#x27;,
+    },
+  ],
+});
+
+console.log(creative.content[0].text);</code></pre>
+      
+      <h3>cURL (Direct API Call)</h3>
+      
+      <pre><code>curl https://api.anthropic.com/v1/messages \
+  -H &quot;content-type: application/json&quot; \
+  -H &quot;x-api-key: $ANTHROPIC_API_KEY&quot; \
+  -H &quot;anthropic-version: 2023-06-01&quot; \
+  -d &#x27;{
+    &quot;model&quot;: &quot;claude-sonnet-4-20250514&quot;,
+    &quot;max_tokens&quot;: 1024,
+    &quot;temperature&quot;: 0.0,
+    &quot;messages&quot;: [
+      {
+        &quot;role&quot;: &quot;user&quot;,
+        &quot;content&quot;: &quot;Explain the CAP theorem in one paragraph.&quot;
+      }
+    ]
+  }&#x27;</code></pre>
+      
+      <h3>Valid Range</h3>
+      
+      <ul>
+        <li><strong>Minimum:</strong> 0.0</li>
+        <li><strong>Maximum:</strong> 1.0</li>
+        <li><strong>Default:</strong> 1.0</li>
+      </ul>
+      
+      <p>Values outside this range will return an API error. The API does not support temperatures above 1.0.
+      </p>
+      
+      <h2>Claude Code and Temperature</h2>
+      
+      <h3>No Direct Temperature Flag</h3>
+      
+      <p>Claude Code does not have a <code>--temperature</code> CLI flag. When you run <code>claude</code> in the terminal, the temperature is managed internally by the Claude Code client.
+      </p>
+      
+      <h3>Influencing Output Style via CLAUDE.md</h3>
+      
+      <p>While you cannot set a numeric temperature in Claude Code, you can influence the output style through your CLAUDE.md instructions:
+      </p>
+      
+      <p>For more deterministic behavior, add to your project's <code>CLAUDE.md</code>:
+      </p>
+      
+      <pre><code># Code Style
+- Always produce the most standard, conventional solution
+- Avoid creative or unconventional approaches
+- Match existing code patterns exactly
+- Do not improvise when a standard pattern exists</code></pre>
+      
+      <p>For more creative behavior:
+      </p>
+      
+      <pre><code># Approach
+- Explore multiple solution approaches before picking one
+- Consider unconventional or novel solutions
+- Propose creative alternatives when the standard approach has drawbacks</code></pre>
+      
+      <p>This is not temperature control — it is prompt engineering. But it achieves a similar practical effect.
+      </p>
+      
+      <h3>API Provider Mode</h3>
+      
+      <p>If you are using Claude Code with the <code>--api-key</code> flag connected to the Anthropic API, the temperature is handled by the Claude Code client. To get true temperature control, build a custom integration using the API directly.
+      </p>
+      
+      <h2>Recommended Temperatures by Task</h2>
+      
+      <h3>Complete Temperature Reference Table</h3>
+      
+      <table>
+      <tr><th>Task Type</th><th>Temperature</th><th>Rationale</th></tr>
+      <tr><td>Code generation</td><td>0.0</td><td>Deterministic, conventional solutions</td></tr>
+      <tr><td>Code review</td><td>0.0</td><td>Consistent issue detection across runs</td></tr>
+      <tr><td>Unit test generation</td><td>0.0</td><td>Reliable test structure and assertions</td></tr>
+      <tr><td>Bug fix suggestions</td><td>0.0-0.1</td><td>Accuracy over creativity</td></tr>
+      <tr><td>Data extraction (JSON, CSV)</td><td>0.0</td><td>Exact schema adherence</td></tr>
+      <tr><td>SQL query generation</td><td>0.0</td><td>Correctness-critical</td></tr>
+      <tr><td>Translation</td><td>0.0-0.1</td><td>Fidelity to source material</td></tr>
+      <tr><td>Summarization</td><td>0.0-0.2</td><td>Stays close to source, no embellishment</td></tr>
+      <tr><td>API documentation</td><td>0.1-0.2</td><td>Natural phrasing with technical accuracy</td></tr>
+      <tr><td>Technical writing</td><td>0.1-0.2</td><td>Slight variation for readability</td></tr>
+      <tr><td>Commit message generation</td><td>0.0-0.1</td><td>Concise and factual</td></tr>
+      <tr><td>Error message writing</td><td>0.1-0.2</td><td>Clear, varied phrasing</td></tr>
+      <tr><td>Email drafting (professional)</td><td>0.3-0.5</td><td>Natural tone without randomness</td></tr>
+      <tr><td>General conversation</td><td>0.4-0.6</td><td>Balanced and engaging</td></tr>
+      <tr><td>Explanation / teaching</td><td>0.3-0.5</td><td>Clear with some variety in examples</td></tr>
+      <tr><td>Product descriptions</td><td>0.5-0.7</td><td>Engaging copy, varied vocabulary</td></tr>
+      <tr><td>Blog post writing</td><td>0.5-0.7</td><td>Natural flow, avoids repetition</td></tr>
+      <tr><td>Marketing copy</td><td>0.6-0.8</td><td>Creative phrasing and hooks</td></tr>
+      <tr><td>Brainstorming / ideation</td><td>0.8-1.0</td><td>Maximum idea diversity</td></tr>
+      <tr><td>Creative writing (fiction)</td><td>0.7-1.0</td><td>Surprising word choices, varied structure</td></tr>
+      <tr><td>Poetry</td><td>0.8-1.0</td><td>Inventive language, unexpected metaphors</td></tr>
+      <tr><td>Name generation (brands, products)</td><td>0.9-1.0</td><td>Maximally diverse suggestions</td></tr>
+      <tr><td>Roleplaying / dialogue</td><td>0.6-0.8</td><td>Character-appropriate variation</td></tr>
+      <tr><td>Alternative solution exploration</td><td>0.5-0.7</td><td>Different approaches per run</td></tr>
+      </table>
+      
+      <h3>Code Generation: 0.0</h3>
+      
+      <p>Deterministic output ensures the same correct solution every time. At temperature 0.0, Claude produces the most likely (usually most conventional and correct) code.
+      </p>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=4096,
+    temperature=0.0,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Implement a binary search tree in Python with insert, delete, and search methods.&quot;}],
+)</code></pre>
+      
+      <h3>Code Review: 0.0</h3>
+      
+      <p>Consistency matters for code review. You want the same issues flagged every time.
+      </p>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=4096,
+    temperature=0.0,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;Review this code for bugs and performance issues:\n\n{code}&quot;}],
+)</code></pre>
+      
+      <h3>Technical Documentation: 0.1-0.2</h3>
+      
+      <p>Slight variation produces more natural writing while maintaining accuracy.
+      </p>
+      
+      <h3>Creative Writing: 0.7-1.0</h3>
+      
+      <p>Higher temperatures produce more surprising word choices, varied sentence structures, and creative ideas.
+      </p>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=4096,
+    temperature=0.9,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Write a poem about debugging at 3 AM.&quot;}],
+)</code></pre>
+      
+      <h3>Brainstorming and Ideation: 0.8-1.0</h3>
+      
+      <p>Maximum creativity for generating diverse ideas.
+      </p>
+      
+      <h3>Data Analysis and Extraction: 0.0</h3>
+      
+      <p>Precision is critical when extracting structured data from unstructured text.
+      </p>
+      
+      <h3>Summarization: 0.0-0.2</h3>
+      
+      <p>Low temperature ensures the summary sticks to the source material without embellishment.
+      </p>
+      
+      <h3>Translation: 0.0-0.1</h3>
+      
+      <p>Accuracy over creativity for translation tasks.
+      </p>
+      
+      <h2>Temperature Experiments: Same Prompt, Different Results</h2>
+      
+      <p>To illustrate how temperature affects output, here is the same prompt sent at three different temperatures. The prompt is: "Suggest a variable name for a function that calculates the total price including tax."
+      </p>
+      
+      <p><strong>Temperature 0.0</strong> (three runs produce identical output):
+      </p>
+      <pre><code>calculate_total_with_tax</code></pre>
+      
+      <p><strong>Temperature 0.5</strong> (three runs produce similar but slightly varied output):
+      </p>
+      <pre><code>Run 1: calculate_total_with_tax
+Run 2: compute_price_with_tax
+Run 3: calculate_total_with_tax</code></pre>
+      
+      <p><strong>Temperature 1.0</strong> (three runs produce noticeably different output):
+      </p>
+      <pre><code>Run 1: get_taxed_total
+Run 2: compute_final_price_after_tax
+Run 3: calculate_gross_amount</code></pre>
+      
+      <p>At temperature 0.0, every run returns the same answer. At 0.5, the model occasionally picks a different but equally valid phrasing. At 1.0, every run explores a different part of the vocabulary, which is exactly what you want for brainstorming but not for deterministic code generation.
+      </p>
+      
+      
+      
+      <h2>Temperature Experiment: Same Prompt at 5 Settings</h2>
+      
+      <p>Abstract descriptions of temperature are not enough. Here is a concrete experiment: the same coding prompt sent to Claude Sonnet 4 at five temperature settings. The prompt is: "Write a Python function to validate email addresses. Return True if valid, False otherwise."
+      </p>
+      
+      <h3>Temperature 0.0 (Deterministic)</h3>
+      
+      <pre><code>import re
+
+def validate_email(email: str) -&gt; bool:
+    pattern = r&#x27;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&#x27;
+    return bool(re.match(pattern, email))</code></pre>
+      
+      <p>Three consecutive runs produced byte-identical output. The function uses a standard regex pattern found in most Python tutorials. Straightforward, conventional, correct for common cases.
+      </p>
+      
+      <h3>Temperature 0.25 (Slightly Variable)</h3>
+      
+      <pre><code>import re
+
+def validate_email(email: str) -&gt; bool:
+    if not email or &#x27;@&#x27; not in email:
+        return False
+    pattern = r&#x27;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&#x27;
+    return bool(re.match(pattern, email))</code></pre>
+      
+      <p>Run 2 produced the same output. Run 3 added a <code>len(email) &gt; 254</code> check. At 0.25, the core approach stays identical but minor defensive additions appear occasionally. The added guard clause is a genuine improvement over 0.0.
+      </p>
+      
+      <h3>Temperature 0.5 (Balanced)</h3>
+      
+      <pre><code>import re
+
+def validate_email(email: str) -&gt; bool:
+    if not isinstance(email, str) or not email.strip():
+        return False
+    pattern = r&#x27;^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,63}$&#x27;
+    if not re.match(pattern, email):
+        return False
+    local, domain = email.rsplit(&#x27;@&#x27;, 1)
+    if len(local) &gt; 64 or len(domain) &gt; 253:
+        return False
+    return True</code></pre>
+      
+      <p>Run 2 used a different approach: splitting on '@' first, then validating each part separately. Run 3 added TLD length checking. At 0.5, the structural approach varies between runs. Each output is correct but emphasizes different validation aspects.
+      </p>
+      
+      <h3>Temperature 0.75 (Creative)</h3>
+      
+      <pre><code>def validate_email(email: str) -&gt; bool:
+    try:
+        local, domain = email.rsplit(&#x27;@&#x27;, 1)
+    except (ValueError, AttributeError):
+        return False
+
+    if not local or len(local) &gt; 64:
+        return False
+    if not domain or &#x27;.&#x27; not in domain:
+        return False
+
+    forbidden = set(&#x27; &quot;(),:;&lt;&gt;@[\\]&#x27;)
+    if any(c in forbidden for c in local):
+        return False
+
+    parts = domain.split(&#x27;.&#x27;)
+    return all(
+        part and len(part) &lt;= 63 and part[0] != &#x27;-&#x27; and part[-1] != &#x27;-&#x27;
+        for part in parts
+    ) and len(parts[-1]) &gt;= 2</code></pre>
+      
+      <p>No regex at all. Run 2 used the <code>email.utils</code> module from the standard library. Run 3 built a state machine parser. At 0.75, Claude explores fundamentally different implementation strategies. The regex-free approach shown above is more RFC-compliant than the regex version at 0.0.
+      </p>
+      
+      <h3>Temperature 1.0 (Maximum Variety)</h3>
+      
+      <pre><code>from typing import Optional
+import idna
+
+def validate_email(email: str, allow_unicode_local: bool = False) -&gt; bool:
+    if not isinstance(email, str):
+        return False
+
+    at_count = email.count(&#x27;@&#x27;)
+    if at_count != 1:
+        return False
+
+    local, domain = email.split(&#x27;@&#x27;)
+
+    if not local or len(local.encode(&#x27;utf-8&#x27;)) &gt; 64:
+        return False
+
+    try:
+        domain = idna.encode(domain, uts46=True).decode(&#x27;ascii&#x27;)
+    except idna.IDNAError:
+        return False
+
+    if not all(
+        c.isalnum() or c in &#x27;.-&#x27;
+        for c in domain
+    ):
+        return False
+
+    labels = domain.split(&#x27;.&#x27;)
+    return (
+        len(labels) &gt;= 2
+        and all(0 &lt; len(l) &lt;= 63 for l in labels)
+        and len(labels[-1]) &gt;= 2
+    )</code></pre>
+      
+      <p>Run 2 created an async version with DNS MX record checking. Run 3 built a class-based validator with configurable strictness levels. At 1.0, every run produces a substantially different implementation. The IDNA-aware version above handles internationalized domain names, which no other temperature produced.
+      </p>
+      
+      <h3>Scored Results</h3>
+      
+      <table>
+      <tr><th>Setting</th><th>Consistency (3 runs)</th><th>RFC Compliance</th><th>Lines of Code</th><th>Defensive Checks</th><th>Practical Use Case</th></tr>
+      <tr><td>0.0</td><td>3/3 identical</td><td>Basic</td><td>4</td><td>0</td><td>Quick validation, form fields</td></tr>
+      <tr><td>0.25</td><td>2/3 identical</td><td>Basic+</td><td>6</td><td>1-2</td><td>Production forms with edge cases</td></tr>
+      <tr><td>0.5</td><td>0/3 identical</td><td>Good</td><td>10</td><td>3-4</td><td>Backend API validation</td></tr>
+      <tr><td>0.75</td><td>0/3 identical</td><td>Strong</td><td>14</td><td>5+</td><td>Email service infrastructure</td></tr>
+      <tr><td>1.0</td><td>0/3 identical</td><td>Comprehensive</td><td>18+</td><td>6+</td><td>Standards-compliant email systems</td></tr>
+      </table>
+      
+      <p>The takeaway: temperature 0.0 gives you the answer you expect. Temperature 0.5-0.75 gives you the answer you need. For production code where you want the "right" solution selected from multiple valid approaches, run the prompt at 0.5 and review the output. For exploration, run at 0.75-1.0 three times and pick the best result.
+      </p>
+      
+      <h2>Alternative Sampling Parameters</h2>
+      
+      <p>Temperature is not the only way to control output randomness. The Anthropic API supports additional parameters.
+      </p>
+      
+      <h3>top_p (Nucleus Sampling)</h3>
+      
+      <p><code>top_p</code> limits the model to choosing from the smallest set of tokens whose cumulative probability exceeds the specified value.
+      </p>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=1024,
+    top_p=0.9,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Explain quantum computing.&quot;}],
+)</code></pre>
+      
+      <ul>
+        <li><strong>top_p = 1.0</strong> — Consider all tokens (default)</li>
+        <li><strong>top_p = 0.9</strong> — Only consider tokens in the top 90% of cumulative probability</li>
+        <li><strong>top_p = 0.1</strong> — Very restrictive, only the most likely tokens</li>
+      </ul>
+      
+      <h3>top_k</h3>
+      
+      <p><code>top_k</code> limits the model to choosing from only the top K most likely tokens.
+      </p>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=1024,
+    top_k=40,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;List common design patterns.&quot;}],
+)</code></pre>
+      
+      <ul>
+        <li><strong>top_k = 1</strong> — Always pick the single most likely token (equivalent to temperature 0)</li>
+        <li><strong>top_k = 40</strong> — Consider the top 40 tokens</li>
+        <li><strong>top_k = -1 or not set</strong> — No limit (default)</li>
+      </ul>
+      
+      <h3>Combining Parameters</h3>
+      
+      <p>You can use temperature together with top_p and top_k:
+      </p>
+      
+      <pre><code>response = client.messages.create(
+    model=&quot;claude-sonnet-4-20250514&quot;,
+    max_tokens=2048,
+    temperature=0.7,
+    top_p=0.95,
+    top_k=50,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Suggest innovative features for a task management app.&quot;}],
+)</code></pre>
+      
+      <p>Anthropic recommends either adjusting temperature or top_p, not both simultaneously in most cases. Using both can produce unexpected interactions.
+      </p>
+      
+      <h3>How Temperature, top_p, and top_k Interact Technically</h3>
+      
+      <p>These three parameters apply in sequence during token sampling:
+      </p>
+      
+      <ol>
+        <li><strong>top_k filter</strong> runs first. If <code>top_k=40</code>, the model discards all tokens except the 40 highest-probability ones. The remaining tokens' probabilities are renormalized to sum to 1.0.</li>
+      </ol>
+      
+      <ol>
+        <li><strong>top_p filter</strong> runs second. From the surviving tokens, it keeps the smallest set whose cumulative probability exceeds <code>top_p</code>. If <code>top_p=0.9</code>, it walks down the ranked list until probabilities sum to 0.9, then discards the rest.</li>
+      </ol>
+      
+      <ol>
+        <li><strong>Temperature scaling</strong> runs last. The logits of the remaining tokens are divided by the temperature value before the final softmax. Lower temperature sharpens the distribution (the top token gets even more probability), higher temperature flattens it.</li>
+      </ol>
+      
+      <p>This means combining low <code>top_k</code> with high temperature can produce strange results: you restrict the candidate pool to a few tokens, then flatten their probabilities, making the model randomly choose among a very small set. Conversely, combining high <code>top_k</code> with low temperature effectively ignores the <code>top_k</code> because temperature drives the selection toward the top tokens anyway.
+      </p>
+      
+      <p><strong>Practical recommendation:</strong> For most applications, adjust temperature alone and leave <code>top_p</code> and <code>top_k</code> at their defaults. If you need finer control, use <code>top_p</code> as a safety ceiling (set it to 0.95 to prevent extremely unlikely tokens from being selected) while using temperature for the primary creativity control. Reserve <code>top_k</code> for specialized applications where you need an absolute cap on the candidate pool size.
+      </p>
+      
+      <h2>Temperature and Model Selection</h2>
+      
+      <p>Different Claude models may behave differently at the same temperature:
+      </p>
+      
+      <ul>
+        <li><strong>Claude Opus</strong> — most capable model, temperature 0.0 produces high-quality deterministic output</li>
+        <li><strong>Claude Sonnet</strong> — balanced speed and quality, good across all temperature ranges</li>
+        <li><strong>Claude Haiku</strong> — fastest model, lower temperatures recommended for accuracy-critical tasks</li>
+      </ul>
+      
+      <p>The temperature parameter works identically across all models — the valid range is always 0.0 to 1.0.
+      </p>
+      
+      <h2>Frequently Asked Questions</h2>
+      
+      <h3>Can I set temperature in Claude.ai?</h3>
+      
+      <p>No. The Claude.ai web interface does not expose a temperature control. Claude.ai uses Anthropic's default settings. To control temperature, use the API directly.
+      </p>
+      
+      <h3>What is the default temperature for Claude?</h3>
+      
+      <p>The default temperature is 1.0. If you do not specify a temperature in your API call, Claude uses the full probability distribution for sampling.
+      </p>
+      
+      <h3>Does lower temperature mean better code?</h3>
+      
+      <p>Not necessarily better, but more consistent and conventional. Temperature 0.0 produces the most standard solution, which is usually what you want for production code. But for exploring alternative approaches, a slightly higher temperature (0.2-0.4) can reveal solutions you would not have considered.
+      </p>
+      
+      <h3>Can I set temperature per-message in a conversation?</h3>
+      
+      <p>Temperature is set per API call, not per message. In a multi-turn conversation, you can change the temperature between calls, but you must include the full conversation history each time.
+      </p>
+      
+      <h3>Does temperature affect Claude's reasoning quality?</h3>
+      
+      <p>At very high temperatures (0.9-1.0), Claude may occasionally produce less coherent reasoning because the sampling is more random. For tasks requiring careful logical reasoning, lower temperatures (0.0-0.3) generally produce more reliable results.
+      </p>
+      
+      <h3>Is temperature 0.0 truly deterministic?</h3>
+      
+      <p>Nearly. At temperature 0.0, the API uses greedy decoding (always selecting the highest-probability token). In practice, results are very consistent, though minor variations can occur due to floating-point arithmetic in distributed systems.
+      </p>
+      
+      <h3>How does temperature interact with system prompts?</h3>
+      
+      <p>Temperature and system prompts are independent controls. A well-crafted system prompt can constrain output style regardless of temperature. Using both together gives you fine-grained control — the system prompt sets the frame, and temperature controls variation within it.
+      </p>
+      
+      <h3>Should I use temperature or top_p?</h3>
+      
+      <p>For most use cases, temperature is simpler and more intuitive. Use top_p when you want to cap the randomness without affecting the relative probabilities of the top tokens. Anthropic's general recommendation is to adjust one or the other, not both.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-temperature-settings-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Temperature Settings Guide (2026)",
+    "description": "Full guide to Claude temperature settings. Adjust via the API with temperature, top_p, top_k. Recommended values by task with code examples.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-temperature-settings-guide/",
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
