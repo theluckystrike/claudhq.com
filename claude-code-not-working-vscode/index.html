@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <title>Fix Claude Code Not Working VSCode (2026) | ClaudHQ</title>
-  <meta name="description" content="Resolve Claude Code extension issues in VS Code — blank panels, missing output, connection errors, and WSL integration problems. Updated for 2026.">
+  <title>Claude Code Not Working in VS Code? 7 Fixes (2026)</title>
+  <meta name="description" content="Fix Claude Code not working in VS Code — terminal not responding, blank panels, restart issues, and extension errors. 7 proven fixes with copy-paste commands.">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Fix Claude Code Not Working VSCode (2026) | ClaudHQ">
-  <meta property="og:description" content="Resolve Claude Code extension issues in VS Code — blank panels, missing output, connection errors, and WSL integration problems. Updated for 2026.">
+  <meta property="og:title" content="Claude Code Not Working in VS Code? 7 Fixes (2026)">
+  <meta property="og:description" content="Fix Claude Code not working in VS Code — terminal not responding, blank panels, restart issues, and extension errors. 7 proven fixes with copy-paste commands.">
   <meta property="og:url" content="https://claudhq.com/claude-code-not-working-vscode/">
   <meta property="og:site_name" content="ClaudHQ">
   <meta name="twitter:card" content="summary">
@@ -18,12 +18,12 @@
   {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    "headline": "Fix Claude Code Not Working VSCode (2026)",
-    "description": "Resolve Claude Code extension issues in VS Code — blank panels, missing output, connection errors, and WSL integration problems. Updated for 2026.",
+    "headline": "Claude Code Not Working in VS Code? 7 Fixes (2026)",
+    "description": "Fix Claude Code not working in VS Code — terminal not responding, blank panels, restart issues, and extension errors. 7 proven fixes with copy-paste commands.",
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "datePublished": "2026-04-14",
-    "dateModified": "2026-04-17",
+    "dateModified": "2026-05-04",
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-not-working-vscode/"}
   }
   </script>
@@ -50,7 +50,7 @@
 
   <main class="page-content">
     <div class="article-meta">
-      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-04-22
+      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-05-04
     </div>
 
     <h1>Fix Claude Code Not Working in VS Code</h1>
@@ -128,7 +128,25 @@ echo 'export PATH="$HOME/.npm-global/bin:$PATH"' &gt;&gt; ~/.zshrc</code></pre>
 
     <p>If that does not work, fully quit and reopen VS Code.</p>
 
-    <h3>Step 4 — WSL-Specific Fix</h3>
+    <h3>Step 4 — Fix Claude Code Terminal Not Responding</h3>
+
+    <p>If the Claude Code integrated terminal in VS Code is frozen or not responding to input, the underlying CLI process has likely crashed or become disconnected from the extension.</p>
+
+    <p><strong>Quick fix:</strong> Open VS Code's Command Palette (Cmd+Shift+P / Ctrl+Shift+P) and run "Terminal: Kill All Terminals". Then open a new terminal with Ctrl+` and test with <code>claude --version</code>. If the version prints, the CLI is fine and the terminal connection was stale.</p>
+
+    <p>If the terminal repeatedly freezes after a few commands, your system may be running out of memory. Claude Code sessions can consume significant RAM, especially with large codebases. Check your system memory with Activity Monitor (macOS) or <code>top</code> (Linux). Close other heavy applications or reduce the workspace size by excluding large directories in <code>.vscode/settings.json</code>:</p>
+
+    <pre><code>{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/**": true,
+    "**/dist/**": true
+  }
+}</code></pre>
+
+    <p>If the terminal still does not respond, try restarting Claude Code completely by running <code>claude --restart</code> in an external terminal (not VS Code's integrated terminal), then reopen VS Code.</p>
+
+    <h3>Step 5 — WSL-Specific Fix</h3>
 
     <p>If you are using VS Code Remote — WSL:</p>
 
@@ -145,7 +163,7 @@ claude --version</code></pre>
 
     <p>The extension in WSL mode uses the WSL environment, not the Windows host.</p>
 
-    <h3>Step 5 — Verify It Works</h3>
+    <h3>Step 6 — Verify It Works</h3>
 
     <p>After fixes, test in VS Code:</p>
 
@@ -168,6 +186,11 @@ claude --version</code></pre>
         </tr>
       </thead>
       <tbody>
+        <tr>
+          <td>Terminal not responding / frozen</td>
+          <td>Stale CLI process</td>
+          <td>Kill all terminals, reopen (Step 4)</td>
+        </tr>
         <tr>
           <td>Works in terminal, not in VS Code</td>
           <td>Different PATH</td>
@@ -235,6 +258,17 @@ claude --version</code></pre>
 
       <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta-beforeafter&amp;utm_campaign=claude-code-not-working-vscode">Get the CLAUDE.md for your stack</a></strong></p>
     </div>
+
+
+    <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+  <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+    <li><a href="/claude-code-stuck-infinite-loop-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Claude Code Infinite Loop (2026)</a></li>
+    <li><a href="/claude-code-bun-crash-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Bun Crash (2026)</a></li>
+    <li><a href="/claude-code-skill-timeout-error-how-to-increase-the-limit/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Claude Code Skill Timeout Error: How to Increase the Limit</a></li>
+  </ul>
+</div>
+
 
     <div class="mastery-cta">
       <p>I hit this exact error six months ago. Then I wrote a CLAUDE.md that tells Claude my stack, my conventions, and my error handling patterns. Haven't seen it since.</p>
