@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Slow Claude Code Response Latency (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix slow Claude Code response times with proven techniques. Trim context, optimize settings, and tune performance for faster output.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-slow-response-how-to-fix-latency-issues/">
+  <meta property="og:title" content="Fix Slow Claude Code Response Latency (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix slow Claude Code response times with proven techniques. Trim context, optimize settings, and tune performance for faster output.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-slow-response-how-to-fix-latency-issues/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Slow Response: How to Fix Latency Issues</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>When Claude Code responds slowly, it disrupts your development workflow and kills productivity. This guide covers practical solutions for diagnosing and fixing latency issues in Claude Code, from context management to performance tuning.</p>
+
+      <h2>Common Causes of Slow Responses</h2>
+      <p>Claude Code latency typically stems from a few key areas. Understanding these causes helps you apply the right fix.</p>
+      <p><strong>Context window saturation</strong> causes significant delays. When your conversation history grows large, Claude must scan through extensive context to generate relevant responses. This becomes noticeable after several hundred messages.</p>
+      <p><strong>Large file processing</strong> slows response times when Claude reads project files. Loading multiple megabytes of JavaScript bundles, compiled assets, or documentation adds latency before Claude can even begin analysis.</p>
+      <p><strong>Network latency</strong> affects cloud-based model routing. Your geographic location and connection quality impact how quickly responses return.</p>
+      <p><strong>CLAUDE.md file size</strong> is frequently underestimated as a performance factor. Claude reads your CLAUDE.md on every session start. A 3,000-line CLAUDE.md with redundant instructions adds noticeable delay before the first response.</p>
+
+      <h2>Quick Diagnosis Checklist</h2>
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Priority Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Slow on first response, fresh session</td><td>Large CLAUDE.md</td><td>Trim CLAUDE.md</td></tr>
+          <tr><td>Fast at start, slow after 1-2 hours</td><td>Context window saturation</td><td>Run <code>/compact</code> or start new session</td></tr>
+          <tr><td>Slow only when reading files</td><td>Large files being scanned</td><td>Add <code>.claudeignore</code> rules</td></tr>
+          <tr><td>Slow regardless of session state</td><td>Network or service issue</td><td>Check connection, verify status page</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Context Management Strategies</h2>
+      <p>Managing conversation context dramatically improves response speed. Claude Code provides several context-handling commands.</p>
+      <p>Use context truncation strategically:</p>
+      <pre><code>/compact</code></pre>
+      <p>This command summarizes the conversation history, reducing the context Claude must process while preserving key information. Run <code>/compact</code> periodically during long sessions -- every 50-100 messages works well for most workflows.</p>
+      <p>For projects requiring extensive history, consider splitting work across multiple sessions:</p>
+      <pre><code>/new-session</code></pre>
+
+      <h3>Understanding Context Growth</h3>
+      <p>Context grows faster than most developers expect. Each exchange adds both your message and Claude's response to the running history:</p>
+      <ul>
+        <li>Session start: ~2,000 tokens (CLAUDE.md)</li>
+        <li>After 20 exchanges: ~12,000 tokens</li>
+        <li>After 50 exchanges: ~30,000 tokens</li>
+        <li>After 100 exchanges: ~60,000+ tokens</li>
+      </ul>
+      <p>Response latency scales roughly with context size. Running <code>/compact</code> typically compresses context by 60-70%, bringing a bloated session back to a manageable size.</p>
+
+      <h2>File Processing Optimizations</h2>
+      <p>Claude Code's file reading can cause delays with large projects. Optimize by excluding unnecessary files.</p>
+      <p>Create or update your project's <code>.claudeignore</code> file:</p>
+      <pre><code># Exclude compiled assets
+dist/
+build/
+*.min.js
+*.min.css
+
+# Exclude dependencies
+node_modules/
+vendor/
+venv/</code></pre>
+      <p>Being explicit about what to read is faster than letting Claude decide. When you say "read src/auth/middleware.js and src/auth/session.js," it goes directly there instead of scanning several directories.</p>
+
+      <h2>Network and Connection Improvements</h2>
+      <p>Network latency often goes overlooked. Simple adjustments improve response times noticeably.</p>
+      <ul>
+        <li>Use wired connections instead of WiFi when possible.</li>
+        <li>Close unnecessary browser tabs and applications that consume bandwidth.</li>
+        <li>Consider regional model routing. Choose the region closest to your physical location.</li>
+        <li>VPN impact is significant. A VPN routing through a distant server can add 50-100ms or more per request.</li>
+      </ul>
+
+      <h2>Configuration Tweaks</h2>
+      <p>Fine-tune Claude Code's behavior through configuration files. Edit your <code>~/.claude/settings.json</code>:</p>
+      <pre><code>{
+  "maxContextTokens": 8000,
+  "responseStreaming": true
+}</code></pre>
+      <p>Reducing <code>maxContextTokens</code> forces more aggressive context management but speeds responses. The <code>responseStreaming</code> setting makes the interaction feel faster because you see tokens as they generate.</p>
+
+      <h2>When to Seek Further Help</h2>
+      <p>If latency persists after applying these solutions, consider these additional steps:</p>
+      <ol>
+        <li>Check Claude Code status pages for service disruptions</li>
+        <li>Review your system's available resources (CPU, memory)</li>
+        <li>Test with a minimal configuration to isolate the issue</li>
+      </ol>
+
+      <div class="tool-cta">
+        <p><strong>Estimate your token usage</strong> with our <a href="/calculator/">Cost Calculator</a> to understand your context costs.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-slow-response-how-to-fix-latency-issues" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Slow Response: How to Fix Latency Issues",
+    "description": "Fix slow Claude Code response times with proven techniques. Trim context, optimize settings, and tune performance for faster output.",
+    "url": "https://claudhq.com/claude-code-slow-response-how-to-fix-latency-issues/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Keeps Suggesting the Same Broken Solution (2026) | ClaudHQ</title>
+  <meta name="description" content="Learn why Claude Code gets stuck in repetitive solution loops and how to break free with practical techniques and better prompt strategies.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-keeps-suggesting-the-same-broken-solution/">
+  <meta property="og:title" content="Fix Claude Code Keeps Suggesting the Same Broken Solution (2026) | ClaudHQ">
+  <meta property="og:description" content="Learn why Claude Code gets stuck in repetitive solution loops and how to break free with practical techniques and better prompt strategies.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-keeps-suggesting-the-same-broken-solution/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Why Claude Code Keeps Suggesting the Same Broken Solution</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>One of the most frustrating experiences when working with Claude Code is watching it repeatedly suggest the same solution that clearly is not working. You have explained the problem multiple times, tried different phrasings, and yet Claude keeps circling back to the same approach. This behavior is not a flaw -- it is a feature of how LLMs work, and understanding it gives you the tools to fix it.</p>
+
+      <h2>Why This Happens</h2>
+      <p>Claude Code generates responses based on patterns in your conversation and its training data. When it suggests the same broken solution repeatedly, several things are typically happening:</p>
+      <ol>
+        <li><strong>Confirmation bias in the prompt:</strong> Your prompts inadvertently reinforce the same approach by focusing on why the last solution failed rather than what you actually need.</li>
+        <li><strong>Session context accumulation:</strong> The conversation history contains strong signals about "what you have tried" rather than "what should work."</li>
+        <li><strong>Missing solution space:</strong> Claude may not have enough information about alternative approaches to generate fresh solutions.</li>
+      </ol>
+
+      <h2>Recognizing the Loop</h2>
+      <p>Before you can break the pattern, recognize these warning signs:</p>
+      <ul>
+        <li>Claude starts responses with "One approach is..." but it is always the same approach</li>
+        <li>Your corrections are met with "You are right, let me try a different approach" followed by the same solution</li>
+        <li>Claude references solutions from earlier in the conversation rather than generating new ones</li>
+        <li>The suggestions work technically but do not solve your actual problem</li>
+      </ul>
+
+      <h2>Practical Solutions to Break the Loop</h2>
+      <h3>1. Use the /new Command for Fresh Context</h3>
+      <pre><code>/new</code></pre>
+      <p>This starts a fresh conversation context. It is like hitting the reset button -- Claude loses the accumulated "this is what we have tried" context and approaches your problem with fresh eyes.</p>
+
+      <h3>2. Provide Explicit Solution Constraints</h3>
+      <p>Instead of describing what does not work, specify what should work:</p>
+      <p><strong>Instead of:</strong></p>
+      <pre><code>"That didn't work because it doesn't handle async properly. Can you fix it?"</code></pre>
+      <p><strong>Try:</strong></p>
+      <pre><code>"I need a solution that handles async operations with proper error recovery.
+The API should return promises and include retry logic with exponential backoff."</code></pre>
+
+      <h3>3. Break the Pattern with Concrete Examples</h3>
+      <p>Provide explicit examples of what success looks like:</p>
+      <pre><code>I want something that works like this:
+result = await fetch_with_retry("https://api.example.com/data")
+- Should retry 3 times with 1s, 2s, 4s delays
+- Should raise RetriesExhaustedError after all attempts fail
+- Should log each attempt at WARNING level</code></pre>
+
+      <h3>4. Request Multiple Approaches</h3>
+      <p>Force Claude out of its current pattern:</p>
+      <pre><code>"Let's step back. What are three fundamentally different approaches
+to solving this problem? List pros and cons of each."</code></pre>
+
+      <h2>When to Use Different Approaches</h2>
+      <table>
+        <thead><tr><th>Situation</th><th>Best Approach</th></tr></thead>
+        <tbody>
+          <tr><td>Deep in the loop</td><td><code>/new</code> command</td></tr>
+          <tr><td>Claude misunderstanding the goal</td><td>Explicit constraints with examples</td></tr>
+          <tr><td>Need to explore design space</td><td>Structured comparison of alternatives</td></tr>
+          <tr><td>Same error repeating</td><td>Provide the full error output plus your constraints</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Building Better Habits</h2>
+      <p>The best way to avoid these loops is to structure your interactions to prevent them from forming:</p>
+      <ol>
+        <li><strong>Start with constraints:</strong> "I need X that handles Y and Z, but must avoid A and B"</li>
+        <li><strong>Provide success criteria:</strong> "The solution is correct when..."</li>
+        <li><strong>Ask for alternatives:</strong> "Before implementing, show me two other approaches"</li>
+        <li><strong>Be specific about failures:</strong> "That approach will not work because [specific technical reason]"</li>
+      </ol>
+
+      <h2>Conclusion</h2>
+      <p>When Claude Code keeps suggesting the same broken solution, your prompts shape Claude's behavior. Rather than criticizing failures, guide toward successes. Rather than listing what does not work, specify what should work. Instead of one more attempt at the same approach, explicitly request alternatives. The key insight is that you control the direction of the conversation.</p>
+
+      <div class="tool-cta">
+        <p><strong>Generate better prompts</strong> with our <a href="/generator/">CLAUDE.md Generator</a> to prevent solution loops.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-keeps-suggesting-the-same-broken-solution" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Keeps Suggesting the Same Broken Solution (2026)",
+    "description": "Learn why Claude Code gets stuck in repetitive solution loops and how to break free with practical techniques and better prompt strategies.",
+    "url": "https://claudhq.com/claude-code-keeps-suggesting-the-same-broken-solution/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

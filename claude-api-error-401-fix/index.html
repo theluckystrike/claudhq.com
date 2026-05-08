@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude API Error 401 Authentication Failed (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Claude API 401 unauthorized errors. Covers API key validation, environment variable setup, and common authentication mistakes.">
+  <link rel="canonical" href="https://claudhq.com/claude-api-error-401-fix/">
+  <meta property="og:title" content="Fix Claude API Error 401 Authentication Failed (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Claude API 401 unauthorized errors. Covers API key validation, environment variable setup, and common authentication mistakes.">
+  <meta property="og:url" content="https://claudhq.com/claude-api-error-401-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude API Error 401 -- Authentication Failed</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p><strong>TL;DR:</strong> A 401 error means your API key is missing, invalid, or expired. Verify your key, check environment variables, and ensure the correct header format.</p>
+
+      <h2>The Problem</h2>
+      <p>When calling the Claude API, you receive an HTTP 401 response:</p>
+      <pre><code>{
+  "type": "error",
+  "error": {
+    "type": "authentication_error",
+    "message": "Invalid API key"
+  }
+}</code></pre>
+
+      <h2>Why This Happens</h2>
+      <p>The Anthropic API requires a valid API key in the <code>x-api-key</code> header. A 401 occurs when:</p>
+      <ul>
+        <li>The API key is missing from the request headers</li>
+        <li>The key has been revoked or rotated in the Anthropic Console</li>
+        <li>Environment variables (<code>ANTHROPIC_API_KEY</code>) are not set or contain whitespace/newlines</li>
+        <li>You are using the wrong header name (e.g., <code>Authorization: Bearer</code> instead of <code>x-api-key</code>)</li>
+      </ul>
+
+      <h2>The Fix</h2>
+      <h3>Step 1: Verify Your API Key</h3>
+      <pre><code># Check if the environment variable is set
+echo "Key length: ${#ANTHROPIC_API_KEY}"
+echo "Key prefix: ${ANTHROPIC_API_KEY:0:10}..."
+# Key should start with "sk-ant-" and be ~100+ characters</code></pre>
+
+      <h3>Step 2: Set the API Key Correctly</h3>
+      <p><strong>macOS / Linux (bash/zsh):</strong></p>
+      <pre><code>export ANTHROPIC_API_KEY="sk-ant-api03-your-key-here"
+source ~/.zshrc</code></pre>
+      <p><strong>In code (Python SDK):</strong></p>
+      <pre><code>import anthropic
+# SDK reads ANTHROPIC_API_KEY automatically
+client = anthropic.Anthropic()</code></pre>
+
+      <h3>Step 3: Verify the Header Format</h3>
+      <p>If making raw HTTP requests, use <code>x-api-key</code> (not <code>Authorization</code>):</p>
+      <pre><code># Correct
+curl https://api.anthropic.com/v1/messages \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{"model":"claude-sonnet-4-5-20250514","max_tokens":128,"messages":[{"role":"user","content":"Hi"}]}'</code></pre>
+
+      <h2>Common Variations</h2>
+      <table>
+        <thead><tr><th>Scenario</th><th>Cause</th><th>Quick Fix</th></tr></thead>
+        <tbody>
+          <tr><td>401 in CI/CD pipeline</td><td>Secret not injected</td><td>Check CI secret configuration</td></tr>
+          <tr><td>401 after key rotation</td><td>Old key cached</td><td>Restart application, clear env cache</td></tr>
+          <tr><td>401 with SDK</td><td><code>ANTHROPIC_API_KEY</code> not exported</td><td>Add <code>export</code> before the variable</td></tr>
+          <tr><td>401 with trailing newline</td><td>Copy-paste artifact</td><td>Use <code>echo -n</code> when setting key</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Prevention</h2>
+      <ul>
+        <li><strong>Never hardcode API keys:</strong> Use environment variables or a secrets manager.</li>
+        <li><strong>Rotate keys periodically:</strong> Generate new keys in the Anthropic Console and update your environment.</li>
+        <li><strong>Test auth separately:</strong> Before debugging complex requests, verify auth with a minimal test call.</li>
+      </ul>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-api-error-401-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude API Error 401 Authentication Failed (2026)",
+    "description": "Resolve Claude API 401 unauthorized errors. Covers API key validation, environment variable setup, and common authentication mistakes.",
+    "url": "https://claudhq.com/claude-api-error-401-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

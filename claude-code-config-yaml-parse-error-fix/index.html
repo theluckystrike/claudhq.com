@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Config YAML Parse Error (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code configuration file YAML and JSON parse errors. Validate syntax and fix common indentation and formatting mistakes.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-config-yaml-parse-error-fix/">
+  <meta property="og:title" content="Fix Claude Code Config YAML Parse Error (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code configuration file YAML and JSON parse errors. Validate syntax and fix common indentation and formatting mistakes.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-config-yaml-parse-error-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Config YAML Parse Error</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+      <pre><code>Error: Failed to parse configuration file
+YAMLException: bad indentation of a mapping entry (2:3)
+  at /Users/you/.claude/settings.json
+
+# Or for CLAUDE.md YAML frontmatter:
+Error: Invalid YAML frontmatter in CLAUDE.md
+  expected a single document in the stream
+  but found another document at line 5, column 1
+
+# Or:
+SyntaxError: Unexpected token ':' in JSON at position 42
+  Could not parse settings.json</code></pre>
+
+      <h2>The Fix</h2>
+      <h3>1. Validate your config file syntax</h3>
+      <pre><code># For JSON config (settings.json):
+python3 -c "import json; json.load(open('$HOME/.claude/settings.json')); print('JSON valid')"
+
+# For YAML frontmatter in CLAUDE.md:
+python3 -c "
+import yaml
+with open('CLAUDE.md') as f:
+    content = f.read()
+    if content.startswith('---'):
+        end = content.index('---', 3)
+        yaml.safe_load(content[3:end])
+        print('YAML frontmatter valid')
+"</code></pre>
+
+      <h3>2. Fix common syntax mistakes</h3>
+      <p>The <code>settings.json</code> file must be valid JSON with no trailing commas:</p>
+      <pre><code>{
+  "permissions": {
+    "allow": ["Bash", "Read", "Write"],
+    "deny": []
+  }
+}</code></pre>
+
+      <h3>3. Verify the fix</h3>
+      <pre><code>python3 -c "import json; json.load(open('$HOME/.claude/settings.json')); print('Config OK')" &amp;&amp; claude --version</code></pre>
+
+      <h2>Why This Happens</h2>
+      <p>Claude Code reads configuration from <code>~/.claude/settings.json</code> (JSON format) and project-level <code>CLAUDE.md</code> files (which may contain YAML frontmatter). JSON is strict about syntax -- trailing commas, unquoted keys, and single quotes are all parse errors. YAML frontmatter requires proper indentation (spaces only, no tabs) and must be enclosed between <code>---</code> delimiters. Editors that auto-insert smart quotes or tabs break both formats silently.</p>
+
+      <h2>If That Does Not Work</h2>
+      <ul>
+        <li><strong>Delete and recreate the config:</strong> <code>mv ~/.claude/settings.json ~/.claude/settings.json.bak &amp;&amp; claude</code> -- Claude Code creates a fresh default config</li>
+        <li><strong>Use an online JSON/YAML validator</strong> like jsonlint.com to pinpoint the exact character</li>
+        <li><strong>Reveal hidden characters:</strong> Run <code>cat -A ~/.claude/settings.json</code> to see tabs (shown as <code>^I</code>) and carriage returns (shown as <code>^M</code>)</li>
+      </ul>
+
+      <h2>Common JSON Mistakes</h2>
+      <pre><code>// WRONG: trailing comma
+{ "key": "value", }
+
+// WRONG: single quotes
+{ 'key': 'value' }
+
+// WRONG: unquoted keys
+{ key: "value" }
+
+// WRONG: comments in JSON
+{ "key": "value" /* comment */ }
+
+// CORRECT
+{ "key": "value" }</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Use spaces not tabs in all config files. Validate JSON with <code>python3 -c "import json; json.load(open('file'))"</code> after editing. Never use trailing commas in JSON config files. Use a proper code editor with JSON syntax highlighting to catch errors immediately.</p>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-config-yaml-parse-error-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Config YAML Parse Error (2026)",
+    "description": "Fix Claude Code configuration file YAML and JSON parse errors. Validate syntax and fix common indentation and formatting mistakes.",
+    "url": "https://claudhq.com/claude-code-config-yaml-parse-error-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

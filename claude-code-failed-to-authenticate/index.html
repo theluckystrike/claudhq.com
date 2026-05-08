@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Failed to Authenticate (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Claude Code authentication failures with step-by-step fixes for expired tokens, invalid API keys, and misconfigured credentials.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-failed-to-authenticate/">
+  <meta property="og:title" content="Fix Claude Code Failed to Authenticate (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Claude Code authentication failures with step-by-step fixes for expired tokens, invalid API keys, and misconfigured credentials.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-failed-to-authenticate/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Failed to Authenticate</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The "failed to authenticate" error in Claude Code means your credentials are missing, expired, or misconfigured. This guide walks through every authentication method Claude Code supports and shows you exactly how to fix each failure mode.</p>
+
+      <h2>The Problem</h2>
+      <p>You launch Claude Code or run a command, and it immediately returns a "failed to authenticate" error. This blocks all AI-assisted work. The error can appear after system updates, token expiration, environment variable changes, or when switching between authentication methods.</p>
+
+      <h2>Quick Solution</h2>
+      <ol>
+        <li>Check which authentication method you are using:
+          <pre><code>claude config list</code></pre>
+        </li>
+        <li>If using an API key, verify it is set correctly:
+          <pre><code>echo $ANTHROPIC_API_KEY</code></pre>
+        </li>
+        <li>If the key is missing or empty, set it:
+          <pre><code>export ANTHROPIC_API_KEY="sk-ant-your-key-here"</code></pre>
+        </li>
+        <li>If using OAuth (Claude Max subscription), re-authenticate:
+          <pre><code>claude auth login</code></pre>
+        </li>
+        <li>Test the connection:
+          <pre><code>claude "hello"</code></pre>
+        </li>
+      </ol>
+
+      <h2>How Authentication Works</h2>
+      <p>Claude Code supports multiple authentication paths. The most common is the <code>ANTHROPIC_API_KEY</code> environment variable, which sends your key directly with each API request. When this variable is unset, empty, or contains an invalid key, authentication fails immediately.</p>
+      <p>OAuth-based authentication through <code>claude auth login</code> stores tokens in <code>~/.claude/</code>. These tokens expire periodically and must be refreshed.</p>
+      <p>For enterprise setups using Amazon Bedrock or Google Vertex AI, authentication flows through AWS IAM or GCP service accounts respectively.</p>
+
+      <h2>Common Issues</h2>
+      <p><strong>Token expired after sleep or restart.</strong> OAuth tokens have a limited lifetime. Run <code>claude auth login</code> again. To prevent this, add <code>export ANTHROPIC_API_KEY=...</code> to your shell profile (<code>~/.zshrc</code> or <code>~/.bashrc</code>) so it persists across sessions.</p>
+      <p><strong>Wrong API key format.</strong> Anthropic API keys start with <code>sk-ant-</code>. If your key does not match this format, you may be using a key from a different provider.</p>
+      <p><strong>Environment variable overridden by dotenv.</strong> If your project uses <code>.env</code> files, an empty <code>ANTHROPIC_API_KEY=</code> line will override your shell export. Check all <code>.env</code> files in your project hierarchy.</p>
+
+      <h2>Best Practices</h2>
+      <ul>
+        <li><strong>Store your API key in your shell profile</strong> (<code>~/.zshrc</code> or <code>~/.bashrc</code>) so it survives terminal restarts.</li>
+        <li><strong>Never commit API keys</strong> to version control. Use <code>.env.local</code> files that are listed in <code>.gitignore</code>.</li>
+        <li><strong>Use separate keys</strong> for development and production to isolate rate limits and track usage independently.</li>
+        <li><strong>Set up a pre-commit hook</strong> that scans for accidentally committed secrets using tools like <code>gitleaks</code>.</li>
+        <li><strong>For team environments, use OAuth</strong> rather than shared API keys so each developer has their own authentication context.</li>
+      </ul>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-failed-to-authenticate" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Failed to Authenticate (2026)",
+    "description": "Resolve Claude Code authentication failures with step-by-step fixes for expired tokens, invalid API keys, and misconfigured credentials.",
+    "url": "https://claudhq.com/claude-code-failed-to-authenticate/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

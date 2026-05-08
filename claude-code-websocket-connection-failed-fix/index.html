@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix WebSocket Connection Failed in Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve WebSocket connection failed errors in Claude Code projects. Debug WS handshake failures, proxy issues, and CORS configuration problems.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-websocket-connection-failed-fix/">
+  <meta property="og:title" content="Fix WebSocket Connection Failed in Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve WebSocket connection failed errors in Claude Code projects. Debug WS handshake failures, proxy issues, and CORS configuration problems.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-websocket-connection-failed-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix WebSocket Connection Failures in Claude Code</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Your application uses WebSockets and the connection fails with errors like:</p>
+      <pre><code>WebSocket connection to 'ws://localhost:3001' failed:
+Error during WebSocket handshake: Unexpected response code: 400</code></pre>
+      <p>Or in your server logs:</p>
+      <pre><code>Error: listen EADDRINUSE :::3001
+WebSocket: Invalid frame header</code></pre>
+
+      <h2>Quick Fix</h2>
+      <p>Check the three most common causes:</p>
+      <pre><code># 1. Is the WS server running?
+lsof -i :3001
+
+# 2. Is the client connecting to the right URL?
+grep -r "ws://" src/ --include="*.ts" --include="*.js"
+
+# 3. Is a proxy interfering?
+cat vite.config.ts</code></pre>
+      <p>If using a dev server with a proxy, add WebSocket proxy support:</p>
+      <pre><code>// vite.config.ts
+export default defineConfig({
+  server: {
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true,
+      },
+    },
+  },
+});</code></pre>
+
+      <h2>What Is Happening</h2>
+      <p>WebSocket connections start as HTTP requests that "upgrade" to the WebSocket protocol. This upgrade handshake is where most failures occur. Common causes include:</p>
+      <ol>
+        <li><strong>Missing upgrade handling:</strong> The server does not handle the HTTP upgrade request</li>
+        <li><strong>Proxy stripping headers:</strong> A reverse proxy or dev server strips the <code>Upgrade</code> and <code>Connection</code> headers</li>
+        <li><strong>CORS blocking:</strong> The server rejects the WebSocket origin</li>
+        <li><strong>Port mismatch:</strong> Client connects to the wrong port or the server is not listening</li>
+        <li><strong>SSL/TLS mismatch:</strong> Using <code>ws://</code> when the page is served over HTTPS (requires <code>wss://</code>)</li>
+      </ol>
+
+      <h2>Step-by-Step Fix</h2>
+      <h3>Step 1: Verify the server setup</h3>
+      <p>A correct Node.js WebSocket server looks like:</p>
+      <pre><code>import { WebSocketServer } from 'ws';
+import { createServer } from 'http';
+
+const server = createServer();
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws) =&gt; {
+  console.log('Client connected');
+  ws.on('message', (data) =&gt; {
+    ws.send(JSON.stringify({ echo: data.toString() }));
+  });
+});
+
+server.listen(3001, () =&gt; {
+  console.log('WebSocket server running on port 3001');
+});</code></pre>
+
+      <h3>Step 2: Fix the client connection</h3>
+      <pre><code>// Auto-detect protocol
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const ws = new WebSocket(\`\${protocol}//\${window.location.host}/ws\`);</code></pre>
+
+      <h3>Step 3: Configure proxy for development</h3>
+      <p><strong>Next.js:</strong></p>
+      <pre><code>// next.config.js
+module.exports = {
+  async rewrites() {
+    return [{ source: '/ws', destination: 'http://localhost:3001/ws' }];
+  },
+};</code></pre>
+
+      <h3>Step 4: Add reconnection logic</h3>
+      <p>WebSocket connections drop. Production code needs automatic reconnection with exponential backoff:</p>
+      <pre><code>class ReconnectingWebSocket {
+  private ws: WebSocket | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 10;
+  private baseDelay = 1000;
+
+  constructor(private url: string) { this.connect(); }
+
+  private connect(): void {
+    this.ws = new WebSocket(this.url);
+    this.ws.onopen = () =&gt; { this.reconnectAttempts = 0; };
+    this.ws.onclose = () =&gt; {
+      if (this.reconnectAttempts &lt; this.maxReconnectAttempts) {
+        const delay = this.baseDelay * Math.pow(2, this.reconnectAttempts);
+        this.reconnectAttempts++;
+        setTimeout(() =&gt; this.connect(), delay);
+      }
+    };
+  }
+}</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Test WebSocket connections with <code>wscat</code> before integrating with your frontend:</p>
+      <pre><code>npx wscat -c ws://localhost:3001/ws</code></pre>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-websocket-connection-failed-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix WebSocket Connection Failed in Claude Code (2026)",
+    "description": "Resolve WebSocket connection failed errors in Claude Code projects. Debug WS handshake failures, proxy issues, and CORS configuration problems.",
+    "url": "https://claudhq.com/claude-code-websocket-connection-failed-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

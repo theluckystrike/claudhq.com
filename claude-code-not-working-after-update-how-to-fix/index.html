@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Not Working After Update (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code after an update breaks your workflow. Step-by-step solutions for broken configs, path changes, and dependency issues.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-not-working-after-update-how-to-fix/">
+  <meta property="og:title" content="Fix Claude Code Not Working After Update (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code after an update breaks your workflow. Step-by-step solutions for broken configs, path changes, and dependency issues.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-not-working-after-update-how-to-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Not Working After Update: How to Fix</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Updates to Claude Code can sometimes introduce breaking changes that affect your custom configurations or workflow integrations. This guide covers the most common issues developers encounter after updating Claude Code and provides practical solutions to get you back up and running quickly.</p>
+
+      <h2>Common Symptoms After Update</h2>
+      <p>After a Claude Code update, you might experience several telltale signs that something has broken:</p>
+      <ul>
+        <li>Custom prompts or configurations are ignored</li>
+        <li>Path references point to non-existent directories</li>
+        <li>Previously working integrations suddenly stop functioning</li>
+        <li>Claude Code fails to start entirely</li>
+      </ul>
+
+      <h2>Issue 1: Configuration Files Being Ignored</h2>
+      <p>Sometimes after an update, your custom configurations seem to have no effect. This typically occurs when the configuration file location or format changes between versions.</p>
+      <h3>Diagnosis</h3>
+      <p>Check which configuration files Claude Code is actually using:</p>
+      <pre><code>claude config --show-paths</code></pre>
+      <h3>Solution</h3>
+      <p>Move your configuration to the correct location. After the update, Claude Code may have changed from looking in <code>~/.claude/settings.json</code> to a different path:</p>
+      <pre><code>{
+  "preferences": {
+    "maxTokens": 4096,
+    "temperature": 0.7
+  }
+}</code></pre>
+
+      <h2>Issue 2: Path and Environment Variable Problems</h2>
+      <p>Another common issue involves broken path references. After updates, the internal directory structure of Claude Code may change.</p>
+      <h3>Diagnosis</h3>
+      <p>Look for errors mentioning missing files or directories:</p>
+      <pre><code>Error: ENOENT: no such file or directory</code></pre>
+      <h3>Solution</h3>
+      <p>Update scripts to use environment variables instead of hardcoded paths:</p>
+      <pre><code>// Before (brittle)
+const utils = require('/home/user/.claude/utils.js');
+
+// After (portable)
+const skillRoot = process.env.CLAUDE_SKILL_ROOT || process.cwd();
+const utils = require(\`\${skillRoot}/utils.js\`);</code></pre>
+
+      <h2>Issue 3: Dependency Conflicts</h2>
+      <p>Claude Code updates may change how external processes are invoked, breaking tools that depend on specific versions.</p>
+      <h3>Solution</h3>
+      <p>Reinstall dependencies:</p>
+      <pre><code>cd ~/.claude/
+npm install  # for Node.js-based tools
+pip install -r requirements.txt  # for Python-based tools</code></pre>
+
+      <h2>Quick Checklist for Immediate Fixes</h2>
+      <ol>
+        <li>Restart Claude Code completely</li>
+        <li>Run <code>claude --version</code> to verify installation</li>
+        <li>Clear any cached data (<code>claude cache clear</code>)</li>
+        <li>Check permissions on configuration files and directories</li>
+        <li>Verify environment variables are still set correctly</li>
+        <li>Reinstall dependencies if needed</li>
+      </ol>
+      <p>Most issues resolve by step 4. If problems persist after clearing the cache and reinstalling dependencies, the issue likely requires attention to your specific configuration.</p>
+
+      <h2>Prevention</h2>
+      <p>To minimize disruptions from future updates:</p>
+      <ul>
+        <li>Keep backup configurations of working setups</li>
+        <li>Monitor Claude Code release notes for breaking changes</li>
+        <li>Test after each update in a staging environment</li>
+        <li>Use environment-aware path handling in all configuration</li>
+      </ul>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-not-working-after-update-how-to-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Not Working After Update (2026)",
+    "description": "Fix Claude Code after an update breaks your workflow. Step-by-step solutions for broken configs, path changes, and dependency issues.",
+    "url": "https://claudhq.com/claude-code-not-working-after-update-how-to-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

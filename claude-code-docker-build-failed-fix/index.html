@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Docker Build Failures with Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Docker build failures with Claude Code. Fix multi-stage build errors, missing dependencies, layer caching issues, and platform mismatches.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-docker-build-failed-fix/">
+  <meta property="og:title" content="Fix Docker Build Failures with Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Docker build failures with Claude Code. Fix multi-stage build errors, missing dependencies, layer caching issues, and platform mismatches.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-docker-build-failed-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Docker Build Failures When Using Claude Code</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Problem</h2>
+      <p>You ask Claude Code to build your Docker image and it fails:</p>
+      <pre><code>ERROR [build 4/7] RUN npm ci
+#8 12.45 npm ERR! code ENOENT
+#8 12.45 npm ERR! syscall open
+#8 12.45 npm ERR! path /app/package.json
+ERROR: failed to solve: exit code: 1</code></pre>
+
+      <h2>Quick Fix</h2>
+      <p>The most common causes:</p>
+      <pre><code># Wrong: COPY before WORKDIR
+COPY package*.json ./
+WORKDIR /app  # package.json is now in / not /app
+
+# Right: WORKDIR first, then COPY
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci</code></pre>
+
+      <h2>What Is Happening</h2>
+      <p>Docker builds execute instructions sequentially in an isolated environment. Each instruction creates a new layer. Common failure points include:</p>
+      <ol>
+        <li><strong>Build context issues:</strong> Files excluded by <code>.dockerignore</code> or not in the build context directory</li>
+        <li><strong>Layer ordering:</strong> Instructions depend on files that have not been copied yet</li>
+        <li><strong>Platform mismatch:</strong> Building for linux/amd64 on an ARM Mac (Apple Silicon)</li>
+        <li><strong>Dependency installation:</strong> Native modules that need build tools not present in the image</li>
+        <li><strong>Multi-stage references:</strong> Incorrect <code>--from</code> references in multi-stage builds</li>
+      </ol>
+
+      <h2>Step-by-Step Fix</h2>
+      <h3>Step 1: Read the full error output</h3>
+      <pre><code>docker build --no-cache --progress=plain -t myapp . 2&gt;&amp;1</code></pre>
+
+      <h3>Step 2: Fix .dockerignore conflicts</h3>
+      <p>A common issue is <code>.dockerignore</code> excluding files needed during the build. Use a targeted ignore list:</p>
+      <pre><code>node_modules
+.git
+.env
+.env.local
+dist
+coverage
+.next</code></pre>
+
+      <h3>Step 3: Fix a broken Dockerfile</h3>
+      <p>A well-structured Node.js Dockerfile:</p>
+      <pre><code>FROM node:20-slim AS builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY tsconfig.json ./
+COPY src/ ./src/
+RUN npm run build
+
+FROM node:20-slim AS production
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts &amp;&amp; npm cache clean --force
+COPY --from=builder /app/dist ./dist
+RUN groupadd -r app &amp;&amp; useradd -r -g app app
+USER app
+EXPOSE 3000
+CMD ["node", "dist/index.js"]</code></pre>
+
+      <h3>Step 4: Fix platform/architecture issues</h3>
+      <p>On Apple Silicon Macs:</p>
+      <pre><code>docker build --platform linux/amd64 -t myapp .</code></pre>
+
+      <h3>Step 5: Fix layer caching issues</h3>
+      <pre><code># Bad: copying everything invalidates the npm ci cache
+COPY . .
+RUN npm ci
+
+# Good: copy dependency files first, install, then copy source
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Add Dockerfile linting to your CI pipeline:</p>
+      <pre><code>brew install hadolint
+hadolint Dockerfile</code></pre>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-docker-build-failed-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Docker Build Failures with Claude Code (2026)",
+    "description": "Resolve Docker build failures with Claude Code. Fix multi-stage build errors, missing dependencies, layer caching issues, and platform mismatches.",
+    "url": "https://claudhq.com/claude-code-docker-build-failed-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

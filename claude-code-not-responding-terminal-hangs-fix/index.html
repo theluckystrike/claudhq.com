@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Not Responding Terminal Hangs (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code when your terminal hangs or stops responding. Step-by-step recovery commands, diagnostic techniques, and prevention strategies.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-not-responding-terminal-hangs-fix/">
+  <meta property="og:title" content="Fix Claude Code Not Responding Terminal Hangs (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code when your terminal hangs or stops responding. Step-by-step recovery commands, diagnostic techniques, and prevention strategies.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-not-responding-terminal-hangs-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Not Responding: Terminal Hangs</h1>
+      <div class="article-meta"><time>May 2026</time> · ClaudHQ</div>
+
+      <p>When Claude Code freezes mid-conversation or your terminal stops responding, productivity comes to a halt. This guide covers practical solutions for diagnosing and fixing these issues, whether you are running a simple query or working on a complex project.</p>
+
+      <h2>Identifying the Problem</h2>
+      <p>Terminal hangs with Claude Code typically manifest in three ways. First, you might see a spinner that never completes, the cursor spins indefinitely with no response. Second, output may truncate mid-stream, leaving you with partial results and no way to continue. Third, the entire terminal session becomes unresponsive, accepting no keyboard input.</p>
+      <p>Before applying fixes, identify which scenario matches your situation. Different symptoms require different solutions.</p>
+
+      <h2>Quick Recovery Commands</h2>
+      <p>The fastest way to recover from a frozen Claude Code session depends on your terminal and operating system.</p>
+      <p>For most users, pressing <code>Ctrl+C</code> once sends an interrupt signal. This tells Claude Code to stop the current operation and return control to your shell. In many cases, you will see an "Interrupted" message and can continue your session.</p>
+      <p>If <code>Ctrl+C</code> fails, try <code>Ctrl+Z</code> to background the process:</p>
+      <pre><code>^Z
+[1]+ Stopped
+claude</code></pre>
+      <p>Then kill the background process:</p>
+      <pre><code>kill %1</code></pre>
+      <p>For macOS users with iTerm2, you can send a SIGKILL directly through the terminal menu: press <code>Cmd+.</code> to send an interrupt, or use <code>Cmd+Shift+K</code> to close the pane.</p>
+      <p>On Linux, find the process ID and use <code>kill -9</code>:</p>
+      <pre><code>ps aux | grep claude
+kill -9 &lt;PID&gt;</code></pre>
+
+      <h2>Diagnosing Root Causes</h2>
+      <p>If hangs recur frequently, diagnose the underlying cause. Common culprits include network connectivity issues, configuration problems, and resource constraints.</p>
+
+      <h3>Network Issues</h3>
+      <p>Claude Code communicates with Anthropic's API servers. Network problems manifest as hangs during the "Thinking..." phase. Test your connection:</p>
+      <pre><code>curl -s https://api.anthropic.com/health | head</code></pre>
+      <p>If this fails, check your firewall settings, VPN connection, or proxy configuration. Corporate networks often block API endpoints.</p>
+
+      <h3>Resource Constraints</h3>
+      <p>Low memory or CPU throttling can cause Claude Code to appear frozen. Monitor system resources:</p>
+      <pre><code># macOS
+top -l 1 | head -20
+
+# Linux
+free -h &amp;&amp; uptime</code></pre>
+      <p>If memory is exhausted, close other applications or restart your terminal entirely.</p>
+
+      <h2>Preventing Future Hangs</h2>
+      <p>Prevention strategies reduce the frequency of frozen sessions.</p>
+
+      <h3>Use Explicit Context Boundaries</h3>
+      <p>When working with large codebases or long conversations, explicitly set context boundaries. Instead of letting a session run indefinitely, break work into smaller chunks:</p>
+      <pre><code>/clear</code></pre>
+      <p>This clears conversation history and starts fresh, reducing memory usage and the chance of hangs.</p>
+
+      <h3>Configure Timeouts</h3>
+      <p>Add timeout configurations to your <code>~/.claude/settings.json</code>:</p>
+      <pre><code>{
+  "timeout": 30,
+  "maxRetries": 2
+}</code></pre>
+
+      <h3>Optimize Prompt Complexity</h3>
+      <p>Complex prompts with multiple instructions can trigger hangs. Break complex requests into sequential steps. Instead of:</p>
+      <pre><code>Create a full-stack application with authentication, database models, and API endpoints</code></pre>
+      <p>Use:</p>
+      <pre><code>First, create the database models for user authentication</code></pre>
+      <p>Then follow up with subsequent requests for each component.</p>
+
+      <h2>Recovery Workflow</h2>
+      <p>When you encounter a hang, follow this systematic recovery workflow:</p>
+      <ol>
+        <li><strong>Wait 30 seconds:</strong> Sometimes Claude Code is processing a complex request. A 30-second wait eliminates false positives.</li>
+        <li><strong>Press Ctrl+C once:</strong> A single interrupt signal often resolves the issue.</li>
+        <li><strong>Check process status:</strong> If the terminal remains frozen, open a new terminal window and check for running Claude processes.</li>
+        <li><strong>Kill stubborn processes:</strong> Use process termination as a last resort before restarting your terminal entirely.</li>
+        <li><strong>Restart Claude Code:</strong> After recovery, verify functionality with a simple query like "Hello, respond with OK."</li>
+      </ol>
+
+      <h2>Advanced Techniques</h2>
+
+      <h3>Container Environments</h3>
+      <p>When running Claude Code inside Docker containers, ensure proper signal handling. Add an <code>ENTRYPOINT</code> that properly forwards signals:</p>
+      <pre><code>ENTRYPOINT ["sh", "-c"]
+CMD ["exec claude"]</code></pre>
+
+      <h3>tmux and Screen Sessions</h3>
+      <p>If you use tmux or screen, configure proper pane management. Add to your <code>.tmux.conf</code>:</p>
+      <pre><code>bind-key C-c send-keys C-c
+bind-key C-z send-keys C-z</code></pre>
+      <p>This ensures interrupt signals reach Claude Code even when running in detached sessions.</p>
+
+      <h3>Log Analysis</h3>
+      <p>Enable debug logging to diagnose recurring issues. Set the <code>CLAUDE_DEBUG</code> environment variable:</p>
+      <pre><code>export CLAUDE_DEBUG=1
+claude</code></pre>
+      <p>Debug logs reveal where Claude Code stalls, helping identify whether the issue is network-related or a code execution problem.</p>
+
+      <h2>When to Reinstall</h2>
+      <p>If issues persist despite troubleshooting, a clean reinstallation often resolves underlying corruption:</p>
+      <pre><code># Uninstall Claude Code
+brew uninstall claude
+
+# Clear configuration
+rm -rf ~/.claude
+
+# Fresh installation
+brew install claude</code></pre>
+      <p>Reinstallation takes minutes and eliminates configuration conflicts that troubleshooting cannot fix.</p>
+
+      <h2>Conclusion</h2>
+      <p>Terminal hangs with Claude Code frustrate developers, but most hangs resolve with simple interrupt signals. Persistent issues often stem from network connectivity, configuration, or system resource constraints. By understanding the symptoms, applying quick recovery commands, and implementing prevention strategies, you minimize downtime and maintain productivity.</p>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error into our <a href="/diagnose/">Error Diagnostic</a></strong> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-not-responding-terminal-hangs-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Not Responding: Terminal Hangs",
+    "description": "Fix Claude Code when your terminal hangs or stops responding. Step-by-step recovery commands, diagnostic techniques, and prevention strategies.",
+    "url": "https://claudhq.com/claude-code-not-responding-terminal-hangs-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

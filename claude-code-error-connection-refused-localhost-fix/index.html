@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code Connection Refused Localhost (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code connection refused errors on localhost. Check ports, proxy settings, and API config with copy-paste diagnostic commands.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-error-connection-refused-localhost-fix/">
+  <meta property="og:title" content="Fix Claude Code Connection Refused Localhost (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code connection refused errors on localhost. Check ports, proxy settings, and API config with copy-paste diagnostic commands.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-error-connection-refused-localhost-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Error Connection Refused Localhost Fix</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Connection refused errors when Claude Code attempts to connect to localhost can halt your development workflow unexpectedly. This guide provides actionable solutions for developers encountering this issue.</p>
+
+      <h2>What Causes Connection Refused Errors</h2>
+      <p>When Claude Code attempts to connect to a local service and receives a "connection refused" error, it means no service is listening on the target port. This differs from a timeout, which indicates the connection attempt stalled. With connection refused, the operating system actively rejected the connection attempt.</p>
+      <p>These errors commonly occur when running Claude Code to test local development servers, connecting to local database services like PostgreSQL or MongoDB, or working with local Redis instances.</p>
+
+      <h2>Diagnosing the Problem</h2>
+      <p>Check which services are currently listening on your machine:</p>
+      <pre><code># macOS and Linux
+lsof -i -P | grep LISTEN
+
+# Windows
+netstat -ano | findstr "LISTENING"</code></pre>
+
+      <h2>Fix 1: Starting the Required Service</h2>
+      <p>Navigate to your project directory and start the development server:</p>
+      <pre><code># For Node.js projects
+npm run dev
+
+# For Python projects with Flask
+python app.py
+
+# For Django
+python manage.py runserver</code></pre>
+
+      <h2>Fix 2: Checking Port Configuration</h2>
+      <p>Services sometimes use different ports than their defaults. Verify your service configuration:</p>
+      <pre><code>cat package.json | grep -A 5 '"scripts"'</code></pre>
+
+      <h2>Fix 3: Firewall and Security Software</h2>
+      <p>Security software sometimes blocks localhost connections:</p>
+      <pre><code># Check firewall status (macOS)
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate</code></pre>
+
+      <h2>Fix 4: Using the Correct Hostname</h2>
+      <p>Some systems require explicit binding to localhost rather than 127.0.0.1:</p>
+      <pre><code># Check what your service is listening on
+lsof -i :PORT_NUMBER</code></pre>
+      <p>Services bound to <code>0.0.0.0</code> accept connections from any interface, while <code>127.0.0.1</code> restricts connections to the local machine.</p>
+
+      <h2>Fix 5: Waiting for Service Readiness</h2>
+      <p>Development servers require time to initialize before accepting connections:</p>
+      <pre><code># Wait for port to become available
+until nc -z 127.0.0.1 3000; do
+    echo "Waiting for server..."
+    sleep 2
+done
+echo "Server is ready!"</code></pre>
+
+      <h2>Fix 6: Checking for Port Conflicts</h2>
+      <p>Another service may already occupy the expected port:</p>
+      <pre><code># Find process using a specific port
+lsof -i :3000
+
+# Kill the process by PID
+kill -9 PID_NUMBER
+
+# Or use a different port
+PORT=3001 npm run dev</code></pre>
+
+      <h2>Prevention Strategies</h2>
+      <p>Document required services in your project CLAUDE.md file so Claude Code understands startup dependencies. For complex multi-service projects, consider using docker-compose to manage dependencies and ensure all required services start together.</p>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-error-connection-refused-localhost-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Connection Refused Localhost (2026)",
+    "description": "Fix Claude Code connection refused errors on localhost. Check ports, proxy settings, and API config with copy-paste diagnostic commands.",
+    "url": "https://claudhq.com/claude-code-error-connection-refused-localhost-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

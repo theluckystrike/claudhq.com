@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix EACCES Permission Errors During npm Install (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve npm EACCES permission denied errors when Claude Code runs npm install. Fix global installs, node_modules ownership, and cache issues.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-npm-install-eacces-permission-fix/">
+  <meta property="og:title" content="Fix EACCES Permission Errors During npm Install (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve npm EACCES permission denied errors when Claude Code runs npm install. Fix global installs, node_modules ownership, and cache issues.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-npm-install-eacces-permission-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix EACCES Permission Errors During npm Install in Claude Code</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Problem</h2>
+      <p>Claude Code runs <code>npm install</code> and hits a permission error:</p>
+      <pre><code>npm ERR! code EACCES
+npm ERR! syscall mkdir
+npm ERR! path /usr/local/lib/node_modules/some-package
+npm ERR! errno -13
+npm ERR! Error: EACCES: permission denied</code></pre>
+
+      <h2>Quick Fix</h2>
+      <p>For local project installs, fix the node_modules ownership:</p>
+      <pre><code>sudo chown -R $(whoami) node_modules/
+npm install</code></pre>
+      <p>For global install permission issues, configure npm to use a user-owned directory:</p>
+      <pre><code>mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' &gt;&gt; ~/.zshrc
+source ~/.zshrc</code></pre>
+
+      <h2>What Is Happening</h2>
+      <p>EACCES errors occur when the current user lacks write permission to a directory that npm needs to modify. This happens in three common scenarios:</p>
+      <ol>
+        <li><strong>Previous sudo install:</strong> Someone ran <code>sudo npm install</code> and now root owns files inside <code>node_modules/</code>.</li>
+        <li><strong>Global prefix pointing to system directory:</strong> npm's default global prefix (<code>/usr/local</code>) requires root access.</li>
+        <li><strong>Corrupted npm cache:</strong> The npm cache directory has mixed ownership from previous sudo operations.</li>
+      </ol>
+
+      <h2>Step-by-Step Fix</h2>
+      <h3>Step 1: Diagnose the exact cause</h3>
+      <pre><code>npm install 2&gt;&amp;1
+ls -la node_modules/ | head -20</code></pre>
+
+      <h3>Step 2: Fix node_modules ownership</h3>
+      <pre><code># Check for root-owned files
+find node_modules/ -user root -type f | head -10
+
+# Fix ownership recursively
+sudo chown -R $(whoami):$(id -gn) node_modules/
+
+# Now install normally
+npm install</code></pre>
+
+      <h3>Step 3: Fix global prefix</h3>
+      <pre><code>mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' &gt;&gt; ~/.zshrc
+source ~/.zshrc
+npm config get prefix
+# Should output: /Users/you/.npm-global</code></pre>
+
+      <h3>Step 4: Fix npm cache permissions</h3>
+      <pre><code>sudo chown -R $(whoami):$(id -gn) ~/.npm
+# Or clean the cache entirely
+npm cache clean --force</code></pre>
+
+      <h2>Using pnpm Instead</h2>
+      <p>pnpm avoids most EACCES issues because it uses a content-addressable store in user space:</p>
+      <pre><code>npm install -g pnpm
+pnpm install</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Never run <code>sudo npm install</code> for local project dependencies. If a tutorial tells you to use sudo with npm, the correct fix is always to change ownership or the global prefix. Add a <code>.npmrc</code> file to your project root for consistent behavior:</p>
+      <pre><code>engine-strict=true
+save-exact=true
+fund=false
+audit=false</code></pre>
+
+      <div class="tool-cta">
+        <p><strong>Configure permissions</strong> with our <a href="/generator/">CLAUDE.md Generator</a> to prevent permission issues.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-npm-install-eacces-permission-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix EACCES Permission Errors During npm Install (2026)",
+    "description": "Resolve npm EACCES permission denied errors when Claude Code runs npm install. Fix global installs, node_modules ownership, and cache issues.",
+    "url": "https://claudhq.com/claude-code-npm-install-eacces-permission-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

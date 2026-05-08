@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Prisma Migration Failures with Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Prisma migration errors using Claude Code. Fix drift detection, failed migrations, data loss warnings, and production rollback scenarios.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-prisma-migration-failed-fix/">
+  <meta property="og:title" content="Fix Prisma Migration Failures with Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Prisma migration errors using Claude Code. Fix drift detection, failed migrations, data loss warnings, and production rollback scenarios.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-prisma-migration-failed-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Prisma Migration Failures with Claude Code</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Problem</h2>
+      <p>You run <code>npx prisma migrate dev</code> and it fails:</p>
+      <pre><code>Error: P3006
+Migration `20260415_add_user_roles` failed to apply cleanly to the shadow database.
+Error:
+  Step 1 Added the required column `role` to the `User` table without a default value.
+  There are 247 rows in this table, it is not possible to execute this step.</code></pre>
+      <p>Or you see drift detection failures:</p>
+      <pre><code>Error: P3005
+The database schema is not empty.</code></pre>
+
+      <h2>Quick Fix</h2>
+      <p>For the "required column without default" error, add a default value:</p>
+      <pre><code>model User {
+  id    String @id @default(cuid())
+  email String @unique
+  role  String @default("user") // Add default for existing rows
+}</code></pre>
+      <p>Then regenerate the migration:</p>
+      <pre><code>npx prisma migrate dev --name add_user_roles</code></pre>
+
+      <h2>What Is Happening</h2>
+      <p>Prisma Migrate uses a shadow database to verify migrations. It creates a temporary database, applies all migrations from scratch, and compares the result with your schema. Common failure scenarios:</p>
+      <ol>
+        <li><strong>Adding a required column:</strong> Existing rows have no value for the new column</li>
+        <li><strong>Schema drift:</strong> The database has been modified outside of Prisma migrations</li>
+        <li><strong>Failed migration stuck in history:</strong> A previous migration partially applied</li>
+        <li><strong>Data type changes:</strong> Converting a column type with incompatible data</li>
+        <li><strong>Unique constraint violations:</strong> Adding a unique constraint to a column with duplicates</li>
+      </ol>
+
+      <h2>Step-by-Step Fix</h2>
+      <h3>Fix required column errors (3 options)</h3>
+      <p><strong>Option A:</strong> Add a default value in the schema.</p>
+      <p><strong>Option B:</strong> Make the column optional first, backfill, then make required:</p>
+      <pre><code>-- Step 1: Add column as optional
+ALTER TABLE "User" ADD COLUMN "role" TEXT;
+
+-- Step 2: Backfill
+UPDATE "User" SET "role" = 'user' WHERE "role" IS NULL;
+
+-- Step 3: Make required
+ALTER TABLE "User" ALTER COLUMN "role" SET NOT NULL;
+ALTER TABLE "User" ALTER COLUMN "role" SET DEFAULT 'user';</code></pre>
+
+      <h3>Fix schema drift</h3>
+      <pre><code>npx prisma migrate diff \
+  --from-migrations ./prisma/migrations \
+  --to-schema-datamodel ./prisma/schema.prisma \
+  --script</code></pre>
+      <p>If the database matches your desired schema but has no migration history:</p>
+      <pre><code>npx prisma migrate resolve --applied "20260415_init"</code></pre>
+
+      <h3>Fix a stuck failed migration</h3>
+      <pre><code>npx prisma migrate status
+npx prisma migrate resolve --rolled-back "20260415_add_user_roles"</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Always test migrations against a copy of production data before deploying. Never add a required column without a default value. Always use <code>--create-only</code> for complex migrations and review the SQL. Never use <code>prisma migrate dev</code> in production (use <code>prisma migrate deploy</code>).</p>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-prisma-migration-failed-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Prisma Migration Failures with Claude Code (2026)",
+    "description": "Resolve Prisma migration errors using Claude Code. Fix drift detection, failed migrations, data loss warnings, and production rollback scenarios.",
+    "url": "https://claudhq.com/claude-code-prisma-migration-failed-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

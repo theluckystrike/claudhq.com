@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix ESLint and Prettier Conflicts in Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve ESLint and Prettier conflicts in Claude Code projects. Stop the endless formatting loop with eslint-config-prettier and proper setup.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-eslint-prettier-conflict-fix/">
+  <meta property="og:title" content="Fix ESLint and Prettier Conflicts in Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve ESLint and Prettier conflicts in Claude Code projects. Stop the endless formatting loop with eslint-config-prettier and proper setup.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-eslint-prettier-conflict-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix ESLint and Prettier Conflicts in Claude Code Projects</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Problem</h2>
+      <p>Claude Code writes code that passes Prettier formatting but fails ESLint, or vice versa. You see conflicting errors like:</p>
+      <pre><code>error  Replace `     ` with `    `  prettier/prettier
+error  Expected indentation of 4 spaces but found 2  indent</code></pre>
+      <p>This creates an endless loop of fixes.</p>
+
+      <h2>Quick Fix</h2>
+      <p>Install <code>eslint-config-prettier</code> to disable all ESLint rules that conflict with Prettier:</p>
+      <pre><code>npm install --save-dev eslint-config-prettier</code></pre>
+      <p>Add it as the last item in your ESLint extends array:</p>
+      <pre><code>{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ]
+}</code></pre>
+
+      <h2>What Is Happening</h2>
+      <p>ESLint and Prettier both have opinions about code formatting. ESLint has rules like <code>indent</code>, <code>semi</code>, <code>quotes</code>, and <code>max-len</code> that control formatting. Prettier also controls these same aspects. When both tools run, they produce contradictory requirements.</p>
+      <p>The solution is to let Prettier handle all formatting and let ESLint handle only code quality rules (unused variables, type errors, potential bugs).</p>
+
+      <h2>Step-by-Step Fix</h2>
+      <h3>Step 1: Install the compatibility package</h3>
+      <pre><code>npm install --save-dev eslint-config-prettier</code></pre>
+
+      <h3>Step 2: Update ESLint configuration</h3>
+      <p><strong>For flat config (eslint.config.js) - ESLint 9+:</strong></p>
+      <pre><code>import eslintConfigPrettier from 'eslint-config-prettier';
+import tseslint from 'typescript-eslint';
+
+export default [
+  ...tseslint.configs.recommended,
+  eslintConfigPrettier, // Must be last
+  {
+    rules: {
+      'no-console': 'warn',
+      '@typescript-eslint/no-unused-vars': 'error',
+    },
+  },
+];</code></pre>
+
+      <h3>Step 3: Configure Prettier</h3>
+      <p>Create or update <code>.prettierrc</code>:</p>
+      <pre><code>{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "endOfLine": "lf"
+}</code></pre>
+
+      <h3>Step 4: Set up format-on-save</h3>
+      <p>Configure VS Code:</p>
+      <pre><code>{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}</code></pre>
+
+      <h3>Step 5: Add a pre-commit hook</h3>
+      <pre><code>npm install --save-dev husky lint-staged
+npx husky init</code></pre>
+      <p>Configure <code>lint-staged</code> in <code>package.json</code>:</p>
+      <pre><code>{
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["prettier --write", "eslint --fix --max-warnings 0"],
+    "*.{json,md,css}": ["prettier --write"]
+  }
+}</code></pre>
+
+      <h2>Verify the Fix</h2>
+      <pre><code># Format with Prettier
+npx prettier --write "src/**/*.{ts,tsx}"
+
+# Lint with ESLint (should report zero formatting issues)
+npx eslint "src/**/*.{ts,tsx}"</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Keep formatting and linting concerns separate. Prettier owns formatting (whitespace, semicolons, quotes). ESLint owns code quality (unused variables, unreachable code, type safety). Never add formatting rules to ESLint when Prettier is in the project.</p>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-eslint-prettier-conflict-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix ESLint and Prettier Conflicts in Claude Code (2026)",
+    "description": "Resolve ESLint and Prettier conflicts in Claude Code projects. Stop the endless formatting loop with eslint-config-prettier and proper setup.",
+    "url": "https://claudhq.com/claude-code-eslint-prettier-conflict-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

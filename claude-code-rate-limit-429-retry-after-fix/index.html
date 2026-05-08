@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Code 429 Rate Limit with Retry-After (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code 429 rate limit errors. Parse the retry-after header and implement proper backoff logic. Step-by-step solution.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-rate-limit-429-retry-after-fix/">
+  <meta property="og:title" content="Fix Claude Code 429 Rate Limit with Retry-After (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code 429 rate limit errors. Parse the retry-after header and implement proper backoff logic. Step-by-step solution.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-rate-limit-429-retry-after-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code 429 Rate Limit with Retry-After</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+      <pre><code>Error 429: Too Many Requests
+{
+  "type": "error",
+  "error": {
+    "type": "rate_limit_error",
+    "message": "Number of request tokens has exceeded your per-minute rate limit"
+  }
+}
+
+# Headers include:
+retry-after: 34
+x-ratelimit-limit-requests: 1000
+x-ratelimit-remaining-requests: 0</code></pre>
+
+      <h2>The Fix</h2>
+      <h3>1. Parse and respect the retry-after header</h3>
+      <pre><code>import anthropic
+import time
+
+def call_with_rate_limit(client, max_retries=5, **kwargs):
+    for attempt in range(max_retries):
+        try:
+            return client.messages.create(**kwargs)
+        except anthropic.RateLimitError as e:
+            retry_after = int(e.response.headers.get("retry-after", 30))
+            print(f"Rate limited. Waiting {retry_after}s (attempt {attempt + 1})")
+            time.sleep(retry_after)
+    raise RuntimeError("Rate limit exceeded after max retries")</code></pre>
+
+      <h3>2. Check your current rate limit status</h3>
+      <pre><code>curl -s -D - https://api.anthropic.com/v1/messages \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{"model":"claude-haiku-4-20250514","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}' \
+  2&gt;&amp;1 | grep -i "x-ratelimit"</code></pre>
+
+      <h2>Why This Happens</h2>
+      <p>Anthropic enforces per-minute rate limits on both request count and token count. The limits vary by plan tier (free, build, scale) and model. When you exceed either limit, the API returns 429 with a <code>retry-after</code> header indicating how many seconds to wait.</p>
+      <p>Common triggers: parallel requests from multiple Claude Code sessions, batch scripts without throttling, or a single large prompt that exceeds the tokens-per-minute budget.</p>
+
+      <h2>If That Does Not Work</h2>
+      <ul>
+        <li><strong>Reduce parallelism:</strong> Run one Claude Code session at a time or add <code>time.sleep(2)</code> between requests</li>
+        <li><strong>Use the Batch API:</strong> It has separate, higher limits via <code>client.batches.create(...)</code></li>
+        <li><strong>Check your limits:</strong> Visit <code>console.anthropic.com/settings/limits</code> to see your exact per-minute limits</li>
+      </ul>
+
+      <h2>Prevention</h2>
+      <p>Always respect retry-after headers on 429 responses. Default to 2-second delays between API calls in batch scripts. Use a token counter to stay under per-minute token limits. Prefer the Batch API for workloads exceeding 50 requests per minute.</p>
+
+      <div class="tool-cta">
+        <p><strong>Estimate your usage</strong> with our <a href="/calculator/">Cost Calculator</a> to stay under rate limits.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-rate-limit-429-retry-after-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code 429 Rate Limit with Retry-After (2026)",
+    "description": "Fix Claude Code 429 rate limit errors. Parse the retry-after header and implement proper backoff logic. Step-by-step solution.",
+    "url": "https://claudhq.com/claude-code-rate-limit-429-retry-after-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

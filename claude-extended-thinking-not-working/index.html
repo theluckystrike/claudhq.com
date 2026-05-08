@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Claude Extended Thinking Not Working (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude extended thinking errors. Covers budget_tokens validation, tool_choice conflicts, display options, and multi-turn continuity.">
+  <link rel="canonical" href="https://claudhq.com/claude-extended-thinking-not-working/">
+  <meta property="og:title" content="Fix Claude Extended Thinking Not Working (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude extended thinking errors. Covers budget_tokens validation, tool_choice conflicts, display options, and multi-turn continuity.">
+  <meta property="og:url" content="https://claudhq.com/claude-extended-thinking-not-working/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Extended Thinking Not Working Fix</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Extended thinking gives Claude deeper reasoning capabilities, but misconfigured parameters produce 400 errors or empty thinking blocks. This guide covers every failure mode and the exact fix.</p>
+
+      <h2>The Error</h2>
+      <pre><code>{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "thinking.budget_tokens: must be &gt;= 1024 and &lt; max_tokens"
+  }
+}</code></pre>
+
+      <h2>Quick Fix</h2>
+      <ol>
+        <li>Set <code>budget_tokens</code> to at least 1024 and strictly less than <code>max_tokens</code>.</li>
+        <li>When using tools with thinking, set <code>tool_choice</code> to <code>auto</code> or <code>none</code> only.</li>
+        <li>Pass thinking blocks back unmodified in multi-turn conversations.</li>
+      </ol>
+
+      <h2>What Causes This</h2>
+      <p>Extended thinking fails when:</p>
+      <ul>
+        <li><code>budget_tokens</code> is less than 1024 or greater than or equal to <code>max_tokens</code></li>
+        <li><code>tool_choice</code> is set to <code>any</code> or a specific tool name (only <code>auto</code> and <code>none</code> work)</li>
+        <li>Thinking blocks are modified or stripped when passing them back in multi-turn conversations</li>
+        <li>Thinking parameters change between turns, invalidating cached messages</li>
+      </ul>
+
+      <h2>Full Solution</h2>
+      <h3>Basic Extended Thinking Setup</h3>
+      <pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=16000,
+    thinking={"type": "enabled", "budget_tokens": 10000},
+    messages=[{"role": "user", "content": "Solve this step by step: What is 127 * 389?"}]
+)
+
+for block in response.content:
+    if block.type == "thinking":
+        print(f"Thinking: {block.thinking[:200]}...")
+    elif block.type == "text":
+        print(f"Answer: {block.text}")</code></pre>
+
+      <h3>Fix budget_tokens Validation</h3>
+      <pre><code># WRONG: budget_tokens &gt;= max_tokens
+thinking={"type": "enabled", "budget_tokens": 8000}  # with max_tokens=8000
+
+# WRONG: budget_tokens &lt; 1024
+thinking={"type": "enabled", "budget_tokens": 500}
+
+# CORRECT: 1024 &lt;= budget_tokens &lt; max_tokens
+max_tokens=16000,
+thinking={"type": "enabled", "budget_tokens": 10000}</code></pre>
+
+      <h3>Fix Tool Choice Conflicts</h3>
+      <pre><code># WRONG: tool_choice "any" with thinking
+tool_choice={"type": "any"}  # Error!
+
+# CORRECT: tool_choice "auto" with thinking
+tool_choice={"type": "auto"}  # OK</code></pre>
+
+      <h3>Multi-Turn Thinking Continuity</h3>
+      <p>Pass thinking blocks back unmodified to maintain reasoning continuity:</p>
+      <pre><code>response1 = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=16000,
+    thinking={"type": "enabled", "budget_tokens": 10000},
+    messages=[{"role": "user", "content": "What is 127 * 389?"}]
+)
+
+# Second turn -- pass ALL content blocks back unmodified
+messages = [
+    {"role": "user", "content": "What is 127 * 389?"},
+    {"role": "assistant", "content": response1.content},
+    {"role": "user", "content": "Now multiply that result by 2"}
+]</code></pre>
+
+      <h3>TypeScript Example</h3>
+      <pre><code>import Anthropic from "@anthropic-ai/sdk";
+const client = new Anthropic();
+
+const response = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 16000,
+    thinking: { type: "enabled", budget_tokens: 10000 },
+    messages: [{ role: "user", content: "Solve step by step: What is 127 * 389?" }]
+});</code></pre>
+
+      <h2>Prevention</h2>
+      <ul>
+        <li><strong>Always set max_tokens &gt; budget_tokens + expected output:</strong> A good rule is <code>max_tokens = budget_tokens + 4096</code>.</li>
+        <li><strong>Default to tool_choice auto:</strong> When combining tools with thinking.</li>
+        <li><strong>Never modify thinking blocks:</strong> Return them exactly as received.</li>
+        <li><strong>Keep thinking params stable:</strong> Changing parameters between turns invalidates cached messages.</li>
+      </ul>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-extended-thinking-not-working" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Extended Thinking Not Working (2026)",
+    "description": "Fix Claude extended thinking errors. Covers budget_tokens validation, tool_choice conflicts, display options, and multi-turn continuity.",
+    "url": "https://claudhq.com/claude-extended-thinking-not-working/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Next.js Hydration Errors Using Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Resolve Next.js hydration mismatch errors with Claude Code. Fix server/client rendering differences, dynamic content, and date formatting issues.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-next-js-hydration-error-fix/">
+  <meta property="og:title" content="Fix Next.js Hydration Errors Using Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Resolve Next.js hydration mismatch errors with Claude Code. Fix server/client rendering differences, dynamic content, and date formatting issues.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-next-js-hydration-error-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Next.js Hydration Errors Using Claude Code</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Problem</h2>
+      <p>Your Next.js application throws a hydration error in the browser console:</p>
+      <pre><code>Error: Hydration failed because the initial UI does not match what was
+rendered on the server.
+
+Warning: Expected server HTML to contain a matching &lt;div&gt; in &lt;div&gt;.</code></pre>
+      <p>The page may flash, show incorrect content briefly, or lose interactive state.</p>
+
+      <h2>Quick Fix</h2>
+      <p>The most common cause is rendering browser-only values during SSR. Wrap dynamic content with a client-side check:</p>
+      <pre><code>'use client';
+
+import { useState, useEffect } from 'react';
+
+function UserGreeting() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() =&gt; {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return &lt;div&gt;Welcome&lt;/div&gt;;
+  }
+
+  return &lt;div&gt;Welcome, it is {new Date().toLocaleTimeString()}&lt;/div&gt;;
+}</code></pre>
+
+      <h2>What Is Happening</h2>
+      <p>Next.js renders your React components on the server to produce HTML. The browser receives this HTML and displays it immediately. Then React "hydrates" the page by attaching event handlers. Hydration fails when the server and client produce different output. Common causes:</p>
+      <ol>
+        <li><strong>Date/time rendering:</strong> Server and client are in different timezones</li>
+        <li><strong>Random values:</strong> <code>Math.random()</code> produces different values</li>
+        <li><strong>Browser APIs:</strong> <code>window.innerWidth</code>, <code>localStorage</code>, <code>navigator.userAgent</code></li>
+        <li><strong>Invalid HTML nesting:</strong> <code>&lt;p&gt;</code> inside <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code> inside <code>&lt;p&gt;</code></li>
+        <li><strong>Third-party scripts:</strong> Browser extensions modifying the DOM</li>
+      </ol>
+
+      <h2>Step-by-Step Fix</h2>
+      <h3>Step 1: Fix date/time mismatches</h3>
+      <pre><code>// BROKEN: Server renders UTC, client renders local timezone
+function PostDate({ date }: { date: string }) {
+  return &lt;time&gt;{new Date(date).toLocaleDateString()}&lt;/time&gt;;
+}
+
+// FIXED: Render stable format on server, enhance on client
+function PostDate({ date }: { date: string }) {
+  const [formatted, setFormatted] = useState(date);
+
+  useEffect(() =&gt; {
+    setFormatted(new Date(date).toLocaleDateString());
+  }, [date]);
+
+  return &lt;time dateTime={date}&gt;{formatted}&lt;/time&gt;;
+}</code></pre>
+
+      <h3>Step 2: Fix browser API usage</h3>
+      <pre><code>// BROKEN: window is undefined on server
+const isMobile = window.innerWidth &lt; 768;
+
+// FIXED: Use a hook that handles SSR
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() =&gt; {
+    const check = () =&gt; setIsMobile(window.innerWidth &lt; 768);
+    check();
+    window.addEventListener('resize', check);
+    return () =&gt; window.removeEventListener('resize', check);
+  }, []);
+  return isMobile;
+}</code></pre>
+
+      <h3>Step 3: Fix localStorage access</h3>
+      <pre><code>// FIXED: Read from storage in useEffect
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light');
+  useEffect(() =&gt; {
+    const saved = localStorage.getItem('theme');
+    if (saved) setTheme(saved);
+  }, []);
+  return &lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;
+    {children}
+  &lt;/ThemeContext.Provider&gt;;
+}</code></pre>
+
+      <h3>Step 4: Fix invalid HTML nesting</h3>
+      <pre><code>&lt;!-- BROKEN: div cannot be inside p --&gt;
+&lt;p&gt;Some text &lt;div class="highlight"&gt;Highlighted&lt;/div&gt;&lt;/p&gt;
+
+&lt;!-- FIXED: Use span or restructure --&gt;
+&lt;p&gt;Some text &lt;span class="highlight"&gt;Highlighted&lt;/span&gt;&lt;/p&gt;</code></pre>
+
+      <h3>Step 5: Use dynamic import for client-only components</h3>
+      <pre><code>import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() =&gt; import('./Map'), {
+  ssr: false,
+  loading: () =&gt; &lt;div className="map-skeleton" /&gt;,
+});</code></pre>
+
+      <h2>Prevention</h2>
+      <p>Add these rules to your CLAUDE.md for Next.js projects: never access window, document, or localStorage during render. Use useEffect for browser-only values. Use <code>suppressHydrationWarning</code> only for dates/times. Use dynamic import with <code>ssr: false</code> for client-only libraries. Validate HTML nesting.</p>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-next-js-hydration-error-fix" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Next.js Hydration Errors Using Claude Code (2026)",
+    "description": "Resolve Next.js hydration mismatch errors with Claude Code. Fix server/client rendering differences, dynamic content, and date formatting issues.",
+    "url": "https://claudhq.com/claude-code-next-js-hydration-error-fix/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

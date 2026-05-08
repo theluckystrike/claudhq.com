@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix Uncaught TypeError: is not a function in Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Diagnose and fix Uncaught TypeError is not a function errors in Claude Code projects. Common causes, practical solutions, and prevention tips.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-uncaught-typeerror-is-not-a-function/">
+  <meta property="og:title" content="Fix Uncaught TypeError: is not a function in Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Diagnose and fix Uncaught TypeError is not a function errors in Claude Code projects. Common causes, practical solutions, and prevention tips.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-uncaught-typeerror-is-not-a-function/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix "Uncaught TypeError: Is Not a Function" in Claude Code</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The "X is not a function" error occurs when your code attempts to call something as a function, but that something is not actually a function. This is one of the most common JavaScript runtime errors that can interrupt your development workflow.</p>
+
+      <h2>Understanding the Error</h2>
+      <p>You might see variations like:</p>
+      <ul>
+        <li><code>TypeError: undefined is not a function</code></li>
+        <li><code>TypeError: null is not a function</code></li>
+        <li><code>TypeError: user.getName is not a function</code></li>
+        <li><code>TypeError: myModule.default is not a function</code></li>
+      </ul>
+      <p>When the subject is <code>undefined</code> or <code>null</code>, the variable was never assigned a function. When it includes an object path like <code>user.getName</code>, you are calling a method that does not exist on that object.</p>
+
+      <h2>Common Causes</h2>
+      <h3>1. Method Name Typos</h3>
+      <pre><code>const user = { name: "Alice", greet: function() { return \`Hello, \${this.name}!\`; } };
+user.greetUser(); // TypeError: user.greetUser is not a function
+// Correct: user.greet();</code></pre>
+
+      <h3>2. Incorrect Imports</h3>
+      <pre><code>// In math-utils.js
+export const add = (a, b) =&gt; a + b;
+
+// In main.js - common mistake
+import { calculate } from './math-utils.js';
+calculate(2, 3); // TypeError: calculate is not a function
+
+// Correct:
+import { add } from './math-utils.js';</code></pre>
+
+      <h3>3. Default vs Named Exports</h3>
+      <pre><code>// In logger.js
+export default function log(message) { console.log(message); }
+
+// Mistake: named import syntax
+import { log } from './logger.js'; // undefined
+log("test"); // TypeError
+
+// Correct: default import syntax
+import log from './logger.js';</code></pre>
+
+      <h3>4. Missing await on Async Functions</h3>
+      <pre><code>async function fetchUserData(userId) {
+    const response = await fetch(\`/api/users/\${userId}\`);
+    return response.json();
+}
+
+// Bug: missing await
+const user = fetchUserData(123); // user is a Promise!
+user.getName(); // TypeError
+
+// Fix:
+const user = await fetchUserData(123);
+user.getName(); // Works</code></pre>
+
+      <h3>5. Lost this Context</h3>
+      <pre><code>class Button {
+    constructor(label) { this.label = label; }
+    handleClick() { console.log(\`Button \${this.label} clicked\`); }
+}
+
+const btn = new Button("Submit");
+document.addEventListener('click', btn.handleClick); // this is lost
+
+// Fix: use arrow function or bind
+document.addEventListener('click', () =&gt; btn.handleClick());
+document.addEventListener('click', btn.handleClick.bind(btn));</code></pre>
+
+      <h2>Practical Solutions</h2>
+      <h3>Verify Function Existence</h3>
+      <pre><code>if (typeof myFunction === 'function') {
+    myFunction();
+} else {
+    console.warn('myFunction is not a function, actual type:', typeof myFunction);
+}</code></pre>
+
+      <h3>Use Optional Chaining</h3>
+      <pre><code>const result = user?.getName?.();
+// Returns undefined instead of throwing an error</code></pre>
+
+      <h3>Validate Imports at Module Load Time</h3>
+      <pre><code>const utils = require('./my-utils');
+const REQUIRED = ['processData', 'validateInput', 'formatOutput'];
+
+REQUIRED.forEach(fnName =&gt; {
+    if (typeof utils[fnName] !== 'function') {
+        throw new Error(\`utils.\${fnName} is not a function. Check exports.\`);
+    }
+});</code></pre>
+
+      <h2>Prevention</h2>
+      <ul>
+        <li><strong>Use TypeScript</strong> to catch these errors at compile time</li>
+        <li><strong>Enable ESLint</strong> rules like <code>no-undef</code> and <code>no-unsafe-call</code></li>
+        <li><strong>Write unit tests</strong> that invoke each exported function</li>
+        <li><strong>Consistent export style:</strong> Pick either named exports or default exports and stick to one style</li>
+      </ul>
+
+      <div class="tool-cta">
+        <p><strong>Paste your error</strong> into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix.</p>
+      </div>
+
+      <div class="mastery-cta" style="margin-top:3rem;padding:2rem;background:oklch(0.25 0.02 250);border-radius:12px;text-align:center">
+        <h3 style="color:oklch(0.85 0.15 85);margin-bottom:0.5rem">Master Claude Code</h3>
+        <p style="color:oklch(0.75 0 0);margin-bottom:1rem">Get lifetime access to all ClaudHQ tools, advanced workflows, and production-grade templates.</p>
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-uncaught-typeerror-is-not-a-function" style="display:inline-block;padding:0.75rem 2rem;background:oklch(0.75 0.15 85);color:oklch(0.15 0 0);border-radius:8px;font-weight:700;text-decoration:none">Get Lifetime Access</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid oklch(0.3 0 0)">
+        <p style="color:oklch(0.5 0 0);font-size:0.9rem">Written by the ClaudHQ team · Expert Claude Code guides and tools</p>
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Uncaught TypeError: is not a function in Claude Code (2026)",
+    "description": "Diagnose and fix Uncaught TypeError is not a function errors in Claude Code projects. Common causes, practical solutions, and prevention tips.",
+    "url": "https://claudhq.com/claude-code-uncaught-typeerror-is-not-a-function/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04",
+    "author": {"@type": "Organization", "name": "ClaudHQ"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"}
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
