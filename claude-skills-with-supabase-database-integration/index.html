@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code with Supabase Database Integration | ClaudHQ</title>
+  <meta name="description" content="How to use Claude Code skills alongside Supabase for database-backed projects with practical patterns.">
+  <link rel="canonical" href="https://claudhq.com/claude-skills-with-supabase-database-integration/">
+  <meta property="og:title" content="Claude Code with Supabase Database Integration | ClaudHQ">
+  <meta property="og:description" content="How to use Claude Code skills alongside Supabase for database-backed projects with practical patterns.">
+  <meta property="og:url" content="https://claudhq.com/claude-skills-with-supabase-database-integration/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code with Supabase Database Integration</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Supabase is a popular open-source backend platform built on PostgreSQL. Claude Code skills are plain <code>.md</code> instruction files invoked with slash commands. These two tools are entirely separate. but they work well together because Claude Code can help you write, review, and debug the code that talks to Supabase.</p>
+      <p>This article covers practical patterns for using Claude Code skills to speed up Supabase-related development work.</p>
+      <p>What Skills Are (and Are Not)</p>
+      <p>Before diving in: Claude skills are not Node.js modules, Python packages, or server-side plugins. A skill is a text file in <code>~/.claude/skills/</code> that loads when you type a slash command like <code>/tdd</code> or <code>/frontend-design</code>. The skill gives Claude structured guidance for a type of task.</p>
+      <p>Skills do not run code. They do not have npm dependencies. They do not execute in a Node.js environment. When this article says "use the /pdf skill with Supabase," it means: use the <code>/pdf</code> skill to help you write the code that your application uses to store PDF-extracted data in Supabase.</p>
+      <p>Think of a skill as a persistent system prompt for a domain. Loading <code>/tdd</code> before asking Claude to write a Supabase query function tells Claude to produce tests first, apply test-driven conventions throughout, and flag untested code paths. The skill shapes Claude's behavior for the duration of the conversation without you having to re-specify those preferences every time.</p>
+      <h2>Supabase Architecture Concepts That Shape How You Use Claude</h2>
+      <p>Before asking Claude to write Supabase code, it helps to be precise about which layer you are working in. Supabase has several distinct surfaces that require different approaches:</p>
+      <div class="table-wrap"><table><tr><th>Layer</th><th>What it is</th><th>Key concern</th></tr>
+<tr><td>Database</td><td>PostgreSQL tables, views, functions</td><td>Schema design, migrations, indexes</td></tr>
+<tr><td>Auth</td><td>JWT-based authentication</td><td>Session handling, provider config</td></tr>
+<tr><td>Storage</td><td>S3-compatible object store</td><td>Bucket policies, signed URLs</td></tr>
+<tr><td>Realtime</td><td>WebSocket subscriptions</td><td>Channel setup, filter accuracy</td></tr>
+<tr><td>Edge Functions</td><td>Deno-based serverless functions</td><td>Cold starts, Deno vs Node compatibility</td></tr>
+<tr><td>RLS Policies</td><td>Row-level security rules</td><td>Policy correctness, test coverage</td></tr></table></div>
+      <p>When asking Claude Code for help, naming the layer explicitly gets better results. "Help me write a Supabase query" is less effective than "Help me write a PostgreSQL query using the Supabase JS client that filters by <code>owner_id</code> and applies an RLS policy check in the test."</p>
+      <h2>Using /tdd for Supabase Query Testing</h2>
+      <p>The <code>/tdd</code> skill is useful when writing functions that query Supabase. Invoke it, describe the function you need, and Claude will help you write tests first. then the implementation.</p>
+      <p>Example workflow:</p>
+      <pre><code class="language-">/tdd
+
+I need a function that queries a Supabase table called &quot;projects&quot;
+filtered by owner_id and status. Write tests first, then the implementation.</code></pre>
+      <p>Claude will produce tests using your preferred test framework (Jest, Vitest, pytest, etc.) and then the function implementation. You get tested Supabase query code rather than untested boilerplate.</p>
+      <p>For the Supabase JavaScript client, a tested query function might look like:</p>
+      <pre><code class="language-javascript">import { createClient } from &#x27;@supabase/supabase-js&#x27;
+
+const supabase = createClient(
+ process.env.SUPABASE_URL,
+ process.env.SUPABASE_ANON_KEY
+)
+
+export async function getProjectsByOwner(ownerId, status) {
+ const { data, error } = await supabase
+ .from(&#x27;projects&#x27;)
+ .select(&#x27;id, title, created_at&#x27;)
+ .eq(&#x27;owner_id&#x27;, ownerId)
+ .eq(&#x27;status&#x27;, status)
+ .order(&#x27;created_at&#x27;, { ascending: false })
+
+ if (error) throw new Error(error.message)
+ return data
+}</code></pre>
+      <p>The <code>/tdd</code> skill helps you think through edge cases: what happens when <code>ownerId</code> is null, when the table is empty, or when Supabase returns a network error.</p>
+      <h2>Writing Tests That Actually Mock Supabase</h2>
+      <p>The Supabase JS client is a chained object, which makes mocking slightly awkward. Ask Claude Code to generate a mock factory that preserves the chain:</p>
+      <pre><code class="language-javascript">// supabase-mock.js
+export function createSupabaseMock(responseData = null, responseError = null) {
+ const mockChain = {
+ from: jest.fn().mockReturnThis(),
+ select: jest.fn().mockReturnThis(),
+ eq: jest.fn().mockReturnThis(),
+ order: jest.fn().mockReturnThis(),
+ insert: jest.fn().mockReturnThis(),
+ update: jest.fn().mockReturnThis(),
+ delete: jest.fn().mockReturnThis(),
+ single: jest.fn().mockResolvedValue({ data: responseData, error: responseError }),
+ // Terminal methods that resolve the chain
+ then: undefined
+ };
+
+ // Make the chain itself awaitable at the end
+ mockChain.order.mockResolvedValue({ data: responseData, error: responseError });
+ mockChain.eq.mockReturnThis();
+
+ return {
+ from: jest.fn(() =&gt; mockChain),
+ _chain: mockChain
+ };
+}</code></pre>
+      <p>With this mock in place, the <code>/tdd</code> skill produces tests that accurately exercise the error-handling paths:</p>
+      <pre><code class="language-javascript">// projects.test.js
+import { getProjectsByOwner } from &#x27;./projects&#x27;;
+import { createSupabaseMock } from &#x27;./supabase-mock&#x27;;
+
+jest.mock(&#x27;./supabaseClient&#x27;, () =&gt; ({
+ supabase: createSupabaseMock()
+}));
+
+describe(&#x27;getProjectsByOwner&#x27;, () =&gt; {
+ it(&#x27;returns projects when the query succeeds&#x27;, async () =&gt; {
+ const mockData = [{ id: &#x27;1&#x27;, title: &#x27;Alpha&#x27;, created_at: &#x27;2026-01-01&#x27; }];
+ // Reset mock for this test
+ jest.resetModules();
+ // ... setup mock to return mockData
+ const result = await getProjectsByOwner(&#x27;user-123&#x27;, &#x27;active&#x27;);
+ expect(result).toEqual(mockData);
+ });
+
+ it(&#x27;throws when Supabase returns an error&#x27;, async () =&gt; {
+ // Setup mock to return an error
+ await expect(getProjectsByOwner(null, &#x27;active&#x27;)).rejects.toThrow();
+ });
+
+ it(&#x27;handles empty result sets without throwing&#x27;, async () =&gt; {
+ // Setup mock to return empty array
+ const result = await getProjectsByOwner(&#x27;user-123&#x27;, &#x27;active&#x27;);
+ expect(Array.isArray(result)).toBe(true);
+ });
+});</code></pre>
+      <p>Paste this pattern into Claude Code with your actual schema and it will fill in the remaining test cases and the implementation that passes them.</p>
+      <h2>Using /frontend-design for Supabase-Backed UIs</h2>
+      <p>When you are building a UI that reads from or writes to Supabase, the <code>/frontend-design</code> skill loads guidance for component structure, accessibility, and responsive layouts.</p>
+      <pre><code class="language-">/frontend-design
+
+Build a React component that displays a list of projects fetched from Supabase.
+Show a loading state, an empty state, and the list when data arrives.</code></pre>
+      <p>Claude produces clean, accessible component code that integrates with your data layer. The skill's guidance ensures the UI handles the async nature of database queries properly. loading indicators, error boundaries, and empty state messaging.</p>
+      <p>A well-structured component from this workflow handles all three states explicitly:</p>
+      <pre><code class="language-javascript">import { useState, useEffect } from &#x27;react&#x27;;
+import { supabase } from &#x27;../supabaseClient&#x27;;
+
+export function ProjectList({ ownerId }) {
+ const [projects, setProjects] = useState([]);
+ const [loading, setLoading] = useState(true);
+ const [error, setError] = useState(null);
+
+ useEffect(() =&gt; {
+ let cancelled = false;
+
+ async function fetchProjects() {
+ setLoading(true);
+ setError(null);
+ const { data, error } = await supabase
+ .from(&#x27;projects&#x27;)
+ .select(&#x27;id, title, status, created_at&#x27;)
+ .eq(&#x27;owner_id&#x27;, ownerId)
+ .eq(&#x27;status&#x27;, &#x27;active&#x27;)
+ .order(&#x27;created_at&#x27;, { ascending: false });
+
+ if (cancelled) return;
+
+ if (error) {
+ setError(error.message);
+ } else {
+ setProjects(data || []);
+ }
+ setLoading(false);
+ }
+
+ fetchProjects();
+ return () =&gt; { cancelled = true; };
+ }, [ownerId]);
+
+ if (loading) return &lt;div role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;Loading projects...&lt;/div&gt;;
+ if (error) return &lt;div role=&quot;alert&quot;&gt;Error: {error}&lt;/div&gt;;
+ if (projects.length === 0) return &lt;div&gt;No active projects found.&lt;/div&gt;;
+
+ return (
+ &lt;ul aria-label=&quot;Project list&quot;&gt;
+ {projects.map(project =&gt; (
+ &lt;li key={project.id}&gt;
+ &lt;span&gt;{project.title}&lt;/span&gt;
+ &lt;time dateTime={project.created_at}&gt;
+ {new Date(project.created_at).toLocaleDateString()}
+ &lt;/time&gt;
+ &lt;/li&gt;
+ ))}
+ &lt;/ul&gt;
+ );
+}</code></pre>
+      <p>The <code>cancelled</code> flag in the cleanup function prevents state updates on unmounted components. a common source of React warnings in Supabase-backed UIs. Ask Claude Code via the <code>/frontend-design</code> skill to check every async effect you write for this pattern.</p>
+      <h2>Realtime Subscriptions in the UI</h2>
+      <p>Supabase Realtime adds a layer of complexity to component design. Ask Claude Code to extend any data-fetching component with a Realtime subscription:</p>
+      <pre><code class="language-javascript">useEffect(() =&gt; {
+ // Initial fetch
+ fetchProjects();
+
+ // Subscribe to changes
+ const channel = supabase
+ .channel(&#x27;projects-changes&#x27;)
+ .on(
+ &#x27;postgres_changes&#x27;,
+ {
+ event: &#x27;*&#x27;,
+ schema: &#x27;public&#x27;,
+ table: &#x27;projects&#x27;,
+ filter: `owner_id=eq.${ownerId}`
+ },
+ (payload) =&gt; {
+ if (payload.eventType === &#x27;INSERT&#x27;) {
+ setProjects(prev =&gt; [payload.new, ...prev]);
+ } else if (payload.eventType === &#x27;UPDATE&#x27;) {
+ setProjects(prev =&gt; prev.map(p =&gt;
+ p.id === payload.new.id ? payload.new : p
+ ));
+ } else if (payload.eventType === &#x27;DELETE&#x27;) {
+ setProjects(prev =&gt; prev.filter(p =&gt; p.id !== payload.old.id));
+ }
+ }
+ )
+ .subscribe();
+
+ return () =&gt; {
+ supabase.removeChannel(channel);
+ };
+}, [ownerId]);</code></pre>
+      <p>The <code>/frontend-design</code> skill will also flag that this subscription pattern requires careful cleanup and that the filter syntax (<code>owner_id=eq.${ownerId}</code>) must match the column type exactly. UUIDs require no quotes, but strings do.</p>
+      <h2>Using /webapp-testing for Integration Testing</h2>
+      <p>The <code>/webapp-testing</code> skill is useful for end-to-end testing of features that depend on your Supabase backend.</p>
+      <pre><code class="language-">/webapp-testing
+
+Write Playwright tests for the project list page.
+The page fetches from Supabase. Mock the API calls
+and test the loading, error, and success states.</code></pre>
+      <p>This approach gives you integration tests that do not depend on a live Supabase instance in CI. the tests mock the network layer and verify the UI behavior independently.</p>
+      <p>A Playwright test that intercepts the Supabase REST API:</p>
+      <pre><code class="language-javascript">// projects.spec.js
+import { test, expect } from &#x27;@playwright/test&#x27;;
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+
+test.describe(&#x27;Project list page&#x27;, () =&gt; {
+ test(&#x27;shows loading state then project list&#x27;, async ({ page }) =&gt; {
+ // Intercept the Supabase REST call
+ await page.route(`${SUPABASE_URL}/rest/v1/projects*`, async route =&gt; {
+ // Simulate a slight delay to catch loading state
+ await new Promise(r =&gt; setTimeout(r, 100));
+ await route.fulfill({
+ status: 200,
+ contentType: &#x27;application/json&#x27;,
+ body: JSON.stringify([
+ { id: &#x27;1&#x27;, title: &#x27;Alpha Project&#x27;, status: &#x27;active&#x27;, created_at: &#x27;2026-01-01T00:00:00Z&#x27; }
+ ])
+ });
+ });
+
+ await page.goto(&#x27;/projects&#x27;);
+
+ // Loading state should appear
+ await expect(page.getByRole(&#x27;status&#x27;)).toBeVisible();
+
+ // Data should load
+ await expect(page.getByText(&#x27;Alpha Project&#x27;)).toBeVisible();
+ });
+
+ test(&#x27;shows error state when API fails&#x27;, async ({ page }) =&gt; {
+ await page.route(`${SUPABASE_URL}/rest/v1/projects*`, async route =&gt; {
+ await route.fulfill({ status: 500, body: &#x27;Internal Server Error&#x27; });
+ });
+
+ await page.goto(&#x27;/projects&#x27;);
+ await expect(page.getByRole(&#x27;alert&#x27;)).toBeVisible();
+ });
+
+ test(&#x27;shows empty state when no projects exist&#x27;, async ({ page }) =&gt; {
+ await page.route(`${SUPABASE_URL}/rest/v1/projects*`, async route =&gt; {
+ await route.fulfill({
+ status: 200,
+ contentType: &#x27;application/json&#x27;,
+ body: &#x27;[]&#x27;
+ });
+ });
+
+ await page.goto(&#x27;/projects&#x27;);
+ await expect(page.getByText(&#x27;No active projects found.&#x27;)).toBeVisible();
+ });
+});</code></pre>
+      <p>The key insight here is that Supabase's REST API uses predictable URL patterns (<code>/rest/v1/tablename</code>) that Playwright's route interceptor can match with a glob. You do not need a special Supabase testing library. standard HTTP mocking works.</p>
+      <h2>Using /docx and /pdf for Document Storage Workflows</h2>
+      <p>If your application stores documents in Supabase Storage and you need to process their contents, the <code>/pdf</code> or <code>/docx</code> skills help you write the extraction code.</p>
+      <p>A common pattern:</p>
+      <ol>
+      <li>User uploads a PDF to Supabase Storage via your application.</li>
+      <li>A database trigger or webhook fires.</li>
+      <li>A server-side function downloads the file and extracts text.</li>
+      <li>The extracted text gets stored back to a <code>documents</code> table for search.</li>
+      </ol>
+      <pre><code class="language-">/pdf
+
+Write a Node.js function that downloads a PDF from a Supabase Storage
+signed URL, extracts the text content using pdf-parse, and returns
+a string. Include error handling for corrupt files and network failures.</code></pre>
+      <p>Claude provides the implementation with proper error handling for each failure point.</p>
+      <p>Here is what a complete document processing function looks like when the <code>/pdf</code> skill shapes the implementation:</p>
+      <pre><code class="language-javascript">import { createClient } from &#x27;@supabase/supabase-js&#x27;;
+import pdfParse from &#x27;pdf-parse&#x27;;
+
+const supabase = createClient(
+ process.env.SUPABASE_URL,
+ process.env.SUPABASE_SERVICE_ROLE_KEY // Service role needed for storage access
+);
+
+export async function extractTextFromStoredPDF(bucketName, filePath) {
+ // Generate a short-lived signed URL
+ const { data: signedUrlData, error: urlError } = await supabase
+ .storage
+ .from(bucketName)
+ .createSignedUrl(filePath, 60); // 60-second expiry
+
+ if (urlError) {
+ throw new Error(`Failed to generate signed URL: ${urlError.message}`);
+ }
+
+ // Download the file
+ let pdfBuffer;
+ try {
+ const response = await fetch(signedUrlData.signedUrl);
+ if (!response.ok) {
+ throw new Error(`HTTP ${response.status} fetching PDF`);
+ }
+ const arrayBuffer = await response.arrayBuffer();
+ pdfBuffer = Buffer.from(arrayBuffer);
+ } catch (fetchError) {
+ throw new Error(`Network failure downloading PDF: ${fetchError.message}`);
+ }
+
+ // Extract text
+ try {
+ const parsed = await pdfParse(pdfBuffer);
+ return {
+ text: parsed.text,
+ pageCount: parsed.numpages,
+ metadata: parsed.info
+ };
+ } catch (parseError) {
+ throw new Error(`PDF parse failed (possibly corrupt): ${parseError.message}`);
+ }
+}
+
+export async function processAndStoreDocument(bucketName, filePath, documentId) {
+ const { text, pageCount } = await extractTextFromStoredPDF(bucketName, filePath);
+
+ const { error } = await supabase
+ .from(&#x27;documents&#x27;)
+ .update({
+ extracted_text: text,
+ page_count: pageCount,
+ processed_at: new Date().toISOString()
+ })
+ .eq(&#x27;id&#x27;, documentId);
+
+ if (error) {
+ throw new Error(`Failed to store extracted text: ${error.message}`);
+ }
+
+ return { success: true, pageCount };
+}</code></pre>
+      <p>The <code>/pdf</code> skill instructs Claude to handle each distinct failure mode. URL generation, network download, and parse errors. as separate throw points with descriptive messages rather than a single catch-all.</p>
+      <h2>Schema Design with Claude Code</h2>
+      <p>You do not need a specific skill for database schema work. Claude Code itself handles SQL well. But you can combine the <code>/tdd</code> skill with schema design to produce a migration file and tests simultaneously:</p>
+      <pre><code class="language-sql">-- Example: projects table
+create table projects (
+ id uuid default gen_random_uuid() primary key,
+ owner_id uuid references auth.users not null,
+ title text not null,
+ status text default &#x27;active&#x27; check (status in (&#x27;active&#x27;, &#x27;archived&#x27;, &#x27;deleted&#x27;)),
+ created_at timestamptz default now()
+);
+
+-- Row-Level Security
+alter table projects enable row level security;
+
+create policy &quot;Users can read their own projects&quot;
+ on projects for select
+ using (auth.uid() = owner_id);
+
+create policy &quot;Users can insert their own projects&quot;
+ on projects for insert
+ with check (auth.uid() = owner_id);</code></pre>
+      <p>Ask Claude to review your schema for common issues. missing indexes, overly permissive RLS policies, or enum patterns that should use a lookup table.</p>
+      <h2>Common Schema Issues Claude Code Catches</h2>
+      <p>When you paste a migration and ask Claude Code to review it, the most frequent findings are:</p>
+      <p>Missing indexes on foreign keys and filter columns:</p>
+      <pre><code class="language-sql">-- Add these after the table creation
+create index projects_owner_id_idx on projects(owner_id);
+create index projects_status_idx on projects(status);
+create index projects_created_at_idx on projects(created_at desc);</code></pre>
+      <p>PostgreSQL does not automatically index foreign keys. If your app filters projects by <code>owner_id</code> and that column has no index, every query does a full table scan. something that works fine at 1,000 rows and becomes a serious bottleneck at 100,000.</p>
+      <p>Overly broad RLS policies:</p>
+      <p>A common mistake is writing an <code>UPDATE</code> policy that allows users to change any column including <code>owner_id</code>:</p>
+      <pre><code class="language-sql">-- Dangerous: allows a user to reassign projects to another owner
+create policy &quot;Users can update their own projects&quot;
+ on projects for update
+ using (auth.uid() = owner_id);
+
+-- Better: use a security definer function or restrict updatable columns
+-- at the application layer, since PostgreSQL RLS cannot restrict columns</code></pre>
+      <p>Claude Code will flag this when you ask it to audit your policies.</p>
+      <p>Using text for status instead of an enum or lookup table:</p>
+      <pre><code class="language-sql">-- If status values need to be enforced across multiple tables, use an enum
+create type project_status as enum (&#x27;active&#x27;, &#x27;archived&#x27;, &#x27;deleted&#x27;);
+
+alter table projects
+ alter column status type project_status
+ using status::project_status;</code></pre>
+      <p>This prevents invalid status values from being inserted by any code path, not just application-level validation.</p>
+      <h2>Generating Migrations from Schema Reviews</h2>
+      <p>After Claude Code identifies schema improvements, ask it to generate a numbered migration file:</p>
+      <pre><code class="language-">Review this schema and produce a migration file that adds the missing indexes
+and converts the status column to an enum. Name it 20260315_projects_improvements.sql.</code></pre>
+      <p>Claude generates the migration with the <code>alter table</code> and <code>create index</code> statements in the correct dependency order, with rollback comments where needed.</p>
+      <h2>RLS Policy Testing: The Most Overlooked Step</h2>
+      <p>Row-Level Security is silent by default. A misconfigured policy either blocks legitimate access (returning empty results with no error) or permits unauthorized access (returning data it should not). Neither failure mode produces an obvious error message.</p>
+      <p>Ask Claude Code with the <code>/tdd</code> skill to generate RLS policy tests using Supabase's built-in test helpers or <code>pg_tap</code>:</p>
+      <pre><code class="language-sql">-- Test that users cannot read other users&#x27; projects
+begin;
+select plan(3);
+
+-- Simulate user A
+set local role authenticated;
+set local &quot;request.jwt.claims&quot; to &#x27;{&quot;sub&quot;: &quot;user-a-uuid&quot;}&#x27;;
+
+select results_eq(
+ &#x27;select count(*) from projects where owner_id = &#x27;&#x27;user-b-uuid&#x27;&#x27;&#x27;,
+ &#x27;select 0::bigint&#x27;,
+ &#x27;User A cannot read User B projects&#x27;
+);
+
+-- Simulate user B
+set local &quot;request.jwt.claims&quot; to &#x27;{&quot;sub&quot;: &quot;user-b-uuid&quot;}&#x27;;
+
+select results_eq(
+ &#x27;select count(*) from projects where owner_id = &#x27;&#x27;user-b-uuid&#x27;&#x27;&#x27;,
+ &#x27;select 1::bigint&#x27;,
+ &#x27;User B can read their own projects&#x27;
+);
+
+select results_eq(
+ &#x27;select count(*) from projects where owner_id = &#x27;&#x27;user-a-uuid&#x27;&#x27;&#x27;,
+ &#x27;select 0::bigint&#x27;,
+ &#x27;User B cannot read User A projects&#x27;
+);
+
+select finish();
+rollback;</code></pre>
+      <p>These tests run directly in PostgreSQL via Supabase's SQL editor or your migration tooling. They verify the policy logic at the database layer, independently of any application code.</p>
+      <h2>Practical Tips</h2>
+      <p>Keep credentials out of prompts: Never paste your Supabase service role key into a Claude Code session. Use environment variable names in your code examples and keep actual keys in <code>.env</code> files outside version control.</p>
+      <p>Use the anon key for client-side code: The anon key combined with Row-Level Security policies is the correct pattern for browser and mobile clients. The service role key bypasses RLS and should only appear in trusted server-side code.</p>
+      <p>Test RLS policies explicitly: RLS bugs are silent. a policy that is too permissive allows data leaks without errors. Use the <code>/tdd</code> skill to write tests that verify policies reject unauthorized access, not just that they allow authorized access.</p>
+      <p>Separate your Supabase client initialization: If you initialize the Supabase client inline in every file that uses it, you end up with multiple client instances and inconsistent auth state. Create a single <code>supabaseClient.js</code> module and import from it everywhere:</p>
+      <pre><code class="language-javascript">// supabaseClient.js. create once, import everywhere
+import { createClient } from &#x27;@supabase/supabase-js&#x27;;
+
+export const supabase = createClient(
+ process.env.NEXT_PUBLIC_SUPABASE_URL,
+ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);</code></pre>
+      <p>When you ask Claude Code to generate any Supabase-using module, tell it to import from this shared client rather than calling <code>createClient</code> again.</p>
+      <p>Ask Claude to generate TypeScript types from your schema: Supabase's CLI can generate types automatically (<code>supabase gen types typescript</code>), but you can also paste your schema into Claude Code and ask it to write the TypeScript interfaces manually for when the CLI is not available:</p>
+      <pre><code class="language-typescript">// Generated from projects table schema
+export interface Project {
+ id: string; // uuid
+ owner_id: string; // uuid, references auth.users
+ title: string; // text, not null
+ status: &#x27;active&#x27; | &#x27;archived&#x27; | &#x27;deleted&#x27;;
+ created_at: string; // timestamptz, ISO 8601 string in JS
+}
+
+export type NewProject = Omit&lt;Project, &#x27;id&#x27; | &#x27;created_at&#x27;&gt;;
+export type ProjectUpdate = Partial&lt;Omit&lt;Project, &#x27;id&#x27; | &#x27;owner_id&#x27; | &#x27;created_at&#x27;&gt;&gt;;</code></pre>
+      <p>Typed query functions catch a large class of bugs at compile time rather than at runtime in production.</p>
+      <h2>Choosing the Right Skill for Each Supabase Task</h2>
+      <p>A quick reference for which skill to invoke for common Supabase work:</p>
+      <div class="table-wrap"><table><tr><th>Task</th><th>Recommended skill</th><th>Why</th></tr>
+<tr><td>Write a new query function</td><td>`/tdd`</td><td>Gets tests alongside the implementation</td></tr>
+<tr><td>Build a data display component</td><td>`/frontend-design`</td><td>Handles async states and accessibility</td></tr>
+<tr><td>End-to-end test a feature</td><td>`/webapp-testing`</td><td>Produces Playwright tests with API mocking</td></tr>
+<tr><td>Extract content from uploaded files</td><td>`/pdf` or `/docx`</td><td>Handles file parse error patterns</td></tr>
+<tr><td>Review or design a schema</td><td>No skill needed</td><td>Claude handles SQL without a skill</td></tr>
+<tr><td>Write RLS policies and tests</td><td>`/tdd`</td><td>Drives test-first policy verification</td></tr>
+<tr><td>Write an Edge Function</td><td>No skill needed</td><td>Ask Claude to use Deno-compatible patterns explicitly</td></tr></table></div>
+      <p>No skill is required for pure schema or SQL work. Claude Code's baseline SQL knowledge is strong enough. Skills add the most value when you need structured output (tests + implementation) or domain-specific patterns (accessible component structure, file parsing error handling).</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Estimate your monthly spend with our <a href="/calculator/">Cost Calculator</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-skills-with-supabase-database-integration">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code with Supabase Database Integration",
+    "description": "How to use Claude Code skills alongside Supabase for database-backed projects with practical patterns.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-skills-with-supabase-database-integration/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

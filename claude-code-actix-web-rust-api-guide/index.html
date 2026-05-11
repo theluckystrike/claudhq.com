@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Rust Actix Web APIs with Claude Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Build REST APIs with Actix Web and Rust using Claude Code for code generation, testing, and middleware configuration.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-actix-web-rust-api-guide/">
+  <meta property="og:title" content="Build Rust Actix Web APIs with Claude Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Build REST APIs with Actix Web and Rust using Claude Code for code generation, testing, and middleware configuration.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-actix-web-rust-api-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Build Rust Actix Web APIs with Claude Code (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Actix Web remains one of the most performant web frameworks in the Rust ecosystem When combined with Claude Code's AI capabilities, you can rapidly prototype, develop, and test REST APIs while using Rust's memory safety guarantees. This guide covers building practical APIs using Claude Code sessions and relevant skills.</p>
+      <h2>Why Actix Web for Rust APIs</h2>
+      <p>Before getting into code, it is worth understanding why teams choose Actix Web over alternatives. The Rust web framework landscape includes several capable options, Axum, Warp, Rocket, and Tide are all production-ready. Here is how they compare on the axes that matter most:</p>
+      <div class="table-wrap"><table><tr><th>Framework</th><th>Performance</th><th>Async Model</th><th>Learning Curve</th><th>Ecosystem Maturity</th></tr>
+<tr><td>Actix Web</td><td>Excellent</td><td>Actor-based, Tokio</td><td>Moderate</td><td>High</td></tr>
+<tr><td>Axum</td><td>Excellent</td><td>Tokio-native</td><td>Low-moderate</td><td>High</td></tr>
+<tr><td>Rocket</td><td>Good</td><td>Tokio</td><td>Low</td><td>High</td></tr>
+<tr><td>Warp</td><td>Very good</td><td>Tokio filter chain</td><td>High</td><td>Moderate</td></tr></table></div>
+      <p>Actix Web wins on benchmark throughput and ecosystem breadth. It has mature middleware, WebSocket support, multipart handling, and a large collection of third-party integrations. For APIs that need to handle sustained high request volumes, think 50k+ req/s on modest hardware, it is hard to beat.</p>
+      <p>The tradeoff is that Actix's actor system adds conceptual overhead early in the learning curve. Claude Code helps flatten that curve by generating idiomatic patterns you can inspect and adapt.</p>
+      <h2>Setting Up Your Rust API Project</h2>
+      <p>Initialize a new Actix Web project using Cargo:</p>
+      <pre><code class="language-bash">cargo new rust-api-guide
+cd rust-api-guide
+cargo add actix-web tokio serde serde_json serde_derive
+cargo add actix-rt --features macros</code></pre>
+      <p>Configure your Cargo.toml dependencies:</p>
+      <pre><code class="language-toml">[dependencies]
+actix-web = &quot;4&quot;
+actix-rt = &quot;2&quot;
+tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+serde = { version = &quot;1&quot;, features = [&quot;derive&quot;] }
+serde_json = &quot;1&quot;</code></pre>
+      <p>For a production API you will also want logging, environment configuration, and a connection pool. Add these upfront to avoid refactoring later:</p>
+      <pre><code class="language-toml">[dependencies]
+actix-web = &quot;4&quot;
+actix-rt = &quot;2&quot;
+tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+serde = { version = &quot;1&quot;, features = [&quot;derive&quot;] }
+serde_json = &quot;1&quot;
+env_logger = &quot;0.11&quot;
+log = &quot;0.4&quot;
+dotenvy = &quot;0.15&quot;
+uuid = { version = &quot;1&quot;, features = [&quot;v4&quot;, &quot;serde&quot;] }</code></pre>
+      <h2>Creating Your First Endpoint</h2>
+      <p>Define a simple REST endpoint with request validation. Here's a practical example of a user management endpoint:</p>
+      <pre><code class="language-rust">// src/main.rs
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct User {
+ id: u64,
+ name: String,
+ email: String,
+}
+
+#[derive(Deserialize)]
+struct CreateUserRequest {
+ name: String,
+ email: String,
+}
+
+async fn get_users() -&gt; impl Responder {
+ let users = vec![
+ User { id: 1, name: &quot;Alice&quot;.to_string(), email: &quot;alice@example.com&quot;.to_string() },
+ User { id: 2, name: &quot;Bob&quot;.to_string(), email: &quot;bob@example.com&quot;.to_string() },
+ ];
+ HttpResponse::Ok().json(users)
+}
+
+async fn create_user(req: web::Json&lt;CreateUserRequest&gt;) -&gt; impl Responder {
+ let new_user = User {
+ id: 3,
+ name: req.name.clone(),
+ email: req.email.clone(),
+ };
+ HttpResponse::Created().json(new_user)
+}
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+ HttpServer::new(|| {
+ App::new()
+ .route(&quot;/users&quot;, web::get().to(get_users))
+ .route(&quot;/users&quot;, web::post().to(create_user))
+ })
+ .bind(&quot;127.0.0.1:8080&quot;)?
+ .run()
+ .await
+}</code></pre>
+      <p>Run the server with cargo run and test with curl:</p>
+      <pre><code class="language-bash">curl http://127.0.0.1:8080/users
+curl -X POST http://127.0.0.1:8080/users \
+ -H &quot;Content-Type: application/json&quot; \
+ -d &#x27;{&quot;name&quot;: &quot;Charlie&quot;, &quot;email&quot;: &quot;charlie@example.com&quot;}&#x27;</code></pre>
+      <h2>Structuring Routes with App State</h2>
+      <p>In-memory data is fine for prototypes, but real applications need shared state, database pools, configuration, caches. Actix Web's <code>web::Data</code> wrapper handles this cleanly:</p>
+      <pre><code class="language-rust">use actix_web::{web, App, HttpResponse, HttpServer};
+use std::sync::Mutex;
+
+struct AppState {
+ users: Mutex&lt;Vec&lt;User&gt;&gt;,
+ request_count: Mutex&lt;u64&gt;,
+}
+
+async fn get_users(data: web::Data&lt;AppState&gt;) -&gt; HttpResponse {
+ let users = data.users.lock().unwrap();
+ HttpResponse::Ok().json(users.clone())
+}
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+ let state = web::Data::new(AppState {
+ users: Mutex::new(vec![]),
+ request_count: Mutex::new(0),
+ });
+
+ HttpServer::new(move || {
+ App::new()
+ .app_data(state.clone())
+ .route(&quot;/users&quot;, web::get().to(get_users))
+ })
+ .bind(&quot;127.0.0.1:8080&quot;)?
+ .run()
+ .await
+}</code></pre>
+      <p>Ask Claude Code to scaffold this pattern for any new project:</p>
+      <pre><code class="language-bash">claude &quot;Scaffold an Actix Web app with web::Data state containing a connection pool
+and a request metrics counter. Show the main function, state struct, and one
+example handler that increments the counter.&quot;</code></pre>
+      <p>Claude produces the boilerplate correctly, including the <code>move</code> closure in <code>HttpServer::new</code> that trips up many developers new to Rust's ownership rules.</p>
+      <h2>Using Claude Code with Your API</h2>
+      <p>Activate Claude Code and use specific skills to enhance your development workflow. The <code>/tdd</code> skill helps generate unit tests for your endpoint handlers:</p>
+      <pre><code class="language-">/tdd
+Write tests for a create_user handler that validates email format and rejects empty names</code></pre>
+      <p>The skill guides Claude to produce test cases covering validation logic, edge cases, and error responses.</p>
+      <p>For API documentation, use the <code>/pdf</code> skill to generate structured documentation from your OpenAPI specs or code comments:</p>
+      <pre><code class="language-">/pdf
+Generate API documentation from the OpenAPI spec in ./api-spec.yaml</code></pre>
+      <p>Claude Code is particularly useful when you hit Rust-specific roadblocks. Common examples:</p>
+      <pre><code class="language-bash">Lifetime errors in handler functions
+claude &quot;My Actix handler returns a reference to data inside a Mutex guard.
+The compiler says &#x27;cannot return reference to temporary value&#x27;. Explain why and show the fix.&quot;
+
+Async trait bounds
+claude &quot;I need to pass a trait object that implements an async method to an Actix handler.
+Show the pattern for boxing the future and making this work with web::Data.&quot;
+
+Middleware ordering
+claude &quot;Explain the order in which Actix Web applies middleware when you chain
+wrap() calls on an App. Does order matter for authentication + logging?&quot;</code></pre>
+      <p>These targeted questions get precise answers that would otherwise require significant time reading the Actix documentation and source code.</p>
+      <h2>Advanced: Database Integration with Diesel</h2>
+      <p>Connect your Actix Web API to a PostgreSQL database using Diesel ORM:</p>
+      <pre><code class="language-rust">// src/models.rs
+use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Queryable, Serialize, Deserialize)]
+pub struct User {
+ pub id: i32,
+ pub username: String,
+ pub email: String,
+}
+
+#[derive(Insertable)]
+#[table_name = &quot;users&quot;]
+pub struct NewUser&lt;&#x27;a&gt; {
+ pub username: &amp;&#x27;a str,
+ pub email: &amp;&#x27;a str,
+}</code></pre>
+      <p>Configure connection pooling in your main.rs:</p>
+      <pre><code class="language-rust">use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::PgConnection;
+
+type DbPool = Pool&lt;ConnectionManager&lt;PgConnection&gt;&gt;;
+
+async fn get_all_users(pool: web::Data&lt;DbPool&gt;) -&gt; impl Responder {
+ use crate::schema::users::dsl::*;
+
+ let conn = pool.get().unwrap();
+ let results = users.load::&lt;User&gt;(&amp;conn).unwrap();
+ HttpResponse::Ok().json(results)
+}</code></pre>
+      <p>In practice you will want to handle the pool error and the query error without unwrapping. Here is a more production-ready version that returns proper HTTP status codes on failure:</p>
+      <pre><code class="language-rust">use actix_web::web;
+use diesel::r2d2::{ConnectionManager, Pool, PoolError};
+use diesel::PgConnection;
+use diesel::prelude::*;
+
+type DbPool = Pool&lt;ConnectionManager&lt;PgConnection&gt;&gt;;
+
+async fn get_all_users(pool: web::Data&lt;DbPool&gt;) -&gt; HttpResponse {
+ let conn = match pool.get() {
+ Ok(c) =&gt; c,
+ Err(_) =&gt; return HttpResponse::ServiceUnavailable()
+ .json(serde_json::json!({&quot;error&quot;: &quot;Database unavailable&quot;})),
+ };
+
+ match users.load::&lt;User&gt;(&amp;conn) {
+ Ok(results) =&gt; HttpResponse::Ok().json(results),
+ Err(e) =&gt; {
+ log::error!(&quot;Database query failed: {}&quot;, e);
+ HttpResponse::InternalServerError()
+ .json(serde_json::json!({&quot;error&quot;: &quot;Query failed&quot;}))
+ }
+ }
+}</code></pre>
+      <p>Ask Claude to audit your handlers for unwrap calls before shipping:</p>
+      <pre><code class="language-bash">claude &quot;Review all my Actix handlers and identify every .unwrap() call.
+For each one, suggest the appropriate error handling pattern and whether it
+should return 400, 500, or 503.&quot;</code></pre>
+      <h2>Error Handling Patterns</h2>
+      <p>Implement consistent error responses across your API by defining a custom error type that implements <code>actix_web::ResponseError</code>:</p>
+      <pre><code class="language-rust">use actix_web::HttpResponse;
+use serde::Serialize;
+use std::fmt;
+
+#[derive(Debug, Serialize)]
+pub struct ApiError {
+ pub code: String,
+ pub message: String,
+}
+
+impl fmt::Display for ApiError {
+ fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+ write!(f, &quot;{}: {}&quot;, self.code, self.message)
+ }
+}
+
+impl actix_web::ResponseError for ApiError {
+ fn error_response(&amp;self) -&gt; HttpResponse {
+ match self.code.as_str() {
+ &quot;NOT_FOUND&quot; =&gt; HttpResponse::NotFound().json(self),
+ &quot;VALIDATION_ERROR&quot; =&gt; HttpResponse::BadRequest().json(self),
+ &quot;UNAUTHORIZED&quot; =&gt; HttpResponse::Unauthorized().json(self),
+ _ =&gt; HttpResponse::InternalServerError().json(self),
+ }
+ }
+}
+
+// Usage in a handler
+async fn get_user(path: web::Path&lt;u64&gt;) -&gt; Result&lt;HttpResponse, ApiError&gt; {
+ let user_id = path.into_inner();
+ find_user(user_id).ok_or_else(|| ApiError {
+ code: &quot;NOT_FOUND&quot;.to_string(),
+ message: format!(&quot;User {} not found&quot;, user_id),
+ })
+ .map(|u| HttpResponse::Ok().json(u))
+}</code></pre>
+      <p>This pattern centralizes HTTP status code decisions. When you add a new error variant, you update one match arm, not every handler that might produce that error.</p>
+      <p>Use this pattern with the <code>/tdd</code> skill to ensure your error paths are tested:</p>
+      <pre><code class="language-">/tdd
+Generate test cases for the create_user endpoint covering: valid input, missing name, invalid email format, database connection failure</code></pre>
+      <p>The generated tests should verify not just that an error occurs, but that the response body has the correct <code>code</code> field and that the HTTP status code matches your contract.</p>
+      <h2>Input Validation with the Validator Crate</h2>
+      <p>Raw Serde deserialization catches type mismatches but not semantic invalidity, an empty string is a valid <code>String</code> in Serde. Use the <code>validator</code> crate for domain-level validation:</p>
+      <pre><code class="language-toml">[dependencies]
+validator = { version = &quot;0.18&quot;, features = [&quot;derive&quot;] }</code></pre>
+      <pre><code class="language-rust">use serde::Deserialize;
+use validator::Validate;
+
+#[derive(Deserialize, Validate)]
+pub struct CreateUserRequest {
+ #[validate(length(min = 1, max = 100, message = &quot;Name must be 1-100 characters&quot;))]
+ pub name: String,
+
+ #[validate(email(message = &quot;Must be a valid email address&quot;))]
+ pub email: String,
+
+ #[validate(range(min = 18, max = 120, message = &quot;Age must be between 18 and 120&quot;))]
+ pub age: Option&lt;u32&gt;,
+}
+
+async fn create_user(
+ req: web::Json&lt;CreateUserRequest&gt;,
+) -&gt; Result&lt;HttpResponse, ApiError&gt; {
+ req.validate().map_err(|e| ApiError {
+ code: &quot;VALIDATION_ERROR&quot;.to_string(),
+ message: e.to_string(),
+ })?;
+
+ // proceed with validated data
+ Ok(HttpResponse::Created().json(&amp;*req))
+}</code></pre>
+      <p>Ask Claude to generate validation rules for any domain model:</p>
+      <pre><code class="language-bash">claude &quot;Add validator annotations to this Rust struct for a product listing:
+name (required, 1-200 chars), price (positive float), sku (alphanumeric, 6-20 chars),
+description (optional, max 5000 chars), category_ids (non-empty list of positive integers)&quot;</code></pre>
+      <h2>Using supermemory for API Patterns</h2>
+      <p>The <code>/supermemory</code> skill stores your preferred API patterns across sessions. Store common patterns:</p>
+      <pre><code class="language-">/supermemory store: API error response format uses { &quot;code&quot;: &quot;ERROR_CODE&quot;, &quot;message&quot;: &quot;Human readable message&quot; }. Standard pagination params are page and limit.</code></pre>
+      <p>Claude remembers these patterns in future sessions, applying consistent designs across your API endpoints.</p>
+      <p>Additional patterns worth storing:</p>
+      <pre><code class="language-">/supermemory store: Actix Web handler signature for authenticated endpoints uses
+web::ReqData&lt;AuthUser&gt; extracted from JWT middleware. Never access the Authorization
+header directly in handlers.
+
+/supermemory store: All database operations go through a repository trait.
+Handlers receive web::Data&lt;dyn UserRepository&gt; not a direct pool reference.
+This makes handlers testable without a real database.</code></pre>
+      <p>The repository pattern note is especially valuable. When you start a new service six weeks later and ask Claude to scaffold handlers, it will apply the pattern automatically without you having to re-explain it.</p>
+      <h2>Combining Multiple Skills</h2>
+      <p>For full-stack API development, combine skills effectively:</p>
+      <ol>
+      <li>Use <code>/tdd</code> to generate tests before implementing handlers</li>
+      <li>Apply <code>/frontend-design</code> to build accompanying React/Vue components that consume your API</li>
+      <li>Use <code>/pdf</code> to export API documentation for stakeholders</li>
+      <li>Reference <code>/supermemory</code> to maintain consistent error formats and naming conventions</li>
+      </ol>
+      <p>Example workflow:</p>
+      <pre><code class="language-">/tdd
+Write handler tests for a product inventory endpoint
+
+/frontend-design
+Scaffold a React component that displays inventory data with pagination
+
+/pdf
+Create API documentation from the spec</code></pre>
+      <p>A more complete session flow for a new API resource looks like:</p>
+      <pre><code class="language-bash">1 - Generate the data model and migrations
+claude &quot;Generate a Diesel model and migration for a &#x27;product&#x27; table with:
+id (uuid), name (varchar 200), price (numeric 10,2), stock_quantity (integer),
+created_at and updated_at timestamps. Include the Up and Down migration SQL.&quot;
+
+2 - Scaffold CRUD handlers with proper error handling
+claude &quot;Scaffold Actix Web CRUD handlers for the Product model using the repository
+pattern. Return 404 on missing resources, 422 on validation failure, 503 on
+database unavailability.&quot;
+
+3 - Generate tests using TDD skill
+/tdd
+Write integration tests for each Product CRUD endpoint using actix_web::test
+
+4 - Document the API
+/pdf
+Generate OpenAPI 3.0 documentation for the Product CRUD endpoints</code></pre>
+      <p>Each step is independent and reversible. If the generated migration looks wrong, fix it before generating the handlers. Claude Code gives you checkpoints rather than a single opaque output.</p>
+      <h2>Step-by-Step Guide: Building Your First Actix Web API with Claude Code</h2>
+      <p>Here is a concrete workflow for building a production-ready Actix Web API from scratch using Claude Code at every stage.</p>
+      <p>Step 1. Project scaffolding. Open a Claude Code session in your new project directory. Ask it to generate a complete Cargo.toml with all necessary dependencies: actix-web, actix-rt, tokio with full features, serde with derive, serde_json, and uuid with v4 feature. Claude Code produces the correct dependency versions and avoids common incompatibility issues between async runtimes.</p>
+      <p>Step 2. Define your data models. Describe your domain in plain language. Claude Code generates Rust structs with appropriate Serde derives, proper field types, and consideration for JSON serialization edge cases like optional fields and default values.</p>
+      <p>Step 3. Implement handler functions. Use Claude Code with the /tdd skill to generate tests first, then implement each handler. The TDD workflow works particularly well with Actix Web because handler signatures are explicit about their dependencies, making test doubles straightforward.</p>
+      <p>Step 4. Wire up routing and middleware. Ask Claude Code to generate the App configuration block with your route definitions, CORS middleware, JSON error handlers, and request logging. Getting middleware order correct in Actix Web requires attention to detail that Claude Code handles consistently.</p>
+      <p>Step 5. Add database integration. Tell Claude Code which database you're using and it generates the connection pool setup, connection extraction in handlers, and an example repository pattern to keep database logic separate from HTTP handling.</p>
+      <h2>Common Pitfalls</h2>
+      <p>Forgetting to call <code>.await</code> on async handlers. Actix Web handlers must be async functions, but forgetting to await inner futures produces compilation errors with confusing messages. Claude Code generates correctly awaited handler bodies and the /tdd skill writes tests that verify async behavior.</p>
+      <p>Using <code>unwrap()</code> in production handlers. Rust's unwrap panics the thread on None or Err, which Actix Web converts into a 500 error with no useful response. Use the <code>?</code> operator with a custom error type that implements <code>ResponseError</code>. Claude Code can generate this error type and the required trait implementations automatically.</p>
+      <p>Blocking the async runtime. CPU-intensive operations in Actix handlers block the tokio runtime. For heavy computation, use <code>web::block()</code> to move work to a thread pool. Claude Code recognizes when operations are synchronous and wraps them appropriately.</p>
+      <p>Not validating request bodies. The <code>web::Json<T></code> extractor returns a 400 error if deserialization fails, but the error message is generic. Add a custom JSON error handler to your App configuration that provides specific validation messages. Claude Code generates this handler as part of a standard app setup.</p>
+      <p>Ignoring connection pool exhaustion. When every handler holds a database connection, pool exhaustion causes request timeouts under load. Claude Code can review your handler patterns and suggest connection borrowing scopes that release connections as quickly as possible.</p>
+      <h2>Best Practices</h2>
+      <p>Use custom error types instead of Box<dyn Error>. Define an AppError enum that implements Actix Web's ResponseError trait. This lets you return specific HTTP status codes and structured JSON error responses from any handler. Claude Code generates a complete error module with common variants like NotFound, Unauthorized, and InternalError.</p>
+      <p>Extract shared state into Data<T>. Application state like database pools, configuration, and API clients should be registered with <code>.app_data(web::Data::new(...))</code> and extracted in handlers. This makes dependencies explicit and testable. Claude Code generates state structs and Data extractors correctly.</p>
+      <p>Structure routes by resource, not HTTP method. Group related routes together using <code>web::scope()</code> rather than a flat list of route registrations. Claude Code generates scope-based routing that scales cleanly as your API grows.</p>
+      <p>Add structured logging with tracing. The tracing crate integrates with Actix Web's request logging and provides structured, queryable logs. Claude Code can add tracing instrumentation to your handlers and configure the subscriber for both development and production environments.</p>
+      <p>Write integration tests with actix-web's test utilities. The actix-web::test module provides an HTTP test client that exercises your actual App configuration. Claude Code with the /tdd skill generates integration tests that cover authentication, error responses, and business logic without a running server.</p>
+      <h2>Advanced: State Management and Middleware</h2>
+      <p>For production APIs, you need request-level state management and cross-cutting middleware:</p>
+      <pre><code class="language-rust">use actix_web::middleware::Logger;
+use actix_web::web::Data;
+use std::sync::Arc;
+
+struct AppState {
+ db_pool: sqlx::PgPool,
+ config: Arc&lt;Config&gt;,
+}
+
+async fn build_app(state: web::Data&lt;AppState&gt;) -&gt; App&lt;...&gt; {
+ App::new()
+ .app_data(state)
+ .wrap(Logger::default())
+ .wrap(actix_cors::Cors::permissive())
+ .service(
+ web::scope(&quot;/api/v1&quot;)
+ .service(users_routes())
+ .service(products_routes())
+ )
+}</code></pre>
+      <p>Claude Code generates this configuration with proper type annotations and handles the lifetime complexity that async Actix Web applications require.</p>
+      <h2>Integration Patterns</h2>
+      <p>Combining with the /supermemory skill. Store your API conventions, error format, pagination parameters, authentication patterns, in supermemory at the start of a project. Claude Code retrieves these conventions in future sessions, ensuring consistency across all endpoints even when working on different parts of the API weeks apart.</p>
+      <p>Generating OpenAPI documentation. Use the <code>utoipa</code> crate with Claude Code to generate OpenAPI spec directly from your handler definitions. Claude Code adds the required macro annotations to your structs and handler functions, producing accurate API documentation that stays synchronized with your implementation.</p>
+      <p>Connecting to a React frontend. Use the /frontend-design skill to scaffold React components that consume your Actix Web API. The skill generates typed fetch functions based on your API response shapes, keeping the frontend and backend in sync.</p>
+      <h2>Conclusion</h2>
+      <p>Claude Code accelerates Actix Web development by generating tests, documenting APIs, and maintaining consistent patterns across your codebase. The combination of Rust's performance and AI-assisted development creates a productive workflow for building high-performance web services.</p>
+      <p>The key is invoking the right skill at the appropriate time: <code>/tdd</code> for test generation, <code>/pdf</code> for documentation, and <code>/supermemory</code> for pattern retention. Your Actix Web APIs benefit from both Rust's compile-time safety and Claude's development velocity.</p>
+      <p>Where Claude Code adds the most value in Rust specifically is in the error-handling and ownership areas where new Rust developers get stuck. Instead of fighting the borrow checker alone, you can ask Claude to explain the error, suggest a fix, and then explain why that fix works, turning compiler errors into learning moments rather than blockers. Over time you internalize the patterns and need Claude less for the basics, but it remains useful for generating the boilerplate that Rust requires even for experienced developers.</p>
+      <h2>Frequently Asked Questions</h2>
+      <h3>Why Actix Web for Rust APIs?</h3>
+      <p>Actix Web wins on benchmark throughput and ecosystem breadth compared to alternatives like Axum, Rocket, and Warp. It delivers excellent performance through an actor-based async model on Tokio, supports sustained 50k+ requests per second on modest hardware, and provides mature middleware, WebSocket support, and multipart handling. The tradeoff is that Actix's actor system adds conceptual overhead to the learning curve. Claude Code helps flatten that curve by generating idiomatic patterns developers can inspect and adapt.</p>
+      <h3>What is Setting Up Your Rust API Project?</h3>
+      <p>Setting up an Actix Web project requires initializing with <code>cargo new</code> and adding dependencies: <code>actix-web = "4"</code>, <code>actix-rt = "2"</code>, <code>tokio</code> with full features, <code>serde</code> with derive, and <code>serde_json</code>. For production APIs, also add <code>env_logger</code>, <code>log</code>, <code>dotenvy</code> for environment configuration, and <code>uuid</code> with v4 and serde features. Configure all dependencies upfront in Cargo.toml to avoid refactoring later, particularly logging and connection pool libraries.</p>
+      <h3>What is Creating Your First Endpoint?</h3>
+      <p>Creating your first Actix Web endpoint involves defining Serde-derived request and response structs (like <code>User</code> and <code>CreateUserRequest</code>), implementing async handler functions that return <code>impl Responder</code>, and wiring routes in <code>HttpServer::new</code> using <code>web::get().to()</code> and <code>web::post().to()</code>. The handler deserializes JSON request bodies via <code>web::Json<T></code> extractor and returns responses with <code>HttpResponse::Ok().json()</code> or <code>HttpResponse::Created().json()</code>. Test with curl against <code>http://127.0.0.1:8080</code>.</p>
+      <h3>What is Structuring Routes with App State?</h3>
+      <p>Structuring routes with app state uses Actix Web's <code>web::Data</code> wrapper to share database pools, configuration, and caches across handlers. Define an <code>AppState</code> struct with <code>Mutex</code>-wrapped fields, wrap it in <code>web::Data::new()</code>, and pass it via <code>.app_data(state.clone())</code> in the App configuration. Handlers extract state through <code>web::Data<AppState></code> parameters. Claude Code generates this pattern correctly, including the <code>move</code> closure in <code>HttpServer::new</code> that trips up developers new to Rust's ownership rules.</p>
+      <h3>What is Using Claude Code with Your API?</h3>
+      <p>Claude Code enhances Actix Web development through targeted skills: the <code>/tdd</code> skill generates unit tests covering validation logic, edge cases, and error responses; the <code>/pdf</code> skill generates API documentation from OpenAPI specs; and the <code>/supermemory</code> skill stores preferred API patterns like error response formats and pagination parameters across sessions. Claude Code is especially valuable for resolving Rust-specific issues like lifetime errors in handler functions, async trait bounds, and middleware ordering questions.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-actix-web-rust-api-guide">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Build Rust Actix Web APIs with Claude Code (2026)",
+    "description": "Build REST APIs with Actix Web and Rust using Claude Code for code generation, testing, and middleware configuration.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-actix-web-rust-api-guide/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

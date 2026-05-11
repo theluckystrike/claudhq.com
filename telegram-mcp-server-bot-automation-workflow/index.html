@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram MCP Server Bot Automation Workflow | ClaudHQ</title>
+  <meta name="description" content="Automate Telegram bots with MCP server and Claude Code. Setup guide for message handling and workflow automation.">
+  <link rel="canonical" href="https://claudhq.com/telegram-mcp-server-bot-automation-workflow/">
+  <meta property="og:title" content="Telegram MCP Server Bot Automation Workflow | ClaudHQ">
+  <meta property="og:description" content="Automate Telegram bots with MCP server and Claude Code. Setup guide for message handling and workflow automation.">
+  <meta property="og:url" content="https://claudhq.com/telegram-mcp-server-bot-automation-workflow/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Telegram MCP Server Bot Automation Workflow</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The Telegram Model Context Protocol server enables Claude Code to interact with Telegram bots through natural language. This integration opens powerful possibilities for building responsive automation workflows, from handling customer support queries to managing team notifications. This guide walks through setting up the Telegram MCP server and creating practical automation workflows that can handle real production use cases.</p>
+      <h2>Prerequisites and Initial Setup</h2>
+      <p>Before building Telegram bot automations, you need a Telegram bot token and the MCP server configured. Create a new bot through @BotFather on Telegram if you do not already have one. The BotFather will provide an API token that authenticates your bot. For guidance on storing bot tokens safely, see the MCP credential management and secrets handling guide.</p>
+      <p>Install the Telegram MCP server package:</p>
+      <pre><code class="language-bash">npm install -g @modelcontextprotocol/server-telegram</code></pre>
+      <p>Configure the MCP server in your <code>~/.claude/mcp-servers.json</code> file:</p>
+      <pre><code class="language-json">{
+ &quot;mcpServers&quot;: {
+ &quot;telegram&quot;: {
+ &quot;command&quot;: &quot;npx&quot;,
+ &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-telegram&quot;],
+ &quot;env&quot;: {
+ &quot;TELEGRAM_BOT_TOKEN&quot;: &quot;your-bot-token-here&quot;
+ }
+ }
+ }
+}</code></pre>
+      <p>Replace <code>your-bot-token-here</code> with the token from BotFather. Restart Claude Code and verify the connection by asking it to list your bot information.</p>
+      <h2>Verifying the Connection</h2>
+      <p>After restarting Claude Code, run a quick sanity check to confirm the MCP server is available and authenticated:</p>
+      <pre><code class="language-">Ask Claude Code: &quot;Using the Telegram MCP server, get my bot&#x27;s information and list any recent updates.&quot;</code></pre>
+      <p>If the server is configured correctly, Claude Code will call the <code>getMe</code> method and return your bot's username, ID, and capabilities. If you see an authentication error, double-check that your token is copied exactly as BotFather provided it, with no leading or trailing whitespace.</p>
+      <h2>Configuring Webhook vs Polling</h2>
+      <p>The Telegram Bot API supports two update delivery modes: long polling and webhooks. For local development, long polling is simpler because it does not require a publicly accessible server. For production, webhooks are more reliable and efficient.</p>
+      <p>With the MCP server, you typically use polling during development sessions since Claude Code initiates the requests. For production deployments where your automation needs to respond to messages even when you are not actively running Claude Code, set up a webhook endpoint:</p>
+      <pre><code class="language-bash">Register a webhook URL with Telegram
+curl -X POST &quot;https://api.telegram.org/bot&lt;YOUR_TOKEN&gt;/setWebhook&quot; \
+ -H &quot;Content-Type: application/json&quot; \
+ -d &#x27;{&quot;url&quot;: &quot;https://yourserver.com/webhook/telegram&quot;}&#x27;
+
+Verify webhook status
+curl &quot;https://api.telegram.org/bot&lt;YOUR_TOKEN&gt;/getWebhookInfo&quot;</code></pre>
+      <p>The webhook response will confirm whether Telegram can reach your endpoint and show any pending error counts that might indicate connection problems.</p>
+      <h2>Building Your First Automated Response</h2>
+      <p>The Telegram MCP server exposes tools for sending messages, handling updates, and managing bot interactions. You can combine these capabilities with Claude skills to create sophisticated responses.</p>
+      <p>For instance, integrate the pdf skill to automatically generate and send documents when users request them:</p>
+      <pre><code class="language-javascript">// Skill: auto-invoice-generator
+
+When the user requests an invoice or receipt, generate a PDF using the pdf skill
+and send it to their Telegram chat. Extract the relevant details from their message
+or ask for clarification on amount, date, and description.</code></pre>
+      <p>This pattern demonstrates how MCP server tools work alongside Claude skills. The skill defines the behavior while the MCP server handles the actual Telegram communication.</p>
+      <h2>Sending Rich Messages with Telegram Formatting</h2>
+      <p>Telegram supports several message formatting modes. Markdown and HTML both work well for structured responses. Here is how to send formatted messages with the MCP server:</p>
+      <pre><code class="language-javascript">// Skill: formatted-status-responder
+
+When responding with system status, format the message using Telegram&#x27;s MarkdownV2:
+- Use *bold* for critical metrics
+- Use `monospace` for values and counts
+- Use &gt; for block quotes when referencing previous user messages
+- Use numbered lists for sequential steps
+
+Example output structure:
+*System Status Report*
+CPU Usage: `78%`
+Memory: `4\.2 GB / 8 GB`
+Uptime: `14 days, 3 hours`
+
+&gt; Your last check was 2 hours ago</code></pre>
+      <p>Note that MarkdownV2 requires escaping special characters like dots, parentheses, and hyphens with a backslash. This is easy to forget when building templates, so keep a reference handy.</p>
+      <h2>Inline Keyboards for Interactive Workflows</h2>
+      <p>One of Telegram's most powerful bot features is inline keyboards. buttons that appear beneath messages and trigger callback queries. This turns your bot from a one-way notification system into an interactive tool:</p>
+      <pre><code class="language-javascript">// Skill: approval-workflow-bot
+
+When a deployment request arrives:
+1. Send a message with the deployment details
+2. Attach an inline keyboard with two buttons: &quot;Approve&quot; and &quot;Reject&quot;
+3. When the user taps a button, handle the callback_query
+4. Update the original message to show the decision and who made it
+5. Trigger the appropriate downstream action based on approval or rejection</code></pre>
+      <p>This pattern is extremely useful for team workflows where you want a human in the loop before consequential actions execute.</p>
+      <h2>Handling Different Message Types</h2>
+      <p>Your bot can process various message types including text, photos, documents, and voice messages. Create separate workflows for each type using Claude Code's conditional logic.</p>
+      <p>Text messages work well for command-based interactions:</p>
+      <pre><code class="language-javascript">// Skill: telegram-command-handler
+
+Process incoming Telegram messages with these rules:
+- Messages starting with &quot;/status&quot; - respond with system health check
+- Messages containing &quot;help&quot; - list available commands
+- Messages with &quot;alert&quot; or &quot;warning&quot; - escalate to priority queue
+- All other messages - use supermemory skill to search for relevant context before responding</code></pre>
+      <p>Document and photo uploads require additional processing. Use the frontend-design skill to generate preview images for documents, or apply the tdd skill to create test cases from user-submitted specifications.</p>
+      <h2>Processing File Uploads</h2>
+      <p>When users send documents or photos to your bot, Telegram stores them on its servers and provides a <code>file_id</code> you can use to download them. This enables a wide range of document processing workflows:</p>
+      <pre><code class="language-javascript">// Skill: document-processor-bot
+
+When a user sends a document:
+1. Extract the file_id from the message&#x27;s document field
+2. Call getFile to retrieve the download path
+3. Download the file using the provided URL
+4. Detect the file type:
+ - PDF: use the pdf skill to extract text and summarize
+ - Image: describe the content using vision capabilities
+ - CSV/XLSX: parse the data and generate a summary with key statistics
+5. Send the analysis back to the user
+6. Store the result in supermemory keyed by file name and user ID</code></pre>
+      <p>Voice message transcription is another high-value workflow. Users who prefer speaking over typing can send voice messages, and your bot can transcribe and process them:</p>
+      <pre><code class="language-javascript">// Skill: voice-message-handler
+
+When a voice message arrives:
+1. Retrieve the audio file from Telegram&#x27;s servers
+2. Transcribe the audio using available speech-to-text tools
+3. Process the transcription as if it were a text message
+4. Respond in text, and optionally offer to send a voice reply</code></pre>
+      <h2>Handling Group vs Private Messages</h2>
+      <p>Bots behave differently in group chats versus private conversations. In groups, bots only receive messages if they are mentioned by username or if the message is a reply to one of the bot's previous messages (unless the bot has read access explicitly enabled). Factor this into your command parsing:</p>
+      <pre><code class="language-javascript">// Skill: group-aware-command-handler
+
+Check the chat type before processing:
+- chat.type === &quot;private&quot;: process all messages normally
+- chat.type === &quot;group&quot; or &quot;supergroup&quot;:
+ - Only respond to messages that mention @YourBotUsername
+ - Or messages that are replies to the bot
+ - Strip the @mention from the command before processing
+ - Keep responses concise to avoid flooding group chats</code></pre>
+      <h2>Creating Workflow Automation Chains</h2>
+      <p>Build multi-step automation workflows by chaining Claude skills together. A common pattern involves receiving user input, processing it through one or more skills, and then sending formatted results back to Telegram.</p>
+      <p>Consider a bug reporting workflow:</p>
+      <pre><code class="language-javascript">// Skill: telegram-bug-reporter
+
+1. Parse the bug report from the user&#x27;s message
+2. Use the tdd skill to generate a minimal reproduction test case
+3. Create a formatted report with:
+ - Bug description
+ - Suggested test case
+ - Severity assessment
+4. Send the report to the designated bug tracker channel
+5. Confirm submission to the user with a reference number</code></pre>
+      <p>This workflow demonstrates the power of combining MCP server capabilities with specialized Claude skills. Each skill handles its domain while the Telegram MCP server manages the communication layer.</p>
+      <h2>CI/CD Integration Workflow</h2>
+      <p>Teams that use CI/CD pipelines can route build and deployment notifications through Telegram, enabling engineers to monitor and control deployments from their phones:</p>
+      <pre><code class="language-javascript">// Skill: cicd-notification-bot
+
+Receive CI/CD webhook events and route them appropriately:
+
+On build failure:
+1. Send a message to the #builds channel with the commit SHA, branch, and error summary
+2. Tag the engineer who pushed the commit
+3. Include an inline keyboard: &quot;View Logs&quot; | &quot;Retry Build&quot; | &quot;Skip for Now&quot;
+
+On deployment success:
+1. Send a success message to #deployments with version number and timestamp
+2. List the changes included in this deployment
+3. Provide a rollback button that triggers the previous version deployment
+
+On test failures:
+1. Use the tdd skill to analyze the failure patterns
+2. Group failures by test suite and summarize root causes
+3. Create a threaded message with detailed failure output</code></pre>
+      <p>This kind of integration replaces email notifications with actionable, interactive messages that engineers actually read.</p>
+      <h2>GitHub Issues to Telegram Bridge</h2>
+      <p>Connect your GitHub repository to Telegram to get notified of issues and pull requests without constantly checking the GitHub UI:</p>
+      <pre><code class="language-javascript">// Skill: github-telegram-bridge
+
+Process GitHub webhook events:
+
+New issue opened:
+- Format: &quot; New Issue #123: [title]&quot; with labels and assignees
+- Send to project channel
+- If labeled &quot;urgent&quot; or &quot;critical&quot;, also send to team leads group
+
+PR opened/updated:
+- Show diff summary and reviewer assignments
+- Include inline buttons: &quot;View on GitHub&quot; | &quot;Request Review&quot; | &quot;Assign to Me&quot;
+
+Issue closed:
+- Summarize the resolution
+- Update thread if using Telegram&#x27;s thread feature for issue tracking</code></pre>
+      <h2>Managing Conversations and State</h2>
+      <p>Effective bot automation requires maintaining conversation context across multiple messages. The Claude supermemory skill provides persistent memory that your Telegram bot can use:</p>
+      <pre><code class="language-javascript">// Skill: telegram-support-bot
+
+Use supermemory to maintain conversation history with this user.
+When handling support requests:
+1. Check supermemory for previous interactions related to the issue
+2. Reference past solutions that worked for similar problems
+3. Update supermemory with the resolution once the issue is resolved
+4. If the issue requires escalation, gather context from supermemory first</code></pre>
+      <p>For more complex state management, use the MCP memory server for persistent agent storage to maintain shared conversation state across sessions.</p>
+      <h2>Implementing Conversation Flows</h2>
+      <p>Some workflows require multi-turn conversations where the bot needs to collect several pieces of information before executing an action. Implement these as state machines stored in memory:</p>
+      <pre><code class="language-javascript">// Skill: multi-step-form-bot
+
+Manage a multi-step data collection flow using this state machine:
+
+States:
+- IDLE: waiting for a trigger command like /new_report
+- COLLECTING_TITLE: asked for report title, waiting for response
+- COLLECTING_DESCRIPTION: asked for description, waiting for response
+- COLLECTING_PRIORITY: showing priority selection keyboard, waiting for callback
+- CONFIRMING: showing summary, waiting for confirm/cancel
+- SUBMITTING: processing submission
+
+At each state, store the collected data in memory keyed by chat_id.
+When the user sends a message, check their current state and transition accordingly.
+Handle /cancel at any state to abort and clear stored data.</code></pre>
+      <p>This approach keeps each conversation's state isolated and makes the flow predictable regardless of how many users are interacting simultaneously.</p>
+      <h2>Broadcasting and Scheduled Notifications</h2>
+      <p>Automate team communications by setting up scheduled broadcasts. Create a skill that handles periodic messages:</p>
+      <pre><code class="language-javascript">// Skill: daily-team-standup
+
+1. Query your project management system for today&#x27;s tasks
+2. Use the tdd skill to identify tests that ran overnight
+3. Compile a summary message with:
+ - Today&#x27;s priorities
+ - Yesterday&#x27;s completed items
+ - Any blocking issues
+4. Send to the team&#x27;s Telegram channel
+5. Tag team members whose input is needed</code></pre>
+      <p>You can schedule skills using cron expressions or external triggers. The key is structuring your skill to gather information dynamically rather than sending static messages.</p>
+      <h2>Building a Metrics Dashboard via Telegram</h2>
+      <p>Instead of building a web dashboard, deliver daily metrics summaries directly to Telegram. This is particularly useful for small teams that want visibility without the overhead of maintaining a dashboard infrastructure:</p>
+      <pre><code class="language-javascript">// Skill: daily-metrics-digest
+
+Every morning at 9 AM (scheduled via cron):
+1. Query your analytics API for yesterday&#x27;s key metrics
+2. Compare against the 7-day rolling average
+3. Flag any metrics that deviate more than 15% from average
+4. Format the digest with:
+ - Headline numbers (visits, conversions, revenue)
+ - Trend indicators (up/down arrows with percentage change)
+ - Anomaly alerts for unusual values
+ - A &quot;View Full Report&quot; link
+5. Send to the team channel
+6. If any critical anomalies exist, also send to the on-call group</code></pre>
+      <h2>Rate Limiting Broadcasts</h2>
+      <p>Telegram enforces rate limits on bot message sending. For groups and channels, the limit is roughly 20 messages per minute. When broadcasting to many users, implement a queue with delays:</p>
+      <pre><code class="language-javascript">// Skill: bulk-notification-sender
+
+When sending announcements to multiple users:
+1. Build the full recipient list first
+2. Send messages in batches of 20
+3. Wait 1 second between batches
+4. Track delivery status for each recipient
+5. Retry failed deliveries up to 3 times with exponential backoff
+6. Report final delivery statistics to the admin</code></pre>
+      <p>Respecting rate limits prevents your bot from being temporarily blocked by Telegram's infrastructure.</p>
+      <h2>Error Handling and Fallbacks</h2>
+      <p>Good automation requires proper error handling. Configure fallback responses for scenarios your primary workflows do not cover:</p>
+      <pre><code class="language-javascript">// Skill: telegram-fallback-handler
+
+When a message doesn&#x27;t match any automation pattern:
+1. Acknowledge receipt of the message
+2. Explain that a human will review it
+3. Forward to the appropriate team channel with priority tag
+4. Store in supermemory for future reference
+5. Provide estimated response time</code></pre>
+      <p>This ensures users always receive acknowledgment even when their request falls outside automated workflows.</p>
+      <h2>Handling Telegram API Errors</h2>
+      <p>The Telegram Bot API returns structured error codes that you can handle gracefully. The most common errors and how to address them:</p>
+      <div class="table-wrap"><table><tr><th>Error Code</th><th>Meaning</th><th>Recommended Action</th></tr>
+<tr><td>400 Bad Request</td><td>Malformed message or invalid parameters</td><td>Log the request body, fix formatting</td></tr>
+<tr><td>401 Unauthorized</td><td>Invalid bot token</td><td>Check token, alert admin immediately</td></tr>
+<tr><td>403 Forbidden</td><td>Bot was blocked by user</td><td>Mark user as inactive, stop sending</td></tr>
+<tr><td>429 Too Many Requests</td><td>Rate limit exceeded</td><td>Implement exponential backoff</td></tr>
+<tr><td>500 Internal Server Error</td><td>Telegram server issue</td><td>Retry after a short delay</td></tr></table></div>
+      <pre><code class="language-javascript">// Skill: resilient-telegram-sender
+
+When sending any message:
+1. Attempt the send operation
+2. On 429 error: read the retry_after value from the response and wait that many seconds
+3. On 403 error: update the user record to mark them as having blocked the bot
+4. On 500 error: retry up to 3 times with 5-second intervals
+5. If all retries fail: queue the message for manual review
+6. Log all errors with full context for debugging</code></pre>
+      <h2>Monitoring Bot Health</h2>
+      <p>Set up a health monitoring skill that periodically checks whether your bot is functioning correctly:</p>
+      <pre><code class="language-javascript">// Skill: bot-health-monitor
+
+Every 15 minutes:
+1. Call getMe to verify the bot token is still valid
+2. Send a test message to a designated health-check chat
+3. Verify the message was delivered successfully
+4. Check the pending updates queue length
+5. If queue length exceeds 100: alert the admin and process the backlog
+6. If any check fails: send an alert to the admin&#x27;s personal chat
+
+Track uptime percentage and send a weekly summary report.</code></pre>
+      <h2>Security Considerations</h2>
+      <p>When building Telegram bot automations, follow security best practices. Never expose your bot token in public repositories. Use environment variables for sensitive configuration. Implement rate limiting to prevent abuse.</p>
+      <p>The MCP server's permission system controls what your bot can access. Review permissions regularly and grant only necessary access levels to each automation workflow.</p>
+      <h2>Validating Incoming Requests</h2>
+      <p>If you are using webhooks, validate that incoming requests genuinely come from Telegram. One approach is to check the IP ranges that Telegram uses for webhook delivery, though this can change. A more solid approach is to use a secret token in the webhook URL:</p>
+      <pre><code class="language-bash">Set a webhook with a secret token
+curl -X POST &quot;https://api.telegram.org/bot&lt;TOKEN&gt;/setWebhook&quot; \
+ -H &quot;Content-Type: application/json&quot; \
+ -d &#x27;{
+ &quot;url&quot;: &quot;https://yourserver.com/webhook/telegram&quot;,
+ &quot;secret_token&quot;: &quot;your-random-secret-here&quot;
+ }&#x27;</code></pre>
+      <p>Telegram then includes this token in the <code>X-Telegram-Bot-Api-Secret-Token</code> header of every webhook request. Reject any requests that do not include the correct token.</p>
+      <h2>Restricting Bot Access by User</h2>
+      <p>For internal tools, restrict bot access to authorized users only. Maintain an allowlist of Telegram user IDs that are permitted to use each command:</p>
+      <pre><code class="language-javascript">// Skill: access-controlled-bot
+
+Before processing any command:
+1. Extract the sender&#x27;s user_id from the update
+2. Check the allowlist for this command type
+3. If the user is not in the allowlist:
+ - Send a polite &quot;access denied&quot; message
+ - Log the attempt with user ID, username, and requested command
+ - Alert the admin if the same user attempts access more than 3 times
+4. If authorized, proceed with the command
+
+Maintain separate allowlists for:
+- /status commands (broader access)
+- /deploy commands (engineering team only)
+- /admin commands (bot admin only)</code></pre>
+      <h2>Conclusion</h2>
+      <p>The Telegram MCP server transforms Claude Code into a powerful bot development platform. By combining MCP server tools with specialized skills like pdf, tdd, supermemory, and frontend-design, you can create sophisticated automation workflows that handle complex interactions. Start with simple command responses and gradually build toward multi-step workflows as your requirements grow.</p>
+      <p>The patterns in this guide. from inline keyboards and multi-step forms to CI/CD integrations and health monitoring. represent the range of what is possible when you treat Telegram not just as a messaging app but as an interface layer for your automation infrastructure. The key is to design workflows around what users actually need, handle errors gracefully, and keep security constraints in mind from the beginning.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Estimate your monthly spend with our <a href="/calculator/">Cost Calculator</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=telegram-mcp-server-bot-automation-workflow">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Telegram MCP Server Bot Automation Workflow",
+    "description": "Automate Telegram bots with MCP server and Claude Code. Setup guide for message handling and workflow automation.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/telegram-mcp-server-bot-automation-workflow/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

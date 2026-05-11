@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Production Guides — Troubleshooting &amp; Workflows | ClaudHQ</title>
-  <meta name="description" content="53 production guides for Claude Code. Fix timeouts, crashes, SSL, 401, 500, npm, Docker, Prisma errors. Workflows, integrations, best practices. All battle-tested.">
+  <meta name="description" content="72 production guides for Claude Code. Fix timeouts, crashes, SSL errors. Workflows, integrations, security, compliance, AI/ML, and framework guides. All battle-tested.">
   <link rel="canonical" href="https://claudhq.com/guides/">
   <meta property="og:title" content="Production Guides | ClaudHQ">
   <meta property="og:description" content="13 production guides for Claude Code developers. Troubleshooting, configuration, and workflows.">
@@ -32,7 +32,7 @@
 
   <main class="wrap">
     <section style="padding:clamp(48px,6vw,80px) 0;">
-      <div class="eyebrow">&sect; 53 Guides</div>
+      <div class="eyebrow">&sect; 72 Guides</div>
       <h1 style="font-family:var(--serif);font-size:clamp(32px,5vw,52px);margin-bottom:12px;">Production <em style="font-family:var(--serif-alt);font-style:italic;color:var(--accent);">guides.</em></h1>
       <p style="color:var(--ink-2);font-size:16px;max-width:600px;margin-bottom:clamp(24px,4vw,48px);">Battle-tested fixes and workflows from a developer running 5 Claude Max subscriptions daily.</p>
 
@@ -158,6 +158,16 @@
             <p style="font-size:14px;color:var(--ink-2);margin:0;">Tune temperature for deterministic code vs creative output.</p>
             <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
           </a>
+          <a href="/the-claude-code-playbook/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">The Claude Code Playbook</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Complete collection: 50 error fixes, 25 templates, 15 orchestration configs, 100 prompts.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-tips-for-absolute-beginners-2026/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Claude Code Tips for Absolute Beginners</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Essential tips for absolute beginners -- setup, skills, and workflows.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
         </div>
       </div>
 
@@ -239,6 +249,16 @@
             <p style="font-size:14px;color:var(--ink-2);margin:0;">Configure Docker networking for Claude Code development environments.</p>
             <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
           </a>
+          <a href="/claude-code-api-regression-testing-workflow/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">API Regression Testing Workflow</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Automated API regression testing with tools integration and best practices.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-hypothesis-property-testing-guide/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Hypothesis Property Testing Guide</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Property-based testing in Python with Hypothesis to catch edge cases automatically.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
         </div>
       </div>
 
@@ -259,6 +279,115 @@
           <a href="/best-way-to-use-claude-code-offline-without-internet-access/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
             <div style="font-family:var(--serif);font-size:18px;">Offline Usage Guide</div>
             <p style="font-size:14px;color:var(--ink-2);margin:0;">Best practices for using Claude Code without internet access.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+      <!-- Integration Guides -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Integration Guides</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/jira-mcp-server-claude-code-integration-guide/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Jira MCP Server Integration</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Automated ticket management, sprint planning, and issue tracking via MCP.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/telegram-mcp-server-bot-automation-workflow/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Telegram MCP Server Automation</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Message handling and workflow automation for Telegram bots via MCP.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-skills-with-supabase-database-integration/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Supabase Database Integration</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Database-backed projects with practical Supabase patterns.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Security & Compliance -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Security &amp; Compliance</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-code-for-security-scan-automation/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Security Scan Automation</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Automate security scans and integrate security tooling into CI/CD.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-skills-for-regulated-industries-fintech-healthcare/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Regulated Industries: Fintech &amp; Healthcare</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Compliance workflows and code patterns for fintech and healthcare.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-iso27001-evidence-collection-workflow/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">ISO 27001 Evidence Collection</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Automated ISO 27001 evidence collection for compliance audits.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-enterprise-disaster-recovery-workflow-planning/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Enterprise Disaster Recovery Planning</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Build disaster recovery workflows for enterprise systems.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- AI/ML Workflows -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">AI/ML Workflows</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-code-for-huggingface-transformers-model-training/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">HuggingFace Transformers Model Training</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Streamline HuggingFace Transformers model training workflows.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-for-llamaindex-rag-pipeline-debugging/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">LlamaIndex RAG Pipeline Debugging</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Debug retrieval and generation issues in LlamaIndex RAG pipelines.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-arxiv-paper-implementation-guide/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Implement ArXiv Papers with Claude Code</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Turn ArXiv research papers into working code with algorithm extraction.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Framework Guides -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Framework Guides</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/claude-code-actix-web-rust-api-guide/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Build Rust Actix Web APIs</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">REST APIs with Actix Web and Rust -- code generation, testing, middleware.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-sveltekit-hooks-handle-load-workflow-tutorial/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">SvelteKit Hooks &amp; Load Workflow</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">SvelteKit development with hooks.handle and the load workflow.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-for-graphql-codegen-workflow-tutorial/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">GraphQL Codegen Workflow</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Typed queries, resolver scaffolding, and schema-first development.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Automation & Build -->
+      <div style="margin-bottom:clamp(32px,4vw,56px);">
+        <h2 style="font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:16px;">Automation &amp; Build</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <a href="/parallel-ai-agent-execution-patterns-and-trade-offs/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Parallel AI Agent Execution Patterns</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Supervisor-worker architectures and concurrent tool use patterns.</p>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
+          </a>
+          <a href="/claude-code-makefile-build-automation-workflow-guide/" style="background:var(--bg-2);padding:24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);transition:background .2s;">
+            <div style="font-family:var(--serif);font-size:18px;">Makefile Build Automation</div>
+            <p style="font-size:14px;color:var(--ink-2);margin:0;">Target generation, dependency tracking, and multi-project build graphs.</p>
             <span style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:auto;text-transform:uppercase;letter-spacing:0.06em;">Read guide &rarr;</span>
           </a>
         </div>

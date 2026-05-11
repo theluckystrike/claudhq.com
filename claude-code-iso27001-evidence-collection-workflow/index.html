@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code ISO 27001 Evidence Collection Workflow | ClaudHQ</title>
+  <meta name="description" content="Build automated ISO 27001 evidence collection workflows using Claude Code. Streamline compliance audits.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-iso27001-evidence-collection-workflow/">
+  <meta property="og:title" content="Claude Code ISO 27001 Evidence Collection Workflow | ClaudHQ">
+  <meta property="og:description" content="Build automated ISO 27001 evidence collection workflows using Claude Code. Streamline compliance audits.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-iso27001-evidence-collection-workflow/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code ISO 27001 Evidence Collection Workflow</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>ISO 27001 certification requires organizations to demonstrate systematic evidence collection across 93 security controls. For many teams, this means manually gathering screenshots, configuration dumps, and audit logs, a time-consuming process prone to gaps and inconsistencies. Claude Code transforms this workflow by enabling automated, reproducible evidence collection that integrates directly into your development and operations pipelines.</p>
+      <h2>Understanding the Evidence Collection Challenge</h2>
+      <p>ISO 27001 evidence falls into several categories that Claude Code can help automate:</p>
+      <ul>
+      <li>Configuration evidence: Firewall rules, access control lists, encryption settings</li>
+      <li>Operational evidence: Log excerpts, incident reports, change management records</li>
+      <li>Process evidence: Policy acknowledgments, training records, risk assessments</li>
+      <li>Technical evidence: Vulnerability scan results, penetration test reports, backup verification</li>
+      </ul>
+      <p>Traditional approaches require manual documentation or expensive GRC platforms. Claude Code offers a middle ground, lightweight automation that captures evidence during normal development operations.</p>
+      <h2>Manual vs. Automated Evidence Collection</h2>
+      <p>Before committing to an automation approach, it helps to understand exactly where manual workflows break down:</p>
+      <div class="table-wrap"><table><tr><th>Dimension</th><th>Manual Collection</th><th>Automated (Claude Code)</th><th>Enterprise GRC Platform</th></tr>
+<tr><td>Setup time</td><td>None</td><td>1–3 days</td><td>Weeks to months</td></tr>
+<tr><td>Per-audit effort</td><td>40–120 hours</td><td>2–4 hours</td><td>4–8 hours</td></tr>
+<tr><td>Evidence freshness</td><td>Point-in-time</td><td>Continuous or scheduled</td><td>Scheduled</td></tr>
+<tr><td>Audit trail</td><td>Ad hoc</td><td>Git history + timestamps</td><td>Platform logs</td></tr>
+<tr><td>Cost</td><td>Staff time only</td><td>Staff time + compute</td><td>$20k–$200k+ per year</td></tr>
+<tr><td>Customizability</td><td>High (but slow)</td><td>High (code)</td><td>Low (vendor lock-in)</td></tr>
+<tr><td>Scalability</td><td>Poor</td><td>Good</td><td>Excellent</td></tr></table></div>
+      <p>For organizations with fewer than 200 employees or those in an early compliance maturity phase, the Claude Code approach delivers most of the automation benefit at a fraction of the GRC platform cost.</p>
+      <h2>Core Claude Code Skills for Evidence Collection</h2>
+      <ol>
+      <li>File Operations Skill for Documenting Configurations</li>
+      </ol>
+      <p>The file operations skill enables Claude Code to read, analyze, and document configuration files as evidence:</p>
+      <pre><code class="language-python">def collect_configuration_evidence(config_paths):
+ &quot;&quot;&quot;Collect configuration files as audit evidence&quot;&quot;&quot;
+ evidence = {}
+ for path in config_paths:
+ with open(path, &#x27;r&#x27;) as f:
+ evidence[path] = {
+ &#x27;content&#x27;: f.read(),
+ &#x27;timestamp&#x27;: get_audit_timestamp(),
+ &#x27;hash&#x27;: calculate_hash(f)
+ }
+ return evidence</code></pre>
+      <p>This pattern works for documenting:</p>
+      <ul>
+      <li>AWS/IAM policy files</li>
+      <li>Kubernetes manifests</li>
+      <li>Application configuration files</li>
+      <li>Database security settings</li>
+      </ul>
+      <p>A more production-hardened version adds error handling, encoding normalization, and structured metadata:</p>
+      <pre><code class="language-python">import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
+
+def get_audit_timestamp() -&gt; str:
+ &quot;&quot;&quot;Return ISO 8601 UTC timestamp suitable for audit records.&quot;&quot;&quot;
+ return datetime.now(timezone.utc).isoformat()
+
+def calculate_file_hash(path: Path) -&gt; str:
+ &quot;&quot;&quot;Calculate SHA-256 hash of file contents.&quot;&quot;&quot;
+ sha256 = hashlib.sha256()
+ with open(path, &#x27;rb&#x27;) as f:
+ for chunk in iter(lambda: f.read(8192), b&#x27;&#x27;):
+ sha256.update(chunk)
+ return sha256.hexdigest()
+
+def collect_configuration_evidence(
+ config_paths: list[str],
+ control_id: str,
+ collector: str = &quot;automated&quot;,
+ notes: Optional[str] = None
+) -&gt; dict:
+ &quot;&quot;&quot;
+ Collect configuration files as ISO 27001 audit evidence.
+
+ Args:
+ config_paths: List of file paths to collect
+ control_id: ISO 27001 control identifier (e.g. &#x27;A.9.1.1&#x27;)
+ collector: Name or ID of the collecting system/person
+ notes: Optional narrative notes about this evidence
+
+ Returns:
+ Structured evidence record ready for archival
+ &quot;&quot;&quot;
+ evidence_record = {
+ &#x27;control_id&#x27;: control_id,
+ &#x27;collection_timestamp&#x27;: get_audit_timestamp(),
+ &#x27;collector&#x27;: collector,
+ &#x27;notes&#x27;: notes,
+ &#x27;files&#x27;: {}
+ }
+
+ for raw_path in config_paths:
+ path = Path(raw_path)
+ if not path.exists():
+ evidence_record[&#x27;files&#x27;][raw_path] = {
+ &#x27;status&#x27;: &#x27;missing&#x27;,
+ &#x27;error&#x27;: f&#x27;File not found: {raw_path}&#x27;
+ }
+ continue
+
+ try:
+ content = path.read_text(encoding=&#x27;utf-8&#x27;, errors=&#x27;replace&#x27;)
+ evidence_record[&#x27;files&#x27;][raw_path] = {
+ &#x27;status&#x27;: &#x27;collected&#x27;,
+ &#x27;size_bytes&#x27;: path.stat().st_size,
+ &#x27;sha256&#x27;: calculate_file_hash(path),
+ &#x27;last_modified&#x27;: datetime.fromtimestamp(
+ path.stat().st_mtime, tz=timezone.utc
+ ).isoformat(),
+ &#x27;content&#x27;: content
+ }
+ except PermissionError as e:
+ evidence_record[&#x27;files&#x27;][raw_path] = {
+ &#x27;status&#x27;: &#x27;permission_denied&#x27;,
+ &#x27;error&#x27;: str(e)
+ }
+
+ return evidence_record</code></pre>
+      <ol>
+      <li>Git Integration for Change Management Evidence</li>
+      </ol>
+      <p>Claude Code's git integration naturally supports change management documentation:</p>
+      <pre><code class="language-bash">Automated commit with evidence metadata
+git commit -m &quot;Evidence: Access control update for ISO A.9 - $(date +%Y-%m-%d)&quot;</code></pre>
+      <p>The git history becomes your change management evidence, with each modification automatically timestamped and attributed.</p>
+      <p>For richer evidence, use structured commit messages that map directly to ISO 27001 control identifiers:</p>
+      <pre><code class="language-bash">#!/usr/bin/env bash
+scripts/evidence-commit.sh
+Usage: ./scripts/evidence-commit.sh A.9.1.1 &quot;Updated IAM role bindings to remove excess privileges&quot;
+
+CONTROL_ID=$1
+CHANGE_DESCRIPTION=$2
+EVIDENCE_DIR=&quot;evidence/$(date +%Y-%m)&quot;
+
+Export current IAM configuration as snapshot
+aws iam get-account-authorization-details \
+ --output json &gt; &quot;$EVIDENCE_DIR/${CONTROL_ID}_iam_snapshot_$(date +%Y%m%d_%H%M%S).json&quot;
+
+Stage evidence file
+git add &quot;$EVIDENCE_DIR/&quot;
+
+Create structured commit
+git commit -m &quot;iso27001(${CONTROL_ID}): ${CHANGE_DESCRIPTION}
+
+Evidence: ${CONTROL_ID} $(date -u +%Y-%m-%dT%H:%M:%SZ)
+Collector: $(git config user.email)
+Scope: IAM configuration snapshot
+Retention: 3 years&quot;</code></pre>
+      <p>Structured commit messages allow auditors to grep the git log for specific controls:</p>
+      <pre><code class="language-bash">Find all commits related to access control evidence
+git log --oneline --grep=&quot;iso27001(A.9&quot;</code></pre>
+      <ol>
+      <li>Automated Screenshot and State Capture</li>
+      </ol>
+      <p>For visual evidence, Claude Code can invoke screenshot tools:</p>
+      <pre><code class="language-python">def capture_dashboard_state(dashboard_url):
+ &quot;&quot;&quot;Capture dashboard state for evidence&quot;&quot;&quot;
+ result = run_command([
+ &#x27;screenshot-cli&#x27;,
+ &#x27;--url&#x27;, dashboard_url,
+ &#x27;--output&#x27;, f&#x27;evidence/{get_timestamp()}_dashboard.png&#x27;
+ ])
+ return result</code></pre>
+      <p>This captures vulnerability dashboards, access logs, and compliance dashboards at scheduled intervals.</p>
+      <p>For headless capture in CI environments, use Playwright:</p>
+      <pre><code class="language-python">from playwright.sync_api import sync_playwright
+from datetime import datetime, timezone
+import hashlib
+from pathlib import Path
+
+def capture_compliance_dashboard(
+ dashboard_url: str,
+ output_dir: str,
+ control_id: str,
+ auth_token: str | None = None
+) -&gt; dict:
+ &quot;&quot;&quot;
+ Capture a compliance dashboard screenshot as audit evidence.
+
+ Returns evidence metadata including file path, hash, and timestamp.
+ &quot;&quot;&quot;
+ output_path = Path(output_dir)
+ output_path.mkdir(parents=True, exist_ok=True)
+
+ timestamp = datetime.now(timezone.utc)
+ filename = f&quot;{control_id}_{timestamp.strftime(&#x27;%Y%m%d_%H%M%S&#x27;)}_dashboard.png&quot;
+ screenshot_path = output_path / filename
+
+ with sync_playwright() as p:
+ browser = p.chromium.launch(headless=True)
+ context = browser.new_context(
+ viewport={&#x27;width&#x27;: 1920, &#x27;height&#x27;: 1080}
+ )
+
+ if auth_token:
+ context.set_extra_http_headers({
+ &#x27;Authorization&#x27;: f&#x27;Bearer {auth_token}&#x27;
+ })
+
+ page = context.new_page()
+ page.goto(dashboard_url, wait_until=&#x27;networkidle&#x27;, timeout=30000)
+
+ # Wait for dashboard to fully render
+ page.wait_for_timeout(2000)
+
+ page.screenshot(path=str(screenshot_path), full_page=True)
+ browser.close()
+
+ # Calculate hash for integrity verification
+ sha256 = hashlib.sha256(screenshot_path.read_bytes()).hexdigest()
+
+ return {
+ &#x27;control_id&#x27;: control_id,
+ &#x27;file&#x27;: str(screenshot_path),
+ &#x27;sha256&#x27;: sha256,
+ &#x27;timestamp&#x27;: timestamp.isoformat(),
+ &#x27;source_url&#x27;: dashboard_url
+ }</code></pre>
+      <h2>Building the Evidence Collection Workflow</h2>
+      <h2>Step 1: Define Your Control Mapping</h2>
+      <p>Map each ISO 27001 control to evidence types:</p>
+      <div class="table-wrap"><table><tr><th>Control</th><th>Evidence Type</th><th>Collection Method</th></tr>
+<tr><td>A.5.1.1</td><td>Information security policies</td><td>Document version control</td></tr>
+<tr><td>A.6.1.2</td><td>Risk assessment records</td><td>Automated scan exports</td></tr>
+<tr><td>A.9.1.1</td><td>Access control policy</td><td>Configuration snapshots</td></tr>
+<tr><td>A.12.4.1</td><td>Event logging</td><td>Log aggregation queries</td></tr>
+<tr><td>A.18.1.3</td><td>Technical compliance review</td><td>Vulnerability scan reports</td></tr></table></div>
+      <p>Extending this mapping to the full ISO 27001:2022 control set gives you a complete automation blueprint. The 2022 revision reorganized controls into four themes:</p>
+      <div class="table-wrap"><table><tr><th>Theme</th><th>Controls</th><th>Key Evidence Types</th></tr>
+<tr><td>Organizational (5.x)</td><td>37 controls</td><td>Policies, risk registers, supplier contracts</td></tr>
+<tr><td>People (6.x)</td><td>8 controls</td><td>Training records, background check logs, HR records</td></tr>
+<tr><td>Physical (7.x)</td><td>14 controls</td><td>CCTV exports, access badge logs, clean desk audits</td></tr>
+<tr><td>Technological (8.x)</td><td>34 controls</td><td>Config snapshots, scan reports, log exports, code reviews</td></tr></table></div>
+      <p>Claude Code is most impactful for Technological controls (8.x) since those are the most automatable. Organizational and People controls still require human process validation but can use Claude Code to draft policy documents and track acknowledgments.</p>
+      <h2>Step 2: Create Evidence Collection Skills</h2>
+      <p>Build custom Claude Code skills that wrap evidence collection logic:</p>
+      <pre><code class="language-python">class ISO27001EvidenceSkill:
+ &quot;&quot;&quot;Skill for ISO 27001 evidence collection&quot;&quot;&quot;
+
+ def collect_control_evidence(self, control_id):
+ &quot;&quot;&quot;Collect evidence for specific control&quot;&quot;&quot;
+ evidence_map = {
+ &#x27;A.9.1.1&#x27;: self.get_access_control_evidence,
+ &#x27;A.12.4.1&#x27;: self.get_logging_evidence,
+ &#x27;A.16.1.1&#x27;: self.get_incident_evidence,
+ }
+ collector = evidence_map.get(control_id)
+ if collector:
+ return collector()
+ return None</code></pre>
+      <p>A more complete implementation covers AWS, Azure, and GCP cloud environments:</p>
+      <pre><code class="language-python">import subprocess
+import json
+from dataclasses import dataclass, field
+from typing import Callable
+
+@dataclass
+class EvidenceRecord:
+ control_id: str
+ description: str
+ data: dict
+ timestamp: str
+ collector: str
+ errors: list[str] = field(default_factory=list)
+
+class ISO27001EvidenceSkill:
+ &quot;&quot;&quot;
+ Claude Code skill for automated ISO 27001 evidence collection.
+ Supports AWS, Azure, and GCP environments.
+ &quot;&quot;&quot;
+
+ def __init__(self, cloud_provider: str = &quot;aws&quot;, output_dir: str = &quot;./evidence&quot;):
+ self.cloud_provider = cloud_provider
+ self.output_dir = output_dir
+ self.evidence_map: dict[str, Callable] = {
+ # Access control
+ &#x27;8.2&#x27;: self.collect_privileged_access_evidence,
+ &#x27;8.3&#x27;: self.collect_info_access_restriction_evidence,
+ # Logging and monitoring
+ &#x27;8.15&#x27;: self.collect_logging_evidence,
+ &#x27;8.16&#x27;: self.collect_monitoring_evidence,
+ # Vulnerability management
+ &#x27;8.8&#x27;: self.collect_vulnerability_evidence,
+ # Configuration management
+ &#x27;8.9&#x27;: self.collect_configuration_evidence,
+ # Cryptography
+ &#x27;8.24&#x27;: self.collect_encryption_evidence,
+ }
+
+ def collect_control_evidence(self, control_id: str) -&gt; EvidenceRecord:
+ &quot;&quot;&quot;Dispatch evidence collection for a specific control.&quot;&quot;&quot;
+ collector = self.evidence_map.get(control_id)
+ if not collector:
+ return EvidenceRecord(
+ control_id=control_id,
+ description=&quot;No automated collector registered&quot;,
+ data={},
+ timestamp=get_audit_timestamp(),
+ collector=&quot;iso27001-skill&quot;,
+ errors=[f&quot;No collector registered for control {control_id}&quot;]
+ )
+ return collector()
+
+ def collect_privileged_access_evidence(self) -&gt; EvidenceRecord:
+ &quot;&quot;&quot;Collect evidence for 8.2 Privileged Access Rights.&quot;&quot;&quot;
+ data = {}
+ errors = []
+
+ if self.cloud_provider == &quot;aws&quot;:
+ # List IAM users with AdministratorAccess
+ result = self._run_aws_cli([
+ &#x27;iam&#x27;, &#x27;get-account-authorization-details&#x27;,
+ &#x27;--filter&#x27;, &#x27;User&#x27;
+ ])
+ if result[&#x27;success&#x27;]:
+ data[&#x27;iam_users&#x27;] = result[&#x27;output&#x27;]
+ else:
+ errors.append(result[&#x27;error&#x27;])
+
+ # Check for users without MFA
+ result = self._run_aws_cli([
+ &#x27;iam&#x27;, &#x27;generate-credential-report&#x27;
+ ])
+ if result[&#x27;success&#x27;]:
+ data[&#x27;credential_report_requested&#x27;] = True
+ else:
+ errors.append(result[&#x27;error&#x27;])
+
+ return EvidenceRecord(
+ control_id=&#x27;8.2&#x27;,
+ description=&#x27;Privileged access rights snapshot&#x27;,
+ data=data,
+ timestamp=get_audit_timestamp(),
+ collector=&#x27;iso27001-skill&#x27;,
+ errors=errors
+ )
+
+ def collect_logging_evidence(self) -&gt; EvidenceRecord:
+ &quot;&quot;&quot;Collect evidence for 8.15 Logging.&quot;&quot;&quot;
+ data = {}
+ errors = []
+
+ if self.cloud_provider == &quot;aws&quot;:
+ # Verify CloudTrail is enabled
+ result = self._run_aws_cli([
+ &#x27;cloudtrail&#x27;, &#x27;describe-trails&#x27;,
+ &#x27;--include-shadow-trails&#x27;
+ ])
+ if result[&#x27;success&#x27;]:
+ data[&#x27;cloudtrail_config&#x27;] = result[&#x27;output&#x27;]
+ else:
+ errors.append(result[&#x27;error&#x27;])
+
+ # Check CloudWatch log retention
+ result = self._run_aws_cli([
+ &#x27;logs&#x27;, &#x27;describe-log-groups&#x27;,
+ &#x27;--query&#x27;, &#x27;logGroups[*].{name:logGroupName,retentionDays:retentionInDays}&#x27;
+ ])
+ if result[&#x27;success&#x27;]:
+ data[&#x27;log_retention_config&#x27;] = result[&#x27;output&#x27;]
+ else:
+ errors.append(result[&#x27;error&#x27;])
+
+ return EvidenceRecord(
+ control_id=&#x27;8.15&#x27;,
+ description=&#x27;Logging configuration and retention snapshot&#x27;,
+ data=data,
+ timestamp=get_audit_timestamp(),
+ collector=&#x27;iso27001-skill&#x27;,
+ errors=errors
+ )
+
+ def _run_aws_cli(self, args: list[str]) -&gt; dict:
+ &quot;&quot;&quot;Run an AWS CLI command and return structured result.&quot;&quot;&quot;
+ try:
+ result = subprocess.run(
+ [&#x27;aws&#x27;] + args + [&#x27;--output&#x27;, &#x27;json&#x27;],
+ capture_output=True, text=True, timeout=30
+ )
+ if result.returncode == 0:
+ return {&#x27;success&#x27;: True, &#x27;output&#x27;: json.loads(result.stdout)}
+ return {&#x27;success&#x27;: False, &#x27;error&#x27;: result.stderr.strip()}
+ except subprocess.TimeoutExpired:
+ return {&#x27;success&#x27;: False, &#x27;error&#x27;: &#x27;AWS CLI command timed out&#x27;}
+ except json.JSONDecodeError as e:
+ return {&#x27;success&#x27;: False, &#x27;error&#x27;: f&#x27;Failed to parse AWS CLI output: {e}&#x27;}</code></pre>
+      <h2>Step 3: Schedule Automated Collection</h2>
+      <p>Use cron or CI/CD pipelines to trigger evidence collection:</p>
+      <pre><code class="language-yaml">GitHub Actions workflow for scheduled evidence collection
+name: ISO 27001 Evidence Collection
+on:
+ schedule:
+ - cron: &#x27;0 2 * * *&#x27; # Daily at 2 AM
+ workflow_dispatch:
+
+jobs:
+ collect-evidence:
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+ - name: Run Claude Evidence Collection
+ run: |
+ # Claude Code reads instructions from CLAUDE.md at repo root
+ # Place your iso27001-evidence skill instructions in CLAUDE.md
+ # or pass a prompt directly:
+ claude -p &quot;Run ISO27001 evidence collection: audit logs, access reviews, change records. Output findings to ./evidence/&quot;
+ - name: Archive Evidence
+ uses: actions/upload-artifact@v4
+ with:
+ name: iso27001-evidence
+ path: ./evidence/</code></pre>
+      <p>For organizations needing immutable evidence storage, extend the workflow to push to a write-protected S3 bucket:</p>
+      <pre><code class="language-yaml">jobs:
+ collect-and-archive-evidence:
+ runs-on: ubuntu-latest
+ permissions:
+ id-token: write # Required for OIDC AWS auth
+ contents: read
+
+ steps:
+ - uses: actions/checkout@v4
+
+ - name: Configure AWS credentials via OIDC
+ uses: aws-actions/configure-aws-credentials@v4
+ with:
+ role-to-assume: arn:aws:iam::123456789:role/iso27001-evidence-collector
+ aws-region: us-east-1
+
+ - name: Set up Python
+ uses: actions/setup-python@v5
+ with:
+ python-version: &#x27;3.12&#x27;
+
+ - name: Install evidence collection dependencies
+ run: pip install boto3 playwright
+
+ - name: Install Playwright browsers
+ run: playwright install chromium --with-deps
+
+ - name: Run evidence collection
+ env:
+ EVIDENCE_DATE: $
+ CONTROL_SET: &quot;8.2,8.3,8.15,8.16,8.8&quot;
+ run: python scripts/collect_evidence.py --controls &quot;$CONTROL_SET&quot;
+
+ - name: Upload evidence to S3 (immutable)
+ run: |
+ EVIDENCE_PATH=&quot;s3://myorg-iso27001-evidence/$(date +%Y/%m/%d)/&quot;
+ aws s3 sync ./evidence/ &quot;$EVIDENCE_PATH&quot; \
+ --storage-class GLACIER_IR \
+ --metadata &quot;collection-run=$,workflow=$&quot;
+
+ - name: Tag evidence collection run
+ run: |
+ echo &quot;Evidence archived: s3://myorg-iso27001-evidence/$(date +%Y/%m/%d)/&quot; &gt;&gt; $GITHUB_STEP_SUMMARY</code></pre>
+      <h2>Step 4: Generate Compliance Reports</h2>
+      <p>Claude Code can compile evidence into audit-ready reports:</p>
+      <pre><code class="language-python">def generate_compliance_report(control_id, evidence_dir):
+ &quot;&quot;&quot;Generate markdown compliance report&quot;&quot;&quot;
+ evidence_files = list(Path(evidence_dir).glob(f&#x27;{control_id}*&#x27;))
+
+ report = f&quot;&quot;&quot;# ISO 27001 Control {control_id} Evidence Report
+
+Collected Evidence
+
+&quot;&quot;&quot;
+ for evidence_file in evidence_files:
+ report += f&quot;- [{evidence_file.name}]({evidence_file})\n&quot;
+
+ report += f&quot;&quot;&quot;
+Collection Timestamp
+{get_audit_timestamp()}
+
+Evidence Hash
+{calculate_directory_hash(evidence_dir)}
+&quot;&quot;&quot;
+ return report</code></pre>
+      <p>A more complete report generator adds pass/fail assessment for each control and a summary dashboard:</p>
+      <pre><code class="language-python">from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+
+def calculate_directory_hash(directory: str) -&gt; str:
+ &quot;&quot;&quot;Calculate a reproducible SHA-256 hash of all files in a directory.&quot;&quot;&quot;
+ dir_path = Path(directory)
+ sha256 = hashlib.sha256()
+
+ for file_path in sorted(dir_path.rglob(&#x27;*&#x27;)):
+ if file_path.is_file():
+ sha256.update(file_path.name.encode())
+ sha256.update(file_path.read_bytes())
+
+ return sha256.hexdigest()
+
+def assess_control_status(evidence_files: list[Path]) -&gt; str:
+ &quot;&quot;&quot;
+ Determine control compliance status based on collected evidence.
+ Returns: COMPLIANT, PARTIALLY_COMPLIANT, NON_COMPLIANT, or NOT_ASSESSED
+ &quot;&quot;&quot;
+ if not evidence_files:
+ return &quot;NOT_ASSESSED&quot;
+
+ # Check for error markers in evidence files
+ errors_found = False
+ for f in evidence_files:
+ if f.suffix == &#x27;.json&#x27;:
+ try:
+ data = json.loads(f.read_text())
+ if data.get(&#x27;errors&#x27;):
+ errors_found = True
+ except (json.JSONDecodeError, KeyError):
+ pass
+
+ if errors_found:
+ return &quot;PARTIALLY_COMPLIANT&quot;
+
+ return &quot;COMPLIANT&quot;
+
+def generate_compliance_report(
+ control_id: str,
+ evidence_dir: str,
+ control_description: str = &quot;&quot;,
+ assessor: str = &quot;automated&quot;
+) -&gt; str:
+ &quot;&quot;&quot;Generate a full markdown compliance evidence report.&quot;&quot;&quot;
+ evidence_path = Path(evidence_dir)
+ evidence_files = sorted(evidence_path.glob(f&#x27;{control_id}*&#x27;))
+ status = assess_control_status(evidence_files)
+
+ status_badge = {
+ &quot;COMPLIANT&quot;: &quot; COMPLIANT&quot;,
+ &quot;PARTIALLY_COMPLIANT&quot;: &quot;~ PARTIALLY COMPLIANT&quot;,
+ &quot;NON_COMPLIANT&quot;: &quot; NON-COMPLIANT&quot;,
+ &quot;NOT_ASSESSED&quot;: &quot;? NOT ASSESSED&quot;
+ }.get(status, status)
+
+ report_lines = [
+ f&quot;# ISO 27001 Control {control_id} Evidence Report&quot;,
+ &quot;&quot;,
+ f&quot;Control: {control_id} {control_description}&quot;,
+ f&quot;Status: {status_badge}&quot;,
+ f&quot;Assessor: {assessor}&quot;,
+ f&quot;Report Generated: {datetime.now(timezone.utc).isoformat()}&quot;,
+ &quot;&quot;,
+ &quot;---&quot;,
+ &quot;&quot;,
+ &quot;## Collected Evidence&quot;,
+ &quot;&quot;,
+ ]
+
+ if evidence_files:
+ for ef in evidence_files:
+ file_hash = hashlib.sha256(ef.read_bytes()).hexdigest()[:16]
+ size_kb = ef.stat().st_size / 1024
+ report_lines.append(
+ f&quot;| `{ef.name}` | {size_kb:.1f} KB | `{file_hash}...` |&quot;
+ )
+ report_lines.insert(-1, &quot;| File | Size | SHA-256 (first 16) |&quot;)
+ report_lines.insert(-1, &quot;|------|------|---------------------|&quot;)
+ else:
+ report_lines.append(&quot;_No evidence files collected for this control._&quot;)
+
+ report_lines += [
+ &quot;&quot;,
+ &quot;## Evidence Integrity&quot;,
+ &quot;&quot;,
+ f&quot;Directory Hash: `{calculate_directory_hash(evidence_dir)}`&quot;,
+ &quot;&quot;,
+ &quot;_This hash covers all evidence files in this collection. &quot;
+ &quot;Recalculate to verify no files have been modified._&quot;
+ ]
+
+ return &quot;\n&quot;.join(report_lines)</code></pre>
+      <h2>Practical Example: Access Control Evidence</h2>
+      <p>Let's walk through a complete example for ISO 27001 control A.9 (Access Control):</p>
+      <ol>
+      <li>Document the access control policy: Use Claude Code to read and version control IAM policies</li>
+      <li>Capture current state: Query AWS IAM or Azure AD for current user assignments</li>
+      <li>Verify privileged access: Check for users with elevated permissions</li>
+      <li>Generate evidence package: Compile everything into a timestamped report</li>
+      </ol>
+      <pre><code class="language-python">def collect_access_control_evidence():
+ &quot;&quot;&quot;Complete evidence collection for A.9 controls&quot;&quot;&quot;
+ evidence = {
+ &#x27;policy_documents&#x27;: read_versioned_files(&#x27;configs/iam/*.json&#x27;),
+ &#x27;current_users&#x27;: run_aws_command(&#x27;iam list-users&#x27;),
+ &#x27;role_assignments&#x27;: run_azure_command(&#x27;role assignments list&#x27;),
+ &#x27;mfa_status&#x27;: check_mfa_enforcement(),
+ &#x27;timestamp&#x27;: get_iso_timestamp()
+ }
+
+ # Archive to evidence store
+ archive_evidence(&#x27;A.9&#x27;, evidence)
+ return evidence</code></pre>
+      <h2>Detecting Access Control Weaknesses During Collection</h2>
+      <p>Evidence collection is more valuable when it flags problems automatically. Augment the basic collection with policy analysis:</p>
+      <pre><code class="language-python">def analyze_iam_evidence(iam_data: dict) -&gt; dict:
+ &quot;&quot;&quot;
+ Analyze collected IAM evidence for common ISO 27001 A.9 findings.
+ Returns a list of findings suitable for inclusion in the audit report.
+ &quot;&quot;&quot;
+ findings = []
+
+ users = iam_data.get(&#x27;UserDetailList&#x27;, [])
+ for user in users:
+ username = user.get(&#x27;UserName&#x27;, &#x27;unknown&#x27;)
+
+ # Check for users without MFA
+ mfa_devices = user.get(&#x27;MFADevices&#x27;, [])
+ if not mfa_devices:
+ findings.append({
+ &#x27;severity&#x27;: &#x27;HIGH&#x27;,
+ &#x27;control&#x27;: &#x27;8.5&#x27;,
+ &#x27;finding&#x27;: f&#x27;User {username} has no MFA device registered&#x27;,
+ &#x27;recommendation&#x27;: &#x27;Enforce MFA via IAM policy condition&#x27;
+ })
+
+ # Check for inline policies (harder to audit than managed policies)
+ inline_policies = user.get(&#x27;UserPolicyList&#x27;, [])
+ if inline_policies:
+ findings.append({
+ &#x27;severity&#x27;: &#x27;MEDIUM&#x27;,
+ &#x27;control&#x27;: &#x27;8.2&#x27;,
+ &#x27;finding&#x27;: f&#x27;User {username} has {len(inline_policies)} inline policy/policies&#x27;,
+ &#x27;recommendation&#x27;: &#x27;Convert to managed policies for easier review&#x27;
+ })
+
+ # Check for direct policy attachments (should use roles/groups instead)
+ attached_managed = user.get(&#x27;AttachedManagedPolicies&#x27;, [])
+ admin_policies = [
+ p for p in attached_managed
+ if &#x27;AdministratorAccess&#x27; in p.get(&#x27;PolicyName&#x27;, &#x27;&#x27;)
+ ]
+ if admin_policies:
+ findings.append({
+ &#x27;severity&#x27;: &#x27;CRITICAL&#x27;,
+ &#x27;control&#x27;: &#x27;8.2&#x27;,
+ &#x27;finding&#x27;: f&#x27;User {username} has direct AdministratorAccess&#x27;,
+ &#x27;recommendation&#x27;: &#x27;Remove and assign to a break-glass group with time-limited access&#x27;
+ })
+
+ return {
+ &#x27;total_users_reviewed&#x27;: len(users),
+ &#x27;findings&#x27;: findings,
+ &#x27;critical_count&#x27;: sum(1 for f in findings if f[&#x27;severity&#x27;] == &#x27;CRITICAL&#x27;),
+ &#x27;high_count&#x27;: sum(1 for f in findings if f[&#x27;severity&#x27;] == &#x27;HIGH&#x27;),
+ &#x27;medium_count&#x27;: sum(1 for f in findings if f[&#x27;severity&#x27;] == &#x27;MEDIUM&#x27;)
+ }</code></pre>
+      <h2>Best Practices for Automated Evidence Collection</h2>
+      <ol>
+      <li>Immutability: Store evidence in append-only storage (S3 with bucket policies, Git with branch protection)</li>
+      <li>Integrity: Generate cryptographic hashes for all evidence files</li>
+      <li>Timestamp accuracy: Use synchronized NTP time across all systems</li>
+      <li>Audit trails: Log all evidence collection actions with attribution</li>
+      <li>Retention: Define evidence retention policies aligned with ISO 27001 requirements (typically 3+ years)</li>
+      </ol>
+      <h2>Evidence Storage Architecture</h2>
+      <p>Choosing the right storage architecture determines whether auditors trust your evidence. Here is a comparison of common approaches:</p>
+      <div class="table-wrap"><table><tr><th>Storage Option</th><th>Immutability</th><th>Searchability</th><th>Cost</th><th>Recommended For</th></tr>
+<tr><td>S3 + Object Lock</td><td>High (WORM)</td><td>Via Athena</td><td>Low</td><td>Production</td></tr>
+<tr><td>Git + branch protection</td><td>Moderate</td><td>git log/grep</td><td>Free</td><td>Small teams</td></tr>
+<tr><td>SharePoint/Confluence</td><td>Low</td><td>Good</td><td>Included</td><td>Document evidence</td></tr>
+<tr><td>Dedicated GRC platform</td><td>High</td><td>Excellent</td><td>High</td><td>Regulated enterprise</td></tr>
+<tr><td>Local filesystem</td><td>None</td><td>Basic</td><td>Free</td><td>Development only</td></tr></table></div>
+      <p>For most organizations using Claude Code automation, S3 with Object Lock in Governance mode is the ideal backend. It prevents deletion and modification during the retention period while still allowing authorized administrators to clean up mistakes.</p>
+      <h2>Implementing S3 WORM Storage for Evidence</h2>
+      <pre><code class="language-python">import boto3
+from datetime import datetime, timezone, timedelta
+
+def archive_evidence_to_s3_worm(
+ evidence_dir: str,
+ bucket_name: str,
+ retention_years: int = 3
+) -&gt; list[str]:
+ &quot;&quot;&quot;
+ Upload evidence files to S3 with Object Lock for immutable retention.
+
+ Returns list of S3 URIs for uploaded files.
+ &quot;&quot;&quot;
+ s3 = boto3.client(&#x27;s3&#x27;)
+ uploaded = []
+ retain_until = datetime.now(timezone.utc) + timedelta(days=retention_years * 365)
+
+ for file_path in Path(evidence_dir).rglob(&#x27;*&#x27;):
+ if not file_path.is_file():
+ continue
+
+ s3_key = f&quot;evidence/{file_path.relative_to(evidence_dir)}&quot;
+
+ s3.put_object(
+ Bucket=bucket_name,
+ Key=s3_key,
+ Body=file_path.read_bytes(),
+ ObjectLockMode=&#x27;GOVERNANCE&#x27;,
+ ObjectLockRetainUntilDate=retain_until,
+ Metadata={
+ &#x27;collection-timestamp&#x27;: datetime.now(timezone.utc).isoformat(),
+ &#x27;source-file&#x27;: file_path.name,
+ &#x27;sha256&#x27;: calculate_file_hash(file_path)
+ }
+ )
+ uploaded.append(f&quot;s3://{bucket_name}/{s3_key}&quot;)
+
+ return uploaded</code></pre>
+      <h2>Integration with Existing Workflows</h2>
+      <p>Claude Code evidence collection integrates naturally with:</p>
+      <ul>
+      <li>CI/CD pipelines: Collect evidence as part of deployment processes</li>
+      <li>Infrastructure as Code: Version control becomes evidence documentation</li>
+      <li>Security scanning: Automated tool outputs become compliance evidence</li>
+      <li>Incident response: Post-incident documentation automatically captured</li>
+      </ul>
+      <h2>Connecting to Common Security Tooling</h2>
+      <p>Most security teams already have scanning tools. Claude Code can translate their outputs into ISO 27001 evidence:</p>
+      <div class="table-wrap"><table><tr><th>Security Tool</th><th>ISO 27001 Control</th><th>Integration Method</th></tr>
+<tr><td>AWS Security Hub</td><td>8.8, 8.16</td><td>`aws securityhub get-findings --filters ...`</td></tr>
+<tr><td>Tenable / Nessus</td><td>8.8</td><td>Nessus API export to CSV/JSON</td></tr>
+<tr><td>Snyk / Dependabot</td><td>8.8</td><td>GitHub API or Snyk API</td></tr>
+<tr><td>Splunk / Elastic</td><td>8.15, 8.16</td><td>Query API → JSON export</td></tr>
+<tr><td>Hashicorp Vault</td><td>8.24, 8.10</td><td>Vault audit log export</td></tr>
+<tr><td>GitHub Advanced Security</td><td>8.25, 8.28</td><td>GitHub Security API</td></tr>
+<tr><td>Lacework / Wiz</td><td>8.7, 8.8</td><td>Platform API JSON export</td></tr></table></div>
+      <p>The integration pattern is consistent: query the tool's API, save the output as a timestamped JSON file, calculate its hash, and include it in the evidence package.</p>
+      <h2>CLAUDE.md for Compliance Projects</h2>
+      <p>Document your evidence collection setup in a project-level <code>CLAUDE.md</code> so any session can pick up where the last one left off:</p>
+      <pre><code class="language-markdown">ISO 27001 Compliance Automation
+
+Project Purpose
+Automated evidence collection for annual ISO 27001 surveillance audit (scope: AWS us-east-1).
+
+Evidence Collection Schedule
+- Daily: Logging config, access reviews (via GitHub Actions)
+- Weekly: Vulnerability scan exports, config snapshots
+- Monthly: Full IAM review, encryption key rotation status
+- Pre-audit: Full evidence package generation
+
+Control Coverage
+Automated: 8.2, 8.3, 8.5, 8.8, 8.9, 8.15, 8.16, 8.24
+Manual required: 5.x (policies), 6.x (HR), 7.x (physical)
+
+Running Collection Manually
+python scripts/collect_evidence.py --controls all --output ./evidence/$(date +%Y-%m-%d)
+
+Evidence Storage
+Archived to: s3://myorg-iso27001-evidence/
+Retention: 3 years (Object Lock Governance mode)</code></pre>
+      <h2>Conclusion</h2>
+      <p>Claude Code transforms ISO 27001 evidence collection from a manual, periodic burden into an automated, continuous process. By integrating evidence collection into development workflows, organizations maintain audit-ready documentation without additional overhead. The key is starting with high-value controls, privileged access, logging, vulnerability management, and gradually expanding coverage as your evidence collection matures.</p>
+      <p>The workflow demonstrated here provides a foundation. Customize the evidence types, collection methods, and reporting formats to match your specific ISO 27001 scope and organizational context. As your automation library grows, you will find that audit preparation shrinks from weeks of frantic document gathering to a few hours of reviewing what the system has already collected.</p>
+      <p>The most important shift is cultural: once evidence collection is automated and continuous, your team stops thinking about compliance as a periodic event and starts treating it as a live, always-current view of your security posture.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-iso27001-evidence-collection-workflow">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code ISO 27001 Evidence Collection Workflow",
+    "description": "Build automated ISO 27001 evidence collection workflows using Claude Code. Streamline compliance audits.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-iso27001-evidence-collection-workflow/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

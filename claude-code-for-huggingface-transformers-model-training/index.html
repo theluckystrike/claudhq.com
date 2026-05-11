@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code for HuggingFace Transformers Model Training | ClaudHQ</title>
+  <meta name="description" content="Use Claude Code to streamline your HuggingFace Transformers model training workflow with practical examples.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-for-huggingface-transformers-model-training/">
+  <meta property="og:title" content="Claude Code for HuggingFace Transformers Model Training | ClaudHQ">
+  <meta property="og:description" content="Use Claude Code to streamline your HuggingFace Transformers model training workflow with practical examples.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-for-huggingface-transformers-model-training/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code for HuggingFace Transformers Model Training</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>The intersection of AI-assisted development and transformer model training represents one of the most exciting frontiers in modern machine learning. Claude Code, with its powerful coding capabilities and tool-use features, can dramatically accelerate your HuggingFace Transformers workflow, from data preprocessing through model training and evaluation. This guide explores practical strategies for integrating Claude Code into your transformer model training pipeline, covering everything from environment setup to production deployment.</p>
+      <h2>Setting Up Your Training Environment</h2>
+      <p>Claude Code excels at helping you set up solid training environments. Before diving into model training, ensure your environment is properly configured with all necessary dependencies. Claude can generate a comprehensive requirements file or help you create a Docker container optimized for GPU training.</p>
+      <p>Start by having Claude generate a project structure for your training pipeline:</p>
+      <pre><code class="language-python">from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from datasets import load_dataset
+from torch.utils.data import DataLoader
+import torch
+
+Configuration for your training run
+model_name = &quot;distilbert-base-uncased&quot;
+num_labels = 2
+learning_rate = 2e-5
+num_epochs = 3
+batch_size = 16</code></pre>
+      <p>Claude Code can also help you set up distributed training configurations for larger models, including DeepSpeed integration and multi-GPU training setups that would otherwise require extensive manual configuration.</p>
+      <h2>Choosing the Right Base Model</h2>
+      <p>One of the first decisions in any transformer project is which base model to fine-tune. Claude Code can help you reason through the tradeoffs when you provide your task description and hardware constraints. Here is a practical comparison of common base models for classification tasks:</p>
+      <div class="table-wrap"><table><tr><th>Model</th><th>Parameters</th><th>GPU Memory (FP32)</th><th>Typical Accuracy</th><th>Best For</th></tr>
+<tr><td>distilbert-base-uncased</td><td>66M</td><td>~1.5 GB</td><td>High (90-95% of BERT)</td><td>CPU inference, fast iteration</td></tr>
+<tr><td>bert-base-uncased</td><td>110M</td><td>~2.5 GB</td><td>Strong baseline</td><td>General NLP classification</td></tr>
+<tr><td>roberta-base</td><td>125M</td><td>~2.8 GB</td><td>Often beats BERT</td><td>Longer documents, noisy text</td></tr>
+<tr><td>deberta-v3-base</td><td>183M</td><td>~4.2 GB</td><td>State-of-art on many tasks</td><td>High-accuracy requirements</td></tr>
+<tr><td>bert-large-uncased</td><td>340M</td><td>~7.0 GB</td><td>Strong</td><td>When accuracy > speed</td></tr></table></div>
+      <p>Ask Claude Code something like: "Given I have an RTX 3090 with 24GB VRAM and need to classify customer support tickets into 12 categories, which base model and batch size should I start with?" Claude will reason through the memory math and recommend a starting point.</p>
+      <h2>Environment and Dependency Setup</h2>
+      <p>Claude Code can generate a <code>requirements.txt</code> or <code>pyproject.toml</code> with pinned versions that avoid common incompatibility issues:</p>
+      <pre><code class="language-bash">Ask Claude Code to audit your environment
+claude &quot;Check for version conflicts between torch, transformers, datasets, and accelerate in my current environment and suggest a stable combination&quot;</code></pre>
+      <p>A Claude-generated <code>requirements.txt</code> for a GPU training environment typically looks like:</p>
+      <pre><code class="language-">torch==2.2.0+cu121
+transformers==4.38.2
+datasets==2.18.0
+accelerate==0.27.2
+peft==0.9.0
+evaluate==0.4.1
+scikit-learn==1.4.1
+wandb==0.16.4</code></pre>
+      <p>Claude Code knows which version combinations are tested and stable, saving you hours of debugging dependency conflicts.</p>
+      <h2>Data Preparation and Preprocessing</h2>
+      <p>One of Claude Code's strongest capabilities is its ability to understand and manipulate data. When working with HuggingFace datasets, you can use Claude to handle complex preprocessing pipelines efficiently.</p>
+      <p>Claude can help you create custom data collators, handle tokenization at scale, and implement advanced preprocessing techniques like data augmentation for NLP tasks. Here's how you might approach tokenization:</p>
+      <pre><code class="language-python">def tokenize_function(examples):
+ return tokenizer(
+ examples[&quot;text&quot;],
+ padding=&quot;max_length&quot;,
+ truncation=True,
+ max_length=512
+ )
+
+Apply tokenization across all splits
+tokenized_dataset = dataset.map(tokenize_function, batched=True)
+tokenized_dataset = tokenized_dataset.remove_columns([&quot;text&quot;])
+tokenized_dataset = tokenized_dataset.rename_column(&quot;label&quot;, &quot;labels&quot;)
+tokenized_dataset.set_format(&quot;torch&quot;)</code></pre>
+      <h2>Dynamic Padding vs. Fixed Padding</h2>
+      <p>A common mistake beginners make is always padding to the model's maximum length (512 tokens for BERT). Claude Code will point out that dynamic padding, padding each batch to the longest sequence in that batch, is almost always more efficient. Here is how to implement it using a data collator:</p>
+      <pre><code class="language-python">from transformers import DataCollatorWithPadding
+
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+def tokenize_function(examples):
+ # No padding here. let the collator handle it per batch
+ return tokenizer(
+ examples[&quot;text&quot;],
+ truncation=True,
+ max_length=512
+ )
+
+tokenized_dataset = dataset.map(tokenize_function, batched=True, remove_columns=[&quot;text&quot;])
+tokenized_dataset = tokenized_dataset.rename_column(&quot;label&quot;, &quot;labels&quot;)
+
+This collator pads each batch dynamically
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)</code></pre>
+      <p>Dynamic padding can reduce training time by 20-40% on datasets with variable-length text because short sequences no longer waste compute on padding tokens.</p>
+      <h2>Handling Imbalanced Datasets</h2>
+      <p>Real-world classification datasets are rarely balanced. Claude Code can suggest and implement several strategies depending on your imbalance ratio:</p>
+      <div class="table-wrap"><table><tr><th>Strategy</th><th>Imbalance Ratio</th><th>Pros</th><th>Cons</th></tr>
+<tr><td>Class weights in loss</td><td>2:1 to 10:1</td><td>Simple, no data changes</td><td>May not help extreme imbalance</td></tr>
+<tr><td>Oversampling (SMOTE-like)</td><td>5:1 to 20:1</td><td>Keeps all data</td><td>Risk of overfitting minority</td></tr>
+<tr><td>Undersampling majority</td><td>Any ratio</td><td>Fast, reduces dataset size</td><td>Discards useful data</td></tr>
+<tr><td>Focal loss</td><td>Any ratio</td><td>Focuses on hard examples</td><td>More hyperparameters to tune</td></tr>
+<tr><td>Threshold tuning at inference</td><td>Any ratio</td><td>No training changes needed</td><td>Requires calibration set</td></tr></table></div>
+      <p>Here is how Claude Code would help you implement weighted cross-entropy loss for a 10:1 imbalanced binary dataset:</p>
+      <pre><code class="language-python">import torch
+from torch import nn
+from transformers import Trainer
+
+Compute class weights from training label distribution
+label_counts = [9000, 1000] # majority=9000, minority=1000
+total = sum(label_counts)
+class_weights = torch.tensor([total / (len(label_counts) * c) for c in label_counts])
+
+class WeightedTrainer(Trainer):
+ def compute_loss(self, model, inputs, return_outputs=False):
+ labels = inputs.pop(&quot;labels&quot;)
+ outputs = model(inputs)
+ logits = outputs.logits
+
+ loss_fn = nn.CrossEntropyLoss(
+ weight=class_weights.to(logits.device)
+ )
+ loss = loss_fn(logits, labels)
+ return (loss, outputs) if return_outputs else loss</code></pre>
+      <p>For imbalanced datasets, Claude can suggest and implement sampling strategies, or help you create custom loss functions that address class imbalance without extensive manual research.</p>
+      <h2>Training Configuration with HuggingFace Trainer</h2>
+      <p>The HuggingFace Trainer class provides a powerful abstraction for model training, and Claude Code can help you configure it optimally for your specific use case. Whether you need custom callbacks, evaluation strategies, or hyperparameter search, Claude can generate the appropriate configuration code.</p>
+      <pre><code class="language-python">from transformers import TrainingArguments, Trainer
+
+training_args = TrainingArguments(
+ output_dir=&quot;./results&quot;,
+ evaluation_strategy=&quot;epoch&quot;,
+ learning_rate=learning_rate,
+ per_device_train_batch_size=batch_size,
+ per_device_eval_batch_size=batch_size,
+ num_train_epochs=num_epochs,
+ weight_decay=0.01,
+ logging_dir=&quot;./logs&quot;,
+ logging_steps=10,
+ load_best_model_at_end=True,
+ metric_for_best_model=&quot;accuracy&quot;,
+ report_to=&quot;none&quot;
+)</code></pre>
+      <h2>Complete Training Script with Custom Metrics</h2>
+      <p>Claude Code can help you build a complete training script that includes custom metric computation. Here is an example that tracks accuracy, F1, precision, and recall:</p>
+      <pre><code class="language-python">import numpy as np
+import evaluate
+from transformers import (
+ AutoModelForSequenceClassification,
+ AutoTokenizer,
+ TrainingArguments,
+ Trainer,
+ EarlyStoppingCallback
+)
+from datasets import load_dataset
+
+Load metrics
+accuracy_metric = evaluate.load(&quot;accuracy&quot;)
+f1_metric = evaluate.load(&quot;f1&quot;)
+
+def compute_metrics(eval_pred):
+ logits, labels = eval_pred
+ predictions = np.argmax(logits, axis=-1)
+
+ accuracy = accuracy_metric.compute(
+ predictions=predictions, references=labels
+ )
+ f1 = f1_metric.compute(
+ predictions=predictions, references=labels, average=&quot;weighted&quot;
+ )
+
+ return {
+ &quot;accuracy&quot;: accuracy[&quot;accuracy&quot;],
+ &quot;f1&quot;: f1[&quot;f1&quot;]
+ }
+
+Load model and tokenizer
+model_name = &quot;distilbert-base-uncased&quot;
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(
+ model_name, num_labels=2
+)
+
+Load and preprocess data
+dataset = load_dataset(&quot;imdb&quot;)
+tokenized_dataset = dataset.map(
+ lambda x: tokenizer(x[&quot;text&quot;], truncation=True, max_length=512),
+ batched=True
+)
+
+Training arguments tuned for a single GPU
+training_args = TrainingArguments(
+ output_dir=&quot;./results&quot;,
+ evaluation_strategy=&quot;steps&quot;,
+ eval_steps=500,
+ save_strategy=&quot;steps&quot;,
+ save_steps=500,
+ learning_rate=2e-5,
+ per_device_train_batch_size=16,
+ per_device_eval_batch_size=32,
+ num_train_epochs=3,
+ weight_decay=0.01,
+ warmup_ratio=0.1,
+ lr_scheduler_type=&quot;cosine&quot;,
+ fp16=True,
+ load_best_model_at_end=True,
+ metric_for_best_model=&quot;f1&quot;,
+ greater_is_better=True,
+ logging_steps=100,
+ report_to=&quot;none&quot;
+)
+
+trainer = Trainer(
+ model=model,
+ args=training_args,
+ train_dataset=tokenized_dataset[&quot;train&quot;],
+ eval_dataset=tokenized_dataset[&quot;test&quot;],
+ tokenizer=tokenizer,
+ compute_metrics=compute_metrics,
+ callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+)
+
+trainer.train()</code></pre>
+      <p>Claude Code can also help you implement custom metrics, integrate with Weights & Biases or MLflow for experiment tracking, and set up early stopping callbacks based on your specific requirements.</p>
+      <h2>Experiment Tracking with Weights & Biases</h2>
+      <p>Claude Code can add W&B integration to your training script in under a minute:</p>
+      <pre><code class="language-python">import wandb
+
+wandb.init(
+ project=&quot;sentiment-classification&quot;,
+ config={
+ &quot;model&quot;: model_name,
+ &quot;learning_rate&quot;: 2e-5,
+ &quot;batch_size&quot;: 16,
+ &quot;epochs&quot;: 3,
+ &quot;optimizer&quot;: &quot;AdamW&quot;,
+ &quot;scheduler&quot;: &quot;cosine&quot;
+ }
+)
+
+training_args = TrainingArguments(
+ output_dir=&quot;./results&quot;,
+ report_to=&quot;wandb&quot;,
+ run_name=&quot;distilbert-sentiment-v1&quot;,
+ # ... other args
+)</code></pre>
+      <h2>Fine-Tuning Strategies and Best Practices</h2>
+      <p>When fine-tuning pretrained transformers, several strategies can significantly impact your model's performance. Claude Code can guide you through implementing these techniques:</p>
+      <p>Learning Rate Scheduling: Proper learning rate warmup and decay can prevent catastrophic forgetting. Claude can help you implement cosine annealing, linear warmup, or polynomial decay schedules tailored to your dataset size.</p>
+      <p>Gradient Accumulation: For memory-constrained environments, gradient accumulation allows you to simulate larger batch sizes:</p>
+      <pre><code class="language-python">training_args = TrainingArguments(
+ per_device_train_batch_size=4,
+ gradient_accumulation_steps=4, # Effective batch size: 16
+ # ... other arguments
+)</code></pre>
+      <p>Mixed Precision Training: Reduce memory usage and accelerate training with FP16 or BF16:</p>
+      <pre><code class="language-python">training_args = TrainingArguments(
+ fp16=True, # or bf16=True for Ampere GPUs
+ # ... other arguments
+)</code></pre>
+      <h2>Comparing Fine-Tuning Approaches</h2>
+      <p>Choosing the right fine-tuning strategy significantly affects memory usage, training time, and final accuracy. Claude Code can walk you through the tradeoffs:</p>
+      <div class="table-wrap"><table><tr><th>Approach</th><th>Trainable Params</th><th>GPU Memory</th><th>Training Time</th><th>Best Use Case</th></tr>
+<tr><td>Full fine-tuning</td><td>100%</td><td>High</td><td>Slow</td><td>Sufficient GPU, max accuracy</td></tr>
+<tr><td>Freeze base, train head</td><td><1%</td><td>Low</td><td>Very fast</td><td>Quick baseline, limited GPU</td></tr>
+<tr><td>LoRA (r=8)</td><td>~1-2%</td><td>Medium-low</td><td>Fast</td><td>Efficient fine-tuning</td></tr>
+<tr><td>QLoRA (4-bit + LoRA)</td><td>~1-2%</td><td>Very low</td><td>Medium</td><td>Consumer GPU (8-16GB)</td></tr>
+<tr><td>Adapters</td><td>~3-5%</td><td>Medium</td><td>Medium</td><td>Multi-task learning</td></tr>
+<tr><td>Prefix tuning</td><td><1%</td><td>Low</td><td>Fast</td><td>Few-shot transfer</td></tr></table></div>
+      <h2>Layer-wise Learning Rate Decay</h2>
+      <p>A technique Claude Code commonly recommends for full fine-tuning is applying lower learning rates to earlier transformer layers, since they encode general linguistic knowledge that should change less:</p>
+      <pre><code class="language-python">from transformers import AdamW
+
+def get_grouped_params(model, weight_decay, lr_base, lr_decay=0.9):
+ &quot;&quot;&quot;Apply layer-wise LR decay: deeper layers learn faster.&quot;&quot;&quot;
+ num_layers = model.config.num_hidden_layers
+ optimizer_grouped_parameters = []
+
+ # Embeddings get the lowest LR
+ optimizer_grouped_parameters.append({
+ &quot;params&quot;: [p for n, p in model.named_parameters() if &quot;embeddings&quot; in n],
+ &quot;lr&quot;: lr_base * (lr_decay num_layers),
+ &quot;weight_decay&quot;: weight_decay
+ })
+
+ # Each transformer layer gets progressively higher LR
+ for layer_idx in range(num_layers):
+ layer_lr = lr_base * (lr_decay (num_layers - layer_idx))
+ optimizer_grouped_parameters.append({
+ &quot;params&quot;: [
+ p for n, p in model.named_parameters()
+ if f&quot;layer.{layer_idx}.&quot; in n
+ ],
+ &quot;lr&quot;: layer_lr,
+ &quot;weight_decay&quot;: weight_decay
+ })
+
+ # Classifier head gets full LR
+ optimizer_grouped_parameters.append({
+ &quot;params&quot;: [p for n, p in model.named_parameters() if &quot;classifier&quot; in n],
+ &quot;lr&quot;: lr_base,
+ &quot;weight_decay&quot;: 0.0
+ })
+
+ return optimizer_grouped_parameters
+
+optimizer = AdamW(
+ get_grouped_params(model, weight_decay=0.01, lr_base=2e-5),
+)</code></pre>
+      <h2>Debugging and Optimization</h2>
+      <p>When training doesn't go as expected, Claude Code becomes invaluable for debugging. It can help you diagnose common issues like gradient explosion, NaN losses, or poor generalization. Claude can analyze your training logs and suggest specific interventions.</p>
+      <h2>Common Training Problems and Claude Code Fixes</h2>
+      <p>Here is a reference table of frequent issues and how to address them with Claude Code assistance:</p>
+      <div class="table-wrap"><table><tr><th>Symptom</th><th>Likely Cause</th><th>Claude Code Recommended Fix</th></tr>
+<tr><td>Loss is NaN from step 1</td><td>Learning rate too high, bad data</td><td>Lower LR 10x, add gradient clipping</td></tr>
+<tr><td>Loss decreases then spikes</td><td>LR schedule mismatch</td><td>Add warmup steps, reduce LR</td></tr>
+<tr><td>Validation loss diverges from train loss</td><td>Overfitting</td><td>Add dropout, reduce epochs, weight decay</td></tr>
+<tr><td>GPU OOM error</td><td>Batch too large</td><td>Halve batch size, add gradient accumulation</td></tr>
+<tr><td>Training very slow</td><td>No mixed precision</td><td>Enable fp16=True</td></tr>
+<tr><td>Accuracy stuck at 50%</td><td>Label mismatch, tokenization bug</td><td>Verify label mapping and token alignment</td></tr></table></div>
+      <p>To diagnose gradient issues, Claude Code can add a gradient monitoring callback:</p>
+      <pre><code class="language-python">from transformers import TrainerCallback
+import torch
+
+class GradientMonitorCallback(TrainerCallback):
+ def on_step_end(self, args, state, control, model=None, kwargs):
+ if state.global_step % 100 == 0:
+ total_norm = 0.0
+ for p in model.parameters():
+ if p.grad is not None:
+ param_norm = p.grad.data.norm(2)
+ total_norm += param_norm.item() 2
+ total_norm = total_norm 0.5
+
+ if total_norm &gt; 10.0:
+ print(f&quot;WARNING: Large gradient norm at step {state.global_step}: {total_norm:.2f}&quot;)
+
+ if torch.isnan(torch.tensor(total_norm)):
+ print(f&quot;NaN gradient detected at step {state.global_step}!&quot;)
+ control.should_training_stop = True
+
+trainer = Trainer(
+ # ... other args
+ callbacks=[GradientMonitorCallback()]
+)</code></pre>
+      <p>For optimization, Claude can help you implement techniques like:</p>
+      <ul>
+      <li>LoRA (Low-Rank Adaptation): Fine-tune with reduced memory footprint</li>
+      <li>QLoRA: Quantized fine-tuning for even greater efficiency</li>
+      <li>Adapter layers: Insert trainable modules without modifying the base model</li>
+      </ul>
+      <pre><code class="language-python">from peft import LoraConfig, get_peft_model, TaskType
+
+lora_config = LoraConfig(
+ task_type=TaskType.SEQ_CLS,
+ r=8,
+ lora_alpha=16,
+ lora_dropout=0.1,
+ target_modules=[&quot;query&quot;, &quot;value&quot;]
+)
+
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()</code></pre>
+      <h2>QLoRA for Consumer GPUs</h2>
+      <p>For training on GPUs with 8-16GB VRAM, Claude Code will walk you through QLoRA setup with BitsAndBytes quantization:</p>
+      <pre><code class="language-python">from transformers import BitsAndBytesConfig
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+import torch
+
+4-bit quantization config
+bnb_config = BitsAndBytesConfig(
+ load_in_4bit=True,
+ bnb_4bit_use_double_quant=True,
+ bnb_4bit_quant_type=&quot;nf4&quot;,
+ bnb_4bit_compute_dtype=torch.bfloat16
+)
+
+Load model in 4-bit
+model = AutoModelForSequenceClassification.from_pretrained(
+ &quot;bert-large-uncased&quot;,
+ quantization_config=bnb_config,
+ num_labels=2,
+ device_map=&quot;auto&quot;
+)
+
+Prepare for k-bit training (adds gradient checkpointing hooks)
+model = prepare_model_for_kbit_training(model)
+
+Apply LoRA on top of the quantized model
+lora_config = LoraConfig(
+ r=16,
+ lora_alpha=32,
+ target_modules=[&quot;query&quot;, &quot;key&quot;, &quot;value&quot;],
+ lora_dropout=0.05,
+ bias=&quot;none&quot;,
+ task_type=TaskType.SEQ_CLS
+)
+
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()
+Trainable params: ~2M | All params: ~340M | Trainable: ~0.6%</code></pre>
+      <p>This configuration lets you fine-tune <code>bert-large-uncased</code> (340M parameters) on a single 12GB GPU, something that would require 28GB+ in FP32.</p>
+      <h2>Evaluation and Model Export</h2>
+      <p>After training, Claude Code assists with comprehensive model evaluation, helping you generate classification reports, confusion matrices, and conduct error analysis on misclassified examples. You can also use Claude to export your model in various formats, ONNX for inference optimization, TensorFlow Lite for mobile deployment, or simply save the checkpoint in HuggingFace's standard format.</p>
+      <h2>Generating a Full Evaluation Report</h2>
+      <p>Claude Code can scaffold a post-training evaluation script that goes beyond simple accuracy:</p>
+      <pre><code class="language-python">from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import torch
+
+def evaluate_model_fully(trainer, eval_dataset, label_names):
+ &quot;&quot;&quot;Run full evaluation with confusion matrix and per-class metrics.&quot;&quot;&quot;
+ predictions_output = trainer.predict(eval_dataset)
+ preds = np.argmax(predictions_output.predictions, axis=-1)
+ labels = predictions_output.label_ids
+
+ # Detailed classification report
+ print(&quot;=&quot; * 60)
+ print(&quot;CLASSIFICATION REPORT&quot;)
+ print(&quot;=&quot; * 60)
+ print(classification_report(labels, preds, target_names=label_names))
+
+ # Confusion matrix
+ cm = confusion_matrix(labels, preds)
+ plt.figure(figsize=(8, 6))
+ sns.heatmap(
+ cm, annot=True, fmt=&quot;d&quot;, cmap=&quot;Blues&quot;,
+ xticklabels=label_names,
+ yticklabels=label_names
+ )
+ plt.title(&quot;Confusion Matrix&quot;)
+ plt.ylabel(&quot;True Label&quot;)
+ plt.xlabel(&quot;Predicted Label&quot;)
+ plt.tight_layout()
+ plt.savefig(&quot;confusion_matrix.png&quot;, dpi=150)
+ plt.close()
+
+ # Error analysis: find misclassified examples
+ misclassified_idx = np.where(preds != labels)[0]
+ print(f&quot;\nMisclassified examples: {len(misclassified_idx)} / {len(labels)}&quot;)
+
+ return preds, labels
+
+preds, labels = evaluate_model_fully(
+ trainer,
+ tokenized_dataset[&quot;test&quot;],
+ label_names=[&quot;negative&quot;, &quot;positive&quot;]
+)</code></pre>
+      <h2>Exporting to ONNX</h2>
+      <p>For production inference, ONNX export dramatically reduces latency. Claude Code can generate the full export and validation pipeline:</p>
+      <pre><code class="language-python">from transformers.onnx import export, FeaturesManager
+from pathlib import Path
+import onnxruntime as ort
+import numpy as np
+
+Export to ONNX
+onnx_path = Path(&quot;model.onnx&quot;)
+model_kind, model_onnx_config = FeaturesManager.check_supported_model_or_raise(
+ model, feature=&quot;sequence-classification&quot;
+)
+onnx_config = model_onnx_config(model.config)
+
+export(
+ preprocessor=tokenizer,
+ model=model,
+ config=onnx_config,
+ opset=13,
+ output=onnx_path
+)
+
+Validate the exported model
+session = ort.InferenceSession(str(onnx_path))
+inputs = tokenizer(&quot;Test sentence for validation.&quot;, return_tensors=&quot;np&quot;)
+ort_outputs = session.run(None, dict(inputs))
+print(f&quot;ONNX export successful. Output shape: {ort_outputs[0].shape}&quot;)
+
+Compare with PyTorch output
+with torch.no_grad():
+ pt_inputs = tokenizer(&quot;Test sentence for validation.&quot;, return_tensors=&quot;pt&quot;)
+ pt_outputs = model(pt_inputs).logits.numpy()
+
+max_diff = np.max(np.abs(ort_outputs[0] - pt_outputs))
+print(f&quot;Max difference between ONNX and PyTorch: {max_diff:.6f}&quot;)
+assert max_diff &lt; 1e-4, &quot;ONNX outputs differ significantly from PyTorch!&quot;</code></pre>
+      <h2>Advanced Techniques and Production Readiness</h2>
+      <p>For production deployments, Claude Code can help you implement several critical patterns. Model compression through knowledge distillation allows you to create smaller, faster models that retain most of the original performance. Claude can guide you through the distillation process, helping design teacher-student architectures and appropriate temperature parameters.</p>
+      <p>Inference Optimization: Claude can help you optimize your trained models for inference:</p>
+      <pre><code class="language-python">Optimize for inference with dynamic quantization
+from transformers import AutoModelForSequenceClassification
+import torch
+
+model = AutoModelForSequenceClassification.from_pretrained(&quot;./results/checkpoint-1000&quot;)
+model.eval()
+
+Apply dynamic quantization
+quantized_model = torch.quantization.quantize_dynamic(
+ model, {torch.nn.Linear}, dtype=torch.qint8
+)</code></pre>
+      <h2>Benchmarking Inference Performance</h2>
+      <p>Before choosing an inference optimization strategy, benchmark the baseline. Claude Code can scaffold this benchmarking script:</p>
+      <pre><code class="language-python">import time
+import torch
+import numpy as np
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+def benchmark_inference(model, tokenizer, texts, device, num_warmup=10, num_runs=100):
+ &quot;&quot;&quot;Benchmark inference latency and throughput.&quot;&quot;&quot;
+ model.eval()
+ model.to(device)
+
+ # Tokenize all inputs
+ inputs = tokenizer(texts, return_tensors=&quot;pt&quot;, padding=True, truncation=True)
+ inputs = {k: v.to(device) for k, v in inputs.items()}
+
+ # Warmup
+ with torch.no_grad():
+ for _ in range(num_warmup):
+ _ = model(inputs)
+
+ # Benchmark
+ if device == &quot;cuda&quot;:
+ torch.cuda.synchronize()
+
+ start = time.perf_counter()
+ with torch.no_grad():
+ for _ in range(num_runs):
+ outputs = model(inputs)
+
+ if device == &quot;cuda&quot;:
+ torch.cuda.synchronize()
+
+ elapsed = time.perf_counter() - start
+ avg_latency_ms = (elapsed / num_runs) * 1000
+ throughput = (num_runs * len(texts)) / elapsed
+
+ return {
+ &quot;avg_latency_ms&quot;: avg_latency_ms,
+ &quot;throughput_samples_per_sec&quot;: throughput,
+ &quot;device&quot;: device
+ }
+
+Compare original vs quantized
+test_texts = [&quot;This product is excellent!&quot;, &quot;Terrible experience overall.&quot;]
+original_stats = benchmark_inference(model, tokenizer, test_texts, &quot;cpu&quot;)
+quantized_stats = benchmark_inference(quantized_model, tokenizer, test_texts, &quot;cpu&quot;)
+
+print(f&quot;Original: {original_stats[&#x27;avg_latency_ms&#x27;]:.1f}ms, {original_stats[&#x27;throughput_samples_per_sec&#x27;]:.0f} samples/sec&quot;)
+print(f&quot;Quantized: {quantized_stats[&#x27;avg_latency_ms&#x27;]:.1f}ms, {quantized_stats[&#x27;throughput_samples_per_sec&#x27;]:.0f} samples/sec&quot;)
+print(f&quot;Speedup: {original_stats[&#x27;avg_latency_ms&#x27;] / quantized_stats[&#x27;avg_latency_ms&#x27;]:.2f}x&quot;)</code></pre>
+      <p>API Serving: For deploying your model as a microservice, Claude can generate FastAPI or Flask wrappers with proper request validation, batching, and error handling. You can create a production-ready API in minutes rather than hours.</p>
+      <pre><code class="language-python">from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, validator
+from typing import List, Optional
+import torch
+import logging
+
+logger = logging.getLogger(__name__)
+app = FastAPI(title=&quot;Sentiment Classification API&quot;, version=&quot;1.0.0&quot;)
+
+class PredictionRequest(BaseModel):
+ text: str
+
+ @validator(&quot;text&quot;)
+ def text_must_not_be_empty(cls, v):
+ if not v.strip():
+ raise ValueError(&quot;text cannot be empty&quot;)
+ return v.strip()
+
+class BatchPredictionRequest(BaseModel):
+ texts: List[str]
+
+ @validator(&quot;texts&quot;)
+ def batch_size_limit(cls, v):
+ if len(v) &gt; 32:
+ raise ValueError(&quot;Batch size cannot exceed 32&quot;)
+ return v
+
+class PredictionResponse(BaseModel):
+ prediction: str
+ confidence: float
+ probabilities: dict
+
+@app.post(&quot;/predict&quot;, response_model=PredictionResponse)
+async def predict(request: PredictionRequest):
+ try:
+ inputs = tokenizer(request.text, return_tensors=&quot;pt&quot;, truncation=True, max_length=512)
+ with torch.no_grad():
+ outputs = model(inputs)
+ probs = torch.softmax(outputs.logits, dim=-1)[0]
+ pred_idx = probs.argmax().item()
+ labels = [&quot;negative&quot;, &quot;positive&quot;]
+
+ return PredictionResponse(
+ prediction=labels[pred_idx],
+ confidence=float(probs[pred_idx]),
+ probabilities={labels[i]: float(probs[i]) for i in range(len(labels))}
+ )
+ except Exception as e:
+ logger.error(f&quot;Prediction error: {e}&quot;)
+ raise HTTPException(status_code=500, detail=&quot;Inference failed&quot;)
+
+@app.get(&quot;/health&quot;)
+async def health():
+ return {&quot;status&quot;: &quot;healthy&quot;, &quot;model&quot;: model_name}</code></pre>
+      <h2>Knowledge Distillation for Model Compression</h2>
+      <p>When production latency requirements are strict, Claude Code can walk you through building a student model that learns from your fine-tuned teacher:</p>
+      <pre><code class="language-python">from transformers import DistilBertForSequenceClassification
+import torch.nn.functional as F
+
+Teacher: your fine-tuned BERT
+teacher_model = AutoModelForSequenceClassification.from_pretrained(&quot;./results/best-checkpoint&quot;)
+teacher_model.eval()
+
+Student: smaller DistilBERT
+student_model = DistilBertForSequenceClassification.from_pretrained(
+ &quot;distilbert-base-uncased&quot;, num_labels=2
+)
+
+def distillation_loss(student_logits, teacher_logits, labels, temperature=4.0, alpha=0.5):
+ &quot;&quot;&quot;Combines soft distillation loss with hard label loss.&quot;&quot;&quot;
+ # Soft loss: student learns from teacher&#x27;s probability distribution
+ soft_targets = F.softmax(teacher_logits / temperature, dim=-1)
+ soft_student = F.log_softmax(student_logits / temperature, dim=-1)
+ distill_loss = F.kl_div(soft_student, soft_targets, reduction=&quot;batchmean&quot;) * (temperature 2)
+
+ # Hard loss: student also learns from ground truth labels
+ hard_loss = F.cross_entropy(student_logits, labels)
+
+ return alpha * distill_loss + (1 - alpha) * hard_loss</code></pre>
+      <h2>Hyperparameter Search with Optuna</h2>
+      <p>Claude Code can integrate Optuna for automated hyperparameter search, which is especially valuable when you have compute budget and want to find optimal settings:</p>
+      <pre><code class="language-python">import optuna
+from transformers import TrainingArguments, Trainer
+
+def model_init():
+ return AutoModelForSequenceClassification.from_pretrained(
+ model_name, num_labels=2
+ )
+
+def hp_space(trial):
+ return {
+ &quot;learning_rate&quot;: trial.suggest_float(&quot;learning_rate&quot;, 1e-5, 5e-5, log=True),
+ &quot;num_train_epochs&quot;: trial.suggest_int(&quot;num_train_epochs&quot;, 2, 5),
+ &quot;per_device_train_batch_size&quot;: trial.suggest_categorical(
+ &quot;per_device_train_batch_size&quot;, [8, 16, 32]
+ ),
+ &quot;weight_decay&quot;: trial.suggest_float(&quot;weight_decay&quot;, 0.0, 0.1),
+ &quot;warmup_ratio&quot;: trial.suggest_float(&quot;warmup_ratio&quot;, 0.0, 0.2),
+ }
+
+trainer = Trainer(
+ model_init=model_init,
+ args=TrainingArguments(
+ output_dir=&quot;./hp-search&quot;,
+ evaluation_strategy=&quot;epoch&quot;,
+ disable_tqdm=True
+ ),
+ train_dataset=tokenized_dataset[&quot;train&quot;],
+ eval_dataset=tokenized_dataset[&quot;validation&quot;],
+ compute_metrics=compute_metrics
+)
+
+best_run = trainer.hyperparameter_search(
+ direction=&quot;maximize&quot;,
+ backend=&quot;optuna&quot;,
+ hp_space=hp_space,
+ n_trials=20,
+ compute_objective=lambda metrics: metrics[&quot;eval_f1&quot;]
+)
+
+print(f&quot;Best hyperparameters: {best_run.hyperparameters}&quot;)
+print(f&quot;Best F1 score: {best_run.objective:.4f}&quot;)</code></pre>
+      <h2>Conclusion</h2>
+      <p>Integrating Claude Code into your HuggingFace Transformers workflow transforms model training from a largely manual process into a collaborative, AI-assisted experience. From environment setup through training optimization and deployment, Claude's capabilities help you move faster while avoiding common pitfalls. Whether you're a seasoned ML engineer or just starting with transformer models, having Claude Code as a development partner accelerates your path to production-ready models.</p>
+      <p>The practical impact is substantial: Claude Code can reduce setup time from hours to minutes by handling dependency resolution and project scaffolding; debug obscure training failures by analyzing logs and suggesting targeted fixes; implement advanced techniques like LoRA, QLoRA, and knowledge distillation with correctly parameterized code; and generate production serving infrastructure with proper error handling and validation. The combination of Claude's code generation, debugging prowess, and best practice recommendations with HuggingFace's powerful training infrastructure creates a formidable toolkit for modern NLP development.</p>
+      <p>Start with a simple fine-tuning run on a small dataset, use Claude Code to iterate on hyperparameters and architecture choices, then scale up confidently knowing you have an AI partner that understands your entire stack.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Estimate your monthly spend with our <a href="/calculator/">Cost Calculator</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-for-huggingface-transformers-model-training">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code for HuggingFace Transformers Model Training",
+    "description": "Use Claude Code to streamline your HuggingFace Transformers model training workflow with practical examples.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-for-huggingface-transformers-model-training/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

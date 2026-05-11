@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code for Regulated Industries: Fintech and Healthcare | ClaudHQ</title>
+  <meta name="description" content="Claude Code skills tailored for fintech and healthcare development with compliance workflows and code patterns.">
+  <link rel="canonical" href="https://claudhq.com/claude-skills-for-regulated-industries-fintech-healthcare/">
+  <meta property="og:title" content="Claude Code for Regulated Industries: Fintech and Healthcare | ClaudHQ">
+  <meta property="og:description" content="Claude Code skills tailored for fintech and healthcare development with compliance workflows and code patterns.">
+  <meta property="og:url" content="https://claudhq.com/claude-skills-for-regulated-industries-fintech-healthcare/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code for Regulated Industries: Fintech and Healthcare</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Building software for fintech and healthcare sectors requires more than standard development practices. These industries operate under strict regulatory frameworks, PCI-DSS for payments, SOC 2 for service organizations, HIPAA for healthcare data, and GDPR for privacy. Developers in these spaces need specialized workflows that prioritize compliance without sacrificing productivity.</p>
+      <p>Claude skills provide targeted solutions for regulated industry challenges. This guide covers practical implementations for financial services and healthcare applications, with code examples you can adapt immediately.</p>
+      <h2>Core Challenges in Regulated Industries</h2>
+      <p>Regulated development differs from typical software engineering in several critical ways:</p>
+      <ul>
+      <li>Audit trails: Every action must be traceable</li>
+      <li>Data protection: Encryption at rest and in transit is mandatory</li>
+      <li>Access controls: Role-based permissions with granular boundaries</li>
+      <li>Compliance documentation: Evidence collection for audits</li>
+      <li>Incident response: Rapid detection and remediation capabilities</li>
+      </ul>
+      <p>The tdd skill helps enforce test coverage requirements that satisfy compliance auditors. When building for regulated industries, tests serve dual purposes: validating functionality and demonstrating due diligence.</p>
+      <h2>Regulatory Framework Comparison</h2>
+      <p>Understanding the distinctions between major frameworks helps you prioritize compliance effort. Here is a quick reference across the four most common frameworks developers encounter:</p>
+      <div class="table-wrap"><table><tr><th>Framework</th><th>Industry</th><th>Primary Focus</th><th>Key Controls</th><th>Audit Frequency</th></tr>
+<tr><td>HIPAA</td><td>Healthcare</td><td>PHI protection</td><td>Access controls, encryption, audit logs</td><td>Annual risk assessment</td></tr>
+<tr><td>PCI-DSS</td><td>Payments</td><td>Cardholder data</td><td>Network segmentation, tokenization, monitoring</td><td>Annual QSA assessment</td></tr>
+<tr><td>SOC 2</td><td>SaaS / Cloud</td><td>Trust service criteria</td><td>Availability, confidentiality, security</td><td>Annual or continuous</td></tr>
+<tr><td>GDPR</td><td>EU data subjects</td><td>Data privacy rights</td><td>Consent, data portability, right to erasure</td><td>No fixed audit cycle</td></tr></table></div>
+      <p>Each framework has overlapping requirements around access control and logging, which means a well-structured compliance architecture can satisfy multiple frameworks simultaneously. The sections below focus on building that shared foundation first, then adding framework-specific controls on top.</p>
+      <h2>Building HIPAA-Compliant Healthcare Applications</h2>
+      <p>Healthcare developers must handle protected health information (PHI) with strict safeguards. The claude-code-hipaa-compliant-development-workflow-guide provides comprehensive patterns, but here are essential implementations:</p>
+      <pre><code class="language-javascript">// PHI access control with audit logging
+class HealthcareDataAccess {
+ constructor(auditLogger) {
+ this.auditLogger = auditLogger;
+ this.encryption = new AES256Encryption();
+ }
+
+ async accessPatientRecord(patientId, userContext, authorizedRoles) {
+ // Verify authorization
+ if (!authorizedRoles.includes(userContext.role)) {
+ await this.auditLogger.log({
+ event: &#x27;ACCESS_DENIED&#x27;,
+ user: userContext.id,
+ resource: `patient:${patientId}`,
+ timestamp: new Date().toISOString()
+ });
+ throw new AccessDeniedError(&#x27;Insufficient privileges&#x27;);
+ }
+
+ // Log successful access
+ await this.auditLogger.log({
+ event: &#x27;PHI_ACCESS&#x27;,
+ user: userContext.id,
+ resource: `patient:${patientId}`,
+ purpose: userContext.purpose,
+ timestamp: new Date().toISOString()
+ });
+
+ return this.fetchEncryptedRecord(patientId);
+ }
+}</code></pre>
+      <p>The supermemory skill helps maintain compliance context across sessions without storing sensitive data in logs.</p>
+      <h2>PHI De-identification Patterns</h2>
+      <p>HIPAA's Safe Harbor method requires removing 18 specific identifiers before data can be treated as de-identified. Automating this removal prevents accidental PHI exposure in development and test environments:</p>
+      <pre><code class="language-javascript">// HIPAA Safe Harbor de-identification (removes all 18 identifiers)
+const PHI_PATTERNS = {
+ ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
+ phone: /\b(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g,
+ email: /\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b/g,
+ dob: /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-]\d{2,4}\b/g,
+ zip: /\b\d{5}(-\d{4})?\b/g,
+ mrn: /\bMRN[:\s#]*\d+\b/gi,
+ ipAddress: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g,
+};
+
+function deidentifyRecord(text) {
+ let sanitized = text;
+ for (const [type, pattern] of Object.entries(PHI_PATTERNS)) {
+ sanitized = sanitized.replace(pattern, `[REDACTED_${type.toUpperCase()}]`);
+ }
+ return sanitized;
+}
+
+// Test with a synthetic record
+const raw = &#x27;Patient Jane Doe, DOB 04/12/1985, SSN 123-45-6789, MRN: 987654&#x27;;
+const clean = deidentifyRecord(raw);
+// → &#x27;Patient Jane Doe, DOB [REDACTED_DOB], SSN [REDACTED_SSN], MRN: [REDACTED_MRN]&#x27;</code></pre>
+      <p>Note that name de-identification requires NLP-based entity recognition rather than simple regex. Libraries like spaCy's <code>en_core_web_sm</code> model or AWS Comprehend Medical handle named entity recognition for clinical text and should replace the regex approach for production PHI pipelines.</p>
+      <h2>Encryption Key Management for PHI at Rest</h2>
+      <p>Choosing the right key management strategy is often where teams make expensive mistakes. Here is a comparison of common approaches:</p>
+      <div class="table-wrap"><table><tr><th>Approach</th><th>Key Storage</th><th>Rotation</th><th>HIPAA Suitability</th><th>Cost</th></tr>
+<tr><td>Application-managed keys</td><td>Config / secrets manager</td><td>Manual</td><td>Weak. keys co-located with data</td><td>Low</td></tr>
+<tr><td>AWS KMS customer-managed</td><td>AWS KMS</td><td>Automatic or scheduled</td><td>Strong</td><td>~$1/key/month</td></tr>
+<tr><td>HashiCorp Vault</td><td>Vault cluster</td><td>Policy-driven</td><td>Strong</td><td>Infrastructure cost</td></tr>
+<tr><td>Azure Key Vault</td><td>Azure managed</td><td>Automatic</td><td>Strong</td><td>Pay-per-operation</td></tr>
+<tr><td>Hardware Security Module (HSM)</td><td>Dedicated hardware</td><td>Manual</td><td>Strongest</td><td>High</td></tr></table></div>
+      <p>For most teams, AWS KMS or Azure Key Vault provides the right balance of security and operational overhead. Here is a KMS-backed encryption wrapper in Python:</p>
+      <pre><code class="language-python">import boto3
+import base64
+from cryptography.fernet import Fernet
+
+class KMSEncryptionService:
+ def __init__(self, kms_key_id: str, region: str = &#x27;us-east-1&#x27;):
+ self.kms = boto3.client(&#x27;kms&#x27;, region_name=region)
+ self.kms_key_id = kms_key_id
+
+ def generate_data_key(self) -&gt; dict:
+ &quot;&quot;&quot;Generate a data key encrypted by KMS. Never store the plaintext key.&quot;&quot;&quot;
+ response = self.kms.generate_data_key(
+ KeyId=self.kms_key_id,
+ KeySpec=&#x27;AES_256&#x27;
+ )
+ return {
+ &#x27;plaintext&#x27;: response[&#x27;Plaintext&#x27;], # Use to encrypt, then discard
+ &#x27;ciphertext_blob&#x27;: response[&#x27;CiphertextBlob&#x27;] # Store alongside data
+ }
+
+ def encrypt_phi(self, plaintext: str) -&gt; dict:
+ data_key = self.generate_data_key()
+ f = Fernet(base64.urlsafe_b64encode(data_key[&#x27;plaintext&#x27;][:32]))
+
+ encrypted = f.encrypt(plaintext.encode())
+
+ # Explicitly zero out plaintext key from memory
+ data_key[&#x27;plaintext&#x27;] = b&#x27;\x00&#x27; * len(data_key[&#x27;plaintext&#x27;])
+
+ return {
+ &#x27;ciphertext&#x27;: base64.b64encode(encrypted).decode(),
+ &#x27;encrypted_data_key&#x27;: base64.b64encode(data_key[&#x27;ciphertext_blob&#x27;]).decode()
+ }
+
+ def decrypt_phi(self, payload: dict) -&gt; str:
+ encrypted_data_key = base64.b64decode(payload[&#x27;encrypted_data_key&#x27;])
+ response = self.kms.decrypt(CiphertextBlob=encrypted_data_key)
+
+ f = Fernet(base64.urlsafe_b64encode(response[&#x27;Plaintext&#x27;][:32]))
+ return f.decrypt(base64.b64decode(payload[&#x27;ciphertext&#x27;])).decode()</code></pre>
+      <p>This pattern, called envelope encryption, stores only the encrypted data key alongside the ciphertext. The actual encryption key never persists in your database.</p>
+      <h2>Fintech Payment Processing Compliance</h2>
+      <p>Financial applications require PCI-DSS compliance. Use the claude-code-soc2-compliance-audit-preparation-guide-2026 for SOC 2 preparation, but implement payment handling with tokenization:</p>
+      <pre><code class="language-python">Payment tokenization pattern for PCI compliance
+class PaymentTokenizer:
+ def __init__(self, vault_client, audit_service):
+ self.vault = vault_client
+ self.audit = audit_service
+
+ def tokenize_card(self, card_data, merchant_id):
+ # Never store raw card data - tokenize immediately
+ token = self.vault.create_token({
+ &#x27;card_number&#x27;: card_data[&#x27;number&#x27;],
+ &#x27;cvv&#x27;: card_data[&#x27;cvv&#x27;], # Never persisted
+ &#x27;merchant&#x27;: merchant_id
+ })
+
+ self.audit.log_tokenization(
+ merchant_id=merchant_id,
+ token_id=token[&#x27;id&#x27;],
+ last_four=card_data[&#x27;number&#x27;][-4:],
+ timestamp=datetime.utcnow().isoformat()
+ )
+
+ return {&#x27;token&#x27;: token[&#x27;id&#x27;], &#x27;last_four&#x27;: token[&#x27;last_four&#x27;]}</code></pre>
+      <p>The claude-code-secret-scanning-prevent-credential-leaks-guide prevents accidentally committing API keys or payment credentials.</p>
+      <h2>PCI-DSS Scope Reduction Strategies</h2>
+      <p>The cheapest compliance is compliance you do not have to do. Reducing your PCI scope is the most impactful action a fintech team can take. Here is how different architectural choices affect your scope:</p>
+      <div class="table-wrap"><table><tr><th>Architecture</th><th>PCI Scope</th><th>Implementation Complexity</th><th>Recommended For</th></tr>
+<tr><td>Collect card data in your app</td><td>Full scope (SAQ D)</td><td>Low initially, high long-term</td><td>Never recommended</td></tr>
+<tr><td>Hosted payment page (Stripe, Braintree)</td><td>Minimal (SAQ A)</td><td>Low</td><td>Most SaaS products</td></tr>
+<tr><td>JavaScript tokenization (Stripe.js)</td><td>Reduced (SAQ A-EP)</td><td>Medium</td><td>Custom checkout flows</td></tr>
+<tr><td>In-app mobile SDK</td><td>Medium scope</td><td>Medium</td><td>Mobile-first apps</td></tr>
+<tr><td>P2PE hardware terminal</td><td>Reduced hardware scope</td><td>High</td><td>In-person payments</td></tr></table></div>
+      <p>For the vast majority of fintech applications, using a hosted payment page or a JavaScript tokenization library like Stripe.js reduces your PCI scope to SAQ A or SAQ A-EP, which are self-assessment questionnaires requiring far less evidence than a full QSA audit.</p>
+      <h2>Transaction Anomaly Detection</h2>
+      <p>Compliance frameworks increasingly require controls around fraud detection. Here is a lightweight rule-based anomaly detector you can extend:</p>
+      <pre><code class="language-python">from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import List
+import statistics
+
+@dataclass
+class Transaction:
+ id: str
+ user_id: str
+ amount: float
+ merchant_id: str
+ timestamp: datetime
+ country_code: str
+
+class AnomalyDetector:
+ def __init__(self, audit_service):
+ self.audit = audit_service
+ self.velocity_window = timedelta(hours=1)
+
+ def evaluate(self, tx: Transaction, history: List[Transaction]) -&gt; dict:
+ findings = []
+
+ # Rule 1: Velocity check. more than 10 transactions in 1 hour
+ recent = [h for h in history if tx.timestamp - h.timestamp &lt; self.velocity_window]
+ if len(recent) &gt; 10:
+ findings.append({&#x27;rule&#x27;: &#x27;VELOCITY&#x27;, &#x27;severity&#x27;: &#x27;HIGH&#x27;,
+ &#x27;detail&#x27;: f&#x27;{len(recent)} transactions in last hour&#x27;})
+
+ # Rule 2: Amount deviation. more than 3 standard deviations above user mean
+ if len(history) &gt;= 10:
+ amounts = [h.amount for h in history[-90:]]
+ mean = statistics.mean(amounts)
+ std = statistics.stdev(amounts)
+ if std &gt; 0 and (tx.amount - mean) / std &gt; 3:
+ findings.append({&#x27;rule&#x27;: &#x27;AMOUNT_DEVIATION&#x27;, &#x27;severity&#x27;: &#x27;MEDIUM&#x27;,
+ &#x27;detail&#x27;: f&#x27;Amount {tx.amount} exceeds 3σ threshold&#x27;})
+
+ # Rule 3: Country mismatch. transaction from unexpected geography
+ common_countries = {h.country_code for h in history[-30:]}
+ if tx.country_code not in common_countries and len(common_countries) &gt; 0:
+ findings.append({&#x27;rule&#x27;: &#x27;GEO_ANOMALY&#x27;, &#x27;severity&#x27;: &#x27;MEDIUM&#x27;,
+ &#x27;detail&#x27;: f&#x27;Unexpected country: {tx.country_code}&#x27;})
+
+ if findings:
+ self.audit.log_anomaly(tx.id, tx.user_id, findings)
+
+ return {&#x27;transaction_id&#x27;: tx.id, &#x27;risk_level&#x27;: self._aggregate_risk(findings),
+ &#x27;findings&#x27;: findings}
+
+ def _aggregate_risk(self, findings: list) -&gt; str:
+ if any(f[&#x27;severity&#x27;] == &#x27;HIGH&#x27; for f in findings):
+ return &#x27;HIGH&#x27;
+ if findings:
+ return &#x27;MEDIUM&#x27;
+ return &#x27;LOW&#x27;</code></pre>
+      <p>This pattern generates structured audit log entries for every anomalous transaction, which satisfies PCI-DSS Requirement 10 (track and monitor all access to network resources and cardholder data) and SOC 2 CC7.2 (anomaly and event monitoring).</p>
+      <h2>Automating Compliance Documentation</h2>
+      <p>Regulated industries require extensive documentation. The /pdf skill generates compliance reports:</p>
+      <pre><code class="language-">/pdf
+Generate a compliance audit report covering:
+- Access log summary for Q1 2026
+- SOC 2 control evidence for CC6.1 through CC6.8
+- HIPAA security rule compliance status
+Output as a formal PDF report with executive summary.</code></pre>
+      <p>The /xlsx skill builds evidence spreadsheets auditors expect:</p>
+      <pre><code class="language-">/xlsx
+Create a compliance evidence workbook with:
+- Sheet 1: Access log data from audit_trail.json (columns: User, Action, Resource, Timestamp)
+- Sheet 2: Control status summary
+- Sheet 3: Remediation tracking
+Save as compliance-evidence.xlsx</code></pre>
+      <p><code>from xlsx import Workbook</code> is not valid. the xlsx skill is invoked with <code>/xlsx</code>, not imported as a Python package.</p>
+      <h2>SOC 2 Control Evidence Mapping</h2>
+      <p>When preparing for a SOC 2 audit, auditors expect evidence mapped to specific Trust Service Criteria (TSC). Here is how to structure your evidence workbook output from the <code>/xlsx</code> skill:</p>
+      <div class="table-wrap"><table><tr><th>TSC Control</th><th>Control Description</th><th>Evidence Type</th><th>Collection Method</th></tr>
+<tr><td>CC6.1</td><td>Logical and physical access controls</td><td>Access control policy, IAM screenshots</td><td>Manual + automated export</td></tr>
+<tr><td>CC6.2</td><td>Access provisioning</td><td>Ticket records, provisioning logs</td><td>JIRA/ServiceNow export</td></tr>
+<tr><td>CC6.3</td><td>Access removal</td><td>Offboarding checklists, account deletion logs</td><td>HR system export</td></tr>
+<tr><td>CC6.6</td><td>Logical access boundaries</td><td>Network diagrams, firewall rule exports</td><td>Infrastructure as code</td></tr>
+<tr><td>CC7.1</td><td>System monitoring</td><td>SIEM alerts, monitoring dashboards</td><td>CloudWatch / Splunk export</td></tr>
+<tr><td>CC7.2</td><td>Anomaly detection</td><td>Anomaly alert logs</td><td>Security tool export</td></tr>
+<tr><td>CC8.1</td><td>Change management</td><td>Deployment records, change tickets</td><td>CI/CD pipeline logs</td></tr></table></div>
+      <p>Using Claude Code with the <code>/xlsx</code> skill to ingest your CI/CD pipeline logs and generate this evidence workbook takes roughly 15 minutes rather than the 4–8 hours a manual evidence collection process typically requires.</p>
+      <h2>Generating a HIPAA Risk Assessment Narrative</h2>
+      <p>The HIPAA Security Rule requires a documented risk analysis at least annually. Claude Code can draft the narrative structure from your existing technical controls:</p>
+      <pre><code class="language-">/pdf
+Draft a HIPAA Security Risk Assessment for our patient portal application.
+
+Context:
+- Application type: web portal with mobile companion app
+- Data stored: patient demographics, appointment records, lab results
+- Hosting: AWS us-east-1, encrypted EBS volumes, KMS key management
+- Authentication: SSO via Okta with MFA enforced
+- Monitoring: CloudTrail + GuardDuty enabled
+- Backup: daily snapshots retained 90 days, cross-region replication enabled
+
+Generate:
+1. Executive summary
+2. Asset inventory table
+3. Threat/vulnerability matrix with likelihood and impact ratings
+4. Current controls assessment
+5. Residual risk ratings
+6. Recommended remediation items with priority rankings
+
+Output as a formal PDF with section headers matching NIST SP 800-30 format.</code></pre>
+      <h2>Security Code Review Workflow</h2>
+      <p>Integrate security scanning using Claude Code hooks in <code>~/.claude/settings.json</code>. The <code>PreToolUse</code> hook can block dangerous patterns before Claude executes bash commands:</p>
+      <pre><code class="language-json">{
+ &quot;hooks&quot;: {
+ &quot;PreToolUse&quot;: [
+ {
+ &quot;matcher&quot;: {&quot;tool_name&quot;: &quot;bash&quot;},
+ &quot;command&quot;: &quot;.claude/hooks/security-check.sh&quot;
+ }
+ ]
+ }
+}</code></pre>
+      <p>The hook script can scan for hardcoded credentials or dangerous patterns:</p>
+      <pre><code class="language-bash">#!/bin/bash
+.claude/hooks/security-check.sh
+INPUT=$(cat)
+CMD=$(echo &quot;$INPUT&quot; | python3 -c &quot;import sys,json; d=json.load(sys.stdin); print(d.get(&#x27;tool_input&#x27;,{}).get(&#x27;command&#x27;,&#x27;&#x27;))&quot;)
+
+Block eval usage
+if echo &quot;$CMD&quot; | grep -qP &#x27;\beval\s*\(&#x27;; then
+ echo &#x27;{&quot;decision&quot;: &quot;block&quot;, &quot;reason&quot;: &quot;Dynamic code execution not allowed&quot;}&#x27;
+ exit 0
+fi
+
+echo &quot;$INPUT&quot;</code></pre>
+      <p>Use the <code>/tdd</code> skill to enforce test coverage for security-critical paths before merging.</p>
+      <h2>Extended Security Hook: Credential and Secret Detection</h2>
+      <p>The hook above catches <code>eval</code>, but a regulated environment needs broader coverage. Here is a more complete version that blocks common secret patterns:</p>
+      <pre><code class="language-bash">#!/bin/bash
+.claude/hooks/security-check.sh. Extended version
+INPUT=$(cat)
+CMD=$(echo &quot;$INPUT&quot; | python3 -c &quot;
+import sys, json
+d = json.load(sys.stdin)
+print(d.get(&#x27;tool_input&#x27;, {}).get(&#x27;command&#x27;, &#x27;&#x27;))
+&quot;)
+
+block_with_reason() {
+ echo &quot;{\&quot;decision\&quot;: \&quot;block\&quot;, \&quot;reason\&quot;: \&quot;$1\&quot;}&quot;
+ exit 0
+}
+
+Block dynamic code execution
+echo &quot;$CMD&quot; | grep -qP &#x27;\beval\s*\(&#x27; &amp;&amp; block_with_reason &quot;Dynamic code execution (eval) not allowed&quot;
+
+Block hardcoded AWS keys
+echo &quot;$CMD&quot; | grep -qP &#x27;AKIA[0-9A-Z]{16}&#x27; &amp;&amp; block_with_reason &quot;Hardcoded AWS access key detected&quot;
+
+Block hardcoded secrets in environment variable assignments
+echo &quot;$CMD&quot; | grep -qiP &#x27;(password|secret|api_key|token)\s*=\s*[&quot;\x27][^&quot;\x27]{8,}&#x27; &amp;&amp; \
+ block_with_reason &quot;Potential hardcoded credential in command&quot;
+
+Block writing to /etc or system paths
+echo &quot;$CMD&quot; | grep -qP &#x27;&gt;\s*/etc/&#x27; &amp;&amp; block_with_reason &quot;Writing to /etc is not permitted&quot;
+
+Block curl | bash patterns (supply chain risk)
+echo &quot;$CMD&quot; | grep -qP &#x27;curl\s.+\|\s*(bash|sh|zsh)&#x27; &amp;&amp; \
+ block_with_reason &quot;Piping remote content to shell is not allowed&quot;
+
+echo &quot;$INPUT&quot;</code></pre>
+      <p>Pair this hook with a <code>PostToolUse</code> hook that writes every executed command to an immutable audit log, satisfying the traceability requirements shared by HIPAA, PCI-DSS, and SOC 2.</p>
+      <h2>TDD for Compliance-Critical Paths</h2>
+      <p>Compliance auditors often ask for evidence that security controls are tested, not just present. The <code>/tdd</code> skill workflow forces tests to exist before implementation, creating a natural paper trail:</p>
+      <pre><code class="language-">/tdd
+Write tests first for the PaymentTokenizer class, covering:
+- tokenize_card stores no raw PAN in the return value
+- tokenize_card calls audit.log_tokenization with correct arguments
+- tokenize_card raises ValueError when card_number fails Luhn check
+- decrypt_token returns original card data only for same merchant_id
+- decrypt_token raises PermissionError for cross-merchant access attempts
+
+Run the tests (they should fail), then implement the class to make them pass.</code></pre>
+      <p>This workflow produces both a test suite and a traceable commit history showing tests were written before code, strong evidence for SOC 2 CC8.1 change management controls.</p>
+      <h2>Frontend Design for Compliance Forms</h2>
+      <p>The frontend-design skill helps build accessible, compliant forms:</p>
+      <pre><code class="language-jsx">// WCAG-compliant healthcare data entry form
+function PatientDataForm({ onSubmit }) {
+ const [errors, setErrors] = useState({});
+
+ const validateAndSubmit = (formData) =&gt; {
+ // Field-level validation
+ const newErrors = {};
+
+ if (!formData.ssn || !/^\d{3}-\d{2}-\d{4}$/.test(formData.ssn)) {
+ newErrors.ssn = &#x27;Valid SSN required (XXX-XX-XXXX)&#x27;;
+ }
+
+ if (Object.keys(newErrors).length &gt; 0) {
+ setErrors(newErrors);
+ return;
+ }
+
+ // Encrypt before transmission
+ const encrypted = encryptField(formData, &#x27;ssn&#x27;);
+ onSubmit(encrypted);
+ };
+
+ return (
+ &lt;form onSubmit={validateAndSubmit} aria-label=&quot;Patient Data Entry&quot;&gt;
+ &lt;label htmlFor=&quot;ssn&quot;&gt;Social Security Number&lt;/label&gt;
+ &lt;input
+ id=&quot;ssn&quot;
+ type=&quot;password&quot;
+ aria-describedby=&quot;ssn-error&quot;
+ onChange={(e) =&gt; formatSSN(e.target.value)}
+ /&gt;
+ {errors.ssn &amp;&amp; (
+ &lt;span id=&quot;ssn-error&quot; role=&quot;alert&quot;&gt;{errors.ssn}&lt;/span&gt;
+ )}
+ &lt;/form&gt;
+ );
+}</code></pre>
+      <h2>Consent Management for GDPR and HIPAA</h2>
+      <p>Forms in regulated industries often require explicit consent capture with a verifiable audit record. Here is a consent component that records the consent event with the exact text the user agreed to:</p>
+      <pre><code class="language-jsx">import { useState } from &#x27;react&#x27;;
+
+function ConsentCapture({ consentVersion, onConsent }) {
+ const [agreed, setAgreed] = useState(false);
+
+ const handleConsent = async () =&gt; {
+ if (!agreed) return;
+
+ const consentRecord = {
+ user_agent: navigator.userAgent,
+ timestamp: new Date().toISOString(),
+ consent_version: consentVersion,
+ consent_text_hash: await hashText(document.getElementById(&#x27;consent-text&#x27;).innerText),
+ ip_address: null // Populated server-side. never log client-side IPs
+ };
+
+ // Send to server for immutable audit log storage
+ await fetch(&#x27;/api/consent&#x27;, {
+ method: &#x27;POST&#x27;,
+ headers: { &#x27;Content-Type&#x27;: &#x27;application/json&#x27; },
+ body: JSON.stringify(consentRecord)
+ });
+
+ onConsent(consentRecord);
+ };
+
+ return (
+ &lt;div role=&quot;region&quot; aria-label=&quot;Consent Agreement&quot;&gt;
+ &lt;div id=&quot;consent-text&quot; aria-live=&quot;polite&quot;&gt;
+ &lt;p&gt;By proceeding, you authorize this application to collect and process
+ your health information as described in our{&#x27; &#x27;}
+ &lt;a href=&quot;/privacy-notice&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;
+ Privacy Notice
+ &lt;/a&gt;
+ {&#x27; &#x27;}(Version {consentVersion}).&lt;/p&gt;
+ &lt;/div&gt;
+ &lt;label&gt;
+ &lt;input
+ type=&quot;checkbox&quot;
+ checked={agreed}
+ onChange={(e) =&gt; setAgreed(e.target.checked)}
+ aria-required=&quot;true&quot;
+ /&gt;
+ I have read and agree to the above terms
+ &lt;/label&gt;
+ &lt;button onClick={handleConsent} disabled={!agreed} aria-disabled={!agreed}&gt;
+ Proceed
+ &lt;/button&gt;
+ &lt;/div&gt;
+ );
+}
+
+async function hashText(text) {
+ const encoder = new TextEncoder();
+ const data = encoder.encode(text);
+ const hashBuffer = await crypto.subtle.digest(&#x27;SHA-256&#x27;, data);
+ return Array.from(new Uint8Array(hashBuffer))
+ .map(b =&gt; b.toString(16).padStart(2, &#x27;0&#x27;))
+ .join(&#x27;&#x27;);
+}</code></pre>
+      <p>Hashing the consent text and storing it with the timestamp proves the user saw a specific version of the consent language, a requirement under GDPR Article 7(1) that auditors frequently check.</p>
+      <h2>Infrastructure for Regulated Workloads</h2>
+      <p>The claude-skills-for-infrastructure-as-code-terraform skill helps provision compliant infrastructure:</p>
+      <pre><code class="language-hcl">HIPAA-compliant AWS infrastructure
+module &quot;encrypted_vpc&quot; {
+ source = &quot;./modules/vpc&quot;
+
+ name = &quot;hipaa-vpc&quot;
+
+ # Encryption at rest
+ enable_encryption = true
+ kms_key_id = aws_kms_key.hipaa.arn
+
+ # Network isolation
+ enable_flow_log = true
+ flow_log_destination = aws_s3_bucket.flow_logs.arn
+
+ # Private subnets for PHI processing
+ private_subnets = [&quot;10.0.1.0/24&quot;, &quot;10.0.2.0/24&quot;]
+}</code></pre>
+      <h2>Compliance Infrastructure Checklist by Cloud Provider</h2>
+      <p>Different cloud providers expose the same controls through different service names. Here is a cross-provider reference for the infrastructure controls that appear most frequently in HIPAA and PCI audits:</p>
+      <div class="table-wrap"><table><tr><th>Control</th><th>AWS</th><th>Azure</th><th>GCP</th></tr>
+<tr><td>Encryption at rest (managed keys)</td><td>SSE with AWS-managed keys</td><td>Azure Storage Service Encryption</td><td>Google-managed encryption keys</td></tr>
+<tr><td>Encryption at rest (customer keys)</td><td>KMS CMK</td><td>Azure Key Vault</td><td>Cloud KMS CMEK</td></tr>
+<tr><td>Network flow logs</td><td>VPC Flow Logs</td><td>NSG Flow Logs</td><td>VPC Flow Logs</td></tr>
+<tr><td>Immutable audit trail</td><td>CloudTrail + S3 Object Lock</td><td>Azure Monitor + Immutable Storage</td><td>Cloud Audit Logs + WORM buckets</td></tr>
+<tr><td>Intrusion detection</td><td>GuardDuty</td><td>Microsoft Defender for Cloud</td><td>Security Command Center</td></tr>
+<tr><td>Secrets management</td><td>AWS Secrets Manager</td><td>Azure Key Vault</td><td>Secret Manager</td></tr>
+<tr><td>Privileged access management</td><td>AWS IAM + AWS Organizations</td><td>Azure PIM</td><td>Cloud Identity</td></tr>
+<tr><td>Database encryption</td><td>RDS encrypted storage</td><td>Azure SQL TDE</td><td>Cloud SQL encryption</td></tr></table></div>
+      <h2>Terraform Module for Audit-Ready S3 Bucket</h2>
+      <p>Compliance often requires proving that audit logs cannot be deleted or modified. Here is a Terraform module that creates an S3 bucket with Object Lock and access logging:</p>
+      <pre><code class="language-hcl">resource &quot;aws_s3_bucket&quot; &quot;audit_logs&quot; {
+ bucket = &quot;${var.environment}-audit-logs-${var.account_id}&quot;
+}
+
+resource &quot;aws_s3_bucket_object_lock_configuration&quot; &quot;audit_logs&quot; {
+ bucket = aws_s3_bucket.audit_logs.id
+
+ rule {
+ default_retention {
+ mode = &quot;COMPLIANCE&quot; # GOVERNANCE allows authorized deletions; COMPLIANCE does not
+ days = 365 # HIPAA requires 6 years; PCI-DSS requires 1 year (logs)
+ }
+ }
+}
+
+resource &quot;aws_s3_bucket_server_side_encryption_configuration&quot; &quot;audit_logs&quot; {
+ bucket = aws_s3_bucket.audit_logs.id
+
+ rule {
+ apply_server_side_encryption_by_default {
+ sse_algorithm = &quot;aws:kms&quot;
+ kms_master_key_id = aws_kms_key.audit.arn
+ }
+ bucket_key_enabled = true
+ }
+}
+
+resource &quot;aws_s3_bucket_public_access_block&quot; &quot;audit_logs&quot; {
+ bucket = aws_s3_bucket.audit_logs.id
+ block_public_acls = true
+ block_public_policy = true
+ ignore_public_acls = true
+ restrict_public_buckets = true
+}
+
+resource &quot;aws_s3_bucket_logging&quot; &quot;audit_logs&quot; {
+ bucket = aws_s3_bucket.audit_logs.id
+ target_bucket = aws_s3_bucket.audit_logs.id # Self-logging for access tracking
+ target_prefix = &quot;access-logs/&quot;
+}</code></pre>
+      <p>Using COMPLIANCE mode Object Lock means not even the bucket owner or AWS root account can delete objects before the retention period expires. This is a strong control for HIPAA §164.312(b) audit control requirements.</p>
+      <h2>Selecting the Right Skills for Your Stack</h2>
+      <p>For fintech development, prioritize:</p>
+      <ul>
+      <li>claude-code-soc2-compliance-audit-preparation-guide-2026 for compliance preparation</li>
+      <li>claude-code-secret-scanning-prevent-credential-leaks-guide for security</li>
+      <li>claude-tdd-skill-test-driven-development-workflow for test coverage</li>
+      </ul>
+      <p>For healthcare applications, focus on:</p>
+      <ul>
+      <li>claude-code-hipaa-compliant-development-workflow-guide for HIPAA patterns</li>
+      <li>claude-code-gdpr-data-privacy-implementation-checklist for privacy compliance</li>
+      <li>supermemory skill for session management</li>
+      </ul>
+      <p>Both industries benefit from the claude-code-permissions-model-security-guide-2026 to enforce principle of least privilege.</p>
+      <h2>Skill Selection by Compliance Priority</h2>
+      <p>The table below maps common compliance requirements to the Claude skills best suited to address them:</p>
+      <div class="table-wrap"><table><tr><th>Compliance Requirement</th><th>Primary Skill</th><th>Supporting Skill</th></tr>
+<tr><td>PHI access control implementation</td><td>hipaa-workflow</td><td>tdd</td></tr>
+<tr><td>PCI tokenization and cardholder data flow</td><td>secret-scanning</td><td>tdd</td></tr>
+<tr><td>SOC 2 evidence collection</td><td>pdf, xlsx</td><td>supermemory</td></tr>
+<tr><td>GDPR data subject request handling</td><td>gdpr-checklist</td><td>frontend-design</td></tr>
+<tr><td>Audit log infrastructure</td><td>terraform</td><td>permissions-model</td></tr>
+<tr><td>Security code review automation</td><td>PreToolUse hooks</td><td>secret-scanning</td></tr>
+<tr><td>Risk assessment documentation</td><td>pdf</td><td>supermemory</td></tr>
+<tr><td>Incident response runbooks</td><td>pdf</td><td>tdd</td></tr></table></div>
+      <h2>Summary</h2>
+      <p>Building for regulated industries doesn't mean abandoning developer productivity. Claude skills provide specialized workflows that embed compliance into your development process:</p>
+      <ul>
+      <li>Automated audit logging and evidence generation</li>
+      <li>Security scanning integrated into code review</li>
+      <li>Test-driven development with compliance verification</li>
+      <li>Infrastructure as code with encryption and isolation defaults</li>
+      </ul>
+      <p>Start with the skills matching your primary compliance framework, then expand to cover additional requirements as your application grows.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-skills-for-regulated-industries-fintech-healthcare">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code for Regulated Industries: Fintech and Healthcare",
+    "description": "Claude Code skills tailored for fintech and healthcare development with compliance workflows and code patterns.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-skills-for-regulated-industries-fintech-healthcare/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

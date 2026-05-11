@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code for Security Scan Automation | ClaudHQ</title>
+  <meta name="description" content="Automate security scans using Claude Code. Practical examples for developers integrating security tooling into CI/CD.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-for-security-scan-automation/">
+  <meta property="og:title" content="Claude Code for Security Scan Automation | ClaudHQ">
+  <meta property="og:description" content="Automate security scans using Claude Code. Practical examples for developers integrating security tooling into CI/CD.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-for-security-scan-automation/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code for Security Scan Automation</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Security scanning automation has become essential for teams shipping code frequently. Claude Code provides a powerful foundation for building automated security workflows that catch vulnerabilities before they reach production. This guide shows you how to use Claude Code skills and hooks to create solid security scan pipelines. from dependency audits and secret detection through container scanning and full CI/CD integration.</p>
+      <h2>Why Automate Security Scanning with Claude Code</h2>
+      <p>Manual security reviews are slow and inconsistent. The same engineer who writes a feature rarely catches the subtle vulnerability they just introduced. Automated scanning solves the consistency problem, but most teams bolt it on as an afterthought. a GitHub Action that runs and whose results nobody reads.</p>
+      <p>Claude Code changes the equation by acting as an interpreter layer between raw scanner output and actionable decisions. Instead of reading a 200-line JSON blob from <code>npm audit</code>, you ask Claude to summarize the critical findings, identify which ones are exploitable in your specific context, and draft the remediation plan. The scan runs automatically; Claude Code makes the results useful.</p>
+      <p>The combination works particularly well across four scanning domains:</p>
+      <div class="table-wrap"><table><tr><th>Domain</th><th>Primary Tool</th><th>What Claude Code Adds</th></tr>
+<tr><td>Dependency vulnerabilities</td><td>npm audit, pip-audit</td><td>Filters noise, ranks by exploitability</td></tr>
+<tr><td>Secret detection</td><td>gitleaks, truffleHog</td><td>Explains what each secret type exposes</td></tr>
+<tr><td>Static code analysis (SAST)</td><td>Semgrep, Bandit, ESLint</td><td>Maps findings to fix patterns in your codebase</td></tr>
+<tr><td>Container scanning</td><td>Trivy, Grype</td><td>Prioritizes base image upgrades vs package fixes</td></tr></table></div>
+      <h2>Setting Up Security Scan Skills</h2>
+      <p>Claude Code works best for security automation when you configure dedicated skills for different scanning tasks. The tdd skill proves surprisingly useful here. while designed for test-driven development, its structured approach to running commands and validating outputs maps directly to security scan execution.</p>
+      <p>Start by creating a security scanning skill:</p>
+      <pre><code class="language-json">{
+ &quot;name&quot;: &quot;security-scanner&quot;,
+ &quot;description&quot;: &quot;Runs security scans on codebase&quot;,
+ &quot;commands&quot;: [
+ {
+ &quot;name&quot;: &quot;scan-deps&quot;,
+ &quot;command&quot;: &quot;npm audit --json&quot;,
+ &quot;validator&quot;: &quot;exit_code&quot;
+ },
+ {
+ &quot;name&quot;: &quot;scan-secrets&quot;,
+ &quot;command&quot;: &quot;gitleaks detect --report-format json&quot;
+ }
+ ]
+}</code></pre>
+      <p>This skill structure lets you run dependency audits and secret detection as discrete operations. The key advantage is consistency. each scan produces structured output you can parse and act upon.</p>
+      <p>For Python projects, extend the skill to cover multiple package managers:</p>
+      <pre><code class="language-json">{
+ &quot;name&quot;: &quot;security-scanner-python&quot;,
+ &quot;description&quot;: &quot;Runs security scans for Python projects&quot;,
+ &quot;commands&quot;: [
+ {
+ &quot;name&quot;: &quot;scan-deps&quot;,
+ &quot;command&quot;: &quot;pip-audit --format json --output audit.json &amp;&amp; cat audit.json&quot;,
+ &quot;validator&quot;: &quot;exit_code&quot;
+ },
+ {
+ &quot;name&quot;: &quot;scan-bandit&quot;,
+ &quot;command&quot;: &quot;bandit -r . -f json -o bandit.json; cat bandit.json&quot;,
+ &quot;validator&quot;: &quot;none&quot;
+ },
+ {
+ &quot;name&quot;: &quot;scan-safety&quot;,
+ &quot;command&quot;: &quot;safety check --json&quot;,
+ &quot;validator&quot;: &quot;exit_code&quot;
+ }
+ ]
+}</code></pre>
+      <p>Once these skills are in place, you can trigger a full security sweep from a single Claude Code prompt: "Run the security-scanner skill and tell me which findings need immediate attention."</p>
+      <h2>Automating Dependency Vulnerability Scans</h2>
+      <p>Dependency scanning represents one of the highest-ROI security automations. Tools like npm audit, pip-audit, and OWASP Dependency-Check all produce machine-readable output that Claude Code can process.</p>
+      <p>Here's a practical approach using a Claude hook:</p>
+      <pre><code class="language-bash">#!/bin/bash
+Pre-commit security hook
+Place at .git/hooks/pre-commit or register via Claude Code hooks
+
+echo &quot;Running dependency vulnerability scan...&quot;
+
+AUDIT_OUTPUT=$(npm audit --json 2&gt;/dev/null)
+VULN_COUNT=$(echo &quot;$AUDIT_OUTPUT&quot; | jq &#x27;.metadata.vulnerabilities.total // 0&#x27;)
+CRITICAL_COUNT=$(echo &quot;$AUDIT_OUTPUT&quot; | jq &#x27;.metadata.vulnerabilities.critical // 0&#x27;)
+HIGH_COUNT=$(echo &quot;$AUDIT_OUTPUT&quot; | jq &#x27;.metadata.vulnerabilities.high // 0&#x27;)
+
+if [ &quot;$CRITICAL_COUNT&quot; -gt 0 ]; then
+ echo &quot;BLOCKED: $CRITICAL_COUNT critical vulnerabilities found&quot;
+ echo &quot;$AUDIT_OUTPUT&quot; | jq &#x27;[.vulnerabilities | to_entries[] | select(.value.severity == &quot;critical&quot;) | {name: .key, severity: .value.severity, via: .value.via}] | .[0:5]&#x27;
+ exit 1
+fi
+
+if [ &quot;$HIGH_COUNT&quot; -gt 0 ]; then
+ echo &quot;WARNING: $HIGH_COUNT high-severity vulnerabilities found&quot;
+ echo &quot;$AUDIT_OUTPUT&quot; | jq &#x27;[.vulnerabilities | to_entries[] | select(.value.severity == &quot;high&quot;) | {name: .key, severity: .value.severity}] | .[0:5]&#x27;
+ # Warn but do not block; adjust to exit 1 for stricter policy
+fi
+
+echo &quot;Dependency scan passed (critical: $CRITICAL_COUNT, high: $HIGH_COUNT, total: $VULN_COUNT)&quot;
+exit 0</code></pre>
+      <p>This hook runs before each commit, blocking builds that introduce known critical vulnerabilities. The integration with Claude Code hooks means you can trigger this scan automatically whenever you ask Claude to commit code changes.</p>
+      <p>For Python projects, the equivalent pip-audit hook:</p>
+      <pre><code class="language-bash">#!/bin/bash
+pip-audit pre-commit hook
+
+echo &quot;Running pip-audit...&quot;
+
+if ! command -v pip-audit &amp;&gt;/dev/null; then
+ echo &quot;pip-audit not installed. Run: pip install pip-audit&quot;
+ exit 1
+fi
+
+AUDIT_JSON=$(pip-audit --format json 2&gt;/dev/null)
+VULN_COUNT=$(echo &quot;$AUDIT_JSON&quot; | jq &#x27;[.[] | select(.vulns | length &gt; 0)] | length&#x27;)
+
+if [ &quot;$VULN_COUNT&quot; -gt 0 ]; then
+ echo &quot;BLOCKED: $VULN_COUNT packages with known vulnerabilities&quot;
+ echo &quot;$AUDIT_JSON&quot; | jq &#x27;[.[] | select(.vulns | length &gt; 0) | {name: .name, version: .version, vulns: [.vulns[].id]}]&#x27;
+ exit 1
+fi
+
+echo &quot;pip-audit passed&quot;
+exit 0</code></pre>
+      <h2>Filtering Vulnerability Noise</h2>
+      <p>Raw <code>npm audit</code> output often contains dozens of findings, most of which are transitive dependencies you cannot directly fix. Claude Code helps here by filtering to what matters:</p>
+      <pre><code class="language-javascript">// filter-audit.mjs
+// Feed npm audit JSON; receive only direct + fixable findings
+
+export function filterActionableVulns(auditJson) {
+ const parsed = JSON.parse(auditJson);
+ const vulns = Object.entries(parsed.vulnerabilities || {});
+
+ return vulns
+ .filter(([, v]) =&gt; v.isDirect &amp;&amp; v.fixAvailable)
+ .map(([name, v]) =&gt; ({
+ package: name,
+ severity: v.severity,
+ fixedIn: typeof v.fixAvailable === &quot;object&quot; ? v.fixAvailable.version : &quot;see npm audit fix&quot;,
+ via: v.via.filter(d =&gt; typeof d === &quot;object&quot;).map(d =&gt; d.url || d.name)
+ }))
+ .sort((a, b) =&gt; {
+ const order = { critical: 0, high: 1, moderate: 2, low: 3 };
+ return (order[a.severity] ?? 4) - (order[b.severity] ?? 4);
+ });
+}</code></pre>
+      <p>Pass this to Claude Code and ask: "Which of these should I fix this sprint versus track in the backlog?"</p>
+      <h2>Secret Detection in Codebases</h2>
+      <p>Detecting secrets committed accidentally happens more often than teams realize. The supermemory skill offers an interesting approach. its document indexing capabilities can be adapted to track sensitive patterns across your codebase.</p>
+      <p>A practical secret detection setup uses gitleaks:</p>
+      <pre><code class="language-yaml">.gitleaks.toml
+[rules]
+ [[rules.BasicAuth]]
+ description = &quot;Basic Authorization Header&quot;
+ regex = &#x27;&#x27;&#x27;(authorization|Authorization)\s*:\s*[Bb]asic\s+[A-Za-z0-9+/=]+&#x27;&#x27;&#x27;
+
+ [[rules.AWSAccessKey]]
+ description = &quot;AWS Access Key&quot;
+ regex = &#x27;&#x27;&#x27;(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}&#x27;&#x27;&#x27;
+
+ [[rules.GitHubToken]]
+ description = &quot;GitHub Token&quot;
+ regex = &#x27;&#x27;&#x27;gh[pousr]_[A-Za-z0-9_]{36,251}&#x27;&#x27;&#x27;
+
+ [[rules.PrivateKey]]
+ description = &quot;Private Key Block&quot;
+ regex = &#x27;&#x27;&#x27;-----BEGIN (RSA|EC|DSA|OPENSSH) PRIVATE KEY-----&#x27;&#x27;&#x27;
+
+ [[rules.GenericSecret]]
+ description = &quot;Generic high-entropy string assigned to secret variable&quot;
+ regex = &#x27;&#x27;&#x27;(?i)(secret|password|passwd|pwd|token|api_key)\s*[=:]\s*[&quot;&#x27;][A-Za-z0-9+/=_\-]{20,}[&quot;&#x27;]&#x27;&#x27;&#x27;</code></pre>
+      <p>Combine this with a Claude Code skill that runs gitleaks on every pull request:</p>
+      <pre><code class="language-javascript">// security-skills/github-check.mjs
+import { execSync } from &#x27;child_process&#x27;;
+
+export async function runSecretScan(repoPath) {
+ let output;
+ try {
+ output = execSync(&#x27;gitleaks detect --source . --report-format json --report-path /tmp/gitleaks.json&#x27;, {
+ cwd: repoPath,
+ encoding: &#x27;utf-8&#x27;,
+ stdio: [&#x27;pipe&#x27;, &#x27;pipe&#x27;, &#x27;pipe&#x27;]
+ });
+ } catch (err) {
+ // gitleaks exits 1 when findings exist; read the report regardless
+ output = err.stdout || &#x27;&#x27;;
+ }
+
+ let findings = [];
+ try {
+ const fs = await import(&#x27;fs&#x27;);
+ findings = JSON.parse(fs.readFileSync(&#x27;/tmp/gitleaks.json&#x27;, &#x27;utf-8&#x27;)) || [];
+ } catch {
+ findings = [];
+ }
+
+ if (findings.length &gt; 0) {
+ return {
+ blocked: true,
+ findings: findings.map(f =&gt; ({
+ file: f.File,
+ rule: f.RuleID,
+ line: f.StartLine,
+ secret: f.Secret ? f.Secret.slice(0, 4) + &quot;&quot; : &quot;redacted&quot;
+ }))
+ };
+ }
+
+ return { blocked: false };
+}</code></pre>
+      <h2>What to Do When a Secret Is Found in History</h2>
+      <p>Finding a secret in the current working tree is straightforward. remove it and rotate the credential. Finding one in git history is harder. Claude Code can guide you through the remediation:</p>
+      <pre><code class="language-bash">Find the commit that introduced the secret
+git log --all --oneline -S &quot;AKIA&quot; -- .
+
+Identify all files it touched
+git show &lt;commit-sha&gt; --stat
+
+Use git-filter-repo to purge it from history (safer than filter-branch)
+pip install git-filter-repo
+git filter-repo --path-glob &#x27;/*.env&#x27; --invert-paths
+git filter-repo --replace-text &lt;(echo &quot;AKIAXXXXXXXXXXXXXXXX==&gt;REDACTED&quot;)
+
+Force push all branches (coordinate with team first)
+git push origin --force --all
+git push origin --force --tags</code></pre>
+      <p>Ask Claude Code to walk through this sequence with you. it can verify each step's output and flag if the secret is still present in any branch before you push.</p>
+      <h2>SAST Integration for Code Analysis</h2>
+      <p>Static Application Security Testing (SAST) tools analyze source code for vulnerabilities. Tools like Semgrep, Bandit (Python), and ESLint (with security rules) fit well into Claude Code workflows.</p>
+      <p>The pdf skill. typically used for PDF manipulation. can actually help here. Many security reports come as PDF documents from commercial scanners. You can automate the extraction of vulnerability data from these reports:</p>
+      <pre><code class="language-javascript">// Extract findings from security PDF reports
+import { readPdf } from &#x27;claude-pdf-skill&#x27;;
+
+export async function parseSecurityReport(pdfPath) {
+ const text = await readPdf(pdfPath);
+
+ const vulnPattern = /CVE-\d{4}-\d{4,7}/g;
+ const cves = [...new Set(text.match(vulnPattern) || [])];
+
+ return {
+ cvssPattern: text.match(/CVSS[\s:]+[\d.]+/g) || [],
+ cveCount: cves.length,
+ cves
+ };
+}</code></pre>
+      <p>This becomes valuable when integrating with commercial scanners that produce PDF reports. Claude Code can parse these and extract actionable data.</p>
+      <h2>Semgrep for Custom Rule Writing</h2>
+      <p>Semgrep is exceptional for codebases with custom security requirements. Unlike generic SAST tools, you write rules in the same language as your source code:</p>
+      <pre><code class="language-yaml">.semgrep/no-hardcoded-hosts.yml
+rules:
+ - id: no-hardcoded-production-host
+ patterns:
+ - pattern: $X = &quot;prod.internal.company.com&quot;
+ - pattern: $X = &quot;10.0.0.$Y&quot;
+ message: &quot;Hardcoded production host found: $X. Use environment variables.&quot;
+ languages: [python, javascript, typescript]
+ severity: WARNING
+
+ - id: sql-injection-fstring
+ pattern: |
+ cursor.execute(f&quot;... {$USERINPUT} ...&quot;)
+ message: &quot;Possible SQL injection via f-string. Use parameterized queries.&quot;
+ languages: [python]
+ severity: ERROR</code></pre>
+      <p>Run Semgrep in Claude Code by pointing it at your rules directory:</p>
+      <pre><code class="language-bash">semgrep --config .semgrep/ --json --output semgrep-results.json .</code></pre>
+      <p>Then use Claude Code to analyze the results file: "Read semgrep-results.json and group findings by severity. For the ERROR-level findings, show me the file and line, and suggest a fix for each one."</p>
+      <h2>Bandit for Python Security Analysis</h2>
+      <p>Bandit integrates tightly with Python workflows:</p>
+      <pre><code class="language-bash">Run Bandit and save structured output
+bandit -r ./src -f json -o bandit-report.json -ll
+
+Show summary
+python3 - &lt;&lt;&#x27;EOF&#x27;
+import json, sys
+report = json.load(open(&quot;bandit-report.json&quot;))
+results = report[&quot;results&quot;]
+by_severity = {}
+for r in results:
+ sev = r[&quot;issue_severity&quot;]
+ by_severity.setdefault(sev, []).append(r)
+
+for sev in [&quot;HIGH&quot;, &quot;MEDIUM&quot;, &quot;LOW&quot;]:
+ items = by_severity.get(sev, [])
+ print(f&quot;{sev}: {len(items)} issues&quot;)
+ for item in items[:3]:
+ print(f&quot; {item[&#x27;filename&#x27;]}:{item[&#x27;line_number&#x27;]}. {item[&#x27;issue_text&#x27;]}&quot;)
+EOF</code></pre>
+      <p>The most common Bandit findings and their fixes:</p>
+      <div class="table-wrap"><table><tr><th>Bandit Issue ID</th><th>Description</th><th>Fix</th></tr>
+<tr><td>B101</td><td>Use of `assert` for security checks</td><td>Replace with explicit `if` + `raise`</td></tr>
+<tr><td>B105</td><td>Hardcoded password string</td><td>Move to environment variable</td></tr>
+<tr><td>B301</td><td>`pickle.loads` on untrusted data</td><td>Use `json` or `msgpack` instead</td></tr>
+<tr><td>B324</td><td>Use of weak MD5/SHA1 hash</td><td>Switch to SHA-256 or bcrypt</td></tr>
+<tr><td>B501</td><td>TLS verification disabled</td><td>Remove `verify=False` from requests</td></tr>
+<tr><td>B602</td><td>`subprocess` with `shell=True`</td><td>Use list args, set `shell=False`</td></tr></table></div>
+      <h2>Container Security Scanning</h2>
+      <p>Containerized applications require their own scanning layer. Trivy and Grype are popular open-source tools that integrate easily:</p>
+      <pre><code class="language-bash">#!/bin/bash
+Scan container image for vulnerabilities
+
+IMAGE=$1
+if [ -z &quot;$IMAGE&quot; ]; then
+ echo &quot;Usage: $0 &lt;image:tag&gt;&quot;
+ exit 1
+fi
+
+echo &quot;Scanning $IMAGE...&quot;
+TRIVY_OUTPUT=$(trivy image --format json --severity HIGH,CRITICAL --quiet &quot;$IMAGE&quot;)
+
+CRITICAL=$(echo &quot;$TRIVY_OUTPUT&quot; | jq &#x27;[.Results[].Vulnerabilities // [] | .[] | select(.Severity == &quot;CRITICAL&quot;)] | length&#x27;)
+HIGH=$(echo &quot;$TRIVY_OUTPUT&quot; | jq &#x27;[.Results[].Vulnerabilities // [] | .[] | select(.Severity == &quot;HIGH&quot;)] | length&#x27;)
+
+echo &quot;Critical: $CRITICAL | High: $HIGH&quot;
+
+if [ &quot;$CRITICAL&quot; -gt 0 ]; then
+ echo &quot;BLOCKED: Critical vulnerabilities found&quot;
+ echo &quot;$TRIVY_OUTPUT&quot; | jq &#x27;[.Results[] | select(.Vulnerabilities) | .Vulnerabilities[] | select(.Severity == &quot;CRITICAL&quot;) | {id: .VulnerabilityID, pkg: .PkgName, installed: .InstalledVersion, fixed: .FixedVersion}] | .[0:10]&#x27;
+ exit 1
+fi
+
+echo &quot;Container scan passed&quot;
+exit 0</code></pre>
+      <p>In Claude Code, you can wrap this in a skill that accepts an image name and returns structured vulnerability data:</p>
+      <pre><code class="language-javascript">export async function scanContainer(imageName) {
+ const result = await exec(`trivy image --format json --quiet ${imageName}`);
+ const parsed = JSON.parse(result.stdout);
+
+ const allVulns = parsed.Results
+ .flatMap(r =&gt; r.Vulnerabilities || []);
+
+ const critical = allVulns.filter(v =&gt; v.Severity === &#x27;CRITICAL&#x27;);
+ const high = allVulns.filter(v =&gt; v.Severity === &#x27;HIGH&#x27;);
+ const fixable = allVulns.filter(v =&gt; v.FixedVersion);
+
+ return {
+ image: imageName,
+ criticalCount: critical.length,
+ highCount: high.length,
+ fixableCount: fixable.length,
+ criticalVulns: critical.map(v =&gt; ({
+ id: v.VulnerabilityID,
+ pkg: v.PkgName,
+ installed: v.InstalledVersion,
+ fixed: v.FixedVersion || &quot;no fix available&quot;
+ }))
+ };
+}</code></pre>
+      <h2>Base Image Strategy</h2>
+      <p>The single most impactful container security decision is your base image. Most container vulnerabilities come from the OS layer, not your application code:</p>
+      <div class="table-wrap"><table><tr><th>Base Image</th><th>Typical Vulnerability Count</th><th>Notes</th></tr>
+<tr><td>`ubuntu:latest`</td><td>50–150+</td><td>Large attack surface; convenient for dev</td></tr>
+<tr><td>`ubuntu:22.04` (pinned)</td><td>30–80</td><td>Predictable; security updates via rebuild</td></tr>
+<tr><td>`debian:slim`</td><td>20–60</td><td>Smaller footprint than full Debian</td></tr>
+<tr><td>`alpine:3.19`</td><td>5–20</td><td>Minimal, musl libc; some compatibility tradeoffs</td></tr>
+<tr><td>`distroless/base`</td><td>0–5</td><td>No shell, no package manager; harder to debug</td></tr>
+<tr><td>`scratch`</td><td>0</td><td>Binary only; requires statically linked apps</td></tr></table></div>
+      <p>Claude Code can help you evaluate base image tradeoffs for your specific application. Share your Trivy output and ask: "Which of these vulnerabilities are in the base image versus my application dependencies? What base image change would eliminate the most critical findings?"</p>
+      <h2>CI/CD Pipeline Integration</h2>
+      <p>Putting it all together, your CI/CD pipeline benefits from layered security scanning:</p>
+      <pre><code class="language-yaml">.github/workflows/security-scan.yml
+name: Security Scans
+
+on: [push, pull_request]
+
+jobs:
+ dependency-scan:
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+ - name: Set up Node
+ uses: actions/setup-node@v4
+ with:
+ node-version: &#x27;20&#x27;
+ - run: npm ci
+ - run: npm audit --audit-level=high
+ - name: Upload audit results
+ if: failure()
+ uses: actions/upload-artifact@v4
+ with:
+ name: npm-audit
+ path: npm-audit.json
+
+ secret-scan:
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+ with:
+ fetch-depth: 0 # Full history for git log scanning
+ - uses: gitleaks/gitleaks-action@v2
+ env:
+ GITHUB_TOKEN: $
+
+ sast-scan:
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+ - name: Run Semgrep
+ uses: returntocorp/semgrep-action@v1
+ with:
+ config: p/owasp-top-ten
+ - name: Run Bandit (Python)
+ if: hashFiles(&#x27;/*.py&#x27;) != &#x27;&#x27;
+ run: |
+ pip install bandit
+ bandit -r . -f json -o bandit.json -ll || true
+ - uses: actions/upload-artifact@v4
+ with:
+ name: sast-results
+ path: &quot;*.json&quot;
+
+ container-scan:
+ runs-on: ubuntu-latest
+ needs: build
+ steps:
+ - name: Run Trivy vulnerability scanner
+ uses: aquasecurity/trivy-action@master
+ with:
+ image-ref: myapp:$
+ format: sarif
+ output: trivy-results.sarif
+ severity: HIGH,CRITICAL
+ exit-code: &#x27;1&#x27;
+ - name: Upload Trivy scan results
+ uses: github/codeql-action/upload-sarif@v3
+ if: always()
+ with:
+ sarif_file: trivy-results.sarif</code></pre>
+      <p>Each stage runs in parallel where possible, giving you fast feedback. Claude Code hooks can trigger these scans automatically, ensuring security checks happen consistently without manual intervention.</p>
+      <h2>Handling Pipeline Failures Gracefully</h2>
+      <p>A common mistake is making all security findings pipeline-blocking from day one. Teams push back, start bypassing hooks, and the automation erodes. A graduated approach works better:</p>
+      <pre><code class="language-yaml">Phase 1: Warn only (week 1-2)
+- run: npm audit --audit-level=critical || echo &quot;::warning::Vulnerabilities found&quot;
+
+Phase 2: Block on critical (week 3-4)
+- run: npm audit --audit-level=critical
+
+Phase 3: Block on high (ongoing)
+- run: npm audit --audit-level=high</code></pre>
+      <p>Claude Code helps enforce this policy by tracking which findings existed before the policy change. Ask Claude to "compare this week's audit output against last week's baseline and show me only new findings."</p>
+      <h2>Building Custom Security Workflows</h2>
+      <p>The real power of Claude Code for security automation comes from combining these tools into custom workflows. You can create skills that:</p>
+      <ul>
+      <li>Run multiple scanners in sequence, aggregating results into a unified severity report</li>
+      <li>Filter findings based on your team's risk tolerance and known-false-positive list</li>
+      <li>Generate remediation suggestions automatically by matching CVE IDs against fix databases</li>
+      <li>Track vulnerability trends over time by comparing scan results stored in your repo</li>
+      </ul>
+      <p>Here is an aggregator script that combines npm audit, gitleaks, and Semgrep into a single prioritized report:</p>
+      <pre><code class="language-python">#!/usr/bin/env python3
+&quot;&quot;&quot;
+Aggregate security scan results from multiple tools.
+Usage: python3 aggregate-security.py --npm audit.json --gitleaks gl.json --semgrep sg.json
+&quot;&quot;&quot;
+
+import json
+import argparse
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class Finding:
+ tool: str
+ severity: str
+ title: str
+ location: str
+ remediation: str = &quot;&quot;
+
+def load_npm_audit(path: str) -&gt; List[Finding]:
+ data = json.load(open(path))
+ findings = []
+ for name, vuln in data.get(&quot;vulnerabilities&quot;, {}).items():
+ if vuln.get(&quot;severity&quot;) in (&quot;critical&quot;, &quot;high&quot;):
+ findings.append(Finding(
+ tool=&quot;npm-audit&quot;,
+ severity=vuln[&quot;severity&quot;].upper(),
+ title=f&quot;{name}. {&#x27;, &#x27;.join(v.get(&#x27;title&#x27;, &#x27;&#x27;) for v in vuln.get(&#x27;via&#x27;, []) if isinstance(v, dict))}&quot;,
+ location=f&quot;package: {name}@{vuln.get(&#x27;range&#x27;, &#x27;unknown&#x27;)}&quot;,
+ remediation=&quot;Run: npm audit fix&quot; if vuln.get(&quot;fixAvailable&quot;) else &quot;No automatic fix available&quot;
+ ))
+ return findings
+
+def load_gitleaks(path: str) -&gt; List[Finding]:
+ data = json.load(open(path)) or []
+ return [Finding(
+ tool=&quot;gitleaks&quot;,
+ severity=&quot;CRITICAL&quot;,
+ title=f&quot;Exposed secret: {f.get(&#x27;RuleID&#x27;, &#x27;unknown rule&#x27;)}&quot;,
+ location=f&quot;{f.get(&#x27;File&#x27;, &#x27;?&#x27;)}:{f.get(&#x27;StartLine&#x27;, &#x27;?&#x27;)}&quot;,
+ remediation=&quot;Remove secret, rotate credential, purge from git history&quot;
+ ) for f in data]
+
+def load_semgrep(path: str) -&gt; List[Finding]:
+ data = json.load(open(path))
+ findings = []
+ for r in data.get(&quot;results&quot;, []):
+ sev = r.get(&quot;extra&quot;, {}).get(&quot;severity&quot;, &quot;INFO&quot;)
+ if sev in (&quot;ERROR&quot;, &quot;WARNING&quot;):
+ findings.append(Finding(
+ tool=&quot;semgrep&quot;,
+ severity=&quot;HIGH&quot; if sev == &quot;ERROR&quot; else &quot;MEDIUM&quot;,
+ title=r.get(&quot;check_id&quot;, &quot;unknown&quot;),
+ location=f&quot;{r[&#x27;path&#x27;]}:{r[&#x27;start&#x27;][&#x27;line&#x27;]}&quot;,
+ remediation=r.get(&quot;extra&quot;, {}).get(&quot;message&quot;, &quot;See semgrep docs&quot;)
+ ))
+ return findings
+
+if __name__ == &quot;__main__&quot;:
+ parser = argparse.ArgumentParser()
+ parser.add_argument(&quot;--npm&quot;, help=&quot;npm audit JSON path&quot;)
+ parser.add_argument(&quot;--gitleaks&quot;, help=&quot;gitleaks JSON path&quot;)
+ parser.add_argument(&quot;--semgrep&quot;, help=&quot;semgrep JSON path&quot;)
+ args = parser.parse_args()
+
+ all_findings = []
+ if args.npm: all_findings += load_npm_audit(args.npm)
+ if args.gitleaks: all_findings += load_gitleaks(args.gitleaks)
+ if args.semgrep: all_findings += load_semgrep(args.semgrep)
+
+ order = {&quot;CRITICAL&quot;: 0, &quot;HIGH&quot;: 1, &quot;MEDIUM&quot;: 2, &quot;LOW&quot;: 3}
+ all_findings.sort(key=lambda f: order.get(f.severity, 4))
+
+ print(f&quot;\n=== Security Scan Summary: {len(all_findings)} findings ===\n&quot;)
+ for f in all_findings:
+ print(f&quot;[{f.severity}] ({f.tool}) {f.title}&quot;)
+ print(f&quot; Location: {f.location}&quot;)
+ print(f&quot; Remediation: {f.remediation}\n&quot;)</code></pre>
+      <p>For teams using the frontend-design skill to build React applications, adding security scanning to the component generation workflow catches issues like unsafe DOM manipulation or missing CSRF protections early. Ask Claude Code to run the SAST scan immediately after generating a new component, before the code is committed.</p>
+      <h2>Measuring Security Posture Over Time</h2>
+      <p>Automation without measurement is incomplete. Track these metrics sprint over sprint:</p>
+      <div class="table-wrap"><table><tr><th>Metric</th><th>How to Measure</th><th>Target Direction</th></tr>
+<tr><td>Mean time to patch critical CVEs</td><td>Date found → date fixed in main</td><td>Decreasing</td></tr>
+<tr><td>Secrets found in PRs vs commits</td><td>gitleaks PR count vs commit count</td><td>PRs > commits (caught earlier)</td></tr>
+<tr><td>New SAST findings per sprint</td><td>Semgrep delta between sprints</td><td>Decreasing or stable</td></tr>
+<tr><td>Container vulnerability age</td><td>Average days since CVE published</td><td>Decreasing</td></tr>
+<tr><td>% of builds with security gates</td><td>CI runs with security jobs / total</td><td>100%</td></tr></table></div>
+      <p>Claude Code can generate a weekly security posture report from your scan artifacts:</p>
+      <pre><code class="language-bash">Generate weekly delta report
+Compare this week&#x27;s aggregated findings against last week&#x27;s snapshot
+python3 aggregate-security.py \
+ --npm npm-audit-this-week.json \
+ --gitleaks gl-this-week.json \
+ --semgrep sg-this-week.json \
+ &gt; this-week.txt
+
+diff last-week.txt this-week.txt | grep &quot;^[&lt;&gt;]&quot;</code></pre>
+      <p>Pass the diff output to Claude Code with the prompt: "Summarize what's new and what's been resolved compared to last week. Flag anything that's been open for more than two weeks."</p>
+      <p>The key is treating security scanning as code. version controlled, automated, and integrated into your development workflow. Claude Code provides the automation layer that makes this practical without adding friction to your development process.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-for-security-scan-automation">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code for Security Scan Automation",
+    "description": "Automate security scans using Claude Code. Practical examples for developers integrating security tooling into CI/CD.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-for-security-scan-automation/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

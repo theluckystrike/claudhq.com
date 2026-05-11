@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code GraphQL Codegen Workflow Tutorial | ClaudHQ</title>
+  <meta name="description" content="Automate GraphQL code generation with Claude Code for typed queries, resolver scaffolding, and schema-first development.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-for-graphql-codegen-workflow-tutorial/">
+  <meta property="og:title" content="Claude Code GraphQL Codegen Workflow Tutorial | ClaudHQ">
+  <meta property="og:description" content="Automate GraphQL code generation with Claude Code for typed queries, resolver scaffolding, and schema-first development.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-for-graphql-codegen-workflow-tutorial/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code GraphQL Codegen Workflow Tutorial</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Most graphql codegen problems in practice come down to graphql codegen not working as expected in the development workflow, caused by incomplete graphql codegen configuration or missing integration steps. This guide walks through the Claude Code approach to resolving them, current as of April 2026.</p>
+      <p>If you're working with GraphQL in a modern TypeScript project, you've probably experienced the tedium of manually keeping your API types in sync with your schema. GraphQL Codegen solves this problem by automatically generating types from your schema, but setting up and maintaining the workflow can still be time-consuming. This is where Claude Code becomes your secret weapon.</p>
+      <p>In this tutorial, I'll show you how to use Claude Code to automate your GraphQL codegen workflow, making type generation smooth and almost entirely hands-off.</p>
+      <blockquote><p>Scope of this tutorial: This article focuses specifically on automating the <code>graphql-codegen</code> CLI tool, configuring <code>codegen.yml</code>, running codegen commands, watch mode, pre-commit validation, and troubleshooting codegen errors. If you want to generate server-side GraphQL schema artifacts and resolver scaffolding from TypeScript models, see the GraphQL Code Generation Workflow guide. If you need client-side type and hook generation for React/Apollo, see the GraphQL Client Codegen Guide.</p></blockquote>
+      <p>What is GraphQL Codegen?</p>
+      <p>GraphQL Code Generator is a tool that reads your GraphQL schema and operations, then generates type-safe code for your frontend or backend. Instead of manually defining types like this:</p>
+      <pre><code class="language-typescript">interface User {
+ id: string;
+ name: string;
+ email: string;
+ posts: Post[];
+}</code></pre>
+      <p>You let Codegen handle it automatically, ensuring your types always match your schema.</p>
+      <p>Without codegen, teams typically end up with hand-written interfaces that drift from the actual schema over time. A backend developer renames a field, the schema gets updated, but the frontend TypeScript interfaces never get touched. The result is silent type mismatches that only surface at runtime. Codegen eliminates this entire category of bug.</p>
+      <h2>Codegen vs. Manual Typing: A Direct Comparison</h2>
+      <div class="table-wrap"><table><tr><th>Approach</th><th>Type Safety</th><th>Maintenance</th><th>Schema Drift Risk</th><th>Setup Cost</th></tr>
+<tr><td>Manual TypeScript interfaces</td><td>Medium. only as good as the author</td><td>High. every schema change requires manual updates</td><td>High. very common</td><td>Low</td></tr>
+<tr><td>GraphQL Codegen</td><td>High. generated directly from schema</td><td>Low. one command regenerates everything</td><td>Near zero</td><td>Medium</td></tr>
+<tr><td>No types at all</td><td>None</td><td>None needed</td><td>N/A</td><td>None</td></tr>
+<tr><td>Runtime validation only (e.g. zod)</td><td>High at runtime</td><td>Medium</td><td>Low</td><td>Medium</td></tr></table></div>
+      <p>For any team running more than one or two active API consumers, codegen wins clearly on the maintenance and drift dimensions.</p>
+      <h2>Setting Up Your Claude Code Project</h2>
+      <p>First, ensure you have Claude Code installed and configured. If you haven't already, install it and set up your project:</p>
+      <pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
+mkdir my-graphql-project &amp;&amp; cd my-graphql-project
+mkdir -p .claude</code></pre>
+      <p>Now let's set up GraphQL Codegen in your project:</p>
+      <pre><code class="language-bash">npm install -D @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations</code></pre>
+      <p>For projects using React with Apollo Client, add the React-specific plugins:</p>
+      <pre><code class="language-bash">npm install -D @graphql-codegen/typescript-react-apollo @graphql-codegen/typescript-document-nodes</code></pre>
+      <p>For projects using React with urql, use:</p>
+      <pre><code class="language-bash">npm install -D @graphql-codegen/typescript-urql</code></pre>
+      <h2>Choosing the Right Plugins</h2>
+      <p>The plugin ecosystem for graphql-codegen is large. Here is a practical breakdown of the most common choices:</p>
+      <div class="table-wrap"><table><tr><th>Plugin</th><th>Use Case</th><th>Output</th></tr>
+<tr><td>`typescript`</td><td>Any project. generates base types</td><td>TypeScript interfaces and enums</td></tr>
+<tr><td>`typescript-operations`</td><td>Any project with `.graphql` operation files</td><td>Typed query/mutation/subscription variables and result types</td></tr>
+<tr><td>`typescript-react-apollo`</td><td>React + Apollo Client</td><td>Typed hooks (`useQuery`, `useMutation`)</td></tr>
+<tr><td>`typescript-urql`</td><td>React + urql</td><td>Typed hooks for urql</td></tr>
+<tr><td>`typescript-resolvers`</td><td>Server-side resolvers</td><td>Resolver type maps for your schema</td></tr>
+<tr><td>`introspection`</td><td>Tooling, IDE support</td><td>`introspection.json` for schema exploration</td></tr>
+<tr><td>`fragment-matcher`</td><td>Apollo InMemoryCache</td><td>Fragment matcher config for union/interface types</td></tr></table></div>
+      <p>Start with <code>typescript</code> and <code>typescript-operations</code> for almost every project. Add the client-specific plugin once you have chosen your GraphQL client library.</p>
+      <p>Basic <code>codegen.yml</code> Configuration</p>
+      <p>Create your codegen configuration file:</p>
+      <pre><code class="language-yaml">codegen.yml
+overwrite: true
+schema: &quot;./schema.graphql&quot;
+documents: &quot;./src//*.graphql&quot;
+generates:
+ src/generated/graphql.ts:
+ plugins:
+ - typescript
+ - typescript-operations
+ ./src/generated/introspection.json:
+ plugins:
+ - introspection</code></pre>
+      <p>Advanced <code>codegen.yml</code> for a Real Project</p>
+      <p>Here is a more complete configuration that handles multiple output targets and commonly useful options:</p>
+      <pre><code class="language-yaml">codegen.yml
+overwrite: true
+schema: &quot;./schema.graphql&quot;
+documents:
+ - &quot;./src//*.graphql&quot;
+ - &quot;!./src//*.test.graphql&quot; # exclude test fixtures
+
+generates:
+ # Base TypeScript types. shared by all consumers
+ src/generated/types.ts:
+ plugins:
+ - typescript
+ config:
+ scalars:
+ DateTime: string
+ UUID: string
+ JSON: &quot;Record&lt;string, unknown&gt;&quot;
+ enumsAsTypes: true
+ avoidOptionals:
+ field: true
+ inputValue: false
+ strict: true
+
+ # Operation-specific types (queries, mutations, subscriptions)
+ src/generated/operations.ts:
+ preset: import-types
+ presetConfig:
+ typesPath: ./types
+ plugins:
+ - typescript-operations
+ config:
+ avoidOptionals: true
+ withHooks: false # keep this file framework-agnostic
+
+ # React Apollo hooks. only generated if you use Apollo
+ src/generated/hooks.ts:
+ plugins:
+ - typescript-operations
+ - typescript-react-apollo
+ config:
+ withHooks: true
+ withComponent: false
+ withHOC: false
+ apolloReactHooksImportFrom: &quot;@apollo/client&quot;
+
+ # Introspection for IDE tooling
+ src/generated/introspection.json:
+ plugins:
+ - introspection
+ config:
+ minify: false</code></pre>
+      <p>Notice the separation of concerns: base types in one file, operation types in a second, framework-specific hooks in a third. This lets you share the base types with a backend package while keeping React-specific output isolated.</p>
+      <h2>Automating with Claude Code</h2>
+      <p>Here's where Claude Code shines. Instead of manually running codegen commands, you can create Claude Code prompts that handle the entire workflow.</p>
+      <h2>Creating Your Codegen Agent</h2>
+      <p>Create a file called <code>.claude/codegen-agent.md</code> in your project:</p>
+      <pre><code class="language-markdown">GraphQL Codegen Agent
+
+You are responsible for maintaining the GraphQL codegen workflow. Your responsibilities:
+
+1. Run codegen when schema changes are detected
+2. Validate generated types compile correctly
+3. Report any codegen errors
+4. Keep the codegen configuration updated
+
+Always run `graphql-codegen` after any schema modifications.</code></pre>
+      <h2>A More Complete Codegen Agent Prompt</h2>
+      <p>The brief agent above is a good starting point. A more detailed version gives Claude Code enough context to handle edge cases:</p>
+      <pre><code class="language-markdown">GraphQL Codegen Agent
+
+Role
+Maintain the GraphQL code generation pipeline for this TypeScript project.
+
+Schema Location
+- Source of truth: `./schema.graphql`
+- Remote endpoint (for sync): `$GRAPHQL_ENDPOINT`
+
+Codegen Configuration
+- Config file: `./codegen.yml`
+- Generated output directory: `./src/generated/`
+- Never edit files in `./src/generated/` manually. they are always overwritten
+
+Workflow Steps
+1. If schema.graphql has changed since last codegen run, re-run codegen
+2. After running codegen, verify TypeScript compilation: `tsc --noEmit`
+3. If compilation fails, report the specific type errors. do NOT modify generated files
+4. If a type error originates from an operation file (e.g. `users.graphql`), fix the operation
+5. If a type error originates from generated files, report it. the schema may have changed
+
+Trigger Commands
+- `npm run codegen`. one-time generation
+- `npm run codegen:watch`. continuous watch mode
+- `npm run codegen:check`. generate + type check (use in CI)
+
+Error Handling
+- Schema parse errors: check schema.graphql for syntax issues
+- Plugin errors: check that all plugins listed in codegen.yml are installed
+- Type mismatch errors: compare the operation file with the current schema definition
+
+Do Not
+- Modify files in `./src/generated/`
+- Change scalar definitions without team approval
+- Disable strict mode in the codegen config</code></pre>
+      <h2>Integrating with Claude Code</h2>
+      <p>Now you can invoke Claude Code to handle codegen:</p>
+      <pre><code class="language-bash">claude --print &quot;Run graphql-codegen and verify the generated types compile&quot;</code></pre>
+      <p>Or create a custom script in your <code>package.json</code>:</p>
+      <pre><code class="language-json">{
+ &quot;scripts&quot;: {
+ &quot;codegen&quot;: &quot;graphql-codegen --config codegen.yml&quot;,
+ &quot;codegen:watch&quot;: &quot;graphql-codegen --config codegen.yml --watch&quot;,
+ &quot;codegen:check&quot;: &quot;graphql-codegen --config codegen.yml &amp;&amp; tsc --noEmit&quot;
+ }
+}</code></pre>
+      <h2>Using Claude Code to Diagnose Codegen Failures</h2>
+      <p>When codegen fails, Claude Code can read the error output and trace it back to the source. A typical interaction:</p>
+      <pre><code class="language-bash">Run codegen and capture errors
+npm run codegen 2&gt;&amp;1 | tee codegen-errors.txt
+
+Pass errors to Claude for diagnosis
+claude --print &quot;Read codegen-errors.txt and identify the root cause.
+Check schema.graphql and the relevant operation files to explain what is wrong.&quot;</code></pre>
+      <p>Claude will read both the error output and the source files, then tell you exactly which field in which operation file is inconsistent with the current schema, far faster than manually cross-referencing error messages with schema definitions.</p>
+      <h2>Advanced Workflow Patterns</h2>
+      <h2>Automatic Schema Sync</h2>
+      <p>Set up Claude Code to automatically sync your schema from your API:</p>
+      <pre><code class="language-typescript">// scripts/sync-schema.ts
+import { GraphQLClient, gql } from &#x27;graphql-request&#x27;;
+import { writeFileSync } from &#x27;fs&#x27;;
+
+const client = new GraphQLClient(process.env.GRAPHQL_ENDPOINT);
+
+async function fetchSchema() {
+ const query = gql`
+ query IntrospectionQuery {
+ __schema {
+ types {
+ ...FullType
+ }
+ }
+ }
+ fragment FullType on __Type {
+ kind
+ name
+ fields(includeDeprecated: true) {
+ name
+ args {
+ ...InputValue
+ }
+ type {
+ ...TypeRef
+ }
+ isDeprecated
+ deprecationReason
+ }
+ inputFields {
+ ...InputValue
+ }
+ interfaces {
+ ...TypeRef
+ }
+ enumValues(includeDeprecated: true) {
+ name
+ isDeprecated
+ deprecationReason
+ }
+ possibleTypes {
+ ...TypeRef
+ }
+ }
+ fragment InputValue on __InputInput {
+ name
+ type {
+ ...TypeRef
+ }
+ defaultValue
+ }
+ fragment TypeRef on __Type {
+ kind
+ name
+ ofType {
+ kind
+ name
+ ofType {
+ kind
+ name
+ ofType {
+ kind
+ name
+ ofType {
+ kind
+ name
+ ofType {
+ kind
+ name
+ ofType {
+ kind
+ name
+ ofType {
+ kind
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ `;
+
+ const schema = await client.request(query);
+ writeFileSync(&#x27;./schema.graphql&#x27;, printSchema(schema));
+}</code></pre>
+      <p>A cleaner approach for most teams uses the SDL endpoint directly:</p>
+      <pre><code class="language-typescript">// scripts/sync-schema.ts
+import { writeFileSync } from &#x27;fs&#x27;;
+
+async function syncSchema() {
+ const endpoint = process.env.GRAPHQL_ENDPOINT;
+ if (!endpoint) throw new Error(&#x27;GRAPHQL_ENDPOINT not set&#x27;);
+
+ // Many servers expose SDL at /?sdl or via the SDL header
+ const response = await fetch(endpoint, {
+ method: &#x27;POST&#x27;,
+ headers: { &#x27;Content-Type&#x27;: &#x27;application/json&#x27; },
+ body: JSON.stringify({
+ query: `{ _service { sdl } }`, // Federation SDL endpoint
+ }),
+ });
+
+ const { data } = await response.json();
+ writeFileSync(&#x27;./schema.graphql&#x27;, data._service.sdl);
+ console.log(&#x27;Schema synced successfully&#x27;);
+}
+
+syncSchema().catch(console.error);</code></pre>
+      <p>Add this to your <code>package.json</code>:</p>
+      <pre><code class="language-json">{
+ &quot;scripts&quot;: {
+ &quot;schema:sync&quot;: &quot;ts-node scripts/sync-schema.ts&quot;,
+ &quot;schema:sync-and-codegen&quot;: &quot;npm run schema:sync &amp;&amp; npm run codegen&quot;
+ }
+}</code></pre>
+      <p>With Claude Code, you can describe the full pipeline conversationally:</p>
+      <pre><code class="language-bash">claude --print &quot;Sync the schema from the API, run codegen, then check that TypeScript compiles.
+Report what changed in the schema compared to the previous version.&quot;</code></pre>
+      <p>Claude will execute each step, diff the schema changes, and summarize what types were added, removed, or modified, turning a routine maintenance task into a quick informational summary.</p>
+      <h2>Watching for Changes</h2>
+      <p>Use Claude Code's file watching capabilities to trigger codegen automatically:</p>
+      <pre><code class="language-yaml">.claude/watch-config.yml
+watch:
+ - path: ./schema.graphql
+ action: run-codegen
+ - path: ./src//*.graphql
+ action: run-codegen
+
+actions:
+ run-codegen:
+ command: npm run codegen
+ notify: true</code></pre>
+      <p>Alternatively, run watch mode directly and let Claude Code explain any errors that appear:</p>
+      <pre><code class="language-bash">npm run codegen:watch</code></pre>
+      <p>The <code>--watch</code> flag in graphql-codegen uses chokidar under the hood, which reliably picks up changes to <code>.graphql</code> files and the schema. When an error appears in watch mode, paste it to Claude for a diagnosis.</p>
+      <h2>Integrating Codegen into CI/CD</h2>
+      <p>A common mistake is running codegen only locally and committing the generated files. A better approach: run codegen in CI and treat any diff as a failure.</p>
+      <pre><code class="language-yaml">.github/workflows/codegen-check.yml
+name: GraphQL Codegen Check
+
+on:
+ pull_request:
+ paths:
+ - &#x27;schema.graphql&#x27;
+ - &#x27;src//*.graphql&#x27;
+ - &#x27;codegen.yml&#x27;
+
+jobs:
+ codegen:
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+
+ - name: Setup Node
+ uses: actions/setup-node@v4
+ with:
+ node-version: &#x27;20&#x27;
+ cache: &#x27;npm&#x27;
+
+ - name: Install dependencies
+ run: npm ci
+
+ - name: Run codegen
+ run: npm run codegen
+
+ - name: Check for uncommitted changes
+ run: |
+ git diff --exit-code src/generated/ || \
+ (echo &quot;Generated types are out of date. Run npm run codegen locally and commit the result.&quot; &amp;&amp; exit 1)
+
+ - name: TypeScript check
+ run: npx tsc --noEmit</code></pre>
+      <p>This workflow fails the PR if any generated type file differs from what the checked-in schema would produce, catching schema/type drift before it merges.</p>
+      <h2>Best Practices</h2>
+      <ol>
+      <li>Use Fragment Matching</li>
+      </ol>
+      <p>Configure fragment matching to avoid type conflicts:</p>
+      <pre><code class="language-yaml">generates:
+ src/generated/graphql.ts:
+ plugins:
+ - typescript
+ config:
+ withHooks: true
+ withComponent: false
+ withHOC: false
+ avoidOptionals: true
+ strict: true</code></pre>
+      <p>Fragment matching is especially important when using Apollo Client with polymorphic types (unions and interfaces). Without it, Apollo's cache cannot correctly identify which concrete type a fragment applies to. Add the <code>fragment-matcher</code> plugin:</p>
+      <pre><code class="language-yaml"> src/generated/fragmentMatcher.ts:
+ plugins:
+ - fragment-matcher</code></pre>
+      <p>Then configure Apollo Client to use it:</p>
+      <pre><code class="language-typescript">import { InMemoryCache } from &#x27;@apollo/client&#x27;;
+import introspectionResult from &#x27;./generated/fragmentMatcher&#x27;;
+
+const cache = new InMemoryCache({
+ possibleTypes: introspectionResult.possibleTypes,
+});</code></pre>
+      <ol>
+      <li>Implement Pre-Commit Validation</li>
+      </ol>
+      <p>Add a pre-commit hook to ensure codegen runs successfully:</p>
+      <pre><code class="language-json">{
+ &quot;husky&quot;: {
+ &quot;hooks&quot;: {
+ &quot;pre-commit&quot;: &quot;npm run codegen:check&quot;
+ }
+ }
+}</code></pre>
+      <p>With the modern <code>lint-staged</code> approach:</p>
+      <pre><code class="language-json">{
+ &quot;lint-staged&quot;: {
+ &quot;*.graphql&quot;: [&quot;graphql-codegen --config codegen.yml&quot;, &quot;git add src/generated/&quot;]
+ }
+}</code></pre>
+      <p>This only re-runs codegen when <code>.graphql</code> files are part of the commit, much faster than running it unconditionally on every commit.</p>
+      <ol>
+      <li>Organize Your Operations</li>
+      </ol>
+      <p>Keep your GraphQL operations well-organized:</p>
+      <pre><code class="language-">src/
+ graphql/
+ queries/
+ users.graphql
+ posts.graphql
+ mutations/
+ create-user.graphql
+ fragments/
+ user-fields.graphql
+ generated/
+ graphql.ts</code></pre>
+      <p>A disciplined fragment strategy pays dividends in generated type quality. When you collocate fragments with the components that use them, codegen generates tightly scoped types rather than large catch-all interfaces:</p>
+      <pre><code class="language-graphql">src/graphql/fragments/user-fields.graphql
+fragment UserFields on User {
+ id
+ name
+ email
+}
+
+fragment UserWithPosts on User {
+ ...UserFields
+ posts {
+ id
+ title
+ publishedAt
+ }
+}</code></pre>
+      <p>The generated TypeScript for <code>UserFields</code> will only contain the three fields you declared, not every field on <code>User</code>. This keeps component prop types minimal and avoids accidental data coupling between components.</p>
+      <ol>
+      <li>Handle Custom Scalars Correctly</li>
+      </ol>
+      <p>Custom scalars are a common source of <code>any</code> types in generated output. Always declare them explicitly:</p>
+      <pre><code class="language-yaml">generates:
+ src/generated/types.ts:
+ plugins:
+ - typescript
+ config:
+ scalars:
+ DateTime: string # ISO 8601 string
+ Date: string # YYYY-MM-DD string
+ UUID: string # UUID v4 string
+ JSON: &quot;Record&lt;string, unknown&gt;&quot;
+ Upload: File # for file upload mutations
+ Decimal: number
+ BigInt: string # BigInt as string to avoid precision loss</code></pre>
+      <p>Without this mapping, any custom scalar becomes <code>any</code> in the generated output, which defeats the purpose of type generation.</p>
+      <ol>
+      <li>Version Your Generated Files</li>
+      </ol>
+      <p>Whether to commit generated files to version control is a team decision, but here is the tradeoff:</p>
+      <div class="table-wrap"><table><tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+<tr><td>Commit generated files</td><td>No build step needed for IDEs; CI diffs catch drift</td><td>Noisy PRs; merge conflicts in generated files</td></tr>
+<tr><td>Gitignore generated files</td><td>Clean PRs; no merge conflicts</td><td>Requires codegen step before TypeScript checks; IDE is slow</td></tr>
+<tr><td>Generate in CI only</td><td>Single source of truth</td><td>Local development requires discipline</td></tr></table></div>
+      <p>For most teams, committing generated files to version control and running the CI check above strikes the best balance.</p>
+      <h2>Troubleshooting Common Issues</h2>
+      <h2>Schema Parse Errors</h2>
+      <p>If you encounter schema parsing errors, ensure your schema file is valid:</p>
+      <pre><code class="language-bash">graphql-codegen --config codegen.yml --verbose</code></pre>
+      <p>You can also validate the schema independently using the <code>graphql</code> package:</p>
+      <pre><code class="language-bash">npx graphql-inspector validate &#x27;./src//*.graphql&#x27; &#x27;./schema.graphql&#x27;</code></pre>
+      <p>When Claude Code is available, paste the full verbose error output and ask for a diagnosis:</p>
+      <pre><code class="language-bash">claude --print &quot;The graphql-codegen command is failing with this error: [paste error].
+Read schema.graphql and identify the parse problem.&quot;</code></pre>
+      <h2>Type Mismatches After Schema Updates</h2>
+      <p>When generated types don't match your expectations after a schema update, the usual causes are:</p>
+      <ol>
+      <li>Operation file uses a field that was renamed or removed. codegen fails with a <code>FieldNotFoundError</code></li>
+      <li>A non-nullable field was made nullable. the generated type becomes <code>T | null | undefined</code> which breaks existing consumers</li>
+      <li>A custom scalar was added without updating <code>codegen.yml</code>. the type becomes <code>any</code></li>
+      </ol>
+      <p>Claude Code handles all three cases well. Describe the error:</p>
+      <pre><code class="language-bash">claude --print &quot;After updating schema.graphql, I&#x27;m getting this codegen error:
+&#x27;Cannot query field \&quot;fullName\&quot; on type \&quot;User\&quot;&#x27;.
+Find all .graphql files that reference fullName and tell me what to change.&quot;</code></pre>
+      <h2>Watch Mode Issues</h2>
+      <p>For watch mode problems, ensure you're using the correct file paths in your configuration and that your TypeScript project is properly configured. Common causes:</p>
+      <ul>
+      <li>The <code>documents</code> glob in <code>codegen.yml</code> does not match your file structure</li>
+      <li>The schema path points to a non-existent file (check for typos)</li>
+      <li>File permissions prevent chokidar from watching certain directories (common in Docker)</li>
+      <li>The TypeScript project's <code>rootDir</code> does not include <code>src/generated/</code></li>
+      </ul>
+      <p>For the last issue, verify your <code>tsconfig.json</code>:</p>
+      <pre><code class="language-json">{
+ &quot;compilerOptions&quot;: {
+ &quot;rootDir&quot;: &quot;.&quot;,
+ &quot;outDir&quot;: &quot;./dist&quot;,
+ &quot;paths&quot;: {
+ &quot;@/generated/*&quot;: [&quot;./src/generated/*&quot;]
+ }
+ },
+ &quot;include&quot;: [&quot;src//*.ts&quot;, &quot;src/generated//*.ts&quot;]
+}</code></pre>
+      <h2>Resolving Plugin Conflicts</h2>
+      <p>When using multiple plugins that both emit types for the same operations, you may see duplicate identifier errors. The solution is usually to use <code>import-types</code> preset:</p>
+      <pre><code class="language-yaml">generates:
+ src/generated/operations.ts:
+ preset: import-types
+ presetConfig:
+ typesPath: ./types # relative to the output file
+ plugins:
+ - typescript-operations</code></pre>
+      <p>This tells the <code>typescript-operations</code> plugin to import base types from <code>./types.ts</code> (the output of the <code>typescript</code> plugin) rather than re-declaring them.</p>
+      <h2>Putting It All Together: A Real Workflow</h2>
+      <p>Here is how a typical day looks with this setup running:</p>
+      <ol>
+      <li>Pull the latest schema from the API with <code>npm run schema:sync</code></li>
+      <li>Claude Code reports that two fields changed: <code>user.fullName</code> was split into <code>user.firstName</code> and <code>user.lastName</code>, and a new <code>post.readingTime</code> field was added</li>
+      <li>Run <code>npm run codegen:watch</code> while developing</li>
+      <li>Update the three operation files that referenced <code>fullName</code></li>
+      <li>Watch mode re-generates the types automatically after each save</li>
+      <li>Run <code>npm run codegen:check</code> before committing to verify everything compiles</li>
+      <li>The pre-commit hook catches any missed operation files before the commit goes through</li>
+      <li>The CI job on the PR confirms the committed generated files match the schema</li>
+      </ol>
+      <p>Claude Code accelerates steps 2, 3, and 5, it reads the schema diff, locates affected operation files, and proposes the exact changes needed. What used to take 20-30 minutes of manual cross-referencing takes under five minutes.</p>
+      <h2>Conclusion</h2>
+      <p>Claude Code transforms GraphQL codegen from a manual, error-prone process into an automated, reliable workflow. By integrating codegen with Claude Code's capabilities, you get:</p>
+      <ul>
+      <li>Automatic type generation on schema changes</li>
+      <li>Smooth validation and error reporting</li>
+      <li>Reduced manual intervention</li>
+      <li>Consistent, type-safe code</li>
+      </ul>
+      <p>The combination of a well-structured <code>codegen.yml</code>, a clear agent prompt in <code>.claude/codegen-agent.md</code>, a pre-commit hook, and a CI check covers almost every failure mode teams encounter with GraphQL type drift.</p>
+      <p>Start implementing this workflow in your project today, and you'll wonder how you ever managed without it.</p>
+      <p>Remember to regularly update your Claude Code agents as your project evolves, and keep your codegen configuration in version control to ensure consistency across your team.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Estimate your monthly spend with our <a href="/calculator/">Cost Calculator</a>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-for-graphql-codegen-workflow-tutorial">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code GraphQL Codegen Workflow Tutorial",
+    "description": "Automate GraphQL code generation with Claude Code for typed queries, resolver scaffolding, and schema-first development.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-for-graphql-codegen-workflow-tutorial/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

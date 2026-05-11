@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Enterprise Disaster Recovery Workflow Planning | ClaudHQ</title>
+  <meta name="description" content="A comprehensive guide to building disaster recovery workflows for enterprise systems using Claude Code.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-enterprise-disaster-recovery-workflow-planning/">
+  <meta property="og:title" content="Claude Code Enterprise Disaster Recovery Workflow Planning | ClaudHQ">
+  <meta property="og:description" content="A comprehensive guide to building disaster recovery workflows for enterprise systems using Claude Code.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-enterprise-disaster-recovery-workflow-planning/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Enterprise Disaster Recovery Workflow Planning</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Disaster recovery (DR) is no longer an optional safeguard for enterprise systems, it's a fundamental requirement. As organizations increasingly rely on complex distributed systems, the need for solid, automated DR workflows has never been more critical. This guide explores how Claude Code can be used to plan, implement, and automate enterprise disaster recovery workflows effectively.</p>
+      <h2>Understanding Enterprise Disaster Recovery Requirements</h2>
+      <p>Enterprise disaster recovery differs significantly from simple backup strategies. It encompasses data protection, system redundancy, failover mechanisms, and comprehensive testing protocols. The goal is not just to recover from failures but to maintain business continuity with minimal downtime and data loss.</p>
+      <h2>Key Components of Enterprise DR</h2>
+      <p>Every enterprise disaster recovery plan should address several critical areas:</p>
+      <ul>
+      <li>Data Backup and Replication: Ensuring data is duplicated across geographically distributed locations</li>
+      <li>System Redundancy: Having standby systems ready to take over</li>
+      <li>Failover Automation: Automatically switching to backup systems when primary systems fail</li>
+      <li>Recovery Time Objectives (RTO): The maximum acceptable time to restore services</li>
+      <li>Recovery Point Objectives (RPO): The maximum acceptable amount of data loss measured in time</li>
+      </ul>
+      <h2>RTO vs. RPO: Understanding the Tradeoffs</h2>
+      <p>RTO and RPO are the two foundational metrics of any DR plan, and they often exist in tension with each other. A near-zero RPO requires continuous or near-continuous replication, which increases infrastructure costs significantly. A near-zero RTO requires hot standby systems that are always ready to serve traffic, which is expensive but sometimes necessary for mission-critical services.</p>
+      <div class="table-wrap"><table><tr><th>Tier</th><th>RTO Target</th><th>RPO Target</th><th>Typical Use Case</th><th>Infrastructure Cost</th></tr>
+<tr><td>Tier 0 (Mission Critical)</td><td>< 15 min</td><td>< 5 min</td><td>Payment processing, trading systems</td><td>Very High</td></tr>
+<tr><td>Tier 1 (Business Critical)</td><td>< 1 hour</td><td>< 30 min</td><td>ERP, CRM, core databases</td><td>High</td></tr>
+<tr><td>Tier 2 (Important)</td><td>< 4 hours</td><td>< 2 hours</td><td>Reporting systems, dev/test</td><td>Medium</td></tr>
+<tr><td>Tier 3 (Standard)</td><td>< 24 hours</td><td>< 8 hours</td><td>Archives, internal tools</td><td>Low</td></tr></table></div>
+      <p>One of the first things Claude Code can help you do is classify your services into these tiers based on business impact analysis. Providing Claude with a list of your systems and their business functions allows it to help draft a tiering document that your stakeholders can review and approve.</p>
+      <h2>DR Strategy Patterns</h2>
+      <p>Before writing a single line of automation, choose the right DR strategy for each tier:</p>
+      <div class="table-wrap"><table><tr><th>Strategy</th><th>Description</th><th>RTO</th><th>RPO</th><th>Cost</th></tr>
+<tr><td>Backup and Restore</td><td>Snapshot-based, restore on failure</td><td>Hours–Days</td><td>Hours</td><td>$</td></tr>
+<tr><td>Pilot Light</td><td>Minimal core running, scale on demand</td><td>10–60 min</td><td>Minutes</td><td>$$</td></tr>
+<tr><td>Warm Standby</td><td>Scaled-down version always running</td><td>5–15 min</td><td>Seconds–Minutes</td><td>$$$</td></tr>
+<tr><td>Multi-Site Active/Active</td><td>Full capacity in multiple regions</td><td>Near-zero</td><td>Near-zero</td><td>$$$$</td></tr></table></div>
+      <p>Most enterprises use a mix of these strategies across their service tiers. Tier 0 services warrant Active/Active or Warm Standby, while Tier 3 systems can use Backup and Restore. Claude Code can help you document which strategy applies to each service and generate the corresponding infrastructure templates.</p>
+      <h2>Building DR Workflows with Claude Code</h2>
+      <p>Claude Code excels at automating complex workflows, making it an ideal tool for disaster recovery planning and execution. disaster-recovery-assessment</p>
+      <p>description: Analyzes infrastructure for DR readiness and generates recommendations</p>
+      <pre><code class="language-">
+The skill can then analyze your infrastructure configuration files, Kubernetes manifests, database configurations, and cloud infrastructure to provide a comprehensive DR readiness report.
+
+A useful prompt to give Claude Code when starting a DR assessment:
+</code></pre>
+      <p>Review the infrastructure configurations in ./infra/ and ./k8s/ directories.</p>
+      <p>For each service, identify:</p>
+      <ol>
+      <li>Whether backups are configured and how frequently they run</li>
+      <li>Whether multi-region or multi-AZ redundancy exists</li>
+      <li>Estimated RTO and RPO based on current configuration</li>
+      <li>Any single points of failure</li>
+      <li>Missing alerting or health check configurations</li>
+      </ol>
+      <p>Output a Markdown table summarizing findings per service with a risk rating (HIGH/MEDIUM/LOW).</p>
+      <pre><code class="language-">
+This prompt gives Claude Code enough context to produce a structured assessment rather than a generic checklist. The output becomes the foundation for your DR gap analysis.
+
+Automating Backup Verification
+
+One of the most critical aspects of disaster recovery is ensuring backups are actually working. Many organizations discover their backups were silently failing only when they need to restore, exactly the worst time to find out. Claude Code can help automate backup verification:
+</code></pre>
+      <p>"""Backup verification script for enterprise systems."""</p>
+      <p>import subprocess</p>
+      <p>import json</p>
+      <p>import hashlib</p>
+      <p>import boto3</p>
+      <p>from datetime import datetime, timedelta</p>
+      <p>from typing import List, Dict, Any</p>
+      <p>def verify_database_backups(config: Dict[str, Any]) -> List[Dict[str, Any]]:</p>
+      <p>"""Verify database backups are complete and recent."""</p>
+      <p>results = []</p>
+      <p>for db in config['databases']:</p>
+      <p>last_backup = get_last_backup_time(db['name'])</p>
+      <p>age = datetime.now() - last_backup</p>
+      <p>if age > timedelta(hours=config['rpo_hours']):</p>
+      <p>results.append({</p>
+      <p>'status': 'FAIL',</p>
+      <p>'reason': 'Backup exceeds RPO threshold',</p>
+      <p>'database': db['name'],</p>
+      <p>'last_backup': last_backup.isoformat(),</p>
+      <p>'age_hours': round(age.total_seconds() / 3600, 2),</p>
+      <p>'rpo_hours': config['rpo_hours']</p>
+      <p>})</p>
+      <p>else:</p>
+      <p>integrity_ok = verify_backup_integrity(db['backup_path'])</p>
+      <p>restorable = test_restore_dry_run(db['backup_path'], db['engine'])</p>
+      <p>results.append({</p>
+      <p>'status': 'PASS' if (integrity_ok and restorable) else 'WARN',</p>
+      <p>'database': db['name'],</p>
+      <p>'last_backup': last_backup.isoformat(),</p>
+      <p>'integrity_check': 'PASS' if integrity_ok else 'FAIL',</p>
+      <p>'restore_dry_run': 'PASS' if restorable else 'FAIL',</p>
+      <p>'age_hours': round(age.total_seconds() / 3600, 2)</p>
+      <p>})</p>
+      <p>return results</p>
+      <p>def get_last_backup_time(database_name: str) -> datetime:</p>
+      <p>"""Query the last backup time from AWS Backup or RDS automated backups."""</p>
+      <p>client = boto3.client('rds')</p>
+      <p>response = client.describe_db_snapshots(</p>
+      <p>DBInstanceIdentifier=database_name,</p>
+      <p>SnapshotType='automated'</p>
+      <p>)</p>
+      <p>snapshots = sorted(</p>
+      <p>response['DBSnapshots'],</p>
+      <p>key=lambda s: s['SnapshotCreateTime'],</p>
+      <p>reverse=True</p>
+      <p>)</p>
+      <p>if snapshots:</p>
+      <p>return snapshots[0]['SnapshotCreateTime'].replace(tzinfo=None)</p>
+      <p>raise ValueError(f"No snapshots found for {database_name}")</p>
+      <p>def verify_backup_integrity(backup_path: str) -> bool:</p>
+      <p>"""Verify backup file integrity by comparing stored checksum against recalculated hash."""</p>
+      <p>checksum_file = backup_path + '.sha256'</p>
+      <p>try:</p>
+      <p>with open(checksum_file, 'r') as f:</p>
+      <p>expected = f.read().strip()</p>
+      <p>sha256 = hashlib.sha256()</p>
+      <p>with open(backup_path, 'rb') as f:</p>
+      <p>for chunk in iter(lambda: f.read(8192), b''):</p>
+      <p>sha256.update(chunk)</p>
+      <p>return sha256.hexdigest() == expected</p>
+      <p>except FileNotFoundError:</p>
+      <p>return False</p>
+      <p>def test_restore_dry_run(backup_path: str, engine: str) -> bool:</p>
+      <p>"""Perform a lightweight dry-run restore to verify the backup is not corrupt."""</p>
+      <p>if engine == 'postgres':</p>
+      <p>result = subprocess.run(</p>
+      <p>['pg_restore', '--list', backup_path],</p>
+      <p>capture_output=True, text=True</p>
+      <p>)</p>
+      <p>return result.returncode == 0</p>
+      <p>elif engine == 'mysql':</p>
+      <p>result = subprocess.run(</p>
+      <p>['mysqlcheck', '--check', '--all-databases'],</p>
+      <p>capture_output=True, text=True</p>
+      <p>)</p>
+      <p>return result.returncode == 0</p>
+      <p>return True # Unknown engines pass by default; add cases as needed</p>
+      <p>def run_verification(config_path: str) -> bool:</p>
+      <p>"""Main entry point for backup verification job."""</p>
+      <p>with open(config_path) as f:</p>
+      <p>config = json.load(f)</p>
+      <p>results = verify_database_backups(config)</p>
+      <p>failed = [r for r in results if r['status'] == 'FAIL']</p>
+      <p>warned = [r for r in results if r['status'] == 'WARN']</p>
+      <p>print(json.dumps(results, indent=2))</p>
+      <p>if failed:</p>
+      <p>print(f"\nCRITICAL: {len(failed)} backup(s) failed verification!")</p>
+      <p>return False</p>
+      <p>if warned:</p>
+      <p>print(f"\nWARNING: {len(warned)} backup(s) have integrity issues.")</p>
+      <p>return True</p>
+      <p>if __name__ == '__main__':</p>
+      <p>import sys</p>
+      <p>config_path = sys.argv[1] if len(sys.argv) > 1 else 'dr-config.json'</p>
+      <p>success = run_verification(config_path)</p>
+      <p>sys.exit(0 if success else 1)</p>
+      <pre><code class="language-">
+Run this script as a scheduled job (nightly at minimum, hourly for Tier 0 services) and route alerts to your on-call rotation. The key improvement over most backup scripts is the dual check: timestamp freshness plus an actual integrity verification, not just the presence of a file.
+
+Implementing Multi-Region Failover Scripts
+
+For enterprise systems running across multiple regions, automated failover is essential. Here&#x27;s a complete Python-based failover controller for AWS that Claude Code can help you generate and adapt:
+</code></pre>
+      <p>"""Multi-region failover controller for AWS-based enterprise services."""</p>
+      <p>import boto3</p>
+      <p>import time</p>
+      <p>import logging</p>
+      <p>from dataclasses import dataclass</p>
+      <p>from typing import Optional</p>
+      <p>logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')</p>
+      <p>log = logging.getLogger(__name__)</p>
+      <p>@dataclass</p>
+      <p>class FailoverConfig:</p>
+      <p>primary_region: str</p>
+      <p>secondary_region: str</p>
+      <p>route53_hosted_zone_id: str</p>
+      <p>primary_record_name: str</p>
+      <p>health_check_id: str</p>
+      <p>rds_cluster_id: str</p>
+      <p>ecs_cluster_name: str</p>
+      <p>ecs_service_name: str</p>
+      <p>desired_count_primary: int = 4</p>
+      <p>desired_count_secondary: int = 4</p>
+      <p>def check_primary_health(config: FailoverConfig) -> bool:</p>
+      <p>"""Check Route53 health check status for primary region."""</p>
+      <p>client = boto3.client('route53')</p>
+      <p>response = client.get_health_check_status(HealthCheckId=config.health_check_id)</p>
+      <p>checks = response['HealthCheckObservations']</p>
+      <p>healthy = sum(1 for c in checks if c['StatusReport']['Status'].startswith('Success'))</p>
+      <p>total = len(checks)</p>
+      <p>log.info(f"Health check: {healthy}/{total} endpoints healthy")</p>
+      <p>return healthy / total >= 0.6 # 60% threshold before triggering failover</p>
+      <p>def promote_rds_replica(config: FailoverConfig) -> bool:</p>
+      <p>"""Promote RDS read replica to standalone primary in secondary region."""</p>
+      <p>rds = boto3.client('rds', region_name=config.secondary_region)</p>
+      <p>try:</p>
+      <p>log.info(f"Promoting RDS cluster {config.rds_cluster_id} in {config.secondary_region}")</p>
+      <p>rds.failover_global_cluster(</p>
+      <p>GlobalClusterIdentifier=config.rds_cluster_id,</p>
+      <p>TargetDbClusterIdentifier=f"arn:aws:rds:{config.secondary_region}:123456789012:cluster:{config.rds_cluster_id}-secondary"</p>
+      <p>)</p>
+      <p>waiter = rds.get_waiter('db_cluster_available')</p>
+      <p>waiter.wait(DBClusterIdentifier=f"{config.rds_cluster_id}-secondary")</p>
+      <p>log.info("RDS promotion complete")</p>
+      <p>return True</p>
+      <p>except Exception as e:</p>
+      <p>log.error(f"RDS promotion failed: {e}")</p>
+      <p>return False</p>
+      <p>def scale_ecs_service(config: FailoverConfig, region: str, desired: int) -> bool:</p>
+      <p>"""Scale an ECS service to the specified desired count."""</p>
+      <p>ecs = boto3.client('ecs', region_name=region)</p>
+      <p>try:</p>
+      <p>ecs.update_service(</p>
+      <p>cluster=config.ecs_cluster_name,</p>
+      <p>service=config.ecs_service_name,</p>
+      <p>desiredCount=desired</p>
+      <p>)</p>
+      <p>log.info(f"Scaled ECS service in {region} to {desired} tasks")</p>
+      <p>return True</p>
+      <p>except Exception as e:</p>
+      <p>log.error(f"ECS scale failed in {region}: {e}")</p>
+      <p>return False</p>
+      <p>def update_dns_to_secondary(config: FailoverConfig) -> bool:</p>
+      <p>"""Update Route53 DNS records to point traffic at secondary region."""</p>
+      <p>r53 = boto3.client('route53')</p>
+      <p>try:</p>
+      <p>r53.change_resource_record_sets(</p>
+      <p>HostedZoneId=config.route53_hosted_zone_id,</p>
+      <p>ChangeBatch={</p>
+      <p>'Comment': f'DR failover to {config.secondary_region} at {time.strftime("%Y-%m-%dT%H:%M:%SZ")}',</p>
+      <p>'Changes': [{</p>
+      <p>'Action': 'UPSERT',</p>
+      <p>'ResourceRecordSet': {</p>
+      <p>'Name': config.primary_record_name,</p>
+      <p>'Type': 'A',</p>
+      <p>'AliasTarget': {</p>
+      <p>'HostedZoneId': 'Z35SXDOTRQ7X7K', # ALB hosted zone for us-east-1</p>
+      <p>'DNSName': f'my-alb.{config.secondary_region}.elb.amazonaws.com',</p>
+      <p>'EvaluateTargetHealth': True</p>
+      <p>}</p>
+      <p>}</p>
+      <p>}]</p>
+      <p>}</p>
+      <p>)</p>
+      <p>log.info(f"DNS updated to secondary region {config.secondary_region}")</p>
+      <p>return True</p>
+      <p>except Exception as e:</p>
+      <p>log.error(f"DNS update failed: {e}")</p>
+      <p>return False</p>
+      <p>def execute_failover(config: FailoverConfig) -> bool:</p>
+      <p>"""Orchestrate full failover sequence."""</p>
+      <p>log.info("=== INITIATING REGIONAL FAILOVER ===")</p>
+      <p>log.info(f"Primary: {config.primary_region} -> Secondary: {config.secondary_region}")</p>
+      <p>steps = [</p>
+      <p>("Scale secondary ECS up", lambda: scale_ecs_service(config, config.secondary_region, config.desired_count_secondary)),</p>
+      <p>("Promote RDS replica", lambda: promote_rds_replica(config)),</p>
+      <p>("Update DNS to secondary", lambda: update_dns_to_secondary(config)),</p>
+      <p>("Scale primary ECS down", lambda: scale_ecs_service(config, config.primary_region, 0)),</p>
+      <p>]</p>
+      <p>for step_name, step_fn in steps:</p>
+      <p>log.info(f"Step: {step_name}")</p>
+      <p>if not step_fn():</p>
+      <p>log.error(f"FAILOVER ABORTED at step: {step_name}")</p>
+      <p>return False</p>
+      <p>time.sleep(5)</p>
+      <p>log.info("=== FAILOVER COMPLETE ===")</p>
+      <p>return True</p>
+      <p>if __name__ == '__main__':</p>
+      <p>config = FailoverConfig(</p>
+      <p>primary_region='us-east-1',</p>
+      <p>secondary_region='us-west-2',</p>
+      <p>route53_hosted_zone_id='Z1234567890ABC',</p>
+      <p>primary_record_name='api.example.com',</p>
+      <p>health_check_id='abc-123-health-check',</p>
+      <p>rds_cluster_id='my-aurora-cluster',</p>
+      <p>ecs_cluster_name='production-cluster',</p>
+      <p>ecs_service_name='api-service'</p>
+      <p>)</p>
+      <p>if not check_primary_health(config):</p>
+      <p>log.warning("Primary region unhealthy. executing failover")</p>
+      <p>success = execute_failover(config)</p>
+      <p>exit(0 if success else 1)</p>
+      <p>else:</p>
+      <p>log.info("Primary region healthy. no action required")</p>
+      <p>exit(0)</p>
+      <pre><code class="language-">
+When you share this script with Claude Code and ask it to adapt it to your infrastructure, it can replace the AWS-specific calls with your actual resource ARNs, adjust the health thresholds, and add pre-failover hooks like Slack or PagerDuty notifications.
+
+Testing Your Disaster Recovery Workflows
+
+A DR plan is only as good as its tested execution. Regular testing is mandatory for enterprise compliance and reliability.
+
+DR Testing Approaches Compared
+
+Not all DR tests carry the same risk or provide the same confidence. Use this matrix to plan your test cadence:
+
+| Test Type | Description | Disruption Risk | Confidence Level | Frequency |
+|-----------|-------------|-----------------|-----------------|-----------|
+| Tabletop Exercise | Team walkthrough of runbook, no systems touched | None | Low | Monthly |
+| Backup Restore Test | Restore to isolated environment, verify data | None (isolated) | Medium | Weekly |
+| Component Failover | Fail individual service, verify recovery | Low | Medium-High | Monthly |
+| Full Failover Drill | Complete regional failover in staging | Medium | High | Quarterly |
+| Production Chaos Test | Controlled failure injection in prod | High | Very High | Annually (with approval) |
+
+Claude Code is particularly useful during tabletop exercises: you can feed it the current runbook and ask it to generate likely failure scenarios your team hasn&#x27;t considered, then play through the decision tree.
+
+Building Automated DR Test Suites
+
+Claude Code can help create comprehensive DR test suites:
+</code></pre>
+      <p>"""Comprehensive DR test suite for automated validation."""</p>
+      <p>import time</p>
+      <p>import json</p>
+      <p>from typing import Dict, Any, List</p>
+      <p>from datetime import datetime</p>
+      <p>def test_backup_restoration() -> Dict[str, Any]:</p>
+      <p>"""Restore latest backup to isolated test environment and verify data consistency."""</p>
+      <p>start = time.time()</p>
+      <p>try:</p>
+      <p>backup = find_latest_backup('production-db')</p>
+      <p>test_cluster = restore_to_test_env(backup['snapshot_id'])</p>
+      <p>record_count_prod = query_record_count('production-db', 'orders')</p>
+      <p>record_count_test = query_record_count(test_cluster, 'orders')</p>
+      <p>passed = abs(record_count_prod - record_count_test) < 100 # Allow small delta</p>
+      <p>return {</p>
+      <p>'test': 'backup_restoration',</p>
+      <p>'passed': passed,</p>
+      <p>'duration_seconds': round(time.time() - start, 1),</p>
+      <p>'details': {</p>
+      <p>'backup_id': backup['snapshot_id'],</p>
+      <p>'backup_age_hours': backup['age_hours'],</p>
+      <p>'prod_record_count': record_count_prod,</p>
+      <p>'test_record_count': record_count_test</p>
+      <p>}</p>
+      <p>}</p>
+      <p>except Exception as e:</p>
+      <p>return {'test': 'backup_restoration', 'passed': False, 'error': str(e)}</p>
+      <p>def test_failover_timing() -> Dict[str, Any]:</p>
+      <p>"""Measure actual failover time against RTO target."""</p>
+      <p>rto_target_seconds = 900 # 15 minutes</p>
+      <p>start = time.time()</p>
+      <p>try:</p>
+      <p>trigger_staging_failover()</p>
+      <p>elapsed = 0</p>
+      <p>while elapsed < rto_target_seconds * 2:</p>
+      <p>if check_secondary_healthy():</p>
+      <p>break</p>
+      <p>time.sleep(15)</p>
+      <p>elapsed = time.time() - start</p>
+      <p>actual_rto = time.time() - start</p>
+      <p>return {</p>
+      <p>'test': 'failover_timing',</p>
+      <p>'passed': actual_rto <= rto_target_seconds,</p>
+      <p>'duration_seconds': round(actual_rto, 1),</p>
+      <p>'rto_target_seconds': rto_target_seconds,</p>
+      <p>'rto_met': actual_rto <= rto_target_seconds</p>
+      <p>}</p>
+      <p>except Exception as e:</p>
+      <p>return {'test': 'failover_timing', 'passed': False, 'error': str(e)}</p>
+      <p>def test_data_integrity() -> Dict[str, Any]:</p>
+      <p>"""Verify data consistency between primary and recovered secondary."""</p>
+      <p>start = time.time()</p>
+      <p>try:</p>
+      <p>checksums_primary = compute_table_checksums('primary')</p>
+      <p>checksums_secondary = compute_table_checksums('secondary')</p>
+      <p>mismatches = [</p>
+      <p>table for table in checksums_primary</p>
+      <p>if checksums_primary[table] != checksums_secondary.get(table)</p>
+      <p>]</p>
+      <p>return {</p>
+      <p>'test': 'data_integrity',</p>
+      <p>'passed': len(mismatches) == 0,</p>
+      <p>'duration_seconds': round(time.time() - start, 1),</p>
+      <p>'tables_checked': len(checksums_primary),</p>
+      <p>'mismatches': mismatches</p>
+      <p>}</p>
+      <p>except Exception as e:</p>
+      <p>return {'test': 'data_integrity', 'passed': False, 'error': str(e)}</p>
+      <p>def test_rollback() -> Dict[str, Any]:</p>
+      <p>"""Verify ability to roll back to primary after failover."""</p>
+      <p>start = time.time()</p>
+      <p>try:</p>
+      <p>rollback_success = execute_rollback_to_primary()</p>
+      <p>return {</p>
+      <p>'test': 'rollback',</p>
+      <p>'passed': rollback_success,</p>
+      <p>'duration_seconds': round(time.time() - start, 1)</p>
+      <p>}</p>
+      <p>except Exception as e:</p>
+      <p>return {'test': 'rollback', 'passed': False, 'error': str(e)}</p>
+      <p>def run_dr_tests() -> bool:</p>
+      <p>"""Execute comprehensive disaster recovery tests and generate report."""</p>
+      <p>test_results = []</p>
+      <p>print(f"Starting DR test suite at {datetime.now().isoformat()}")</p>
+      <p>test_results.append(test_backup_restoration())</p>
+      <p>test_results.append(test_failover_timing())</p>
+      <p>test_results.append(test_data_integrity())</p>
+      <p>test_results.append(test_rollback())</p>
+      <p>generate_dr_test_report(test_results)</p>
+      <p>passed = sum(1 for t in test_results if t.get('passed', False))</p>
+      <p>total = len(test_results)</p>
+      <p>print(f"\nResults: {passed}/{total} tests passed")</p>
+      <p>return all(t.get('passed', False) for t in test_results)</p>
+      <p>def generate_dr_test_report(results: List[Dict[str, Any]]) -> None:</p>
+      <p>"""Write DR test report to JSON and print summary."""</p>
+      <p>report = {</p>
+      <p>'timestamp': datetime.now().isoformat(),</p>
+      <p>'overall_passed': all(r.get('passed', False) for r in results),</p>
+      <p>'tests': results</p>
+      <p>}</p>
+      <p>with open(f"dr-test-report-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json", 'w') as f:</p>
+      <p>json.dump(report, f, indent=2)</p>
+      <p>print(json.dumps(report, indent=2))</p>
+      <p>Stub implementations. replace with your actual infrastructure calls</p>
+      <p>def find_latest_backup(db_name): return {'snapshot_id': 'snap-001', 'age_hours': 2.5}</p>
+      <p>def restore_to_test_env(snapshot_id): return 'test-cluster-001'</p>
+      <p>def query_record_count(cluster, table): return 100000</p>
+      <p>def trigger_staging_failover(): time.sleep(1)</p>
+      <p>def check_secondary_healthy(): return True</p>
+      <p>def compute_table_checksums(target): return {'orders': 'abc123', 'users': 'def456'}</p>
+      <p>def execute_rollback_to_primary(): return True</p>
+      <p>if __name__ == '__main__':</p>
+      <p>import sys</p>
+      <p>success = run_dr_tests()</p>
+      <p>sys.exit(0 if success else 1)</p>
+      <pre><code class="language-">
+Claude Code can help you replace the stub implementations with real infrastructure calls, add your specific database tables, and extend the report format to match your compliance requirements (SOC 2, ISO 27001, etc.).
+
+Chaos Engineering Integration
+
+Consider integrating chaos engineering principles to test your DR workflows under realistic failure conditions. The goal is to find gaps before a real incident does. Here&#x27;s a structured approach:
+</code></pre>
+      <p>"""Chaos engineering experiment runner integrated with DR validation."""</p>
+      <p>import random</p>
+      <p>import time</p>
+      <p>import logging</p>
+      <p>from typing import Callable, List, Dict, Any</p>
+      <p>log = logging.getLogger(__name__)</p>
+      <p>class ChaosExperiment:</p>
+      <p>def __init__(self, name: str, target: str, action: Callable, validations: List[Callable]):</p>
+      <p>self.name = name</p>
+      <p>self.target = target</p>
+      <p>self.action = action</p>
+      <p>self.validations = validations</p>
+      <p>def run(self) -> Dict[str, Any]:</p>
+      <p>log.info(f"Starting chaos experiment: {self.name} against {self.target}")</p>
+      <p>start = time.time()</p>
+      <p>action_result = {'triggered': False, 'error': None}</p>
+      <p>try:</p>
+      <p>self.action()</p>
+      <p>action_result['triggered'] = True</p>
+      <p>except Exception as e:</p>
+      <p>action_result['error'] = str(e)</p>
+      <p>log.error(f"Chaos action failed: {e}")</p>
+      <p>time.sleep(30)</p>
+      <p>validation_results = []</p>
+      <p>for validate in self.validations:</p>
+      <p>try:</p>
+      <p>passed = validate()</p>
+      <p>validation_results.append({'validator': validate.__name__, 'passed': passed})</p>
+      <p>except Exception as e:</p>
+      <p>validation_results.append({'validator': validate.__name__, 'passed': False, 'error': str(e)})</p>
+      <p>return {</p>
+      <p>'experiment': self.name,</p>
+      <p>'target': self.target,</p>
+      <p>'duration_seconds': round(time.time() - start, 1),</p>
+      <p>'action': action_result,</p>
+      <p>'validations': validation_results,</p>
+      <p>'overall_passed': all(v['passed'] for v in validation_results)</p>
+      <p>}</p>
+      <p>Example experiment definitions</p>
+      <p>def simulate_az_failure():</p>
+      <p>"""Simulate AZ failure by disabling a specific availability zone in staging."""</p>
+      <p>log.info("Simulating AZ failure. blocking traffic to us-east-1a")</p>
+      <p>def check_failover_initiated() -> bool:</p>
+      <p>"""Verify that the failover mechanism triggered automatically."""</p>
+      <p>return True # Replace with real check</p>
+      <p>def verify_rto_met() -> bool:</p>
+      <p>"""Verify service was restored within RTO window."""</p>
+      <p>return True # Replace with actual service health check</p>
+      <p>def verify_rpo_met() -> bool:</p>
+      <p>"""Verify data loss is within RPO limits."""</p>
+      <p>return True # Replace with data consistency check</p>
+      <p>experiments = [</p>
+      <p>ChaosExperiment(</p>
+      <p>name='az_failure_us_east_1a',</p>
+      <p>target='us-east-1a',</p>
+      <p>action=simulate_az_failure,</p>
+      <p>validations=[check_failover_initiated, verify_rto_met, verify_rpo_met]</p>
+      <p>)</p>
+      <p>]</p>
+      <p>if __name__ == '__main__':</p>
+      <p>for experiment in experiments:</p>
+      <p>result = experiment.run()</p>
+      <p>status = "PASSED" if result['overall_passed'] else "FAILED"</p>
+      <p>log.info(f"Experiment {result['experiment']}: {status}")</p>
+      <pre><code class="language-">
+AWS Fault Injection Simulator (FIS) is the recommended tool for production-safe chaos experiments in AWS environments. Claude Code can help you generate FIS experiment templates in JSON or Terraform that mirror the patterns above.
+
+Best Practices for Enterprise DR Workflows
+
+When implementing disaster recovery workflows with Claude Code, follow these established best practices:
+
+1. Implement Defense in Depth
+
+Don&#x27;t rely on a single recovery mechanism. Layer multiple backup strategies, snapshots, continuous replication, and archived backups, to ensure resilience against various failure scenarios. A practical layering approach:
+
+- Hourly snapshots retained for 24 hours (fast recovery for recent accidents)
+- Daily snapshots retained for 30 days (recovery from data corruption that went unnoticed)
+- Weekly exports to cold storage retained for 1 year (compliance and long-term recovery)
+- Continuous replication to secondary region for Tier 0/1 services (near-zero RPO)
+
+2. Automate Everything Possible, But Test the Automation
+
+Manual disaster recovery processes are error-prone and slow. Use Claude Code to automate detection, notification, failover, and recovery steps. However, automation introduces its own failure modes: a misconfigured failover script that triggers unnecessarily can cause more damage than the incident it was meant to prevent. Every automation must have a manual override path.
+
+Ask Claude Code to add a `--dry-run` flag to all failover scripts so operators can verify what would happen before committing to a failover action.
+
+3. Document Runbooks Alongside Code
+
+Use Claude Code&#x27;s documentation capabilities to generate and maintain runbooks that stay synchronized with your automation scripts. A useful workflow: after updating a failover script, ask Claude Code to regenerate the corresponding runbook section based on the current code. This prevents drift between documentation and implementation.
+
+A minimal runbook entry for each DR scenario should include:
+
+- Trigger conditions (what monitoring alerts fire, what thresholds are crossed)
+- Decision criteria (when to escalate vs. when automation handles it)
+- Step-by-step manual procedure (in case automation fails)
+- Rollback procedure
+- Post-incident actions (backup verification, root cause analysis)
+
+4. Schedule Regular DR Drills
+
+Schedule quarterly full DR drills for Tier 0 and Tier 1 services. Monthly partial tests (backup restoration, component failover) provide ongoing confidence without requiring a full production failover. After each drill, use Claude Code to generate a post-mortem template pre-populated with timing data from your test logs.
+
+5. Monitor DR Health Continuously
+
+Implement monitoring not just for production systems, but for the DR infrastructure itself. Common blind spots:
+
+- Replication lag in secondary region exceeding RPO threshold
+- Backup jobs completing but producing corrupt files
+- Secondary region capacity insufficient to handle full traffic load
+- DNS TTL values set too high for fast failover
+
+Create a dedicated DR health dashboard that shows replication lag, last successful backup timestamp, and secondary region capacity. Route DR health alerts to the same on-call rotation as production alerts.
+
+Real-World Implementation Example
+
+Here&#x27;s how a typical enterprise might implement a complete disaster recovery workflow that brings together assessment, automation, and testing:
+</code></pre>
+      <p>interface DisasterRecoveryWorkflow {</p>
+      <p>stages: [</p>
+      <p>'detection',</p>
+      <p>'notification',</p>
+      <p>'containment',</p>
+      <p>'recovery',</p>
+      <p>'validation',</p>
+      <p>'post-mortem'</p>
+      <p>];</p>
+      <p>async execute(): Promise<RecoveryResult> {</p>
+      <p>// Stage 1: Detection. triggered by monitoring system or manual declaration</p>
+      <p>const incident = await this.detectIncident();</p>
+      <p>const severity = this.classifyIncident(incident);</p>
+      <p>// Stage 2: Notify stakeholders based on severity</p>
+      <p>await this.notifyTeams(incident, severity);</p>
+      <p>if (severity === 'P1') {</p>
+      <p>await this.page_oncall_team(incident);</p>
+      <p>}</p>
+      <p>// Stage 3: Contain damage. isolate affected systems before recovery</p>
+      <p>await this.isolateAffectedSystems(incident);</p>
+      <p>// Stage 4: Recover. choose strategy based on incident type</p>
+      <p>const strategy = this.selectRecoveryStrategy(incident);</p>
+      <p>const recovery = await this.executeRecovery(incident, strategy);</p>
+      <p>// Stage 5: Validate. confirm services are healthy before declaring recovery</p>
+      <p>const validationResult = await this.validateRecovery(recovery);</p>
+      <p>if (!validationResult.passed) {</p>
+      <p>await this.escalateFailedRecovery(validationResult);</p>
+      <p>}</p>
+      <p>// Stage 6: Document. auto-generate post-mortem with timeline</p>
+      <p>await this.generatePostMortem(incident, recovery, validationResult);</p>
+      <p>return recovery;</p>
+      <p>}</p>
+      <p>private classifyIncident(incident: Incident): 'P1' | 'P2' | 'P3' {</p>
+      <p>if (incident.affectedTier === 0 || incident.revenueImpactPerHour > 100000) return 'P1';</p>
+      <p>if (incident.affectedTier === 1 || incident.affectedUserCount > 1000) return 'P2';</p>
+      <p>return 'P3';</p>
+      <p>}</p>
+      <p>private selectRecoveryStrategy(incident: Incident): RecoveryStrategy {</p>
+      <p>if (incident.type === 'regional_outage') return 'cross_region_failover';</p>
+      <p>if (incident.type === 'data_corruption') return 'point_in_time_restore';</p>
+      <p>if (incident.type === 'service_crash') return 'service_restart_with_health_check';</p>
+      <p>return 'manual_intervention_required';</p>
+      <p>}</p>
+      <p>}</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-enterprise-disaster-recovery-workflow-planning">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Enterprise Disaster Recovery Workflow Planning",
+    "description": "A comprehensive guide to building disaster recovery workflows for enterprise systems using Claude Code.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-enterprise-disaster-recovery-workflow-planning/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

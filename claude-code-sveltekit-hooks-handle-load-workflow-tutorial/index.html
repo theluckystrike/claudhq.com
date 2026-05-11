@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code SvelteKit Hooks and Load Workflow Tutorial | ClaudHQ</title>
+  <meta name="description" content="Use Claude Code for SvelteKit development with hooks.handle and the load workflow. Practical examples included.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-sveltekit-hooks-handle-load-workflow-tutorial/">
+  <meta property="og:title" content="Claude Code SvelteKit Hooks and Load Workflow Tutorial | ClaudHQ">
+  <meta property="og:description" content="Use Claude Code for SvelteKit development with hooks.handle and the load workflow. Practical examples included.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-sveltekit-hooks-handle-load-workflow-tutorial/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code SvelteKit Hooks and Load Workflow Tutorial</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code SvelteKit Hooks Handle Load Workflow Tutorial</p>
+      <p>SvelteKit's hooks system is one of the most powerful features for handling server-side logic, authentication, and request processing. Combined with the <code>load</code> function workflow, it provides a solid architecture for building modern web applications. In this tutorial, you'll learn how to effectively work with SvelteKit hooks, the <code>handle</code> function, and the <code>load</code> workflow using Claude Code to accelerate your development.</p>
+      <h2>Understanding SvelteKit Hooks</h2>
+      <p>SvelteKit hooks are server-side functions that intercept requests and responses at various points in the application lifecycle. They live in <code>src/hooks.server.ts</code> (or <code>.js</code>) and allow you to:</p>
+      <ul>
+      <li>Modify requests before they reach your pages and API routes</li>
+      <li>Handle authentication and authorization</li>
+      <li>Log requests and responses</li>
+      <li>Implement caching strategies</li>
+      <li>Handle errors globally</li>
+      </ul>
+      <p>The hooks file exports several optional functions: <code>handle</code>, <code>handleError</code>, <code>handleFetch</code>, and <code>externalFetch</code>. The most commonly used is <code>handle</code>, which processes every incoming request.</p>
+      <h2>Hooks vs Middleware: A Key Distinction</h2>
+      <p>Developers coming from Express or Next.js often equate SvelteKit hooks with middleware, but there are meaningful differences worth understanding before you start building.</p>
+      <div class="table-wrap"><table><tr><th>Concept</th><th>Express Middleware</th><th>Next.js Middleware</th><th>SvelteKit Hooks</th></tr>
+<tr><td>File location</td><td>Defined inline in `app.js`</td><td>`middleware.ts` at project root</td><td>`src/hooks.server.ts`</td></tr>
+<tr><td>Execution scope</td><td>Per-route or global</td><td>Edge runtime only</td><td>Full Node.js server</td></tr>
+<tr><td>Data passing</td><td>`req.locals`</td><td>`NextResponse` headers</td><td>`event.locals`</td></tr>
+<tr><td>Type safety</td><td>Manual</td><td>Partial via types</td><td>Full via `app.d.ts`</td></tr>
+<tr><td>Form action access</td><td>No</td><td>No</td><td>Yes, shares context</td></tr>
+<tr><td>SSR data pipeline</td><td>No</td><td>No</td><td>Yes, feeds `load` functions</td></tr></table></div>
+      <p>The biggest practical advantage of SvelteKit hooks is the <code>event.locals</code> pipeline. Data you set in <code>handle</code> flows directly into every <code>load</code> function without additional requests or cookie re-reads. This makes authentication and user context nearly free once you set it up correctly.</p>
+      <h2>The Handle Function Detailed look</h2>
+      <p>The <code>handle</code> function is the entry point for all server-side request processing. Here's a basic example:</p>
+      <pre><code class="language-typescript">// src/hooks.server.ts
+import type { Handle } from &#x27;@sveltejs/kit&#x27;;
+
+export const handle: Handle = async ({ event, resolve }) =&gt; {
+ // Log incoming requests
+ console.log(`[${new Date().toISOString()}] ${event.request.method} ${event.url.pathname}`);
+
+ // Process the request
+ const response = await resolve(event);
+
+ // Modify the response if needed
+ return response;
+};</code></pre>
+      <p>The <code>handle</code> function receives an <code>event</code> object containing all request information, including cookies, headers, and parameters. It returns a response after passing through <code>resolve(event)</code>.</p>
+      <h2>The resolve Options Parameter</h2>
+      <p>The <code>resolve</code> function accepts a second argument, an options object, that gives you fine-grained control over how SvelteKit processes the request. This is underused and worth knowing about:</p>
+      <pre><code class="language-typescript">// src/hooks.server.ts
+import type { Handle } from &#x27;@sveltejs/kit&#x27;;
+
+export const handle: Handle = async ({ event, resolve }) =&gt; {
+ const response = await resolve(event, {
+ // Transform the response HTML before sending
+ transformPageChunk: ({ html }) =&gt; html.replace(
+ &#x27;&lt;html&#x27;,
+ `&lt;html lang=&quot;en&quot;`
+ ),
+ // Filter which headers get serialized into the response
+ filterSerializedResponseHeaders: (name) =&gt; {
+ return name === &#x27;content-range&#x27; || name === &#x27;x-custom-header&#x27;;
+ }
+ });
+
+ return response;
+};</code></pre>
+      <p><code>transformPageChunk</code> is particularly useful for injecting nonces for Content Security Policy, adding custom <code>lang</code> attributes, or inserting environment-specific banners without touching individual page components.</p>
+      <h2>Chaining Multiple Handle Functions with sequence</h2>
+      <p>When your hooks file grows beyond authentication, say you want separate concerns for logging, auth, and rate limiting, the <code>sequence</code> helper from <code>@sveltejs/kit/hooks</code> lets you compose them cleanly:</p>
+      <pre><code class="language-typescript">// src/hooks.server.ts
+import { sequence } from &#x27;@sveltejs/kit/hooks&#x27;;
+import type { Handle } from &#x27;@sveltejs/kit&#x27;;
+
+const logger: Handle = async ({ event, resolve }) =&gt; {
+ const start = Date.now();
+ const response = await resolve(event);
+ const duration = Date.now() - start;
+ console.log(`${event.request.method} ${event.url.pathname}. ${response.status} (${duration}ms)`);
+ return response;
+};
+
+const auth: Handle = async ({ event, resolve }) =&gt; {
+ const token = event.cookies.get(&#x27;session_token&#x27;);
+ if (token) {
+ const user = await verifyToken(token);
+ if (user) event.locals.user = user;
+ }
+ return resolve(event);
+};
+
+const rateLimit: Handle = async ({ event, resolve }) =&gt; {
+ const ip = event.getClientAddress();
+ const allowed = await checkRateLimit(ip);
+ if (!allowed) {
+ return new Response(&#x27;Too Many Requests&#x27;, { status: 429 });
+ }
+ return resolve(event);
+};
+
+export const handle = sequence(logger, rateLimit, auth);</code></pre>
+      <p>The order matters: <code>rateLimit</code> runs before <code>auth</code> so you're not verifying tokens for requests you'll reject anyway. <code>logger</code> wraps everything to capture the final status code.</p>
+      <h2>Implementing Authentication in Hooks</h2>
+      <p>One of the most common use cases for hooks is implementing authentication. Here's a practical example:</p>
+      <pre><code class="language-typescript">// src/hooks.server.ts
+import type { Handle } from &#x27;@sveltejs/kit&#x27;;
+import { verifyToken } from &#x27;$lib/server/auth&#x27;;
+
+export const handle: Handle = async ({ event, resolve }) =&gt; {
+ const token = event.cookies.get(&#x27;session_token&#x27;);
+
+ if (token) {
+ const user = await verifyToken(token);
+ if (user) {
+ event.locals.user = user;
+ }
+ }
+
+ return await resolve(event);
+};</code></pre>
+      <p>To make <code>event.locals.user</code> TypeScript-friendly, declare it in <code>src/app.d.ts</code>:</p>
+      <pre><code class="language-typescript">// src/app.d.ts
+declare global {
+ namespace App {
+ interface Locals {
+ user?: {
+ id: string;
+ email: string;
+ role: string;
+ };
+ }
+ }
+}
+
+export {};</code></pre>
+      <h2>Route-Level Authorization Guards</h2>
+      <p>Authentication in hooks establishes who the user is. Authorization, whether they're allowed to access a specific route, should still happen at the <code>load</code> function level. However, you can implement a general guard pattern in hooks for broad protection:</p>
+      <pre><code class="language-typescript">// src/hooks.server.ts
+import type { Handle } from &#x27;@sveltejs/kit&#x27;;
+import { redirect } from &#x27;@sveltejs/kit&#x27;;
+import { verifyToken } from &#x27;$lib/server/auth&#x27;;
+
+// Routes that require authentication
+const PROTECTED_PATHS = [&#x27;/dashboard&#x27;, &#x27;/settings&#x27;, &#x27;/api/user&#x27;];
+// Routes that authenticated users shouldn&#x27;t visit
+const AUTH_PATHS = [&#x27;/login&#x27;, &#x27;/register&#x27;];
+
+export const handle: Handle = async ({ event, resolve }) =&gt; {
+ const token = event.cookies.get(&#x27;session_token&#x27;);
+ const path = event.url.pathname;
+
+ if (token) {
+ const user = await verifyToken(token);
+ if (user) {
+ event.locals.user = user;
+ // Redirect authenticated users away from login page
+ if (AUTH_PATHS.some(p =&gt; path.startsWith(p))) {
+ throw redirect(303, &#x27;/dashboard&#x27;);
+ }
+ }
+ }
+
+ // Redirect unauthenticated users away from protected paths
+ if (!event.locals.user &amp;&amp; PROTECTED_PATHS.some(p =&gt; path.startsWith(p))) {
+ throw redirect(303, `/login?redirectTo=${encodeURIComponent(path)}`);
+ }
+
+ return resolve(event);
+};</code></pre>
+      <p>Storing <code>redirectTo</code> in the query string lets your login form redirect users back to where they were trying to go after authentication, which is a significant UX improvement.</p>
+      <h2>Role-Based Access Control</h2>
+      <p>For applications with multiple user roles, you can extend the pattern to enforce role requirements at the hooks level for admin sections:</p>
+      <pre><code class="language-typescript">// src/hooks.server.ts (role-based extension)
+const ADMIN_PATHS = [&#x27;/admin&#x27;];
+
+export const handle: Handle = async ({ event, resolve }) =&gt; {
+ // ... auth logic from above
+
+ if (ADMIN_PATHS.some(p =&gt; event.url.pathname.startsWith(p))) {
+ if (!event.locals.user) {
+ throw redirect(303, &#x27;/login&#x27;);
+ }
+ if (event.locals.user.role !== &#x27;admin&#x27;) {
+ throw redirect(303, &#x27;/403&#x27;);
+ }
+ }
+
+ return resolve(event);
+};</code></pre>
+      <h2>The SvelteKit Load Workflow</h2>
+      <p>The <code>load</code> function is fundamental to SvelteKit's data fetching mechanism. It runs on the server during server-side rendering (SSR) and on the client during navigation. Understanding the <code>load</code> workflow is essential for building performant applications.</p>
+      <h2>Understanding Load Function Types</h2>
+      <p>SvelteKit has four types of load files, each with different capabilities and tradeoffs:</p>
+      <div class="table-wrap"><table><tr><th>File</th><th>Runs on</th><th>Has `locals`</th><th>Has `fetch`</th><th>Exports actions</th></tr>
+<tr><td>`+page.ts`</td><td>Server + Client</td><td>No</td><td>Yes (enhanced)</td><td>No</td></tr>
+<tr><td>`+page.server.ts`</td><td>Server only</td><td>Yes</td><td>Yes (Node)</td><td>Yes</td></tr>
+<tr><td>`+layout.ts`</td><td>Server + Client</td><td>No</td><td>Yes (enhanced)</td><td>No</td></tr>
+<tr><td>`+layout.server.ts`</td><td>Server only</td><td>Yes</td><td>Yes (Node)</td><td>Yes</td></tr></table></div>
+      <p>The key decision is whether you need access to <code>locals</code> (user session, server-only secrets) or whether the data fetch can run on the client. For authenticated pages, always use <code>+page.server.ts</code>. For public data that doesn't need a server round-trip after the initial load, <code>+page.ts</code> reduces server overhead during client-side navigation.</p>
+      <h2>Page Load Functions</h2>
+      <p>Create a <code>+page.server.ts</code> file to define load functions for your pages:</p>
+      <pre><code class="language-typescript">// src/routes/dashboard/+page.server.ts
+import type { PageServerLoad } from &#x27;./$types&#x27;;
+import { redirect } from &#x27;@sveltejs/kit&#x27;;
+
+export const load: PageServerLoad = async ({ locals, params }) =&gt; {
+ if (!locals.user) {
+ throw redirect(303, &#x27;/login&#x27;);
+ }
+
+ const projects = await getUserProjects(locals.user.id);
+
+ return {
+ user: locals.user,
+ projects
+ };
+};</code></pre>
+      <h2>Layout Load Functions for Shared Data</h2>
+      <p>When multiple pages in a route segment need the same data, like a user profile for a dashboard layout, define it once in <code>+layout.server.ts</code>. Child <code>load</code> functions receive parent data and can extend it:</p>
+      <pre><code class="language-typescript">// src/routes/(app)/+layout.server.ts
+import type { LayoutServerLoad } from &#x27;./$types&#x27;;
+import { redirect } from &#x27;@sveltejs/kit&#x27;;
+
+export const load: LayoutServerLoad = async ({ locals }) =&gt; {
+ if (!locals.user) {
+ throw redirect(303, &#x27;/login&#x27;);
+ }
+
+ const profile = await db.profile.findUnique({
+ where: { userId: locals.user.id },
+ include: { avatar: true, preferences: true }
+ });
+
+ return {
+ user: locals.user,
+ profile
+ };
+};</code></pre>
+      <pre><code class="language-typescript">// src/routes/(app)/dashboard/+page.server.ts
+import type { PageServerLoad } from &#x27;./$types&#x27;;
+
+export const load: PageServerLoad = async ({ parent, params }) =&gt; {
+ // Access layout data without re-fetching user info
+ const { user } = await parent();
+
+ const [projects, notifications] = await Promise.all([
+ db.project.findMany({ where: { ownerId: user.id } }),
+ db.notification.findMany({ where: { userId: user.id, read: false } })
+ ]);
+
+ return { projects, notifications };
+};</code></pre>
+      <p>Using <code>await parent()</code> gives you layout data while SvelteKit ensures both loads run in parallel when possible. This is far more efficient than re-fetching the user in every page load function.</p>
+      <h2>Accessing Load Data in Components</h2>
+      <p>In your Svelte component, access the loaded data through the <code>data</code> prop:</p>
+      <pre><code class="language-svelte">&lt;!-- src/routes/dashboard/+page.svelte --&gt;
+&lt;script lang=&quot;ts&quot;&gt;
+ export let data;
+&lt;/script&gt;
+
+&lt;h1&gt;Welcome, {data.user.email}&lt;/h1&gt;
+
+{#each data.projects as project}
+ &lt;div class=&quot;project&quot;&gt;
+ &lt;h2&gt;{project.name}&lt;/h2&gt;
+ &lt;p&gt;{project.description}&lt;/p&gt;
+ &lt;/div&gt;
+{/each}</code></pre>
+      <h2>Parallel Data Fetching in Load Functions</h2>
+      <p>A common performance mistake is awaiting database calls sequentially when they have no dependency on each other. Use <code>Promise.all</code> to run independent queries in parallel:</p>
+      <pre><code class="language-typescript">// SLOW: sequential awaits
+export const load: PageServerLoad = async ({ locals }) =&gt; {
+ const user = await getUser(locals.user.id); // 45ms
+ const projects = await getProjects(locals.user.id); // 38ms
+ const stats = await getStats(locals.user.id); // 52ms
+ // Total: ~135ms
+ return { user, projects, stats };
+};
+
+// FAST: parallel execution with Promise.all
+export const load: PageServerLoad = async ({ locals }) =&gt; {
+ const [user, projects, stats] = await Promise.all([
+ getUser(locals.user.id),
+ getProjects(locals.user.id),
+ getStats(locals.user.id)
+ ]);
+ // Total: ~52ms (limited by slowest query)
+ return { user, projects, stats };
+};</code></pre>
+      <p>For more complex cases where some queries depend on others, use a staged approach:</p>
+      <pre><code class="language-typescript">export const load: PageServerLoad = async ({ locals }) =&gt; {
+ // Stage 1: fetch user (needed for everything else)
+ const user = await getUser(locals.user.id);
+
+ // Stage 2: fetch everything that depends on user data in parallel
+ const [projects, team, billing] = await Promise.all([
+ getProjects(user.organizationId),
+ getTeam(user.organizationId),
+ getBilling(user.organizationId)
+ ]);
+
+ return { user, projects, team, billing };
+};</code></pre>
+      <h2>Form Actions and Load</h2>
+      <p>SvelteKit combines form actions with the load function, allowing you to handle both data fetching and mutations in the same file:</p>
+      <pre><code class="language-typescript">// src/routes/contacts/+page.server.ts
+import type { Actions, PageServerLoad } from &#x27;./$types&#x27;;
+import { fail } from &#x27;@sveltejs/kit&#x27;;
+
+export const load: PageServerLoad = async ({ locals }) =&gt; {
+ const contacts = await db.contacts.findMany({
+ where: { userId: locals.user?.id }
+ });
+
+ return { contacts };
+};
+
+export const actions: Actions = {
+ create: async ({ request, locals }) =&gt; {
+ const data = await request.formData();
+ const email = data.get(&#x27;email&#x27;) as string;
+
+ if (!email.includes(&#x27;@&#x27;)) {
+ return fail(400, { email, missing: true });
+ }
+
+ await db.contacts.create({
+ data: { email, userId: locals.user?.id }
+ });
+
+ return { success: true };
+ }
+};</code></pre>
+      <p>After a successful action, SvelteKit automatically re-runs the <code>load</code> function and updates the page. This means you get optimistic UI patterns without any extra wiring, the contacts list refreshes automatically after you create a new contact.</p>
+      <h2>Handling Action Errors in the Form</h2>
+      <p>Pair form actions with <code>$page.form</code> to display validation errors without losing form state:</p>
+      <pre><code class="language-svelte">&lt;!-- src/routes/contacts/+page.svelte --&gt;
+&lt;script lang=&quot;ts&quot;&gt;
+ import { enhance } from &#x27;$app/forms&#x27;;
+ export let data;
+ export let form;
+&lt;/script&gt;
+
+&lt;form method=&quot;POST&quot; action=&quot;?/create&quot; use:enhance&gt;
+ &lt;input
+ name=&quot;email&quot;
+ type=&quot;email&quot;
+ value={form?.email ?? &#x27;&#x27;}
+ class:error={form?.missing}
+ /&gt;
+ {#if form?.missing}
+ &lt;p class=&quot;error-text&quot;&gt;Please enter a valid email address.&lt;/p&gt;
+ {/if}
+ &lt;button type=&quot;submit&quot;&gt;Add Contact&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;ul&gt;
+ {#each data.contacts as contact}
+ &lt;li&gt;{contact.email}&lt;/li&gt;
+ {/each}
+&lt;/ul&gt;</code></pre>
+      <p>The <code>use:enhance</code> action from <code>$app/forms</code> progressively enhances the form to submit via <code>fetch</code> instead of a full page reload, giving you a SPA-like experience while keeping the server-action architecture.</p>
+      <h2>Connecting Hooks and Load Functions</h2>
+      <p>The real power emerges when hooks and load functions work together. Your authentication logic in <code>handle</code> populates <code>event.locals</code>, which is then accessible in every load function:</p>
+      <pre><code class="language-typescript">// Check authentication in +page.server.ts
+export const load: PageServerLoad = async ({ locals }) =&gt; {
+ // User is already available from hooks.handle
+ const profile = await fetchUserProfile(locals.user.id);
+
+ return { profile };
+};</code></pre>
+      <p>This pattern eliminates repetitive authentication checks in every load function, keeping your code DRY and maintainable.</p>
+      <h2>Request Context Flow Diagram</h2>
+      <p>Understanding the full request lifecycle helps you place logic in the right file:</p>
+      <pre><code class="language-">Incoming HTTP Request
+ ↓
+ hooks.server.ts (handle)
+ Set event.locals.user
+ Check rate limits
+ Add response headers
+ ↓
+ +layout.server.ts (load)
+ Read event.locals.user
+ Fetch shared layout data (profile, nav)
+ Return layout data
+ ↓
+ +page.server.ts (load)
+ Read event.locals.user
+ Call await parent() for layout data
+ Fetch page-specific data
+ Return page data
+ ↓
+ +page.svelte
+ Receive merged `data` prop
+ Render HTML
+ ↓
+ HTML sent to client</code></pre>
+      <p>Each step in this chain has access to the same <code>event.locals</code> object, so the user verification done once in <code>handle</code> is available everywhere without redundant database calls.</p>
+      <h2>Using Claude Code to Build SvelteKit Hooks</h2>
+      <p>Claude Code excels at generating SvelteKit boilerplate because the patterns are well-structured and type-safe. Here are practical prompting strategies that work well:</p>
+      <p>For generating a hooks file from scratch, provide context about your auth strategy:</p>
+      <blockquote><p>"Generate a <code>src/hooks.server.ts</code> for a SvelteKit app that uses JWT tokens stored in httpOnly cookies. The app has three roles: guest, user, and admin. Admin routes start with <code>/admin</code>. Use the <code>sequence</code> helper to split logging and auth into separate handle functions."</p></blockquote>
+      <p>For debugging load function type errors, paste the error message and both the <code>app.d.ts</code> and the load file:</p>
+      <blockquote><p>"I'm getting a TypeScript error: <code>Property 'user' does not exist on type 'Locals'</code>. Here are my relevant files: [paste <code>app.d.ts</code>] [paste <code>hooks.server.ts</code>]. What's wrong?"</p></blockquote>
+      <p>For refactoring sequential fetches, describe what data you need:</p>
+      <blockquote><p>"Refactor this load function to fetch the user, their projects, and their organization settings in parallel. The user must be fetched first because the other queries need <code>user.organizationId</code>."</p></blockquote>
+      <p>Claude Code handles the <code>Promise.all</code> staging pattern well when you're explicit about which queries have dependencies.</p>
+      <h2>Practical Tips for Claude Code Development</h2>
+      <p>When working with SvelteKit hooks and load functions using Claude Code, consider these best practices:</p>
+      <ol>
+      <li>Type Your Locals Early: Define your <code>App.Locals</code> interface in <code>app.d.ts</code> as soon as you add custom properties. This provides autocomplete and type safety throughout your application.</li>
+      </ol>
+      <ol>
+      <li>Use Hooks for Cross-Cutting Concerns: Authentication, logging, and request modification belong in hooks, not in individual load functions.</li>
+      </ol>
+      <ol>
+      <li>Use the Load Function for SSR: Use <code>+page.server.ts</code> load functions when you need server-side data fetching. Client-side fetching with <code>+page.ts</code> is better for truly client-only interactions.</li>
+      </ol>
+      <ol>
+      <li>Handle Errors Gracefully: Export a <code>handleError</code> function in your hooks to customize error responses:</li>
+      </ol>
+      <pre><code class="language-typescript">export const handleError = ({ error, event }) =&gt; {
+ console.error(&#x27;Error:&#x27;, error);
+ return {
+ message: &#x27;An unexpected error occurred&#x27;
+ };
+};</code></pre>
+      <ol>
+      <li>Test Your Hooks: Hooks are server-only, so test them with integration tests that make actual HTTP requests to your SvelteKit app.</li>
+      </ol>
+      <h2>Testing Hooks and Load Functions</h2>
+      <p>Because hooks and load functions run on the server, you need a different testing approach than unit testing components. The most practical approach is using <code>@sveltejs/kit/test</code> with Vitest's <code>fetch</code> mocking:</p>
+      <pre><code class="language-typescript">// src/hooks.server.test.ts
+import { describe, it, expect, vi } from &#x27;vitest&#x27;;
+import { handle } from &#x27;./hooks.server&#x27;;
+
+const mockEvent = (overrides = {}) =&gt; ({
+ cookies: {
+ get: vi.fn().mockReturnValue(null),
+ set: vi.fn(),
+ delete: vi.fn()
+ },
+ locals: {},
+ url: new URL(&#x27;http://localhost/dashboard&#x27;),
+ request: new Request(&#x27;http://localhost/dashboard&#x27;),
+ getClientAddress: () =&gt; &#x27;127.0.0.1&#x27;,
+ ...overrides
+});
+
+describe(&#x27;handle hook&#x27;, () =&gt; {
+ it(&#x27;sets locals.user when valid token is present&#x27;, async () =&gt; {
+ const event = mockEvent({
+ cookies: { get: vi.fn().mockReturnValue(&#x27;valid-token&#x27;) }
+ });
+ const resolve = vi.fn().mockResolvedValue(new Response());
+
+ await handle({ event, resolve });
+
+ expect(event.locals.user).toBeDefined();
+ expect(event.locals.user.email).toBe(&#x27;test@example.com&#x27;);
+ });
+
+ it(&#x27;redirects unauthenticated users from protected routes&#x27;, async () =&gt; {
+ const event = mockEvent();
+ const resolve = vi.fn().mockResolvedValue(new Response());
+
+ const response = await handle({ event, resolve });
+
+ expect(response.status).toBe(303);
+ expect(response.headers.get(&#x27;location&#x27;)).toBe(&#x27;/login?redirectTo=%2Fdashboard&#x27;);
+ });
+});</code></pre>
+      <p>Testing load functions directly requires importing them and constructing mock <code>event</code> objects, which is more involved. For load functions, consider using Playwright for end-to-end tests that validate the full data flow from hook to component.</p>
+      <h2>Common Mistakes to Avoid</h2>
+      <p>Awaiting <code>parent()</code> unnecessarily: Calling <code>await parent()</code> before making your own fetches blocks parallel execution. Only call it when you actually need layout data, and ideally after your own queries have started.</p>
+      <p>Returning non-serializable data: Load functions serialize their return value to pass between server and client. Never return class instances, functions, or circular references, use plain objects and arrays.</p>
+      <p>Forgetting to handle the unauthenticated case in both hooks and load: Hooks guard route segments, but if your routing doesn't cover every protected path, individual load functions still need their own checks. Defense in depth applies here.</p>
+      <p>Over-using <code>+page.server.ts</code> when <code>+page.ts</code> would work: If your data fetch doesn't require <code>locals</code> or a database connection, using a universal load function means faster client-side navigation because the fetch happens from the browser directly after the first load.</p>
+      <h2>Conclusion</h2>
+      <p>SvelteKit's hooks system and load workflow form the backbone of server-side request handling in your applications. The <code>handle</code> function in hooks intercepts every request, allowing you to implement authentication, logging, and request modification centrally. Load functions then use this context to fetch data efficiently, whether during server-side rendering or client-side navigation.</p>
+      <p>The <code>sequence</code> helper, layout load inheritance, and <code>Promise.all</code> parallel fetching are the three techniques that separate good SvelteKit applications from great ones. Combined with Claude Code's ability to generate and refactor these patterns quickly, you can build solid, secure, and performant SvelteKit applications with significantly less boilerplate than traditional Node.js frameworks require.</p>
+      <p>By internalizing the request flow, from <code>handle</code> setting <code>locals</code>, through layout loads establishing shared context, to page loads fetching specific data, you'll know exactly where to place each piece of logic and how to debug it when something goes wrong.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-sveltekit-hooks-handle-load-workflow-tutorial">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code SvelteKit Hooks and Load Workflow Tutorial",
+    "description": "Use Claude Code for SvelteKit development with hooks.handle and the load workflow. Practical examples included.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-sveltekit-hooks-handle-load-workflow-tutorial/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

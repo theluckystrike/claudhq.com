@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Tips for Absolute Beginners (2026) | ClaudHQ</title>
+  <meta name="description" content="Essential Claude Code tips for absolute beginners. Setup, skills, and workflows to boost your productivity.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-tips-for-absolute-beginners-2026/">
+  <meta property="og:title" content="Claude Code Tips for Absolute Beginners (2026) | ClaudHQ">
+  <meta property="og:description" content="Essential Claude Code tips for absolute beginners. Setup, skills, and workflows to boost your productivity.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-tips-for-absolute-beginners-2026/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Claude Code Tips for Absolute Beginners (2026)</h1>
+      <div class="article-meta"><time>May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>Claude Code Tips for Absolute Beginners: A 2026 Practical Guide</h2>
+      <p>Claude Code has become an essential tool for developers and power users in 2026. If you are just starting with this AI coding assistant, this guide provides practical tips to help you get productive quickly.</p>
+      <h2>Getting Started with Claude Code</h2>
+      <p>The first step involves installing Claude Code on your machine. Most developers use npm for installation:</p>
+      <pre><code class="language-bash">npm install -g @anthropic-ai/claude-code</code></pre>
+      <p>After installation, verify the setup by running:</p>
+      <pre><code class="language-bash">claude --version</code></pre>
+      <p>Now you are ready to start your first session. The simplest way to begin is by invoking Claude Code in your terminal within any project directory:</p>
+      <pre><code class="language-bash">claude-code</code></pre>
+      <p>This starts an interactive session where you can type natural language commands. Claude Code will analyze your project, understand context, and execute tasks accordingly.</p>
+      <h2>What Happens When Claude Code Starts</h2>
+      <p>When Claude Code launches, it performs several background operations before you type your first command. It reads the current directory structure, looks for configuration files like <code>package.json</code>, <code>pyproject.toml</code>, or <code>Cargo.toml</code> to understand your stack, and checks for a <code>CLAUDE.md</code> file at the project root to load any project-specific instructions you have written.</p>
+      <p>This context-gathering is why running Claude Code from your project root matters so much. If you launch it from your home directory, it has no project context and produces generic responses. From your project root, it understands your actual files, dependencies, and patterns.</p>
+      <pre><code class="language-bash">Do this. run from your project root
+cd ~/projects/my-webapp
+claude-code
+
+Not this. generic context, weaker suggestions
+cd ~
+claude-code</code></pre>
+      <h2>Configuring Your Environment</h2>
+      <p>Claude Code respects a few environment variables and configuration files that beginners often overlook:</p>
+      <pre><code class="language-bash">Set your preferred editor for file diffs
+export EDITOR=vim # or code, nano, etc.
+
+Increase context window usage for large projects
+export CLAUDE_MAX_TOKENS=8000</code></pre>
+      <p>You can also create a global <code>~/.claude/CLAUDE.md</code> file with personal preferences that apply across all projects:</p>
+      <pre><code class="language-markdown">My Claude Code Preferences
+
+- I prefer TypeScript over JavaScript
+- Always add JSDoc comments to exported functions
+- Use named exports rather than default exports
+- Prefer async/await over .then() chains
+- Include error handling in every async function</code></pre>
+      <p>When Claude Code starts any session, it merges your global preferences with the project-level CLAUDE.md. Project-level instructions take precedence when they conflict.</p>
+      <h2>Understanding the Skill System</h2>
+      <p>One of Claude Code's most powerful features is its skill system. Skills are reusable automation patterns that extend Claude Code's capabilities. You can load skills dynamically using the <code>get_skill</code> function.</p>
+      <p>For instance, if you need help with web design tasks, load the <code>frontend-design</code> skill:</p>
+      <pre><code class="language-">Load the frontend-design skill</code></pre>
+      <p>This skill provides specialized guidance for creating responsive layouts, working with CSS frameworks, and implementing modern UI patterns. Similarly, the <code>pdf</code> skill helps with PDF manipulation, while the <code>tdd</code> skill guides you through test-driven development workflows.</p>
+      <p>The skill system follows a progressive disclosure model. When you first load a skill, you see its metadata and description. As you work with it more, you can access deeper functionality and additional resources.</p>
+      <h2>Skills Reference for Beginners</h2>
+      <p>Here is a quick reference of the most useful skills for developers just getting started:</p>
+      <div class="table-wrap"><table><tr><th>Skill</th><th>What It Does</th><th>Best Used For</th></tr>
+<tr><td>`tdd`</td><td>Test-driven development workflow</td><td>Writing tests before code, red-green-refactor cycles</td></tr>
+<tr><td>`frontend-design`</td><td>Responsive UI and CSS guidance</td><td>Building layouts, component styling</td></tr>
+<tr><td>`pdf`</td><td>PDF reading and generation</td><td>Processing documents, generating reports</td></tr>
+<tr><td>`supermemory`</td><td>Persistent context across sessions</td><td>Retaining decisions and patterns between sessions</td></tr>
+<tr><td>`docx`</td><td>Word document creation</td><td>Generating reports and documentation</td></tr>
+<tr><td>`pptx`</td><td>Presentation creation</td><td>Slide decks and stakeholder reports</td></tr>
+<tr><td>`xlsx`</td><td>Spreadsheet operations</td><td>Data tables, formulas, basic analysis</td></tr>
+<tr><td>`canvas-design`</td><td>Programmatic visual asset creation</td><td>Thumbnails, diagrams, banners</td></tr>
+<tr><td>`theme-factory`</td><td>Consistent styling across a project</td><td>Design systems, multi-page styling</td></tr></table></div>
+      <p>Loading a skill does not lock you into a particular mode. You can load multiple skills in one session and Claude Code will draw on the relevant one depending on your request.</p>
+      <pre><code class="language-">Load the tdd skill and the frontend-design skill
+
+Now help me build a login form component using TDD</code></pre>
+      <p>Claude Code will combine the TDD workflow pattern from the tdd skill with the component structure guidance from the frontend-design skill.</p>
+      <h2>Essential Productivity Tips</h2>
+      <ol>
+      <li>Work in Project Directories</li>
+      </ol>
+      <p>Always run Claude Code from your project root. This allows it to understand your entire project structure, including dependencies, configuration files, and existing code patterns. The context awareness significantly improves the quality of suggestions and generated code.</p>
+      <p>Here is a direct comparison showing the difference project context makes:</p>
+      <p>Without project context (launched from home directory):</p>
+      <pre><code class="language-">You: Write a function to validate user input
+
+Claude Code: Here is a generic validation function:
+
+function validateInput(value) {
+ if (!value || value.trim() === &#x27;&#x27;) {
+ return { valid: false, error: &#x27;Input is required&#x27; };
+ }
+ return { valid: true };
+}</code></pre>
+      <p>With project context (launched from project root where existing validation utilities exist):</p>
+      <pre><code class="language-">You: Write a function to validate user input
+
+Claude Code: I can see you&#x27;re using Zod for validation in this project.
+Here&#x27;s a function that matches your existing patterns in src/lib/validators.ts:
+
+import { z } from &#x27;zod&#x27;;
+import { ValidationError } from &#x27;./errors&#x27;;
+
+export const userInputSchema = z.object({
+ email: z.string().email(),
+ username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/),
+});
+
+export function validateUserInput(data: unknown) {
+ const result = userInputSchema.safeParse(data);
+ if (!result.success) {
+ throw new ValidationError(result.error.format());
+ }
+ return result.data;
+}</code></pre>
+      <p>The second response is usable immediately because Claude Code read your actual project and matched its patterns.</p>
+      <ol>
+      <li>Use Clear, Specific Prompts</li>
+      </ol>
+      <p>Claude Code performs best when you provide clear instructions. Instead of vague requests like "fix this bug," be specific: "The login function returns a 401 error when the password is empty. Debug and fix this validation issue."</p>
+      <p>The anatomy of a high-quality prompt includes:</p>
+      <ol>
+      <li>File or function location. where in the codebase the work happens</li>
+      <li>Current behavior. what is happening now</li>
+      <li>Expected behavior. what should happen instead</li>
+      <li>Constraints. do not change X, must remain compatible with Y</li>
+      </ol>
+      <pre><code class="language-">Weak prompt
+Fix the authentication bug
+
+Strong prompt
+In src/auth/login.ts, the authenticateUser function returns a 401
+when the password field is empty instead of returning a 400 with a
+validation error message. Fix the validation logic to return 400
+and the message &quot;Password is required&quot; for empty passwords.
+Do not change the function signature or the JWT generation logic.</code></pre>
+      <p>The strong prompt eliminates guesswork. Claude Code knows exactly what file to read, what behavior to change, and what to leave alone.</p>
+      <ol>
+      <li>Use File Operations</li>
+      </ol>
+      <p>Claude Code can read, write, and edit files directly. This is faster than manually copying and pasting code:</p>
+      <pre><code class="language-">Read the src/auth.js file and explain the authentication flow</code></pre>
+      <p>For writing new files, provide clear specifications:</p>
+      <pre><code class="language-">Create a new React component called UserProfile in src/components/ with props for name, email, and avatar</code></pre>
+      <p>You can also chain file operations to build context before making changes:</p>
+      <pre><code class="language-">Read src/components/Button.tsx, src/components/Input.tsx, and
+src/styles/theme.ts so you understand the existing component
+patterns, then create a new Select component that follows
+the same API conventions</code></pre>
+      <p>This multi-file read before write pattern produces much more consistent output than asking Claude Code to create a file without context about existing patterns.</p>
+      <ol>
+      <li>Chain Commands Together</li>
+      </ol>
+      <p>You can chain multiple operations in a single session. For example:</p>
+      <pre><code class="language-">First, create a new feature branch called &#x27;user-dashboard&#x27;
+Then, add a UserDashboard component with charts
+Finally, write unit tests for the component</code></pre>
+      <p>Claude Code remembers context within a session, making it easy to build complex features incrementally.</p>
+      <p>A more detailed chaining example for a realistic task:</p>
+      <pre><code class="language-">Step 1: Read the existing UserList component in src/components/UserList.tsx
+
+Step 2: Create a new UserCard component in src/components/UserCard.tsx
+that displays a single user. Match the styling conventions you saw
+in UserList.tsx.
+
+Step 3: Refactor UserList.tsx to use UserCard for each list item
+instead of its current inline rendering.
+
+Step 4: Update the snapshot tests in __tests__/UserList.test.tsx
+to reflect the new structure.</code></pre>
+      <p>By breaking the work into numbered steps with explicit dependencies, you give Claude Code a clear roadmap. It will complete each step and confirm before moving to the next, which makes it easy to catch mistakes early.</p>
+      <ol>
+      <li>Use Background Processes</li>
+      </ol>
+      <p>For long-running tasks, use the background execution feature:</p>
+      <pre><code class="language-">Analyze the entire codebase for security vulnerabilities and run in background</code></pre>
+      <p>This allows you to continue working while Claude Code processes your request.</p>
+      <p>Background mode is especially useful for tasks like:</p>
+      <ul>
+      <li>Running test suites across multiple modules</li>
+      <li>Scanning a large codebase for patterns or issues</li>
+      <li>Generating documentation for all public functions</li>
+      <li>Performing a dependency audit across package files</li>
+      </ul>
+      <p>When the background task completes, Claude Code reports results in your session. You can then ask follow-up questions about what it found.</p>
+      <ol>
+      <li>Iterate on Output</li>
+      </ol>
+      <p>Beginners often accept the first output Claude Code produces and struggle when it does not quite fit. The better habit is to treat the first response as a draft and iterate:</p>
+      <pre><code class="language-">You: Create a function to parse CSV files
+
+Claude Code: [produces a basic implementation]
+
+You: Good start. Now add support for quoted fields that contain
+commas, and make the header row optional with a boolean parameter.
+
+Claude Code: [produces improved version]
+
+You: The quoted field handling looks right but the error messages
+are too generic. Add the line number to each error message.</code></pre>
+      <p>Three short iterations produce much better output than one long, perfectly specified prompt. Claude Code accumulates context across the iterations and refines its understanding of what you actually need.</p>
+      <h2>Working with Claude Skills</h2>
+      <p>The skill ecosystem is one of Claude Code's standout features. Here are some skills worth exploring:</p>
+      <p>The <code>supermemory</code> skill helps you organize and retrieve information across projects. It creates a searchable knowledge base of your development decisions, code patterns, and important context.</p>
+      <p>For document creation, the <code>docx</code> skill generates professional Word documents, while the <code>pptx</code> skill handles presentations. The <code>xlsx</code> skill manages spreadsheet operations, including formulas and data visualization.</p>
+      <p>If you work with design systems, the <code>canvas-design</code> skill creates visual assets programmatically. The <code>theme-factory</code> skill applies consistent styling across your projects.</p>
+      <h2>A Real Workflow with the TDD Skill</h2>
+      <p>Here is a concrete example of the tdd skill in action, building a small utility function from scratch:</p>
+      <pre><code class="language-">You: Load the tdd skill. I need to write a function called
+formatCurrency that accepts a number and a currency code and
+returns a formatted string like &quot;$1,234.56&quot;.
+
+Claude Code: [loads tdd skill]
+
+Starting with the failing test:
+
+// formatCurrency.test.ts
+import { formatCurrency } from &#x27;./formatCurrency&#x27;;
+
+describe(&#x27;formatCurrency&#x27;, () =&gt; {
+ it(&#x27;formats USD correctly&#x27;, () =&gt; {
+ expect(formatCurrency(1234.56, &#x27;USD&#x27;)).toBe(&#x27;$1,234.56&#x27;);
+ });
+
+ it(&#x27;formats EUR correctly&#x27;, () =&gt; {
+ expect(formatCurrency(1234.56, &#x27;EUR&#x27;)).toBe(&#x27;€1,234.56&#x27;);
+ });
+
+ it(&#x27;handles zero&#x27;, () =&gt; {
+ expect(formatCurrency(0, &#x27;USD&#x27;)).toBe(&#x27;$0.00&#x27;);
+ });
+
+ it(&#x27;handles negative values&#x27;, () =&gt; {
+ expect(formatCurrency(-99.99, &#x27;USD&#x27;)).toBe(&#x27;-$99.99&#x27;);
+ });
+});
+
+Run these tests first to confirm they fail, then I&#x27;ll write
+the implementation.
+
+You: Tests are red. Write the implementation.
+
+Claude Code: // formatCurrency.ts
+export function formatCurrency(amount: number, currency: string): string {
+ return new Intl.NumberFormat(&#x27;en-US&#x27;, {
+ style: &#x27;currency&#x27;,
+ currency,
+ }).format(amount);
+}
+
+Run the tests again. They should all pass now.</code></pre>
+      <p>The tdd skill structured the entire workflow: write tests first, confirm they fail, write minimal implementation, confirm they pass. This pattern catches assumptions early and produces well-tested code by default.</p>
+      <h2>Using Supermemory Across Sessions</h2>
+      <p>One practical limitation of Claude Code is that each session starts fresh with no memory of previous sessions. The supermemory skill bridges this gap:</p>
+      <pre><code class="language-">You: Load the supermemory skill. Store the following context:
+- This project uses PostgreSQL 15 with Prisma ORM
+- Authentication uses JWTs with 24-hour expiry
+- We follow the repository pattern for data access
+- All API routes are in src/api/, all services in src/services/
+
+Claude Code: [stores context in supermemory]
+
+--- New session, next day ---
+
+You: Load the supermemory skill and retrieve my project context.
+
+Claude Code: Retrieved context for this project:
+- PostgreSQL 15 with Prisma ORM
+- JWT auth, 24-hour expiry
+- Repository pattern for data access
+- Routes in src/api/, services in src/services/
+
+How can I help you today?</code></pre>
+      <p>With this context loaded, Claude Code generates code that matches your architecture from the very first prompt of each new session.</p>
+      <h2>Best Practices for Beginners</h2>
+      <p>Start small and gradually increase complexity. Begin with simple tasks like code explanations or file creation before moving to complex refactoring or multi-file features.</p>
+      <p>Always review generated code before accepting it. While Claude Code produces high-quality output, understanding what the code does helps you maintain your project long-term. A practical review checklist:</p>
+      <ul>
+      <li>Does the logic match what you asked for?</li>
+      <li>Are imports and dependencies correct for your project?</li>
+      <li>Does it handle error cases?</li>
+      <li>Are any security-sensitive operations (auth, file access, SQL) handled safely?</li>
+      <li>Does it follow your project's existing style and naming conventions?</li>
+      </ul>
+      <p>Use version control. Before running major changes, ensure you have committed recent work or create a backup branch. Claude Code can accidentally modify files, and git provides a safety net.</p>
+      <pre><code class="language-bash">Before asking Claude Code to do a major refactor, create a safety branch
+git checkout -b pre-refactor-backup
+git add -A
+git commit -m &quot;Backup before Claude Code refactor&quot;
+git checkout -</code></pre>
+      <p>If the refactor produces unexpected results, you can always compare or restore from this backup branch.</p>
+      <p>Take notes on what works well. Document successful prompting patterns, skill combinations, and workflows that fit your development style. Keep a <code>~/.claude/CLAUDE.md</code> with your personal preferences as they evolve. Over time, this becomes a powerful personal configuration that tunes Claude Code specifically to how you work.</p>
+      <h2>Common Mistakes to Avoid</h2>
+      <p>New users often provide too little context. Remember that Claude Code has no memory of previous conversations outside your current session. Always include relevant background information in your prompts.</p>
+      <p>Another mistake is ignoring the skill system. Many beginners stick to basic commands without exploring skills, missing significant productivity gains.</p>
+      <p>Finally, avoid skipping the verification step. Claude Code can occasionally make assumptions about your project structure. Verify file locations, import paths, and dependencies before running new code.</p>
+      <p>Here is a comparison of beginner mistakes vs. better approaches:</p>
+      <div class="table-wrap"><table><tr><th>Mistake</th><th>What Goes Wrong</th><th>Better Approach</th></tr>
+<tr><td>Vague prompts like "make it faster"</td><td>Claude Code makes arbitrary changes</td><td>Specify the function, the bottleneck, and the target performance</td></tr>
+<tr><td>Starting a session from home directory</td><td>No project context, generic output</td><td>Always cd to project root first</td></tr>
+<tr><td>Accepting output without review</td><td>Bugs or mismatched patterns slip through</td><td>Run a quick mental review checklist after each response</td></tr>
+<tr><td>Never loading skills</td><td>Missing specialized workflows</td><td>Try one new skill per week until you know the ecosystem</td></tr>
+<tr><td>One giant prompt for a complex task</td><td>Partial output, lost context</td><td>Break complex work into numbered steps</td></tr>
+<tr><td>No version control before major changes</td><td>No way to roll back</td><td>Always commit or branch before large refactors</td></tr></table></div>
+      <h2>Building Your Workflow</h2>
+      <p>As you become more comfortable with Claude Code, build a personal workflow. Identify repetitive tasks in your development process and learn how Claude Code can automate them.</p>
+      <p>Consider creating custom skills for your specific needs. The skill creation system allows you to package common patterns into reusable components. For example, if you frequently set up new API routes with the same boilerplate structure, you can encode that pattern in a custom skill and invoke it with a single command.</p>
+      <p>A starter personal workflow for a web developer might look like this:</p>
+      <pre><code class="language-">Morning routine:
+1. Open terminal, cd to project
+2. Run: git status
+3. Launch claude-code
+4. Load supermemory skill, retrieve yesterday&#x27;s context
+5. Ask Claude Code: &quot;Summarize what we were working on and suggest next steps&quot;</code></pre>
+      <p>This takes about 30 seconds and means you spend zero time re-orienting at the start of each day. Claude Code picks up where you left off.</p>
+      <p>For feature development, a repeatable cycle works well:</p>
+      <pre><code class="language-">Feature cycle:
+1. Ask Claude Code to read relevant existing code and explain it
+2. Ask for a plan: &quot;What steps are needed to add X?&quot;
+3. Review the plan, adjust if needed
+4. Execute each step one at a time, reviewing output
+5. Ask Claude Code to write tests for the new code
+6. Run the tests, feed failures back to Claude Code for fixing
+7. Commit with a Claude Code-generated commit message</code></pre>
+      <p>Track your progress. Note which prompting styles yield the best results and which skills you use most frequently. This self-knowledge helps you work more efficiently over time.</p>
+      <h2>Conclusion</h2>
+      <p>Claude Code offers developers and power users a powerful assistant for coding tasks in 2026. By starting with these tips, working in project directories, using specific prompts, using the skill system, and following best practices, you will quickly become productive.</p>
+      <p>Remember that mastery comes with practice. Start with simple tasks, gradually take on more complex challenges, and explore the growing ecosystem of skills. Claude Code continues to evolve, and staying current with new features will help you maintain peak productivity.</p>
+      <p>The single most important thing a beginner can do is invest in a good CLAUDE.md setup, both global preferences and project-level instructions. This document is how you train Claude Code to understand your style, your stack, and your constraints. A well-maintained CLAUDE.md is the difference between a tool that requires constant re-explaining and one that feels like a collaborator that actually knows your project.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> Paste your error into our <a href="/diagnose/">Error Diagnostic</a> for an instant fix
+      </div>
+
+      <div class="mastery-cta">
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-tips-for-absolute-beginners-2026">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Tips for Absolute Beginners (2026)",
+    "description": "Essential Claude Code tips for absolute beginners. Setup, skills, and workflows to boost your productivity.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-tips-for-absolute-beginners-2026/",
+    "datePublished": "2026-05-04",
+    "dateModified": "2026-05-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
