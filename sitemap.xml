@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://claudhq.com/</loc><lastmod>2026-05-18</lastmod><priority>1.0</priority></url>
-  <url><loc>https://claudhq.com/errors/</loc><lastmod>2026-05-18</lastmod><priority>0.8</priority></url>
+  <url><loc>https://claudhq.com/</loc><lastmod>2026-05-22</lastmod><priority>1.0</priority></url>
+  <url><loc>https://claudhq.com/errors/</loc><lastmod>2026-05-22</lastmod><priority>0.8</priority></url>
   <url><loc>https://claudhq.com/tools/</loc><lastmod>2026-05-18</lastmod><priority>0.8</priority></url>
   <url><loc>https://claudhq.com/guides/</loc><lastmod>2026-05-18</lastmod><priority>0.8</priority></url>
   <url><loc>https://claudhq.com/mastery/</loc><lastmod>2026-05-18</lastmod><priority>0.9</priority></url>
@@ -106,4 +106,6 @@
   <url><loc>https://claudhq.com/research/claude-api-usage-patterns.html</loc><lastmod>2026-05-18</lastmod><priority>0.5</priority></url>
   <url><loc>https://claudhq.com/research/prompt-engineering-patterns.html</loc><lastmod>2026-05-18</lastmod><priority>0.5</priority></url>
   <url><loc>https://claudhq.com/research/prompt-length-effectiveness.html</loc><lastmod>2026-05-18</lastmod><priority>0.5</priority></url>
+  <!-- Wave 6: Sprint 5 new article (2026-05-22) -->
+  <url><loc>https://claudhq.com/claude-code-command-not-found-fix/</loc><lastmod>2026-05-22</lastmod><priority>0.8</priority></url>
 </urlset>

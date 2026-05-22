@@ -23,7 +23,7 @@
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "datePublished": "2026-03-14",
-    "dateModified": "2026-04-21",
+    "dateModified": "2026-05-22",
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-skill-timeout-error-how-to-increase-the-limit/"}
   }
   </script>
@@ -52,7 +52,7 @@
 
   <main class="page-content">
     <div class="article-meta">
-      <time datetime="2026-03-14">March 14, 2026</time> · Last tested 2026-04-21
+      <time datetime="2026-03-14">March 14, 2026</time> · Last tested 2026-05-22
     </div>
 
     <h1>Claude Code Skill Timeout Error: How to Increase the Limit</h1>
@@ -335,6 +335,54 @@ When gathering context, use multiple Read tool calls in the same turn rather tha
       <span>&copy; 2026 ClaudHQ</span>
       <span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span>
     </div>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What causes timeout errors in Claude Code skills?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Timeout errors in Claude Code skills occur when a request exceeds the Anthropic API's response time limits. They happen when processing large files with the /pdf skill, generating comprehensive test suites with /tdd, creating presentations with /pptx, or querying large knowledge stores with /supermemory. There is no configurable --timeout flag or CLAUDE_SKILL_TIMEOUT environment variable."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I diagnose which step is timing out in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run Claude Code with the --verbose flag to print tool call activity to stdout, revealing which tools hang before the timeout. Timeouts within seconds indicate an MCP server or tool layer issue. Partial output followed by a cutoff means the model ran out of time mid-generation. You can also test MCP server health directly with curl."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix Claude Code skill timeout errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Break large tasks into smaller pieces. For /pdf, process 30 pages at a time. For /tdd, scope requests to single modules. For /pptx, create 10 slides per request. Use /supermemory to cache results across sessions instead of re-running expensive operations. Add explicit scope constraints to skill prompts limiting output to 200 lines per invocation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I increase the Claude Code timeout limit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. There is no --timeout flag for the claude CLI, no skillDefaults configuration in settings.json, and no CLAUDE_SKILL_TIMEOUT environment variable. The timeout limits are governed entirely by the Anthropic API's response limits and cannot be configured through skill files or CLI flags."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Claude Code timeout mid-generation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A timeout mid-generation occurs when the model starts generating output but runs out of time before finishing. This is a pure output-length problem caused by requesting too much content in a single API call. The fix is always scoping the request down by breaking the task into smaller pieces or working module-by-module."
+        }
+      }
+    ]
+  }
+  </script>
   </footer>
 </body>
 </html>

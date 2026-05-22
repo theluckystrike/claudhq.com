@@ -23,7 +23,7 @@
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "datePublished": "2026-04-01",
-    "dateModified": "2026-04-17",
+    "dateModified": "2026-05-22",
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-api-timeout-error-handling-retry-guide/"}
   }
   </script>
@@ -52,7 +52,7 @@
 
   <main class="page-content">
     <div class="article-meta">
-      <time datetime="2026-04-01">April 1, 2026</time> · Last tested 2026-04-21
+      <time datetime="2026-04-01">April 1, 2026</time> · Last tested 2026-05-22
     </div>
 
     <h1>Claude API Timeout Errors: Handling and Retry Guide</h1>
@@ -386,6 +386,54 @@ for step in chain_steps:
       <span>&copy; 2026 ClaudHQ</span>
       <span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span>
     </div>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I handle Claude API timeout errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Handle Claude API timeout errors by implementing retry logic with exponential backoff. Catch APITimeoutError and APIConnectionError exceptions, then retry with increasing delays (e.g., 2s, 4s, 8s). Add random jitter to prevent thundering herd problems when multiple instances retry simultaneously. For sustained failures, use a circuit breaker pattern that stops sending requests after repeated timeouts and periodically tests whether the API has recovered."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the default Claude API timeout?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The default timeout depends on your HTTP client library, but most default to 30-60 seconds. This is often too short for Claude API calls that generate long outputs. Anthropic recommends setting explicit timeouts: 60-90 seconds for interactive chat, 120-300 seconds for background processing, 15-30 seconds for real-time integrations like webhooks, and 120-180 seconds per turn for agentic loops with tool use."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I implement retry logic for the Claude API?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Implement retry logic by wrapping your API call in a loop with a maximum retry count (typically 3). On each timeout or connection error, wait with exponential backoff: delay = base_delay * (2 ^ attempt). In Python, catch anthropic.APITimeoutError and anthropic.APIConnectionError. In TypeScript, catch Anthropic.APIConnectionTimeoutError and Anthropic.APIConnectionError. Connection timeouts and read timeouts on non-streaming requests are safe to retry because the API is stateless."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the best practices for Claude API exponential backoff?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Best practices for exponential backoff with the Claude API include: start with a base delay of 2 seconds and double it each attempt (2s, 4s, 8s). Add random jitter (e.g., random 0-1 second) to prevent multiple clients retrying at the same instant. Cap maximum retries at 3-5 attempts. Use a circuit breaker to stop retrying after 5 consecutive failures and wait 60 seconds before testing recovery. Track retry success rate and timeout rate metrics to detect API-side issues early."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I set the Claude API request timeout in Python and TypeScript?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In Python, pass timeout=120.0 (seconds) to the anthropic.Anthropic() constructor. For granular control, use httpx.Timeout with separate connect, read, write, and pool values. In TypeScript/Node.js, pass timeout: 120000 (milliseconds) to new Anthropic(). Both SDKs support per-request timeout overrides: in Python, pass the timeout parameter to individual API calls; in TypeScript, pass { timeout: 180000 } as the second argument to client.messages.create(). Set read timeout to at least 120 seconds when max_tokens exceeds 2,000."
+        }
+      }
+    ]
+  }
+  </script>
   </footer>
 </body>
 </html>

@@ -23,7 +23,7 @@
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "datePublished": "2026-03-14",
-    "dateModified": "2026-04-17",
+    "dateModified": "2026-05-22",
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-ssl-certificate-verification-failed-error/"}
   }
   </script>
@@ -52,7 +52,7 @@
 
   <main class="page-content">
     <div class="article-meta">
-      <time datetime="2026-03-14">March 14, 2026</time> · Last tested 2026-04-21
+      <time datetime="2026-03-14">March 14, 2026</time> · Last tested 2026-05-22
     </div>
 
     <h1>Fixing SSL Certificate Verification Failed Error in Claude Code</h1>
@@ -422,6 +422,54 @@ fi
       <span>&copy; 2026 ClaudHQ</span>
       <span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span>
     </div>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How to fix SSL certificate verification failed in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "There are three main fixes depending on the cause: (1) Update your system's root CA certificates by running 'brew install ca-certificates' on macOS or 'sudo update-ca-certificates' on Linux. (2) If you're behind a corporate proxy or firewall, add your organization's CA bundle by setting NODE_EXTRA_CA_CERTS, SSL_CERT_FILE, and REQUESTS_CA_BUNDLE environment variables to point to your company's certificate file. (3) For development environments with self-signed certificates, add the certificate to your system trust store using 'sudo security add-trusted-cert' on macOS or copying it to /usr/local/share/ca-certificates/ on Ubuntu."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What causes SSL errors in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SSL certificate verification errors in Claude Code are caused by six common issues: expired server certificates, self-signed certificates not issued by a trusted Certificate Authority, hostname mismatches where the certificate domain doesn't match the URL, outdated root CA certificates on your system, corporate proxy or firewall SSL inspection that re-signs traffic with a company-issued certificate, and incomplete certificate chains where the server is missing intermediate certificates. The error can surface from Node.js, Python requests, curl, or git depending on which tool Claude Code is using."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to bypass SSL verification in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can temporarily bypass SSL verification for development by setting the environment variable NODE_TLS_REJECT_UNAUTHORIZED=0 before running Claude Code. For a single command, prefix it: 'NODE_TLS_REJECT_UNAUTHORIZED=0 claude \"your prompt\"'. You can also set CURL_CA_BUNDLE to an empty string to disable curl verification. However, this is strongly discouraged for production use as it removes all TLS security guarantees. The proper fix is to add the correct CA certificate to your system trust store or set NODE_EXTRA_CA_CERTS to point to your organization's CA bundle."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix Claude Code NODE_TLS_REJECT_UNAUTHORIZED errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The NODE_TLS_REJECT_UNAUTHORIZED error in Claude Code means Node.js cannot verify the server's SSL certificate. Instead of setting NODE_TLS_REJECT_UNAUTHORIZED=0 (which disables all SSL security), use the proper fix: set NODE_EXTRA_CA_CERTS to point to your organization's CA bundle file, e.g., 'export NODE_EXTRA_CA_CERTS=/path/to/ca-bundle.crt'. This adds your custom certificates to Node.js's trust store without disabling verification for all connections. Add this to your ~/.zshrc or ~/.bashrc so it persists across terminal sessions and applies to all MCP server subprocesses launched by Claude Code."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to update SSL certificates for Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To update SSL certificates for Claude Code, update your system's CA certificate store. On macOS, run 'brew install ca-certificates' or 'sudo security update-ca-certificates'. On Ubuntu/Debian, run 'sudo apt install --reinstall ca-certificates && sudo update-ca-certificates'. On RHEL/Fedora, run 'sudo dnf update ca-certificates'. For Python specifically on macOS, run 'pip install --upgrade certifi' or execute the Install Certificates command at /Applications/Python 3.12/Install Certificates.command. After updating, restart your terminal session for the changes to take effect."
+        }
+      }
+    ]
+  }
+  </script>
   </footer>
 </body>
 </html>

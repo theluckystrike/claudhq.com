@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix 'Command Not Found: Claude' — zsh/bash/npm Path Fix (2026)</title>
+  <meta name="description" content="Fix 'zsh: command not found: claude' and 'claude: command not found' errors. Step-by-step PATH configuration, npm global install fix, and shell profile setup.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-command-not-found-fix/">
+  <meta property="og:title" content="Fix 'Command Not Found: Claude' — zsh/bash/npm Path Fix (2026)">
+  <meta property="og:description" content="Fix 'zsh: command not found: claude' and 'claude: command not found' errors. Step-by-step PATH configuration, npm global install fix, and shell profile setup.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-command-not-found-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix &ldquo;Command Not Found: Claude&rdquo; &mdash; zsh, bash &amp; npm PATH Fix</h1>
+      <div class="article-meta"><time datetime="2026-05-22">May 2026</time> &middot; ClaudHQ</div>
+
+      <h2>TL;DR &mdash; Quick Fix</h2>
+
+      <p>Run this single command. It fixes the problem 90% of the time:</p>
+
+      <pre><code>npm install -g @anthropic-ai/claude-code &amp;&amp; source ~/.zshrc &amp;&amp; claude --version</code></pre>
+
+      <p>If that does not work, your shell cannot find the npm global bin directory. Keep reading for the full fix.</p>
+
+      <h2>The Error</h2>
+
+      <pre><code>zsh: command not found: claude</code></pre>
+
+      <p>Or one of these variations:</p>
+
+      <pre><code>bash: claude: command not found
+command not found: claude
+claude: not found
+-bash: claude: No such file or directory</code></pre>
+
+      <p>You installed Claude Code with <code>npm install -g @anthropic-ai/claude-code</code>, the install completed without errors, but when you type <code>claude</code> your shell says it cannot find it.</p>
+
+      <h2>Why This Happens</h2>
+
+      <p>When npm installs a global package, it places the executable in npm's global bin directory. Your shell can only run commands that exist in directories listed in your <code>PATH</code> environment variable. If npm's global bin is not in <code>PATH</code>, your shell cannot find <code>claude</code>.</p>
+
+      <p>The three most common causes:</p>
+
+      <ol>
+        <li><strong>npm global bin is not in PATH.</strong> This is the default state on many Linux distributions and some macOS setups. npm installs the binary, but your shell profile never adds its location to PATH.</li>
+        <li><strong>nvm node version mismatch.</strong> You installed Claude Code under Node 20, then switched to Node 22 with <code>nvm use 22</code>. Global packages are per-node-version in nvm. The binary only exists under the Node 20 prefix.</li>
+        <li><strong>Wrong shell profile.</strong> You added the PATH export to <code>~/.bashrc</code> but your terminal runs zsh (reads <code>~/.zshrc</code>). Or you edited <code>~/.zprofile</code> but your terminal is a login shell that reads <code>~/.zshrc</code>.</li>
+      </ol>
+
+      <h2>Fix 1 &mdash; Reinstall Claude Code Globally</h2>
+
+      <p>The fastest fix. This reinstalls the package and re-links the binary:</p>
+
+      <pre><code># Uninstall any existing broken installation
+npm uninstall -g @anthropic-ai/claude-code
+
+# Reinstall fresh
+npm install -g @anthropic-ai/claude-code
+
+# Verify the binary exists
+which claude</code></pre>
+
+      <p>If <code>which claude</code> prints a path like <code>/usr/local/bin/claude</code> or <code>/Users/you/.nvm/versions/node/v22.x.x/bin/claude</code>, the install worked. If it still says &ldquo;not found&rdquo;, continue to Fix 2.</p>
+
+      <h2>Fix 2 &mdash; Add npm Global Bin to PATH</h2>
+
+      <p>First, find where npm installs global binaries:</p>
+
+      <pre><code>npm bin -g</code></pre>
+
+      <p>This prints the directory. Common outputs:</p>
+
+      <pre><code># macOS (system Node)
+/usr/local/bin
+
+# macOS/Linux (nvm)
+/Users/you/.nvm/versions/node/v22.15.0/bin
+
+# Linux (apt-installed Node)
+/usr/lib/node_modules/.bin
+
+# Linux (snap-installed Node)
+/snap/node/current/bin</code></pre>
+
+      <p>Now add that directory to your PATH. Choose your shell:</p>
+
+      <p><strong>zsh (macOS default since Catalina):</strong></p>
+
+      <pre><code># Add npm global bin to PATH in your zsh profile
+echo 'export PATH="$(npm bin -g):$PATH"' &gt;&gt; ~/.zshrc
+
+# Reload the profile
+source ~/.zshrc
+
+# Verify
+claude --version</code></pre>
+
+      <p><strong>bash:</strong></p>
+
+      <pre><code># Add npm global bin to PATH in your bash profile
+echo 'export PATH="$(npm bin -g):$PATH"' &gt;&gt; ~/.bashrc
+
+# Reload the profile
+source ~/.bashrc
+
+# Verify
+claude --version</code></pre>
+
+      <p><strong>fish:</strong></p>
+
+      <pre><code># Add npm global bin to PATH in fish config
+set -Ua fish_user_paths (npm bin -g)
+
+# Verify
+claude --version</code></pre>
+
+      <p>If you are not sure which shell you use, run:</p>
+
+      <pre><code>echo $SHELL</code></pre>
+
+      <h2>Fix 3 &mdash; nvm Users: Node Version Mismatch</h2>
+
+      <p>If you use nvm, global packages are installed per Node version. Switching Node versions makes previously installed globals disappear.</p>
+
+      <pre><code># Check which Node version is active
+node --version
+
+# List installed Node versions
+nvm ls
+
+# Check if claude exists in the current version's bin
+ls $(nvm which current | xargs dirname)/claude 2&gt;/dev/null &amp;&amp; echo "Found" || echo "Not found"</code></pre>
+
+      <p>If &ldquo;Not found&rdquo;, you have two options:</p>
+
+      <p><strong>Option A &mdash; Reinstall under the current Node version:</strong></p>
+
+      <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+
+      <p><strong>Option B &mdash; Switch back to the Node version that has it:</strong></p>
+
+      <pre><code># List all Node versions and check each for claude
+for dir in ~/.nvm/versions/node/*/bin; do
+  [ -f "$dir/claude" ] &amp;&amp; echo "Found claude in: $dir"
+done
+
+# Switch to that version
+nvm use 22  # replace with the version number from above</code></pre>
+
+      <p><strong>Option C &mdash; Set a default Node version so claude persists across terminal sessions:</strong></p>
+
+      <pre><code># Set your current version as the default
+nvm alias default node
+
+# Install claude on the default
+npm install -g @anthropic-ai/claude-code</code></pre>
+
+      <h2>Fix 4 &mdash; Homebrew Users (macOS)</h2>
+
+      <p>If you installed Node.js via Homebrew, npm's global bin is under the Homebrew prefix, which may not be in your PATH (especially on Apple Silicon Macs):</p>
+
+      <pre><code># Check Homebrew prefix
+brew --prefix
+
+# Apple Silicon Macs: /opt/homebrew
+# Intel Macs: /usr/local</code></pre>
+
+      <p><strong>Apple Silicon (M1/M2/M3/M4) fix:</strong></p>
+
+      <pre><code># Add Homebrew's bin to PATH (if not already there)
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zshrc
+source ~/.zshrc
+
+# Reinstall Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# Verify
+which claude</code></pre>
+
+      <p><strong>Intel Mac fix:</strong></p>
+
+      <pre><code># Homebrew's /usr/local/bin is usually already in PATH
+# Just reinstall:
+npm install -g @anthropic-ai/claude-code
+
+# If still not found, force the link:
+npm link @anthropic-ai/claude-code</code></pre>
+
+      <p>You can also install Claude Code directly via Homebrew if npm is giving you trouble:</p>
+
+      <pre><code># Alternative: install via npx without global install
+npx @anthropic-ai/claude-code</code></pre>
+
+      <h2>Fix 5 &mdash; Verify Installation</h2>
+
+      <p>Run these commands to confirm everything is working:</p>
+
+      <pre><code># Check if claude is in PATH
+which claude
+
+# Check the version
+claude --version
+
+# Check that the binary is executable
+ls -la $(which claude)
+
+# Check your PATH includes npm's global bin
+echo $PATH | tr ':' '\n' | grep -i node</code></pre>
+
+      <p>Expected output:</p>
+
+      <pre><code>$ which claude
+/Users/you/.nvm/versions/node/v22.15.0/bin/claude
+
+$ claude --version
+Claude Code v1.x.x
+
+$ ls -la $(which claude)
+lrwxr-xr-x  1 you  staff  ... claude -&gt; ../lib/node_modules/@anthropic-ai/claude-code/cli.js</code></pre>
+
+      <p>If <code>which claude</code> returns a path but <code>claude --version</code> still fails, the symlink may be broken. Reinstall with <code>npm install -g @anthropic-ai/claude-code</code>.</p>
+
+      <h2>Error Variations by Shell and OS</h2>
+
+      <table style="width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.95rem">
+        <thead>
+          <tr style="border-bottom:2px solid var(--line)">
+            <th style="text-align:left;padding:0.5rem">Shell / OS</th>
+            <th style="text-align:left;padding:0.5rem">Error Message</th>
+            <th style="text-align:left;padding:0.5rem">Profile File</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:0.5rem">zsh (macOS)</td>
+            <td style="padding:0.5rem"><code>zsh: command not found: claude</code></td>
+            <td style="padding:0.5rem"><code>~/.zshrc</code></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:0.5rem">bash (Linux)</td>
+            <td style="padding:0.5rem"><code>bash: claude: command not found</code></td>
+            <td style="padding:0.5rem"><code>~/.bashrc</code></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:0.5rem">bash (macOS)</td>
+            <td style="padding:0.5rem"><code>-bash: claude: command not found</code></td>
+            <td style="padding:0.5rem"><code>~/.bash_profile</code></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:0.5rem">fish</td>
+            <td style="padding:0.5rem"><code>fish: Unknown command: claude</code></td>
+            <td style="padding:0.5rem"><code>~/.config/fish/config.fish</code></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:0.5rem">Windows (WSL)</td>
+            <td style="padding:0.5rem"><code>claude: command not found</code></td>
+            <td style="padding:0.5rem"><code>~/.bashrc</code></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:0.5rem">Windows (PowerShell)</td>
+            <td style="padding:0.5rem"><code>claude: The term 'claude' is not recognized</code></td>
+            <td style="padding:0.5rem"><code>$PROFILE</code></td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem">Windows (CMD)</td>
+            <td style="padding:0.5rem"><code>'claude' is not recognized as an internal or external command</code></td>
+            <td style="padding:0.5rem">System Environment Variables</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>The fix is the same for all: make sure npm's global bin directory is in your shell's <code>PATH</code>.</p>
+
+      <h2>FAQ</h2>
+
+      <h3>Why does &ldquo;zsh: command not found: claude&rdquo; appear after a successful npm install?</h3>
+
+      <p>npm installed the binary, but your zsh shell does not know where it is. npm's global bin directory is not in your <code>PATH</code> environment variable. Run <code>npm bin -g</code> to find the directory, then add it to <code>~/.zshrc</code> with <code>export PATH="$(npm bin -g):$PATH"</code>. Reload with <code>source ~/.zshrc</code>.</p>
+
+      <h3>How do I fix &ldquo;claude command not found&rdquo; on macOS?</h3>
+
+      <p>macOS uses zsh by default since Catalina. Run <code>npm install -g @anthropic-ai/claude-code</code> to install, then add the npm bin path to <code>~/.zshrc</code>. On Apple Silicon Macs (M1-M4), also make sure Homebrew's shell environment is loaded: <code>eval "$(/opt/homebrew/bin/brew shellenv)"</code> in your <code>~/.zshrc</code>.</p>
+
+      <h3>Does &ldquo;command not found&rdquo; mean Claude Code failed to install?</h3>
+
+      <p>Not necessarily. The npm install may have succeeded (check with <code>npm list -g @anthropic-ai/claude-code</code>). The error means your shell cannot locate the <code>claude</code> binary because the install directory is not in your PATH. It is a path configuration issue, not an installation failure.</p>
+
+      <h3>Why does claude work in one terminal but not another?</h3>
+
+      <p>Different terminals may load different shell profiles. If you added the PATH export to <code>~/.zshrc</code> but open a bash terminal, it reads <code>~/.bashrc</code> instead. Also, if you use nvm and different terminals default to different Node versions, the global packages differ between them. Run <code>echo $SHELL</code> and <code>node --version</code> in each terminal to compare.</p>
+
+      <h3>I switched Node versions with nvm and now claude is gone. How do I get it back?</h3>
+
+      <p>nvm installs global packages per Node version. When you switch from Node 20 to Node 22, the packages installed under Node 20 are not available. Reinstall with <code>npm install -g @anthropic-ai/claude-code</code> on your current Node version. To prevent this in the future, set a default: <code>nvm alias default node</code> and always install globals on the default version.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+  <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+    <li><a href="/claude-code-not-working-vscode/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code VS Code Extension Not Working (2026)</a></li>
+    <li><a href="/claude-code-err-stream-premature-close-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix ERR_STREAM_PREMATURE_CLOSE Installing Claude Code (2026)</a></li>
+    <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+  </ul>
+</div>
+
+      <div class="mastery-cta">
+        <p>I spent two hours debugging PATH issues before I wrote a CLAUDE.md that auto-configures my environment. Now every project just works.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-command-not-found-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix 'Command Not Found: Claude' — zsh/bash/npm Path Fix (2026)",
+    "description": "Fix 'zsh: command not found: claude' and 'claude: command not found' errors. Step-by-step PATH configuration, npm global install fix, and shell profile setup.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-command-not-found-fix/",
+    "datePublished": "2026-05-22",
+    "dateModified": "2026-05-22"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why does 'zsh: command not found: claude' appear after a successful npm install?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "npm installed the binary, but your zsh shell does not know where it is. npm's global bin directory is not in your PATH environment variable. Run 'npm bin -g' to find the directory, then add it to ~/.zshrc with export PATH=\"$(npm bin -g):$PATH\". Reload with 'source ~/.zshrc'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix 'claude command not found' on macOS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "macOS uses zsh by default since Catalina. Run 'npm install -g @anthropic-ai/claude-code' to install, then add the npm bin path to ~/.zshrc. On Apple Silicon Macs (M1-M4), also make sure Homebrew's shell environment is loaded with eval \"$(/opt/homebrew/bin/brew shellenv)\" in your ~/.zshrc."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does 'command not found' mean Claude Code failed to install?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not necessarily. The npm install may have succeeded (check with 'npm list -g @anthropic-ai/claude-code'). The error means your shell cannot locate the claude binary because the install directory is not in your PATH. It is a path configuration issue, not an installation failure."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does claude work in one terminal but not another?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Different terminals may load different shell profiles. If you added the PATH export to ~/.zshrc but open a bash terminal, it reads ~/.bashrc instead. Also, if you use nvm and different terminals default to different Node versions, the global packages differ between them. Run 'echo $SHELL' and 'node --version' in each terminal to compare."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "I switched Node versions with nvm and now claude is gone. How do I get it back?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "nvm installs global packages per Node version. When you switch from Node 20 to Node 22, the packages installed under Node 20 are not available. Reinstall with 'npm install -g @anthropic-ai/claude-code' on your current Node version. To prevent this in the future, set a default with 'nvm alias default node' and always install globals on the default version."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
