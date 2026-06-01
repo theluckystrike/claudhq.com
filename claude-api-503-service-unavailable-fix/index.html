@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude API 503 Service Unavailable (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude API 503 Service Unavailable errors. Add exponential backoff retry logic, check status page, and implement fallback routing.">
+  <link rel="canonical" href="https://claudhq.com/claude-api-503-service-unavailable-fix/">
+  <meta property="og:title" content="Fix Claude API 503 Service Unavailable (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude API 503 Service Unavailable errors. Add exponential backoff retry logic, check status page, and implement fallback routing.">
+  <meta property="og:url" content="https://claudhq.com/claude-api-503-service-unavailable-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude API 503 Service Unavailable (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+
+      <pre><code>Error 503: Service Unavailable
+{
+  "type": "error",
+  "error": {
+    "type": "api_error",
+    "message": "Service temporarily unavailable. Please try again later."
+  }
+}</code></pre>
+
+      <p>This typically surfaces during peak usage hours (9 AM - 5 PM PT on weekdays) or during Anthropic infrastructure maintenance windows.</p>
+
+      <h2>TL;DR &mdash; Quick Fix</h2>
+
+      <p>Wait 30 seconds and retry. If persistent, add exponential backoff to your API calls. Check <a href="https://status.anthropic.com">status.anthropic.com</a> for outages.</p>
+
+      <h2>The Fix</h2>
+
+      <h3>Step 1: Add exponential backoff with jitter</h3>
+
+      <pre><code>import anthropic
+import time
+import random
+
+def call_with_retry(client, max_retries=5, **kwargs):
+    for attempt in range(max_retries):
+        try:
+            return client.messages.create(**kwargs)
+        except anthropic.APIStatusError as e:
+            if e.status_code == 503 and attempt &lt; max_retries - 1:
+                delay = (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(delay)
+                continue
+            raise</code></pre>
+
+      <h3>Step 2: Check Anthropic status page</h3>
+
+      <pre><code>curl -s https://status.anthropic.com/api/v2/status.json | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+print(data['status']['description'])
+"</code></pre>
+
+      <h3>Step 3: Verify connectivity</h3>
+
+      <pre><code>python3 -c "
+import anthropic
+client = anthropic.Anthropic()
+resp = client.messages.create(
+    model='claude-sonnet-4-20250514',
+    max_tokens=10,
+    messages=[{'role':'user','content':'ping'}]
+)
+print(resp.content[0].text)
+"
+# Expected: A short text response confirming connectivity</code></pre>
+
+      <h2>Why This Happens</h2>
+
+      <p>The 503 error means Anthropic's API servers are temporarily unable to handle your request. This occurs during traffic spikes when request volume exceeds cluster capacity, or during rolling deployments. Unlike a 529 error (model-level saturation), 503 is an infrastructure-level issue at the load balancer or gateway layer. It is almost always transient and resolves within minutes.</p>
+
+      <h2>If That Does Not Work</h2>
+
+      <ul>
+        <li><strong>Use the Batch API</strong> for non-urgent requests &mdash; it queues work and processes within 24 hours at 50% cost.</li>
+        <li><strong>Fall back to a smaller model</strong> like <code>claude-haiku-4-20250514</code> which has higher availability during peak.</li>
+        <li><strong>Check response headers</strong> for <code>retry-after</code>: <code>curl -I https://api.anthropic.com/v1/messages</code></li>
+        <li><strong>Stagger requests</strong> if running multiple concurrent sessions to avoid self-inflicted traffic spikes.</li>
+      </ul>
+
+      <h2>Prevention</h2>
+
+      <p>Add this to your <code>CLAUDE.md</code>:</p>
+
+      <pre><code>Always implement retry logic with exponential backoff for Anthropic API calls.
+Check status.anthropic.com before investigating 503 errors.
+Use the Batch API for workloads that can tolerate latency.
+Shift non-interactive workloads to off-peak windows (evenings PT).</code></pre>
+
+      <h2>FAQ</h2>
+
+      <h3>How long do Claude API 503 errors typically last?</h3>
+
+      <p>Most 503 errors are transient and resolve within 1-5 minutes. They occur during traffic spikes or rolling deployments. If the error persists beyond 10 minutes, check status.anthropic.com for planned maintenance or outage reports. Implementing retry with exponential backoff (starting at 1 second, doubling each attempt) handles most 503s automatically.</p>
+
+      <h3>Do 503 errors consume API credits?</h3>
+
+      <p>No. A 503 response means the server rejected the request before processing it. No tokens are consumed and you are not billed. However, if you retry the same request multiple times and one attempt succeeds, that successful attempt will be billed normally. Your retry logic should be idempotent to avoid duplicate processing.</p>
+
+      <h3>Should I use a different model when getting 503 errors?</h3>
+
+      <p>Smaller models like claude-haiku-4-20250514 typically have higher availability during peak traffic because they require fewer compute resources. If your task does not require the full capability of Opus or Sonnet, falling back to Haiku during 503 errors is a valid strategy. The Batch API is another option for non-time-sensitive work at 50% cost.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+  <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+    <li><a href="/claude-code-login-auth-redirect-loop-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Login Auth Redirect Loop</a></li>
+    <li><a href="/claude-code-command-not-found-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Command Not Found: Claude (2026)</a></li>
+    <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+  </ul>
+</div>
+
+      <div class="mastery-cta">
+        <p>I used to lose entire agent runs to 503 errors. Now my CLAUDE.md enforces retry logic with backoff on every API integration. Zero lost runs in 3 months.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-api-503-service-unavailable-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude API 503 Service Unavailable (2026)",
+    "description": "Fix Claude API 503 Service Unavailable errors. Add exponential backoff retry logic, check status page, and implement fallback routing.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "mainEntityOfPage": "https://claudhq.com/claude-api-503-service-unavailable-fix/",
+    "url": "https://claudhq.com/claude-api-503-service-unavailable-fix/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long do Claude API 503 errors typically last?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most 503 errors are transient and resolve within 1-5 minutes. They occur during traffic spikes or rolling deployments. If the error persists beyond 10 minutes, check status.anthropic.com for planned maintenance or outage reports. Implementing retry with exponential backoff handles most 503s automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do Claude API 503 errors consume API credits?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. A 503 response means the server rejected the request before processing it. No tokens are consumed and you are not billed. However, if you retry the same request and one attempt succeeds, that successful attempt will be billed normally. Your retry logic should be idempotent to avoid duplicate processing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use a different model when getting Claude API 503 errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Smaller models like claude-haiku-4-20250514 typically have higher availability during peak traffic because they require fewer compute resources. If your task does not require the full capability of Opus or Sonnet, falling back to Haiku during 503 errors is a valid strategy. The Batch API is another option for non-time-sensitive work at 50% cost."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

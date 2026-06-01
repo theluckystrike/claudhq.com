@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <title>Claude Code VS Code Extension Not Working? 8 Fixes (2026)</title>
-  <meta name="description" content="Fix Claude Code VS Code extension not working or not loading — blank panels, terminal not responding, command not found errors. 8 proven fixes with step-by-step commands. Updated May 2026.">
+  <title>Claude Code Not Working in VS Code? Fix in 2 Minutes (2026)</title>
+  <meta name="description" content="Claude Code panel blank or frozen in VS Code? 8 fixes that work in under 2 minutes. PATH errors, terminal freezes, CLI issues. Tested June 2026.">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Claude Code VS Code Extension Not Working? 8 Fixes (2026)">
   <meta property="og:description" content="Fix Claude Code VS Code extension not working or not loading — blank panels, terminal not responding, command not found errors. 8 proven fixes with step-by-step commands. Updated May 2026.">
@@ -23,9 +23,12 @@
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "datePublished": "2026-04-14",
-    "dateModified": "2026-05-18",
+    "dateModified": "2026-06-01",
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-not-working-vscode/"}
   }
+  </script>
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Fix Claude Code Not Working in VS Code","description":"Step-by-step guide to fix Claude Code VS Code extension issues in under 2 minutes","step":[{"@type":"HowToStep","name":"Check Claude Code CLI works","text":"Open terminal and run 'claude --version' to verify CLI is functional outside VS Code"},{"@type":"HowToStep","name":"Restart VS Code Extension Host","text":"Press Cmd+Shift+P, type 'Restart Extension Host', and press Enter"},{"@type":"HowToStep","name":"Clear VS Code extension cache","text":"Delete ~/.vscode/extensions/anthropic.claude-code-* folder and reinstall"},{"@type":"HowToStep","name":"Fix PATH issues","text":"Ensure Node.js 18+ is on PATH: run 'which node' and verify version with 'node --version'"},{"@type":"HowToStep","name":"Reinstall Claude Code","text":"Run 'npm uninstall -g @anthropic-ai/claude-code && npm install -g @anthropic-ai/claude-code'"}],"totalTime":"PT2M"}
   </script>
 </head>
 <body>
@@ -52,7 +55,7 @@
 
   <main class="page-content">
     <div class="article-meta">
-      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-05-18
+      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-06-01
     </div>
 
     <h1>Fix Claude Code VS Code Extension Not Working</h1>
@@ -338,7 +341,7 @@ pkill -f code &amp;&amp; sleep 2 &amp;&amp; code</code></pre>
 
     <hr>
 
-    <p><em>Last verified: 2026-04-14. Found an issue? <a href="https://github.com/theluckystrike/extension-insiders/issues">Open a GitHub issue</a>.</em></p>
+    <p><em>Last verified: 2026-06-01. Found an issue? <a href="https://github.com/theluckystrike/extension-insiders/issues">Open a GitHub issue</a>.</em></p>
 
     <h2>Related Articles</h2>
 
@@ -373,26 +376,10 @@ pkill -f code &amp;&amp; sleep 2 &amp;&amp; code</code></pre>
       },
       {
         "@type": "Question",
-        "name": "Why is Claude Code VS Code extension not working?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The most common cause is the Claude Code CLI not being on VS Code's PATH. Open VS Code's integrated terminal and run 'which claude' (macOS/Linux) or 'where claude' (Windows). If it returns nothing, install the CLI with 'npm install -g @anthropic-ai/claude-code' and restart VS Code."
-        }
-      },
-      {
-        "@type": "Question",
         "name": "How do I fix 'command claude-vscode.terminal.open not found' in VS Code?",
         "acceptedAnswer": {
           "@type": "Answer",
           "text": "This means the Claude Code extension failed to register its commands. Open the Command Palette, run 'Developer: Restart Extension Host', and wait for extensions to reload. If the error persists, uninstall and reinstall the Claude Code extension from the VS Code Extensions panel."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do I fix ERR_STREAM_PREMATURE_CLOSE when installing Claude Code extension?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "This error means the extension download was interrupted. Restart VS Code and retry. If it fails again, clear the extension cache (delete ~/Library/Application Support/Code/CachedExtensionVSIXs on macOS) and retry, or download the .vsix file manually and install with 'code --install-extension claude-code.vsix'."
         }
       },
       {

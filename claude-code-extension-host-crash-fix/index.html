@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix VS Code Extension Host Crash (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix VS Code extension host crash caused by Claude Code. Disable conflicting extensions and increase memory limit to stabilize the extension host process.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-extension-host-crash-fix/">
+  <meta property="og:title" content="Fix VS Code Extension Host Crash (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix VS Code extension host crash caused by Claude Code. Disable conflicting extensions and increase memory limit to stabilize the extension host process.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-extension-host-crash-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix VS Code Extension Host Crash &mdash; Claude Code Memory Fix (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+
+      <pre><code>[Extension Host] terminated unexpectedly with code 137 (SIGKILL)
+  Extension host was killed due to memory pressure
+  Claude Code extension and 23 other extensions consumed 2.1GB
+  Restarting extension host... Claude Code extension may need reconfiguration</code></pre>
+
+      <p>This appears when VS Code's extension host process crashes due to excessive memory usage, often caused by the Claude Code extension combined with other memory-heavy extensions.</p>
+
+      <h2>TL;DR &mdash; Quick Fix</h2>
+
+      <p>Disable non-essential extensions for the current workspace, then restart VS Code. This solves the problem 90% of the time.</p>
+
+      <h2>The Fix</h2>
+
+      <ol>
+        <li>Open the Extensions sidebar in VS Code (<code>Cmd+Shift+X</code>).</li>
+        <li>Disable memory-heavy extensions you do not need for this project (GitLens, Remote SSH, Docker, etc.).</li>
+        <li>Restart VS Code to apply the changes.</li>
+      </ol>
+
+      <h2>Why This Happens</h2>
+
+      <p>VS Code runs all extensions in a shared &ldquo;extension host&rdquo; Node.js process. When multiple extensions consume significant memory &mdash; Claude Code for context indexing, GitLens for git history, TypeScript language server for type checking &mdash; the combined usage can exceed the extension host's memory limit. The OS kills the process with SIGKILL (code 137), and VS Code restarts it. Extensions like Claude Code lose their state during the crash.</p>
+
+      <h2>If That Does Not Work</h2>
+
+      <h3>Increase extension host memory limit</h3>
+
+      <p>Give Claude Code its own extension host process with higher memory allocation:</p>
+
+      <pre><code>// VS Code settings.json (user-level)
+{
+  "extensions.experimental.affinity": {
+    "anthropic.claude-code": 2
+  }
+}</code></pre>
+
+      <h3>Use Claude Code CLI directly</h3>
+
+      <p>Run Claude Code in a separate terminal process instead of the VS Code extension:</p>
+
+      <pre><code># Use CLI directly instead of the VS Code extension
+claude</code></pre>
+
+      <h3>Check which extensions use the most memory</h3>
+
+      <pre><code>Help &gt; Open Process Explorer
+# Look at "Extension Host" children for memory usage</code></pre>
+
+      <h3>Disable extensions per-workspace</h3>
+
+      <pre><code>// .vscode/settings.json
+{
+  "extensions.ignoreRecommendations": true
+}</code></pre>
+
+      <h2>Prevention</h2>
+
+      <p>Add this to your <code>CLAUDE.md</code>:</p>
+
+      <pre><code>Keep VS Code extension count under 20 for best performance.
+Use per-workspace extension profiles to load only what you need.
+If the extension host crashes, check Process Explorer for memory usage
+and disable the heaviest extensions.</code></pre>
+
+      <h2>FAQ</h2>
+
+      <h3>Why does the extension host crash with code 137?</h3>
+
+      <p>Code 137 means the process was killed by SIGKILL, which the operating system sends when a process exceeds memory limits. The extension host runs all VS Code extensions in a single Node.js process. When combined memory exceeds the limit (typically 1.5-4GB), the OS terminates it. The fix is to reduce the number of active extensions or isolate Claude Code in its own process.</p>
+
+      <h3>Can I run Claude Code in a separate extension host process?</h3>
+
+      <p>Yes. Add <code>"extensions.experimental.affinity": {"anthropic.claude-code": 2}</code> to your VS Code settings.json. This gives Claude Code its own dedicated extension host process with its own memory allocation, preventing other extensions from competing for the same memory pool.</p>
+
+      <h3>Will disabling extensions affect Claude Code functionality?</h3>
+
+      <p>No. Claude Code does not depend on other VS Code extensions. It operates independently through the Anthropic API. Disabling GitLens, Docker, or other heavy extensions will not reduce Claude Code's capabilities. It will actually improve performance by freeing memory for Claude Code's context indexing.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+  <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+    <li><a href="/claude-code-apple-silicon-rosetta-crash-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Apple Silicon Rosetta Crash (2026)</a></li>
+    <li><a href="/claude-code-command-not-found-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Command Not Found: Claude (2026)</a></li>
+    <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+  </ul>
+</div>
+
+      <div class="mastery-cta">
+        <p>I wasted hours debugging extension host crashes before I set up per-workspace extension profiles. Now my VS Code stays stable even with Claude Code running all day.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-extension-host-crash-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix VS Code Extension Host Crash — Claude Code Memory Fix (2026)",
+    "description": "Fix VS Code extension host crash caused by Claude Code. Disable conflicting extensions and increase memory limit to stabilize the extension host process.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "mainEntityOfPage": "https://claudhq.com/claude-code-extension-host-crash-fix/",
+    "url": "https://claudhq.com/claude-code-extension-host-crash-fix/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why does the VS Code extension host crash with code 137?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Code 137 means the process was killed by SIGKILL, which the operating system sends when a process exceeds memory limits. The extension host runs all VS Code extensions in a single Node.js process. When combined memory exceeds the limit (typically 1.5-4GB), the OS terminates it. The fix is to reduce active extensions or isolate Claude Code in its own process."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I run Claude Code in a separate extension host process?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Add 'extensions.experimental.affinity': {'anthropic.claude-code': 2} to your VS Code settings.json. This gives Claude Code its own dedicated extension host process with its own memory allocation, preventing other extensions from competing for the same memory pool."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will disabling other VS Code extensions affect Claude Code functionality?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Claude Code does not depend on other VS Code extensions. It operates independently through the Anthropic API. Disabling GitLens, Docker, or other heavy extensions will not reduce Claude Code's capabilities. It will actually improve performance by freeing memory for Claude Code's context indexing."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

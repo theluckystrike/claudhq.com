@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Top 50 Claude Code Errors &amp; Fixes (2026) | ClaudHQ</title>
+  <meta name="description" content="The 50 most common Claude Code errors with one-line fixes. Diagnose connection, API, memory, and permission errors instantly.">
+  <link rel="canonical" href="https://claudhq.com/top-50-claude-code-errors/">
+  <meta property="og:title" content="Top 50 Claude Code Errors &amp; Fixes (2026) | ClaudHQ">
+  <meta property="og:description" content="The 50 most common Claude Code errors with one-line fixes. Diagnose connection, API, memory, and permission errors instantly.">
+  <meta property="og:url" content="https://claudhq.com/top-50-claude-code-errors/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Top 50 Claude Code Errors (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code is a powerful AI coding assistant, but even the best tools throw errors. This comprehensive list covers the 50 most frequently reported Claude Code errors in 2026, drawn from GitHub issues, community forums, and thousands of developer reports. Each entry includes the error message, root cause, and a one-line fix so you can get back to coding in seconds.</p>
+
+      <h2>Connection and Network Errors (1-10)</h2>
+
+      <p><strong>1. <code>ECONNREFUSED 127.0.0.1:3000</code></strong><br>Cause: Local dev server not running. Fix: Start your server with <code>npm run dev</code> before invoking Claude Code.</p>
+
+      <p><strong>2. <code>ECONNRESET</code> / Connection reset by peer</strong><br>Cause: Network interruption mid-request. Fix: Check your internet connection and retry; Claude Code auto-retries after 5 seconds.</p>
+
+      <p><strong>3. <code>ETIMEDOUT</code> after 30 seconds</strong><br>Cause: Firewall or proxy blocking Anthropic API. Fix: Allowlist <code>api.anthropic.com</code> in your firewall rules.</p>
+
+      <p><strong>4. <code>CERT_HAS_EXPIRED</code> SSL error</strong><br>Cause: System clock wrong or outdated CA certificates. Fix: Sync your system clock and run <code>npm update -g</code> to refresh certificates.</p>
+
+      <p><strong>5. <code>UNABLE_TO_VERIFY_LEAF_SIGNATURE</code></strong><br>Cause: Corporate proxy intercepting SSL. Fix: Set <code>NODE_EXTRA_CA_CERTS=/path/to/corporate-ca.pem</code> in your environment.</p>
+
+      <p><strong>6. <code>socket hang up</code></strong><br>Cause: Connection dropped during streaming response. Fix: Increase timeout with <code>--timeout 120000</code> or check VPN stability.</p>
+
+      <p><strong>7. <code>ENOTFOUND api.anthropic.com</code></strong><br>Cause: DNS resolution failure. Fix: Try <code>8.8.8.8</code> as DNS server or check <code>/etc/resolv.conf</code>.</p>
+
+      <p><strong>8. <code>HTTP 502 Bad Gateway</code></strong><br>Cause: Anthropic API temporary outage. Fix: Wait 60 seconds and retry; check status.anthropic.com.</p>
+
+      <p><strong>9. <code>HTTP 503 Service Unavailable</code></strong><br>Cause: API under heavy load. Fix: Wait and retry with exponential backoff; Claude Code handles this automatically.</p>
+
+      <p><strong>10. <code>Proxy authentication required (407)</code></strong><br>Cause: Corporate proxy needs credentials. Fix: Set <code>HTTPS_PROXY=http://user:pass@proxy:port</code> in your shell profile.</p>
+
+      <h2>Authentication and API Errors (11-20)</h2>
+
+      <p><strong>11. <code>Invalid API key</code></strong><br>Cause: API key expired or malformed. Fix: Regenerate at console.anthropic.com and run <code>claude config set api_key</code>.</p>
+
+      <p><strong>12. <code>HTTP 401 Unauthorized</code></strong><br>Cause: Missing or revoked API key. Fix: Verify your key is set with <code>echo $ANTHROPIC_API_KEY</code> and re-export if empty.</p>
+
+      <p><strong>13. <code>HTTP 403 Forbidden</code></strong><br>Cause: API key lacks required permissions. Fix: Check key scopes in the Anthropic dashboard and create a new key with full access.</p>
+
+      <p><strong>14. <code>Rate limit exceeded (429)</code></strong><br>Cause: Too many requests per minute. Fix: Reduce concurrent sessions or upgrade your plan. See our <a href="/claude-code-rate-limit-429-retry-after-fix/">429 error guide</a> for details.</p>
+
+      <p><strong>15. <code>HTTP 413 Request too large</code></strong><br>Cause: Context window overflow. Fix: Reduce input size with <code>/compact</code> or split into smaller tasks.</p>
+
+      <p><strong>16. <code>Authentication redirect loop</code></strong><br>Cause: Cached auth tokens corrupted. Fix: Delete <code>~/.claude/credentials.json</code> and re-authenticate with <code>claude login</code>.</p>
+
+      <p><strong>17. <code>Token expired</code></strong><br>Cause: OAuth token past expiry. Fix: Run <code>claude login</code> to refresh your session token.</p>
+
+      <p><strong>18. <code>Organization quota exceeded</code></strong><br>Cause: Team API budget depleted. Fix: Contact your org admin to increase the monthly spending cap.</p>
+
+      <p><strong>19. <code>API key not found for model</code></strong><br>Cause: Key does not have access to the requested model. Fix: Check model availability for your plan at the Anthropic console.</p>
+
+      <p><strong>20. <code>Session expired, please re-authenticate</code></strong><br>Cause: Inactive session timed out. Fix: Run <code>claude login</code> and restart your terminal.</p>
+
+      <h2>File System and Permission Errors (21-30)</h2>
+
+      <p><strong>21. <code>EACCES: permission denied</code></strong><br>Cause: Claude Code lacks read/write access to target file. Fix: Check file ownership with <code>ls -la</code> and fix with <code>chmod</code> or <code>chown</code>.</p>
+
+      <p><strong>22. <code>ENOENT: no such file or directory</code></strong><br>Cause: Referenced file does not exist. Fix: Verify path spelling and use absolute paths when possible.</p>
+
+      <p><strong>23. <code>EISDIR: illegal operation on a directory</code></strong><br>Cause: Attempting to read a directory as a file. Fix: Specify a file path, not a directory path.</p>
+
+      <p><strong>24. <code>EMFILE: too many open files</code></strong><br>Cause: File descriptor limit reached. Fix: Increase with <code>ulimit -n 10240</code> in your shell profile.</p>
+
+      <p><strong>25. <code>ENOSPC: no space left on device</code></strong><br>Cause: Disk full. Fix: Free space with <code>df -h</code> to diagnose, then clean caches or old builds.</p>
+
+      <p><strong>26. <code>EPERM: operation not permitted</code></strong><br>Cause: OS-level restriction (SIP on macOS, SELinux). Fix: Move your project out of system-protected directories.</p>
+
+      <p><strong>27. <code>File too large to read</code></strong><br>Cause: File exceeds Claude Code's size limit. Fix: Split large files or use <code>--max-file-size</code> flag. See the <a href="/claude-code-crashes-on-large-files-fix/">large file crash guide</a>.</p>
+
+      <p><strong>28. <code>Binary file detected, skipping</code></strong><br>Cause: Claude Code will not read binary files. Fix: Convert to text format or use a hex dump tool.</p>
+
+      <p><strong>29. <code>Symlink loop detected</code></strong><br>Cause: Circular symbolic links. Fix: Find and break the loop with <code>find . -type l -ls</code>.</p>
+
+      <p><strong>30. <code>.gitignore pattern blocked read</code></strong><br>Cause: File excluded by ignore rules. Fix: Add an exception in <code>.gitignore</code> or use <code>--include-ignored</code>.</p>
+
+      <h2>Memory and Performance Errors (31-40)</h2>
+
+      <p><strong>31. <code>JavaScript heap out of memory</code></strong><br>Cause: Node.js default memory limit exceeded. Fix: Set <code>NODE_OPTIONS="--max-old-space-size=8192"</code>.</p>
+
+      <p><strong>32. <code>Context window exceeded</code></strong><br>Cause: Conversation too long. Fix: Run <code>/compact</code> to summarize context or start a new session.</p>
+
+      <p><strong>33. <code>SIGKILL</code> / Process killed</strong><br>Cause: OS killed the process for using too much memory. Fix: Close other applications and increase available RAM.</p>
+
+      <p><strong>34. <code>Maximum call stack size exceeded</code></strong><br>Cause: Recursive operation hit Node.js stack limit. Fix: Report as a bug; workaround is to restart Claude Code.</p>
+
+      <p><strong>35. <code>Response truncated</code></strong><br>Cause: Output hit the maximum token limit. Fix: Ask Claude to continue with "continue from where you left off."</p>
+
+      <p><strong>36. <code>Timeout: operation took longer than 120000ms</code></strong><br>Cause: Complex operation exceeded default timeout. Fix: Break the task into smaller steps. See <a href="/claude-code-error-connection-timeout-during-task-fix/">timeout fix</a>.</p>
+
+      <p><strong>37. <code>Worker thread crashed</code></strong><br>Cause: Background worker ran out of memory. Fix: Reduce parallel operations and restart.</p>
+
+      <p><strong>38. <code>Streaming interrupted</code></strong><br>Cause: Response stream cut off mid-generation. Fix: Retry the request; the model will resume from checkpoint.</p>
+
+      <p><strong>39. <code>Cache miss, regenerating</code></strong><br>Cause: Prompt cache expired (5-minute TTL). Fix: This is informational, not an error. Expect slightly higher latency.</p>
+
+      <p><strong>40. <code>Model overloaded, please retry</code></strong><br>Cause: Too many users on the same model. Fix: Wait 30 seconds or switch to a less congested model.</p>
+
+      <h2>Configuration and Skill Errors (41-50)</h2>
+
+      <p><strong>41. <code>CLAUDE.md not found</code></strong><br>Cause: No project configuration file. Fix: Create one with <code>claude init</code> or copy a template.</p>
+
+      <p><strong>42. <code>Invalid JSON in skill definition</code></strong><br>Cause: Malformed skill config file. Fix: Validate with <code>cat .claude/skills.json | python -m json.tool</code>.</p>
+
+      <p><strong>43. <code>Skill not found: [name]</code></strong><br>Cause: Skill not installed or misspelled. Fix: Verify the skill name is correct and installed.</p>
+
+      <p><strong>44. <code>Hook execution failed</code></strong><br>Cause: Pre/post hook script errored. Fix: Check hook scripts in <code>.claude/hooks/</code> for syntax errors.</p>
+
+      <p><strong>45. <code>MCP server connection refused</code></strong><br>Cause: MCP server not running. Fix: Start the server first, then connect Claude Code.</p>
+
+      <p><strong>46. <code>Tool not allowed in current mode</code></strong><br>Cause: Permission mode restricts the tool. Fix: Switch to a less restrictive mode or add the tool to your allowlist.</p>
+
+      <p><strong>47. <code>Git push rejected during skill</code></strong><br>Cause: Remote branch has diverged. Fix: Pull and rebase before retrying.</p>
+
+      <p><strong>48. <code>npm install fails in skill workflow</code></strong><br>Cause: Package conflicts or network issues. Fix: Delete <code>node_modules</code> and <code>package-lock.json</code>, then retry.</p>
+
+      <p><strong>49. <code>Spawn UNKNOWN error</code></strong><br>Cause: System cannot execute the skill binary. Fix: Check that the required runtime is installed.</p>
+
+      <p><strong>50. <code>Config validation failed</code></strong><br>Cause: Invalid value in <code>.claude/config.json</code>. Fix: Reset with <code>claude config reset</code> or manually fix the JSON.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <h2>FAQ</h2>
+
+      <h3>What is the most common Claude Code error in 2026?</h3>
+      <p>Rate limit exceeded (HTTP 429) is the most frequently reported error. It occurs when you exceed your plan's requests-per-minute limit. Upgrading to Max or using API direct with higher rate limits resolves it.</p>
+
+      <h3>How do I fix Claude Code connection errors?</h3>
+      <p>Most connection errors are caused by firewalls, VPNs, or corporate proxies blocking <code>api.anthropic.com</code>. Allowlist the domain, configure <code>HTTPS_PROXY</code>, or set <code>NODE_EXTRA_CA_CERTS</code> for corporate SSL certificates.</p>
+
+      <h3>Why does Claude Code crash with out of memory?</h3>
+      <p>Claude Code runs on Node.js which defaults to about 4GB heap. Large codebases can exceed this. Set <code>NODE_OPTIONS="--max-old-space-size=8192"</code> to double the memory limit.</p>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+        <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+          <li><a href="/why-claude-code-keeps-crashing/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Why Claude Code Keeps Crashing (2026)</a></li>
+          <li><a href="/claude-code-rate-limit-429-retry-after-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code 429 Rate Limit Error</a></li>
+          <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+        </ul>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I spent two hours debugging error after error before I wrote a CLAUDE.md that auto-configures environment variables and error handling. Now every project just works.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=top-50-claude-code-errors">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Top 50 Claude Code Errors (2026)",
+    "description": "The 50 most common Claude Code errors with one-line fixes. Diagnose connection, API, memory, and permission errors instantly.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/top-50-claude-code-errors/",
+    "mainEntityOfPage": "https://claudhq.com/top-50-claude-code-errors/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the most common Claude Code error in 2026?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rate limit exceeded (HTTP 429) is the most frequently reported error. It occurs when you exceed your plan's requests-per-minute limit. Upgrading to Max or using API direct with higher rate limits resolves it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix Claude Code connection errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most connection errors are caused by firewalls, VPNs, or corporate proxies blocking api.anthropic.com. Allowlist the domain, configure HTTPS_PROXY, or set NODE_EXTRA_CA_CERTS for corporate SSL certificates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Claude Code crash with out of memory?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude Code runs on Node.js which defaults to about 4GB heap. Large codebases can exceed this. Set NODE_OPTIONS with max-old-space-size=8192 to double the memory limit."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

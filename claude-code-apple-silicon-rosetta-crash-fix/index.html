@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude Code Apple Silicon Rosetta Crash | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code crashing on Apple Silicon Mac. Install arm64-native Node.js instead of x86 version running through Rosetta 2 translation.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-apple-silicon-rosetta-crash-fix/">
+  <meta property="og:title" content="Fix Claude Code Apple Silicon Rosetta Crash | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code crashing on Apple Silicon Mac. Install arm64-native Node.js instead of x86 version running through Rosetta 2 translation.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-apple-silicon-rosetta-crash-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Apple Silicon Rosetta Crash (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+
+      <pre><code>[1]    12345 killed     claude
+$ file $(which node)
+/usr/local/bin/node: Mach-O 64-bit executable x86_64</code></pre>
+
+      <p>Claude Code crashes or is killed immediately on Apple Silicon Macs when running an x86_64 (Intel) Node.js binary through Rosetta 2 translation. This causes excessive memory usage and eventual OOM kills.</p>
+
+      <h2>TL;DR &mdash; Quick Fix</h2>
+
+      <p>Install ARM64-native Node.js via nvm in a native terminal:</p>
+
+      <pre><code>arch -arm64 zsh &amp;&amp; nvm install 22 &amp;&amp; npm install -g @anthropic-ai/claude-code</code></pre>
+
+      <h2>The Fix</h2>
+
+      <h3>Step 1: Check if your Node is native ARM64</h3>
+
+      <pre><code>file $(which node)
+# Should say: Mach-O 64-bit executable arm64</code></pre>
+
+      <h3>Step 2: Install native ARM64 Node via nvm</h3>
+
+      <pre><code>arch -arm64 zsh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+source ~/.zshrc
+nvm install 22</code></pre>
+
+      <h3>Step 3: Verify the architecture</h3>
+
+      <pre><code>file $(which node)
+# Must show: arm64
+node -e "console.log(process.arch)"
+# Must show: arm64</code></pre>
+
+      <h3>Step 4: Reinstall Claude Code</h3>
+
+      <pre><code>npm install -g @anthropic-ai/claude-code
+claude --version</code></pre>
+
+      <h2>Why This Happens</h2>
+
+      <p>When Node.js is installed via an Intel-only installer or from an x86 terminal session (Terminal opened via Rosetta), you get the x86_64 binary. Rosetta 2 translates it at runtime, adding 30-50% memory overhead. Claude Code's Node process can exceed available memory during large operations and get killed by the OOM killer. Native ARM64 Node uses half the memory and runs significantly faster.</p>
+
+      <h2>If That Does Not Work</h2>
+
+      <h3>Ensure your terminal is not running under Rosetta</h3>
+
+      <pre><code># Check terminal architecture
+uname -m
+# Should say: arm64, not x86_64</code></pre>
+
+      <p>If iTerm2 or Terminal shows x86_64, right-click the app in Finder, select &ldquo;Get Info&rdquo;, and uncheck &ldquo;Open using Rosetta&rdquo;.</p>
+
+      <h3>Remove all Intel Node installations</h3>
+
+      <pre><code>sudo rm -rf /usr/local/lib/node_modules
+brew uninstall node  # If installed via x86 Homebrew</code></pre>
+
+      <h3>Verify Homebrew is ARM64-native</h3>
+
+      <pre><code>file $(which brew)
+# Should show: arm64
+# ARM64 Homebrew installs to /opt/homebrew
+# Intel Homebrew installs to /usr/local</code></pre>
+
+      <h2>Prevention</h2>
+
+      <p>Add this to your <code>CLAUDE.md</code>:</p>
+
+      <pre><code># Apple Silicon
+- Always verify: uname -m returns arm64 before installing tools.
+- Use nvm with native ARM64 shell. Never install Node from x86 terminal.
+- If crashes occur, check: file $(which node) - must show arm64.</code></pre>
+
+      <h2>FAQ</h2>
+
+      <h3>How do I know if my Node.js is running through Rosetta?</h3>
+
+      <p>Run <code>file $(which node)</code> in your terminal. If it shows <code>Mach-O 64-bit executable x86_64</code>, Node is an Intel binary running through Rosetta 2 translation. You need <code>arm64</code> instead. Also check <code>node -e "console.log(process.arch)"</code> which should print <code>arm64</code>, not <code>x64</code>.</p>
+
+      <h3>Why does Rosetta cause Claude Code to crash specifically?</h3>
+
+      <p>Rosetta 2 adds 30-50% memory overhead to translated processes. Claude Code performs heavy operations (file indexing, context management, API streaming) that push Node.js memory usage high. The Rosetta overhead pushes it over the OOM threshold. Native ARM64 Node uses roughly half the memory for the same workload, keeping it well within limits.</p>
+
+      <h3>Will reinstalling Node.js break my existing projects?</h3>
+
+      <p>No. Node.js ARM64 is fully compatible with all npm packages. Your projects will work identically but faster. Global packages (installed with <code>npm install -g</code>) need to be reinstalled after switching Node versions because they are compiled for a specific architecture. Run <code>npm install -g @anthropic-ai/claude-code</code> after installing ARM64 Node.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error for an instant fix</a>
+      </div>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+  <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+    <li><a href="/claude-code-extension-host-crash-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix VS Code Extension Host Crash (2026)</a></li>
+    <li><a href="/claude-code-command-not-found-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Command Not Found: Claude (2026)</a></li>
+    <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+  </ul>
+</div>
+
+      <div class="mastery-cta">
+        <p>I spent an hour debugging random crashes before I realized my terminal was running through Rosetta. Fixed it once in my CLAUDE.md setup script, never thought about it again.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-apple-silicon-rosetta-crash-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Apple Silicon Rosetta Crash (2026)",
+    "description": "Fix Claude Code crashing on Apple Silicon Mac. Install arm64-native Node.js instead of x86 version running through Rosetta 2 translation.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "mainEntityOfPage": "https://claudhq.com/claude-code-apple-silicon-rosetta-crash-fix/",
+    "url": "https://claudhq.com/claude-code-apple-silicon-rosetta-crash-fix/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I know if my Node.js is running through Rosetta on Apple Silicon?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run 'file $(which node)' in your terminal. If it shows 'Mach-O 64-bit executable x86_64', Node is an Intel binary running through Rosetta 2 translation. You need 'arm64' instead. Also check 'node -e console.log(process.arch)' which should print 'arm64', not 'x64'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Rosetta cause Claude Code to crash on Apple Silicon Macs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rosetta 2 adds 30-50% memory overhead to translated processes. Claude Code performs heavy operations (file indexing, context management, API streaming) that push Node.js memory usage high. The Rosetta overhead pushes it over the OOM threshold. Native ARM64 Node uses roughly half the memory for the same workload."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will reinstalling Node.js as ARM64 break my existing projects?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Node.js ARM64 is fully compatible with all npm packages. Your projects will work identically but faster. Global packages need to be reinstalled after switching because they are compiled for a specific architecture. Run 'npm install -g @anthropic-ai/claude-code' after installing ARM64 Node."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

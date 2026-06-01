@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Context Window Exceeded Mid-Conversation | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code context window exceeded mid-conversation. Use /compact to free tokens, start focused sub-sessions, and manage context efficiently.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-context-window-exceeded-fix/">
+  <meta property="og:title" content="Fix Context Window Exceeded Mid-Conversation | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code context window exceeded mid-conversation. Use /compact to free tokens, start focused sub-sessions, and manage context efficiently.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-context-window-exceeded-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix &ldquo;Context Window Exceeded&rdquo; Mid-Conversation in Claude Code</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <h2>The Error</h2>
+
+      <pre><code>Warning: Context window usage at 95% (190,000 / 200,000 tokens).
+  Claude Code will begin compacting conversation history.
+
+Error: Context window exceeded. Cannot process this request.
+  Total tokens (system + messages + tools): 201,347
+  Maximum context window: 200,000 tokens
+  Please start a new conversation or reduce your prompt.</code></pre>
+
+      <h2>TL;DR &mdash; Quick Fix</h2>
+
+      <p>Type <code>/compact</code> inside Claude Code. This summarizes your conversation and frees 50-70% of context space instantly.</p>
+
+      <h2>The Fix</h2>
+
+      <h3>Step 1: Use /compact to summarize and free context space</h3>
+
+      <pre><code># Inside Claude Code, type:
+/compact
+
+# Or with a focus hint:
+/compact Focus on the current task: fixing the auth module</code></pre>
+
+      <h3>Step 2: Start a sub-session for the next task</h3>
+
+      <pre><code># Exit and start fresh, referencing only what you need
+claude -p "Read src/auth/login.ts and fix the null pointer on line 42"
+
+# Or use --continue to resume with compacted context
+claude --continue</code></pre>
+
+      <h3>Step 3: Verify context usage dropped</h3>
+
+      <pre><code># Check context usage after compacting
+# The status bar shows token usage
+# Expected: Context usage drops to 30-50% after /compact</code></pre>
+
+      <h2>Why This Happens</h2>
+
+      <p>Claude Code accumulates context with every message exchange: your prompts, Claude's responses, tool calls, tool results (file contents, command output), and internal system prompts. Reading large files, running commands with verbose output, and iterating on code changes all consume tokens rapidly. A single <code>cat</code> of a 5,000-line file can use 15,000+ tokens. After extended sessions with many file reads and edits, the 200K token window fills up.</p>
+
+      <h2>If That Does Not Work</h2>
+
+      <ul>
+        <li><strong>Start a fresh session</strong> with a precise prompt that includes only the necessary context: files, error messages, and the exact task.</li>
+        <li><strong>Split large tasks</strong> into smaller, independent sessions &mdash; each with a narrow focus.</li>
+        <li><strong>Use /cost</strong> or check the status bar to see current token usage before starting expensive operations.</li>
+        <li><strong>Avoid reading entire large files</strong> &mdash; use line ranges like <code>Read lines 100-150 of src/app.ts</code> instead.</li>
+      </ul>
+
+      <h2>Prevention</h2>
+
+      <p>Add this to your <code>CLAUDE.md</code>:</p>
+
+      <pre><code>Use /compact proactively when context exceeds 60%.
+Avoid reading entire large files - use line ranges instead.
+Prefer focused sub-tasks over long sprawling sessions.
+Keep CLAUDE.md under 2K tokens to preserve context for actual work.</code></pre>
+
+      <h2>FAQ</h2>
+
+      <h3>What does /compact actually do?</h3>
+
+      <p>The <code>/compact</code> command asks Claude to summarize the entire conversation into a condensed form, then replaces the full conversation history with that summary. This typically reduces context usage from 90%+ down to 30-50%, giving you room to continue working without losing the important context of what was accomplished.</p>
+
+      <h3>Does compacting lose important context?</h3>
+
+      <p>The summary preserves key decisions, file paths, and task progress. However, exact code snippets and verbose command outputs are condensed. If you need precise details from earlier in the conversation, you may need to re-read specific files after compacting. Adding a focus hint like <code>/compact Focus on the auth module changes</code> helps preserve the most relevant context.</p>
+
+      <h3>How can I prevent hitting the context limit?</h3>
+
+      <p>Three strategies: (1) Use <code>/compact</code> proactively at 60% usage before you hit the wall. (2) Start focused sub-sessions for each distinct task instead of one long session. (3) Avoid reading entire large files &mdash; specify line ranges or ask Claude to read only the relevant function. A 5,000-line file dump costs 15,000+ tokens; a targeted 50-line read costs under 200.</p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/calculator/">Estimate your token usage with the Cost Calculator</a>
+      </div>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+  <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+    <li><a href="/claude-code-command-not-found-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Command Not Found: Claude (2026)</a></li>
+    <li><a href="/claude-api-503-service-unavailable-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude API 503 Service Unavailable</a></li>
+    <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+  </ul>
+</div>
+
+      <div class="mastery-cta">
+        <p>I used to hit context limits every 20 minutes. Then I wrote a CLAUDE.md that enforces compact-first workflows. Now sessions last hours without interruption.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-context-window-exceeded-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Context Window Exceeded Mid-Conversation in Claude Code",
+    "description": "Fix Claude Code context window exceeded mid-conversation. Use /compact to free tokens, start focused sub-sessions, and manage context efficiently.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "mainEntityOfPage": "https://claudhq.com/claude-code-context-window-exceeded-fix/",
+    "url": "https://claudhq.com/claude-code-context-window-exceeded-fix/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the /compact command do in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The /compact command asks Claude to summarize the entire conversation into a condensed form, then replaces the full conversation history with that summary. This typically reduces context usage from 90%+ down to 30-50%, giving you room to continue working without losing the important context of what was accomplished."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does compacting a Claude Code conversation lose important context?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The summary preserves key decisions, file paths, and task progress. However, exact code snippets and verbose command outputs are condensed. If you need precise details from earlier in the conversation, you may need to re-read specific files after compacting. Adding a focus hint like '/compact Focus on the auth module changes' helps preserve the most relevant context."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I prevent hitting the Claude Code context window limit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Three strategies: (1) Use /compact proactively at 60% usage before you hit the wall. (2) Start focused sub-sessions for each distinct task instead of one long session. (3) Avoid reading entire large files — specify line ranges or ask Claude to read only the relevant function. A 5,000-line file dump costs 15,000+ tokens; a targeted 50-line read costs under 200."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

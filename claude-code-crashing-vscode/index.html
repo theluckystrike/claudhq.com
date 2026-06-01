@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix Claude Code Crashing in VS Code (2026) | ClaudHQ</title>
+  <meta name="description" content="Stop Claude Code from crashing VS Code with fixes for memory limits, extension conflicts, and terminal configuration issues. Tested solutions.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-crashing-vscode/">
+  <meta property="og:title" content="Fix Claude Code Crashing in VS Code (2026) | ClaudHQ">
+  <meta property="og:description" content="Stop Claude Code from crashing VS Code with fixes for memory limits, extension conflicts, and terminal configuration issues. Tested solutions.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-crashing-vscode/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix Claude Code Crashing in VS Code (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code crashing inside VS Code is usually caused by memory limits, extension conflicts, or terminal misconfiguration. This guide walks through each cause and gives you a fix that gets Claude Code stable in VS Code.</p>
+
+      <h2>The Problem</h2>
+
+      <p>You run Claude Code from VS Code&rsquo;s integrated terminal and it crashes &mdash; either Claude Code itself freezes and dies, or the entire VS Code window becomes unresponsive. This may happen immediately on launch or after running for a while during a complex coding session.</p>
+
+      <h2>Quick Solution</h2>
+
+      <p><strong>Step 1: Increase VS Code&rsquo;s memory limit.</strong> Create or edit <code>argv.json</code>:</p>
+      <pre><code># macOS/Linux
+code ~/.vscode/argv.json</code></pre>
+
+      <p>Add or update the max memory setting:</p>
+      <pre><code>{
+  "max-memory": 8192
+}</code></pre>
+      <p>Restart VS Code.</p>
+
+      <p><strong>Step 2: Check for extension conflicts.</strong> Disable all other extensions temporarily:</p>
+      <pre><code>code --disable-extensions</code></pre>
+      <p>Launch Claude Code in the terminal. If it works, re-enable extensions one by one to find the conflict. Common culprits: other AI coding assistants (Copilot, Cody, Continue) competing for resources.</p>
+
+      <p><strong>Step 3: Use an external terminal.</strong> Open your system terminal (Terminal.app on macOS, gnome-terminal on Linux) and run Claude Code from there:</p>
+      <pre><code>cd /path/to/your/project
+claude</code></pre>
+      <p>If Claude Code works fine in an external terminal but crashes in VS Code, the issue is VS Code&rsquo;s terminal environment.</p>
+
+      <p><strong>Step 4: Fix VS Code&rsquo;s terminal environment.</strong> Ensure your shell profile is sourced correctly. In VS Code settings (<code>settings.json</code>):</p>
+      <pre><code>{
+  "terminal.integrated.env.osx": {
+    "ANTHROPIC_API_KEY": "sk-ant-your-key"
+  },
+  "terminal.integrated.shellArgs.osx": ["-l"]
+}</code></pre>
+      <p>The <code>-l</code> flag ensures your shell runs as a login shell, sourcing your profile.</p>
+
+      <p><strong>Step 5: Kill zombie processes.</strong> If VS Code freezes entirely (not just Claude Code), the issue is likely VS Code&rsquo;s PTY process:</p>
+      <pre><code>pkill -f "claude"</code></pre>
+      <p>Then reopen VS Code.</p>
+
+      <h2>How It Works</h2>
+
+      <p>Claude Code runs as a Node.js process inside VS Code&rsquo;s integrated terminal. VS Code&rsquo;s terminal is a pseudo-terminal (PTY) managed by VS Code&rsquo;s Electron process. When Claude Code makes heavy API calls and processes large responses with streaming output, it puts load on both the Node.js process and VS Code&rsquo;s PTY renderer. If VS Code&rsquo;s Electron process runs out of memory (it shares a V8 heap with extensions, the editor, and the terminal), everything freezes.</p>
+
+      <h2>Common Issues</h2>
+
+      <p><strong>Environment variables not loaded.</strong> VS Code&rsquo;s integrated terminal may not source <code>~/.zshrc</code> or <code>~/.bashrc</code> properly. If <code>ANTHROPIC_API_KEY</code> is not available, Claude Code may crash on startup. Use <code>terminal.integrated.env</code> in VS Code settings or switch to a login shell.</p>
+
+      <p><strong>Competing AI extensions.</strong> Running Claude Code alongside GitHub Copilot, Cody, or other AI extensions doubles the memory usage and can cause VS Code to run out of heap space. Disable competing extensions while using Claude Code.</p>
+
+      <p><strong>Large workspace with many open files.</strong> If VS Code has many files open and large Git diffs loaded, there is less memory available for Claude Code. Close unused tabs and editors before starting a Claude Code session.</p>
+
+      <h2>Best Practices</h2>
+
+      <ol>
+        <li><strong>Use an external terminal for long sessions.</strong> VS Code&rsquo;s integrated terminal is convenient but adds overhead. For sessions over 30 minutes or heavy refactoring, use a dedicated terminal window.</li>
+        <li><strong>Set VS Code max-memory to at least 8GB.</strong> The default is 4GB, which is not enough when running Claude Code alongside other extensions.</li>
+        <li><strong>Disable competing AI extensions.</strong> You only need one AI assistant active at a time. Disable Copilot and similar extensions when using Claude Code to free up memory.</li>
+        <li><strong>Keep VS Code updated.</strong> VS Code&rsquo;s terminal handling and memory management improve with each release.</li>
+        <li><strong>Monitor memory usage.</strong> If VS Code&rsquo;s memory usage climbs above 6GB, wrap up your current task and restart VS Code before it crashes.</li>
+      </ol>
+
+      <h2>Example CLAUDE.md Section</h2>
+
+      <pre><code># VS Code Integration
+
+## Terminal Setup
+- Run Claude Code in VS Code integrated terminal
+- Shell: zsh with login flag (-l) for full profile sourcing
+- Environment: ANTHROPIC_API_KEY set in terminal.integrated.env
+
+## Memory Management
+- VS Code max-memory set to 8192 in argv.json
+- Close unused editor tabs before starting Claude Code sessions
+- Disable competing AI extensions (Copilot, Cody) during Claude Code use
+
+## Crash Recovery
+- If VS Code freezes: force quit and reopen (Cmd+Q on macOS)
+- If only Claude Code crashes: run `pkill -f claude` then restart
+- Check git status after any crash for partial file writes
+- Alternative: run Claude Code in external terminal for stability</code></pre>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your VS Code crash error for an instant diagnosis</a>
+      </div>
+
+      <h2>FAQ</h2>
+
+      <h3>Why does Claude Code crash in VS Code but work in a regular terminal?</h3>
+      <p>VS Code&rsquo;s integrated terminal shares memory with the editor, extensions, and all open tabs. A regular terminal gives Claude Code dedicated resources without competition. Additionally, VS Code may not load your shell profile correctly, causing missing environment variables.</p>
+
+      <h3>Will disabling GitHub Copilot help with Claude Code crashes?</h3>
+      <p>Yes. Copilot and Claude Code both use significant memory. Running both simultaneously in VS Code can push total memory usage above the heap limit. Disable Copilot while using Claude Code for best stability.</p>
+
+      <h3>How do I increase VS Code memory beyond 8GB?</h3>
+      <p>Edit <code>~/.vscode/argv.json</code> and set <code>"max-memory": 16384</code> for 16GB. However, if you need more than 8GB, consider using an external terminal for Claude Code instead, as VS Code was not designed to handle that much memory usage.</p>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+        <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+          <li><a href="/claude-code-not-working-vscode/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Not Working in VS Code</a></li>
+          <li><a href="/claude-code-memory-leak-high-ram-usage-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Memory Leak / High RAM Usage</a></li>
+          <li><a href="/why-claude-code-keeps-crashing/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Why Claude Code Keeps Crashing (2026)</a></li>
+        </ul>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I spent hours fighting VS Code crashes before I wrote a CLAUDE.md that configures memory limits and terminal settings automatically. Now every project just works.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-code-crashing-vscode">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix Claude Code Crashing in VS Code (2026)",
+    "description": "Stop Claude Code from crashing VS Code with fixes for memory limits, extension conflicts, and terminal configuration issues. Tested solutions.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-crashing-vscode/",
+    "mainEntityOfPage": "https://claudhq.com/claude-code-crashing-vscode/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why does Claude Code crash in VS Code but work in a regular terminal?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "VS Code's integrated terminal shares memory with the editor, extensions, and all open tabs. A regular terminal gives Claude Code dedicated resources without competition. Additionally, VS Code may not load your shell profile correctly, causing missing environment variables."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will disabling GitHub Copilot help with Claude Code crashes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Copilot and Claude Code both use significant memory. Running both simultaneously in VS Code can push total memory usage above the heap limit. Disable Copilot while using Claude Code for best stability."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I increase VS Code memory beyond 8GB?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Edit ~/.vscode/argv.json and set max-memory to 16384 for 16GB. However, if you need more than 8GB, consider using an external terminal for Claude Code instead, as VS Code was not designed to handle that much memory usage."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

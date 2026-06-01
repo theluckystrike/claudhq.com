@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Why Claude Code Keeps Crashing (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix Claude Code crashes caused by memory limits, network timeouts, permission errors, and API rate limits. Systematic guide with tested solutions.">
+  <link rel="canonical" href="https://claudhq.com/why-claude-code-keeps-crashing/">
+  <meta property="og:title" content="Why Claude Code Keeps Crashing (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix Claude Code crashes caused by memory limits, network timeouts, permission errors, and API rate limits. Systematic guide with tested solutions.">
+  <meta property="og:url" content="https://claudhq.com/why-claude-code-keeps-crashing/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Why Claude Code Keeps Crashing (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code crashing repeatedly is one of the most frustrating developer experiences. You are mid-task, Claude is generating a multi-file refactor, and then the process dies without warning. This guide walks through every common crash cause systematically so you can identify the root cause and apply a permanent fix.</p>
+
+      <h2>1. Memory Exhaustion: The Number One Crash Cause</h2>
+
+      <p>Claude Code runs on Node.js, which has a default heap limit of approximately 4 GB. When working with large codebases, long conversations, or complex multi-file operations, this limit gets hit more often than you might expect.</p>
+
+      <h3>Symptoms</h3>
+      <ul>
+        <li>Process exits with <code>FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed</code></li>
+        <li><code>JavaScript heap out of memory</code> in stderr</li>
+        <li>Process killed by OS with <code>SIGKILL</code> (exit code 137 on Linux)</li>
+      </ul>
+
+      <h3>Fixes</h3>
+
+      <p><strong>Increase Node.js heap size:</strong></p>
+      <pre><code>export NODE_OPTIONS="--max-old-space-size=8192"</code></pre>
+      <p>Add this to your <code>.bashrc</code> or <code>.zshrc</code> for persistence. For very large codebases (monorepos with 10,000+ files), you may need 16384 MB.</p>
+
+      <p><strong>Use /compact regularly:</strong></p>
+      <p>The <code>/compact</code> command summarizes your conversation context, freeing memory. Use it every 15-20 messages or whenever Claude mentions the context is getting long.</p>
+
+      <p><strong>Avoid opening massive files:</strong></p>
+      <p>Files over 1 MB strain memory. If Claude needs to read a large data file, extract the relevant section first. See our <a href="/claude-code-crashes-on-large-files-fix/">large file crash guide</a> for strategies.</p>
+
+      <h2>2. Network Instability</h2>
+
+      <p>Network issues cause crashes that look like bugs but are really infrastructure problems.</p>
+
+      <h3>Symptoms</h3>
+      <ul>
+        <li><code>ECONNRESET</code> or <code>socket hang up</code> errors</li>
+        <li>Responses cut off mid-generation</li>
+        <li><code>ETIMEDOUT</code> after periods of normal operation</li>
+      </ul>
+
+      <h3>Fixes</h3>
+
+      <p><strong>Check VPN stability:</strong> Corporate VPNs with aggressive timeout settings are a top cause. If using a VPN, try disconnecting temporarily to confirm.</p>
+
+      <p><strong>Configure proxy settings:</strong> If behind a corporate proxy:</p>
+      <pre><code>export HTTPS_PROXY="http://proxy.company.com:8080"
+export NODE_EXTRA_CA_CERTS="/path/to/corporate-ca-bundle.pem"</code></pre>
+
+      <p><strong>Improve connection resilience:</strong> Claude Code has built-in retry logic, but for persistent network issues, ensure your connection to <code>api.anthropic.com</code> has less than 200ms latency. Run <code>ping api.anthropic.com</code> to check.</p>
+
+      <h2>3. Permission and File System Errors</h2>
+
+      <p>Claude Code needs read and write access to your project files. Permission problems often manifest as silent crashes rather than clear error messages.</p>
+
+      <h3>Symptoms</h3>
+      <ul>
+        <li><code>EACCES: permission denied</code> on specific files</li>
+        <li>Claude Code exits when trying to write to protected directories</li>
+        <li>Hooks fail with <code>EPERM</code> errors</li>
+      </ul>
+
+      <h3>Fixes</h3>
+
+      <p><strong>Check project directory ownership:</strong></p>
+      <pre><code>ls -la /path/to/project
+# Ensure your user owns the directory
+sudo chown -R $(whoami) /path/to/project</code></pre>
+
+      <p><strong>Avoid system-protected directories:</strong> On macOS, directories under <code>/System</code>, <code>/Library</code>, or SIP-protected paths will cause crashes. Work in your home directory or <code>/opt</code>.</p>
+
+      <p><strong>Fix npm global permissions:</strong></p>
+      <pre><code>mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+# Add ~/.npm-global/bin to your PATH</code></pre>
+
+      <h2>4. API Rate Limits and Quota Exhaustion</h2>
+
+      <p>Hitting rate limits does not always show a clean error. Sometimes the process appears to hang and then crash.</p>
+
+      <h3>Symptoms</h3>
+      <ul>
+        <li>Claude Code freezes for 30+ seconds then exits</li>
+        <li>HTTP 429 errors in verbose output</li>
+        <li>Sudden slowdowns followed by crashes</li>
+      </ul>
+
+      <h3>Fixes</h3>
+
+      <p><strong>Check your plan limits:</strong> Free tier users hit limits quickly. Pro allows roughly 45 messages per hour during peak usage. Max plans offer significantly higher throughput.</p>
+
+      <p><strong>Enable verbose logging to confirm:</strong></p>
+      <pre><code>claude --verbose 2&gt;&amp;1 | tee claude-debug.log</code></pre>
+      <p>Search the log for <code>429</code> or <code>rate_limit</code> to confirm.</p>
+
+      <p><strong>Space out requests:</strong> If running automated workflows, add delays between requests. See our <a href="/claude-code-rate-limit-429-retry-after-fix/">429 rate limit guide</a> for backoff strategies.</p>
+
+      <h2>5. Outdated Version</h2>
+
+      <p>Each Claude Code release includes crash fixes. Running an outdated version means dealing with bugs that have already been resolved.</p>
+
+      <pre><code># Check current version
+claude --version
+
+# Update to latest
+npm update -g @anthropic-ai/claude-code</code></pre>
+
+      <p>Always update before filing a bug report. Many crash reports turn out to be fixed in the latest release.</p>
+
+      <h2>6. Corrupted Configuration</h2>
+
+      <p>Damaged config files cause crashes on startup or during specific operations.</p>
+
+      <h3>Symptoms</h3>
+      <ul>
+        <li>Claude Code crashes immediately on launch</li>
+        <li><code>SyntaxError: Unexpected token</code> in startup output</li>
+        <li>Skills that worked yesterday now crash</li>
+      </ul>
+
+      <h3>Fixes</h3>
+
+      <p><strong>Reset configuration:</strong></p>
+      <pre><code># Back up first
+cp -r ~/.claude ~/.claude-backup
+
+# Reset
+rm ~/.claude/config.json
+claude config reset</code></pre>
+
+      <p><strong>Validate skill configs:</strong></p>
+      <pre><code>for f in .claude/skills/*.json; do
+  python -m json.tool "$f" &gt; /dev/null 2&gt;&amp;1 || echo "Invalid: $f"
+done</code></pre>
+
+      <h2>7. Operating System Resource Limits</h2>
+
+      <p>The OS itself can kill Claude Code if it exceeds system-level limits.</p>
+
+      <p><strong>Increase file descriptor limit (macOS/Linux):</strong></p>
+      <pre><code>ulimit -n 10240</code></pre>
+
+      <p><strong>Increase process limit:</strong></p>
+      <pre><code>ulimit -u 4096</code></pre>
+
+      <p><strong>Check available RAM:</strong> Claude Code with a large context can use 2-4 GB of RAM. Close memory-hungry applications (browsers, Docker containers) if you are on 8 GB or less.</p>
+
+      <h2>Crash Prevention Checklist</h2>
+
+      <p>Before your next coding session, run through this checklist:</p>
+      <ol>
+        <li>Claude Code is on the latest version (<code>claude --version</code>)</li>
+        <li><code>NODE_OPTIONS</code> includes <code>--max-old-space-size=8192</code></li>
+        <li>File descriptor limit is at least 10240 (<code>ulimit -n</code>)</li>
+        <li>No VPN interference (test with VPN off)</li>
+        <li>API key is valid and quota is available</li>
+        <li>Project directory is owned by your user</li>
+      </ol>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your crash log for an instant diagnosis</a>
+      </div>
+
+      <h2>FAQ</h2>
+
+      <h3>Why does Claude Code crash without an error message?</h3>
+      <p>Silent crashes are usually caused by the OS killing the process for exceeding memory limits (SIGKILL). Check your system logs (<code>dmesg</code> on Linux, Console.app on macOS) and increase Node.js heap size with <code>NODE_OPTIONS</code>.</p>
+
+      <h3>How often should I run /compact to prevent crashes?</h3>
+      <p>Run <code>/compact</code> every 15-20 messages or whenever you notice Claude Code slowing down. This summarizes the conversation context and frees memory, preventing heap exhaustion crashes.</p>
+
+      <h3>Does Claude Code crash more on Windows or macOS?</h3>
+      <p>Crash rates are similar across platforms. Windows users more often hit permission issues with antivirus software. macOS users more often hit SIP (System Integrity Protection) restrictions. Linux users rarely see platform-specific crashes.</p>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+        <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+          <li><a href="/claude-code-crashes-on-large-files-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Crashes on Large Files</a></li>
+          <li><a href="/claude-code-memory-leak-high-ram-usage-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Memory Leak / High RAM Usage</a></li>
+          <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+        </ul>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I spent two hours debugging crash issues before I wrote a CLAUDE.md that auto-configures memory limits and environment checks. Now every project just works.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=why-claude-code-keeps-crashing">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Why Claude Code Keeps Crashing (2026)",
+    "description": "Fix Claude Code crashes caused by memory limits, network timeouts, permission errors, and API rate limits. Systematic guide with tested solutions.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/why-claude-code-keeps-crashing/",
+    "mainEntityOfPage": "https://claudhq.com/why-claude-code-keeps-crashing/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why does Claude Code crash without an error message?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Silent crashes are usually caused by the OS killing the process for exceeding memory limits (SIGKILL). Check your system logs (dmesg on Linux, Console.app on macOS) and increase Node.js heap size with NODE_OPTIONS set to --max-old-space-size=8192."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I run /compact to prevent crashes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run /compact every 15-20 messages or whenever you notice Claude Code slowing down. This summarizes the conversation context and frees memory, preventing heap exhaustion crashes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Claude Code crash more on Windows or macOS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Crash rates are similar across platforms. Windows users more often hit permission issues with antivirus software. macOS users more often hit SIP (System Integrity Protection) restrictions. Linux users rarely see platform-specific crashes."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>MCP Troubleshooting: Fix Common Errors (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix the top 10 MCP errors in Claude Code: connection failures, auth errors, timeout issues, and server crashes. Step-by-step solutions.">
+  <link rel="canonical" href="https://claudhq.com/mcp-troubleshooting-common-errors/">
+  <meta property="og:title" content="MCP Troubleshooting: Fix Common Errors (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix the top 10 MCP errors in Claude Code: connection failures, auth errors, timeout issues, and server crashes. Step-by-step solutions.">
+  <meta property="og:url" content="https://claudhq.com/mcp-troubleshooting-common-errors/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>MCP Troubleshooting: Fix Common Errors (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <p>MCP servers fail silently. Claude Code starts normally, but the server is not connected, tools are missing, or queries return cryptic errors. This guide covers the 10 most common MCP errors with step-by-step fixes for each.</p>
+
+      <h2>Error 1: Server Not Appearing in Claude Code</h2>
+
+      <p><strong>Symptom:</strong> You added a server to mcp.json but Claude does not list it as connected.</p>
+
+      <p><strong>Invalid JSON.</strong> The most common cause. Validate your mcp.json:</p>
+      <pre><code>cat .claude/mcp.json | python3 -m json.tool</code></pre>
+      <p>If this prints an error, fix the JSON syntax. Common issues: trailing commas, missing quotes, unescaped characters.</p>
+
+      <p><strong>Wrong file location.</strong> Verify the file is at <code>.claude/mcp.json</code> relative to your project root, not <code>claude/mcp.json</code> or <code>.claude/config.json</code>.</p>
+
+      <p><strong>Session not restarted.</strong> MCP servers are loaded at session start. After editing mcp.json, start a new Claude Code session.</p>
+
+      <p><strong>Command not found.</strong> If <code>npx</code> is not in PATH (common with nvm), use the full path:</p>
+      <pre><code>"command": "/Users/you/.nvm/versions/node/v20.11.0/bin/npx"</code></pre>
+
+      <h2>Error 2: ECONNREFUSED &mdash; Connection Refused</h2>
+
+      <p><strong>Symptom:</strong> <code>Error: connect ECONNREFUSED 127.0.0.1:PORT</code></p>
+
+      <p>The server process failed to start. Run the command manually to see the error:</p>
+      <pre><code>npx -y @modelcontextprotocol/server-postgres "postgresql://user:pass@localhost:5432/db"</code></pre>
+
+      <p>Common causes:</p>
+      <ul>
+        <li><strong>Database not running.</strong> Start PostgreSQL/MySQL/Redis first.</li>
+        <li><strong>Wrong port.</strong> Verify the database is listening on the expected port.</li>
+        <li><strong>Firewall blocking.</strong> macOS firewall may block Node.js connections. Check System Settings &gt; Network &gt; Firewall.</li>
+      </ul>
+
+      <h2>Error 3: Authentication Failed</h2>
+
+      <p><strong>Symptom:</strong> <code>Error: password authentication failed for user "..."</code> or <code>401 Unauthorized</code></p>
+
+      <p><strong>For database servers:</strong></p>
+      <ul>
+        <li>Verify credentials by connecting manually: <code>psql postgresql://user:pass@localhost:5432/db</code></li>
+        <li>Check that the user exists and has the correct password</li>
+        <li>Verify the user has permissions on the target database</li>
+      </ul>
+
+      <p><strong>For API-based servers (GitHub, Brave Search):</strong></p>
+      <ul>
+        <li>Check that the API key or token is valid and not expired</li>
+        <li>Verify environment variables are set: <code>echo $GITHUB_TOKEN</code></li>
+        <li>GitHub tokens need the correct scopes (repo, read:org for full access)</li>
+        <li>Regenerate expired tokens in the service&rsquo;s dashboard</li>
+      </ul>
+
+      <h2>Error 4: Environment Variables Not Resolving</h2>
+
+      <p><strong>Symptom:</strong> Server starts but fails with empty or literal <code>${VAR_NAME}</code> values.</p>
+
+      <p><strong>Fix 1: Verify the variable is exported.</strong></p>
+      <pre><code>echo $GITHUB_TOKEN  # Should print the value, not empty</code></pre>
+      <p>If empty, add to your shell profile (~/.zshrc or ~/.bashrc):</p>
+      <pre><code>export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"</code></pre>
+      <p>Then restart your terminal and Claude Code.</p>
+
+      <p><strong>Fix 2: Check variable syntax.</strong> Both formats work:</p>
+      <pre><code>"env": { "KEY": "${GITHUB_TOKEN}" }
+"env": { "KEY": "$GITHUB_TOKEN" }</code></pre>
+
+      <h2>Error 5: Server Crashes on Startup</h2>
+
+      <p><strong>Symptom:</strong> Server appears briefly then disappears. No tools available.</p>
+
+      <p>Debug by running manually:</p>
+      <pre><code>npx -y @modelcontextprotocol/server-filesystem /path/to/dir 2&gt;&amp;1</code></pre>
+
+      <p>Common causes:</p>
+      <ul>
+        <li><strong>Node.js version mismatch.</strong> Some MCP servers require Node 18+. Check with <code>node --version</code>.</li>
+        <li><strong>Missing native dependencies.</strong> Install build tools: <code>xcode-select --install</code> on macOS.</li>
+        <li><strong>Path does not exist.</strong> Filesystem servers crash if the specified directory does not exist.</li>
+      </ul>
+
+      <h2>Error 6: MCP Timeout &mdash; Server Not Responding</h2>
+
+      <p><strong>Symptom:</strong> <code>Error: MCP server timed out</code> or queries hang indefinitely.</p>
+
+      <p>The server started but is unresponsive. Causes:</p>
+      <ul>
+        <li><strong>Large dataset query.</strong> If you queried a table with millions of rows without a LIMIT clause, the query takes too long. Always include LIMIT in exploratory queries.</li>
+        <li><strong>Network issues.</strong> For remote databases, check connectivity: <code>curl -v telnet://remote-host:5432</code></li>
+        <li><strong>Server resource exhaustion.</strong> Check if the MCP server process is consuming excessive memory: <code>ps aux | grep mcp</code></li>
+      </ul>
+
+      <h2>Error 7: Tool Name Conflicts</h2>
+
+      <p><strong>Symptom:</strong> Claude calls the wrong server&rsquo;s tool, or gets confused about which tool to use.</p>
+
+      <p>This happens when two servers expose tools with the same name. Fix by using descriptive server names:</p>
+      <pre><code>{
+  "mcpServers": {
+    "postgres-users": { ... },
+    "postgres-analytics": { ... }
+  }
+}</code></pre>
+      <p>Then Claude can distinguish between <code>mcp__postgres-users__query</code> and <code>mcp__postgres-analytics__query</code>.</p>
+
+      <h2>Error 8: Permission Denied</h2>
+
+      <p><strong>Symptom:</strong> <code>Error: EACCES: permission denied</code> when reading files or accessing directories.</p>
+
+      <p>Verify the path in your MCP config is readable by your user:</p>
+      <pre><code>ls -la /path/in/config  # Check permissions</code></pre>
+      <p>On macOS, also check Full Disk Access in System Settings &gt; Privacy &amp; Security if the MCP server needs to access protected directories.</p>
+
+      <h2>Error 9: Package Not Found</h2>
+
+      <p><strong>Symptom:</strong> <code>Error: Could not find package @modelcontextprotocol/server-xxx</code></p>
+
+      <p><strong>Wrong package name.</strong> Common mistakes:</p>
+      <ul>
+        <li><code>server-postgresql</code> (wrong) vs <code>server-postgres</code> (correct)</li>
+        <li><code>server-file-system</code> (wrong) vs <code>server-filesystem</code> (correct)</li>
+      </ul>
+
+      <p><strong>npm registry issue.</strong> Clear the npx cache:</p>
+      <pre><code>npx clear-npx-cache</code></pre>
+
+      <p><strong>Private registry configured.</strong> If your .npmrc points to a private registry, it may not have MCP packages:</p>
+      <pre><code>npm config get registry  # Should be https://registry.npmjs.org/</code></pre>
+
+      <h2>Error 10: Incompatible MCP Protocol Version</h2>
+
+      <p><strong>Symptom:</strong> <code>Error: Incompatible MCP protocol version</code> or server connects but tools do not work correctly.</p>
+
+      <p>Update Claude Code to the latest version:</p>
+      <pre><code>npm update -g @anthropic-ai/claude-code</code></pre>
+
+      <p>Also update the MCP server by adding <code>@latest</code>:</p>
+      <pre><code>"args": ["-y", "@modelcontextprotocol/server-github@latest"]</code></pre>
+      <p>The <code>@latest</code> tag forces npx to download the newest version rather than using a cached old one.</p>
+
+      <h2>Diagnostic Checklist</h2>
+
+      <p>When any MCP server fails, run through this checklist:</p>
+      <ol>
+        <li>Is mcp.json valid JSON? (<code>python3 -m json.tool</code>)</li>
+        <li>Is the file in the right location? (<code>.claude/mcp.json</code>)</li>
+        <li>Did you restart Claude Code after editing?</li>
+        <li>Can you run the server command manually in terminal?</li>
+        <li>Are environment variables exported and non-empty?</li>
+        <li>Is the target service (database, API) running and accessible?</li>
+        <li>Is Node.js version 18 or higher?</li>
+        <li>Is the package name correct? (check npm registry)</li>
+      </ol>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/mcp-config/">Generate an error-free MCP config with our MCP Config Generator</a>
+      </div>
+
+      <h2>FAQ</h2>
+
+      <h3>How do I see MCP server logs for debugging?</h3>
+      <p>Run the server command manually in a separate terminal to see stdout and stderr output. MCP servers write diagnostic information to stderr which is hidden when launched by Claude Code.</p>
+
+      <h3>Can a broken MCP server crash Claude Code?</h3>
+      <p>No. Claude Code isolates MCP servers in separate processes. If a server crashes, Claude Code continues without that server. Other servers remain functional.</p>
+
+      <h3>Why does my MCP server work in terminal but not in Claude Code?</h3>
+      <p>PATH differences. Your terminal may have different PATH than the environment Claude Code launches processes in. Use absolute paths for the command field or ensure your PATH is set in your shell profile, not just the current session.</p>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+        <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+          <li><a href="/claude-code-mcp-tool-categories-guide/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; MCP Tool Categories Guide</a></li>
+          <li><a href="/claude-code-error-connection-refused-localhost-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix ECONNREFUSED Localhost Error</a></li>
+          <li><a href="/errors/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; All Claude Code Error Fixes</a></li>
+        </ul>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I spent hours debugging MCP server configs before I wrote a CLAUDE.md that auto-validates mcp.json and includes fallback configs. Now every project just works.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=mcp-troubleshooting-common-errors">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "MCP Troubleshooting: Fix Common Errors (2026)",
+    "description": "Fix the top 10 MCP errors in Claude Code: connection failures, auth errors, timeout issues, and server crashes. Step-by-step solutions.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/mcp-troubleshooting-common-errors/",
+    "mainEntityOfPage": "https://claudhq.com/mcp-troubleshooting-common-errors/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I see MCP server logs for debugging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run the server command manually in a separate terminal to see stdout and stderr output. MCP servers write diagnostic information to stderr which is hidden when launched by Claude Code."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can a broken MCP server crash Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Claude Code isolates MCP servers in separate processes. If a server crashes, Claude Code continues without that server. Other servers remain functional."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does my MCP server work in terminal but not in Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "PATH differences. Your terminal may have different PATH than the environment Claude Code launches processes in. Use absolute paths for the command field or ensure your PATH is set in your shell profile, not just the current session."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

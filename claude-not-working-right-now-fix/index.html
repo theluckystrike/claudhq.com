@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Fix: Claude Not Working Right Now (2026) | ClaudHQ</title>
+  <meta name="description" content="Fix every Claude not working scenario: API outages, rate limits, account issues, browser problems, and CLI errors. Quick diagnostic checklist.">
+  <link rel="canonical" href="https://claudhq.com/claude-not-working-right-now-fix/">
+  <meta property="og:title" content="Fix: Claude Not Working Right Now (2026) | ClaudHQ">
+  <meta property="og:description" content="Fix every Claude not working scenario: API outages, rate limits, account issues, browser problems, and CLI errors. Quick diagnostic checklist.">
+  <meta property="og:url" content="https://claudhq.com/claude-not-working-right-now-fix/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Fix: Claude Isn&rsquo;t Working Right Now (2026)</h1>
+      <div class="article-meta"><time datetime="2026-06-01">June 2026</time> &middot; ClaudHQ</div>
+
+      <p>You open Claude and get an error, a blank screen, or a message that says &ldquo;This isn&rsquo;t working right now.&rdquo; This guide covers every known cause and fix, organized from most common to least common.</p>
+
+      <h2>Quick Diagnostic Checklist</h2>
+
+      <p>Run through these five checks in order. Most issues resolve within the first three.</p>
+
+      <ol>
+        <li><strong>Check Anthropic status:</strong> Visit status.anthropic.com. If there is an active incident, wait for resolution.</li>
+        <li><strong>Check your internet:</strong> Open any website. If other sites load, your connection is fine.</li>
+        <li><strong>Check your plan:</strong> Log in to claude.ai/settings. Verify your subscription is active and not expired.</li>
+        <li><strong>Hard refresh:</strong> Press Ctrl+Shift+R (Cmd+Shift+R on Mac) in your browser. This clears cached data.</li>
+        <li><strong>Try a different browser or incognito:</strong> If Claude works in incognito, a browser extension is causing the issue.</li>
+      </ol>
+
+      <h2>Scenario 1: Anthropic Service Outage</h2>
+
+      <p><strong>Symptoms:</strong> Everyone sees errors. Claude.ai shows error pages. API returns 500/503 errors. Claude Code fails with connection errors.</p>
+
+      <p><strong>What to do:</strong></p>
+      <ul>
+        <li>Wait. Anthropic usually resolves outages within 30 minutes to 2 hours.</li>
+        <li>Subscribe to status updates on the status page for email/SMS notifications.</li>
+        <li>If using Claude Code with an API key, there is no workaround (the backend is down).</li>
+        <li>Check Twitter/X for &ldquo;Claude down&rdquo; or the Anthropic Discord to confirm it is an outage vs your issue.</li>
+      </ul>
+
+      <h2>Scenario 2: Rate Limited (429 Error)</h2>
+
+      <p><strong>Symptoms:</strong> &ldquo;You&rsquo;ve sent too many messages&rdquo; or HTTP 429 error. Works for a while, then stops.</p>
+
+      <h3>On Claude.ai (Web)</h3>
+      <p>You hit the usage limit for your plan tier.</p>
+      <ul>
+        <li>Wait for the limit to reset (rolling 5-hour window for most plans)</li>
+        <li>Switch to a less powerful model (Haiku uses less quota than Opus)</li>
+        <li>Upgrade from Pro ($20/month) to Max ($100 or $200/month) for higher limits</li>
+        <li>Reduce message length to consume fewer tokens per message</li>
+      </ul>
+
+      <h3>On Claude Code (CLI)</h3>
+      <ul>
+        <li>Check remaining rate limit from the error message headers</li>
+        <li>Wait for the reset window (usually 1 minute for request limits)</li>
+        <li>Switch to Haiku for less demanding tasks: <code>/model haiku</code></li>
+        <li>Use <code>/compact</code> to reduce context size</li>
+        <li>See <a href="/claude-code-rate-limit-429-retry-after-fix/">rate limit handling strategies</a></li>
+      </ul>
+
+      <h3>On the API</h3>
+      <p>Exceeded requests per minute (RPM) or tokens per minute (TPM) for your tier. Implement exponential backoff:</p>
+      <pre><code>import time
+import anthropic
+
+client = anthropic.Anthropic()
+
+for attempt in range(5):
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}]
+        )
+        break
+    except anthropic.RateLimitError as e:
+        wait_time = 2 ** attempt
+        print(f"Rate limited. Waiting {wait_time}s...")
+        time.sleep(wait_time)</code></pre>
+
+      <h2>Scenario 3: Account or Subscription Issues</h2>
+
+      <p><strong>Symptoms:</strong> &ldquo;Unable to access&rdquo; or &ldquo;subscription required&rdquo; messages. Previously worked, now shows errors.</p>
+
+      <h3>Expired Subscription</h3>
+      <ul>
+        <li>Renew your subscription payment method</li>
+        <li>Check for failed payment notifications in your email</li>
+        <li>Update your credit card if it expired</li>
+        <li>Contact support@anthropic.com if your subscription shows active but access is blocked</li>
+      </ul>
+
+      <h3>API Credits Exhausted</h3>
+      <ul>
+        <li>Add more credits to your account at console.anthropic.com</li>
+        <li>Set up auto-recharge to prevent interruptions</li>
+        <li>Review your spending to understand what consumed credits</li>
+      </ul>
+
+      <h2>Scenario 4: Browser-Specific Issues</h2>
+
+      <p><strong>Symptoms:</strong> Claude works in one browser but not another. Works in incognito but not regular mode.</p>
+
+      <h3>Browser Extension Conflicts</h3>
+      <p>Common conflicting extensions:</p>
+      <ul>
+        <li>Ad blockers (uBlock Origin, AdBlock Plus) blocking Anthropic API requests</li>
+        <li>Privacy extensions (Privacy Badger, Ghostery) interfering with WebSocket connections</li>
+        <li>VPN extensions routing traffic through unsupported regions</li>
+        <li>JavaScript-modifying extensions breaking the Claude.ai frontend</li>
+      </ul>
+      <p><strong>Fix:</strong> Temporarily disable all extensions and try again. Re-enable them one by one to identify the culprit. Then add an exception for claude.ai in the blocking extension.</p>
+
+      <h3>Cached Data Issues</h3>
+      <p>Open browser developer tools (F12), go to Application tab, under Storage click &ldquo;Clear site data&rdquo;, then reload the page.</p>
+
+      <h2>Scenario 5: Claude Code CLI Issues</h2>
+
+      <h3>&ldquo;ANTHROPIC_API_KEY not set&rdquo;</h3>
+      <pre><code>export ANTHROPIC_API_KEY="sk-ant-your-key-here"</code></pre>
+      <p>Add to your shell profile (<code>~/.zshrc</code> or <code>~/.bashrc</code>) for persistence.</p>
+
+      <h3>&ldquo;Connection refused&rdquo; or Network Errors</h3>
+      <ul>
+        <li>Check your internet connection</li>
+        <li>Check if a corporate firewall blocks api.anthropic.com</li>
+        <li>If using a VPN, try disconnecting</li>
+        <li>Test connectivity: <code>curl -I https://api.anthropic.com</code></li>
+      </ul>
+
+      <h3>Claude Code Hangs (No Response)</h3>
+      <ul>
+        <li>Press Ctrl+C to cancel the current operation</li>
+        <li>Start a new session: exit and run <code>claude</code> again</li>
+        <li>Use <code>/compact</code> before large operations to reduce context</li>
+        <li>Check if extended thinking is consuming time (thinking tokens take longer)</li>
+      </ul>
+
+      <h3>&ldquo;Module not found&rdquo; or Installation Errors</h3>
+      <pre><code>npm uninstall -g @anthropic-ai/claude-code
+npm install -g @anthropic-ai/claude-code</code></pre>
+
+      <h2>Scenario 6: API Integration Issues</h2>
+
+      <h3>Invalid API Key</h3>
+      <ul>
+        <li>Verify the key in console.anthropic.com</li>
+        <li>Generate a new key if the old one was revoked</li>
+        <li>Check for whitespace or invisible characters in the key</li>
+        <li>Ensure the key is sent in the <code>x-api-key</code> header (not <code>Authorization: Bearer</code>)</li>
+      </ul>
+
+      <h3>Model Not Found</h3>
+      <p>Use the exact model ID from Anthropic's documentation:</p>
+      <ul>
+        <li><code>claude-opus-4-0520</code> (not &ldquo;claude-opus-4&rdquo; or &ldquo;claude-4-opus&rdquo;)</li>
+        <li><code>claude-sonnet-4-20250514</code></li>
+        <li><code>claude-3-5-haiku-20241022</code></li>
+      </ul>
+
+      <h2>Scenario 7: Regional Access Issues</h2>
+
+      <p><strong>Symptoms:</strong> Claude works from some locations but not others. VPN changes fix/break access.</p>
+      <ul>
+        <li>Check Anthropic&rsquo;s supported regions list</li>
+        <li>If using a VPN, connect to a US or EU server</li>
+        <li>If on a corporate network, ask IT if api.anthropic.com is blocked</li>
+        <li>Try from a personal network to isolate the issue</li>
+      </ul>
+
+      <h2>Prevention Strategies</h2>
+
+      <h3>Set Up Monitoring</h3>
+      <ol>
+        <li><strong>Status page alerts:</strong> Subscribe to status.anthropic.com updates</li>
+        <li><strong>Health checks:</strong> If running API integrations, add a ping endpoint that verifies Claude API connectivity</li>
+      </ol>
+
+      <h3>Keep Software Updated</h3>
+      <pre><code># Check for Claude Code updates weekly
+npm outdated -g @anthropic-ai/claude-code
+
+# Update
+npm update -g @anthropic-ai/claude-code</code></pre>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Paste your error into our Diagnostic Tool for an instant fix</a>
+      </div>
+
+      <h2>FAQ</h2>
+
+      <h3>How long do Claude outages usually last?</h3>
+      <p>Most outages resolve within 30 minutes to 2 hours. Major incidents are rare and Anthropic communicates updates through status.anthropic.com.</p>
+
+      <h3>Why does Claude Code fail but Claude.ai works?</h3>
+      <p>Claude Code uses the API, while Claude.ai uses a web interface with separate infrastructure. If the API is having issues but the web interface is not (or vice versa), they can fail independently. Also check that your API key is valid and has credits.</p>
+
+      <h3>Does clearing my browser cache delete my conversations?</h3>
+      <p>No. Conversations are stored server-side. Clearing cache only removes local session data. You will need to log in again.</p>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+        <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+          <li><a href="/claude-rate-exceeded-error-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Rate Exceeded Error</a></li>
+          <li><a href="/claude-internal-server-error-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Internal Server Error</a></li>
+          <li><a href="/claude-code-process-exited-code-1-fix/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Fix Claude Code Process Exited Code 1</a></li>
+        </ul>
+      </div>
+
+      <div class="mastery-cta">
+        <p>I spent hours debugging &ldquo;not working&rdquo; issues before I wrote a CLAUDE.md that includes health checks and fallback configs. Now every project just works.</p>
+        <p>I run 5 Claude Max subs, 16 Chrome extensions serving 50K users, and bill $500K+ on Upwork. These CLAUDE.md templates are what I actually use.</p>
+        <p><strong><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=cta&amp;utm_campaign=claude-not-working-right-now-fix">Grab the templates &mdash; $99 once, free forever &rarr;</a></strong></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Fix: Claude Isn't Working Right Now (2026)",
+    "description": "Fix every Claude not working scenario: API outages, rate limits, account issues, browser problems, and CLI errors. Quick diagnostic checklist.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-not-working-right-now-fix/",
+    "mainEntityOfPage": "https://claudhq.com/claude-not-working-right-now-fix/",
+    "datePublished": "2026-06-01",
+    "dateModified": "2026-06-01"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long do Claude outages usually last?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most outages resolve within 30 minutes to 2 hours. Major incidents are rare and Anthropic communicates updates through status.anthropic.com."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Claude Code fail but Claude.ai works?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Claude Code uses the API, while Claude.ai uses a web interface with separate infrastructure. If the API is having issues but the web interface is not, they can fail independently. Also check that your API key is valid and has credits."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does clearing my browser cache delete my conversations?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Conversations are stored server-side. Clearing cache only removes local session data. You will need to log in again."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/tools/">All Tools</a><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/guides/">All Guides</a><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a><a href="/claude-code-ssl-certificate-verification-failed-error/">SSL Error Fix</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="/prompts.html">Prompt Library</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
