@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude.md Linter & Validator</title>
+    <meta name="description" content="Lint and validate your claude.md instructions. Check structure, headers, rule formatting, and anti-patterns. Get a 0-100 score with specific...">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="canonical" href="https://claudhq.com/tools/claude-md-linter">
+    <meta property="og:title" content="Claude.md Linter & Validator">
+    <meta property="og:description" content="Validate your claude.md instruction files for best practices">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claudhq.com/tools/claude-md-linter">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Claude.md Linter">
+    <meta name="twitter:description" content="Lint and validate claude.md instruction files">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Claude.md Linter",
+        "description": "Validate and lint claude.md instruction files for structure, formatting, and best practices",
+        "url": "https://claudhq.com/tools/claude-md-linter",
+        "applicationCategory": "DeveloperApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .editor-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+        .editor-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            background: #0d1117;
+            padding: 12px 15px;
+            border-bottom: 1px solid #30363d;
+            color: #8b949e;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        textarea {
+            flex: 1;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: none;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            min-height: 400px;
+        }
+        textarea:focus {
+            outline: none;
+        }
+        .results-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 600px;
+        }
+        .results-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .score-section {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 15px;
+        }
+        .score-value {
+            color: #58a6ff;
+            font-size: 3em;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        .score-label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        .issue {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #0d1117;
+            border-left: 3px solid #da3633;
+            border-radius: 4px;
+        }
+        .issue.warning {
+            border-left-color: #d29922;
+        }
+        .issue.success {
+            border-left-color: #3fb950;
+        }
+        .issue-type {
+            color: #da3633;
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .issue.warning .issue-type {
+            color: #d29922;
+        }
+        .issue.success .issue-type {
+            color: #3fb950;
+        }
+        .issue-message {
+            color: #c9d1d9;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .issue-suggestion {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px solid #30363d;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #30363d;
+            background: #0d1117;
+        }
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #58a6ff;
+            color: #0d1117;
+            flex: 1;
+        }
+        .btn-primary:hover {
+            background: #79c0ff;
+        }
+        .btn-secondary {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #484f58;
+        }
+        .tips {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+        .tips h3 {
+            color: #58a6ff;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+        .tips ul {
+            list-style: none;
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+        .tips li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .tips li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #3fb950;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8b949e;
+            font-size: 0.85em;
+            border-top: 1px solid #30363d;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude.md Linter</h1>
+            <p class="subtitle">Validate instruction files for structure and best practices</p>
+        </header>
+
+        <div class="editor-wrapper">
+            <div class="editor-panel">
+                <div class="panel-header">Paste your claude.md content</div>
+                <textarea id="mdInput" placeholder="Paste your claude.md file content here..."></textarea>
+                <div class="controls">
+                    <button class="btn-primary" onclick="lintContent()">Lint File</button>
+                    <button class="btn-secondary" onclick="resetLinter()">Clear</button>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div class="panel-header">Linting Results</div>
+                <div class="results-content" id="resultsContent">
+                    <div style="text-align: center; color: #8b949e; padding: 40px 20px;">
+                        Paste content and click "Lint File" to analyze
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tips">
+            <h3>Best Practices for claude.md</h3>
+            <ul>
+                <li>Start with a clear title/context section</li>
+                <li>Use hierarchical headings (# for main, ## for sections)</li>
+                <li>Keep rules concise and actionable</li>
+                <li>Use code blocks for examples (```)</li>
+                <li>Avoid conflicting instructions in different sections</li>
+                <li>Include escape sequences for special characters</li>
+                <li>Don't duplicate rules across sections</li>
+                <li>Provide context for "why" not just "what"</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 claudhq.com — Claude Code Resources
+    </footer>
+
+    <script>
+        const issues = [];
+        let score = 0;
+
+        function lintContent() {
+            issues.length = 0;
+            score = 100;
+
+            const content = document.getElementById('mdInput').value.trim();
+
+            if (!content) {
+                showResults([{ type: 'error', message: 'No content provided', suggestion: 'Paste your claude.md file content' }]);
+                return;
+            }
+
+            checkFileStructure(content);
+            checkHeaders(content);
+            checkFormatting(content);
+            checkAntiPatterns(content);
+            checkComplexity(content);
+
+            showResults(issues);
+        }
+
+        function checkFileStructure(content) {
+            const lines = content.split('\n');
+            const hasTitle = lines.length > 0 && lines[0].startsWith('#');
+
+            if (!hasTitle) {
+                addIssue('warning', 'Missing title', 'Start with # Main Title for clarity');
+                score -= 8;
+            } else {
+                addIssue('success', 'Title found', 'Good document structure');
+            }
+
+            if (lines.length < 5) {
+                addIssue('warning', 'Very short document', 'Consider expanding with more context');
+                score -= 5;
+            } else {
+                addIssue('success', 'Adequate length', '');
+            }
+        }
+
+        function checkHeaders(content) {
+            const headerRegex = /^#+\s/gm;
+            const headers = content.match(headerRegex) || [];
+
+            if (headers.length === 0) {
+                addIssue('warning', 'No headers found', 'Use ## for section headers');
+                score -= 10;
+            } else {
+                addIssue('success', `Found ${headers.length} headers`, 'Good organization');
+            }
+
+            const h1Count = (content.match(/^#\s/gm) || []).length;
+            const h2Count = (content.match(/^##\s/gm) || []).length;
+
+            if (h1Count > 1) {
+                addIssue('warning', 'Multiple level-1 headers', 'Use single # for main title only');
+                score -= 5;
+            }
+        }
+
+        function checkFormatting(content) {
+            const codeBlocks = (content.match(/```/g) || []).length;
+            if (codeBlocks % 2 !== 0) {
+                addIssue('error', 'Unmatched code blocks', 'Check that ``` markers are paired');
+                score -= 10;
+            } else if (codeBlocks > 0) {
+                addIssue('success', `${codeBlocks / 2} code blocks found`, '');
+            }
+
+            const hasLinks = /\[.*?\]\(.*?\)/.test(content);
+            const hasBold = /\*\*.*?\*\*/.test(content);
+            const hasItalic = /\*[^*]+\*/.test(content);
+
+            if (!hasLinks && !hasBold && !hasItalic) {
+                addIssue('warning', 'No formatting detected', 'Use **bold**, *italic*, or [links] for emphasis');
+                score -= 5;
+            }
+        }
+
+        function checkAntiPatterns(content) {
+            const lowerContent = content.toLowerCase();
+
+            // Check for verbosity
+            const verbosePatterns = [
+                { pattern: /please\s+make\s+sure/gi, name: 'Redundant "please make sure"' },
+                { pattern: /very\s+very/gi, name: 'Repetitive emphasis' },
+                { pattern: /\n\n\n+/g, name: 'Excessive blank lines' },
+                { pattern: /\s{2,}$/gm, name: 'Trailing whitespace' }
+            ];
+
+            verbosePatterns.forEach(vp => {
+                const matches = content.match(vp.pattern) || [];
+                if (matches.length > 0) {
+                    addIssue('warning', vp.name, `Found ${matches.length} instance(s)`);
+                    score -= 3;
+                }
+            });
+
+            // Check for conflicting keywords
+            const conflictPairs = [
+                { a: 'always', b: 'never', name: 'Conflicting always/never rules' },
+                { a: 'must', b: 'optional', name: 'Conflicting must/optional rules' }
+            ];
+
+            conflictPairs.forEach(pair => {
+                const hasA = lowerContent.includes(pair.a);
+                const hasB = lowerContent.includes(pair.b);
+                if (hasA && hasB) {
+                    addIssue('warning', pair.name, 'Review for contradictions');
+                    score -= 4;
+                }
+            });
+        }
+
+        function checkComplexity(content) {
+            const lines = content.split('\n');
+            const avgLineLength = lines.reduce((a, b) => a + b.length, 0) / lines.length;
+
+            if (avgLineLength > 120) {
+                addIssue('warning', 'Long lines detected', 'Consider breaking lines under 100 chars');
+                score -= 3;
+            }
+
+            const paragraphLines = lines.filter(l => l.trim() && !l.startsWith('#')).length;
+            if (paragraphLines > 200) {
+                addIssue('warning', 'Dense content', 'Consider breaking into more subsections');
+                score -= 5;
+            } else if (paragraphLines > 50) {
+                addIssue('success', 'Well-balanced length', '');
+            }
+        }
+
+        function addIssue(type, message, suggestion = '') {
+            issues.push({ type, message, suggestion });
+        }
+
+        function showResults(items) {
+            score = Math.max(0, score);
+
+            let html = `
+                <div class="score-section">
+                    <div class="score-value">${score}</div>
+                    <div class="score-label">Linting Score</div>
+                </div>
+            `;
+
+            if (items.length === 0) {
+                html += '<div style="color: #8b949e; text-align: center;">No issues found!</div>';
+            } else {
+                items.forEach(item => {
+                    const cls = item.type === 'error' ? '' : ` ${item.type}`;
+                    html += `
+                        <div class="issue${cls}">
+                            <div class="issue-type">${item.type}</div>
+                            <div class="issue-message">${item.message}</div>
+                            ${item.suggestion ? `<div class="issue-suggestion">${item.suggestion}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('resultsContent').innerHTML = html;
+        }
+
+        function resetLinter() {
+            document.getElementById('mdInput').value = '';
+            document.getElementById('resultsContent').innerHTML = `
+                <div style="text-align: center; color: #8b949e; padding: 40px 20px;">
+                    Paste content and click "Lint File" to analyze
+                </div>
+            `;
+            issues.length = 0;
+            score = 0;
+        }
+    </script>
+</body>
+</html>

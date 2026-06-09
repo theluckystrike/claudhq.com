@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Session Cost Tracker</title>
+    <meta name="description" content="Real-time Claude Code session cost tracker. Monitor spending across Haiku, Sonnet, and Opus models with live timer and cost projections.">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="canonical" href="https://claudhq.com/tools/claude-code-session-cost-tracker">
+    <meta property="og:title" content="Claude Code Session Cost Tracker">
+    <meta property="og:description" content="Track your Claude Code API costs in real-time across all models">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claudhq.com/tools/claude-code-session-cost-tracker">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Claude Code Session Cost Tracker">
+    <meta name="twitter:description" content="Real-time session cost monitoring for Claude API">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Claude Code Session Cost Tracker",
+        "description": "Real-time cost tracking for Claude Code sessions across Haiku, Sonnet, and Opus models",
+        "url": "https://claudhq.com/tools/claude-code-session-cost-tracker",
+        "applicationCategory": "DeveloperApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+        .controls {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #30363d;
+        }
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 600px) {
+            .control-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #58a6ff;
+            color: #0d1117;
+        }
+        .btn-primary:hover {
+            background: #79c0ff;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #484f58;
+        }
+        .btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+        .metric-label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-value {
+            color: #58a6ff;
+            font-size: 1.8em;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        .timer {
+            color: #79c0ff;
+            font-size: 0.9em;
+            margin-top: 8px;
+            color: #8b949e;
+        }
+        .comparison {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .comparison h3 {
+            color: #58a6ff;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #30363d;
+        }
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+        .comparison-model {
+            color: #c9d1d9;
+            font-weight: 600;
+        }
+        .comparison-cost {
+            color: #58a6ff;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        .pricing-info {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.85em;
+            color: #8b949e;
+            border-left: 3px solid #58a6ff;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8b949e;
+            font-size: 0.85em;
+            border-top: 1px solid #30363d;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude Code Session Cost Tracker</h1>
+            <p class="subtitle">Monitor your API spending in real-time</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="model">Model</label>
+                    <select id="model">
+                        <option value="haiku">Claude 3.5 Haiku</option>
+                        <option value="sonnet">Claude 3.5 Sonnet</option>
+                        <option value="opus">Claude Opus 4.6</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="inputTokens">Input Tokens</label>
+                    <input type="number" id="inputTokens" placeholder="0" value="0" min="0">
+                </div>
+            </div>
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="outputTokens">Output Tokens</label>
+                    <input type="number" id="outputTokens" placeholder="0" value="0" min="0">
+                </div>
+                <div class="control-group">
+                    <label for="duration">Duration (minutes)</label>
+                    <input type="number" id="duration" placeholder="0" value="0" min="0" step="0.1">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" id="startBtn" onclick="startTimer()">▶ Start Tracking</button>
+                <button class="btn-secondary" id="resetBtn" onclick="resetForm()">Reset</button>
+            </div>
+        </div>
+
+        <div class="metrics">
+            <div class="metric-card">
+                <div class="metric-label">Session Cost</div>
+                <div class="metric-value" id="sessionCost">$0.00</div>
+                <div class="timer" id="timerDisplay">Not tracking</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Cost/Minute</div>
+                <div class="metric-value" id="costPerMinute">$0.00</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Projected Hourly</div>
+                <div class="metric-value" id="hourlyProjection">$0.00</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Tokens</div>
+                <div class="metric-value" id="totalTokens">0</div>
+            </div>
+        </div>
+
+        <div class="comparison">
+            <h3>Cost Comparison Across Models</h3>
+            <div id="comparisonTable"></div>
+            <div class="pricing-info">
+                <strong>Pricing (Mar 2025):</strong> Haiku: $0.80/$2.40 per MTok in/out | Sonnet: $3/$15 per MTok | Opus: $15/$45 per MTok
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 claudhq.com — Claude Code Resources
+    </footer>
+
+    <script>
+        // Token pricing per million tokens (input/output)
+        const pricing = {
+            haiku: { input: 0.80, output: 2.40 },
+            sonnet: { input: 3.00, output: 15.00 },
+            opus: { input: 15.00, output: 45.00 }
+        };
+
+        let timerInterval = null;
+        let startTime = null;
+        let isTracking = false;
+
+        function calculateCost(model, inputTokens, outputTokens) {
+            const rates = pricing[model];
+            const inputCost = (inputTokens / 1000000) * rates.input;
+            const outputCost = (outputTokens / 1000000) * rates.output;
+            return inputCost + outputCost;
+        }
+
+        function updateMetrics() {
+            const model = document.getElementById('model').value;
+            const inputTokens = parseInt(document.getElementById('inputTokens').value) || 0;
+            const outputTokens = parseInt(document.getElementById('outputTokens').value) || 0;
+            let duration = parseFloat(document.getElementById('duration').value) || 0;
+
+            if (isTracking && startTime) {
+                const elapsedMs = Date.now() - startTime;
+                duration = elapsedMs / 60000;
+                document.getElementById('duration').value = duration.toFixed(2);
+            }
+
+            const sessionCost = calculateCost(model, inputTokens, outputTokens);
+            const costPerMin = duration > 0 ? sessionCost / duration : 0;
+            const hourlyProjection = costPerMin * 60;
+            const totalTokens = inputTokens + outputTokens;
+
+            document.getElementById('sessionCost').textContent = '$' + sessionCost.toFixed(4);
+            document.getElementById('costPerMinute').textContent = '$' + costPerMin.toFixed(4);
+            document.getElementById('hourlyProjection').textContent = '$' + hourlyProjection.toFixed(2);
+            document.getElementById('totalTokens').textContent = totalTokens.toLocaleString();
+
+            updateComparison(inputTokens, outputTokens);
+        }
+
+        function updateComparison(inputTokens, outputTokens) {
+            const models = ['haiku', 'sonnet', 'opus'];
+            const modelNames = {
+                haiku: 'Haiku 3.5',
+                sonnet: 'Sonnet 3.5',
+                opus: 'Opus 4.6'
+            };
+
+            let html = '';
+            models.forEach(model => {
+                const cost = calculateCost(model, inputTokens, outputTokens);
+                html += `
+                    <div class="comparison-row">
+                        <div class="comparison-model">${modelNames[model]}</div>
+                        <div class="comparison-cost">$${cost.toFixed(4)}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('comparisonTable').innerHTML = html;
+        }
+
+        function startTimer() {
+            if (isTracking) {
+                stopTimer();
+                return;
+            }
+
+            isTracking = true;
+            startTime = Date.now();
+            document.getElementById('startBtn').textContent = '⏸ Stop Tracking';
+            document.getElementById('startBtn').classList.add('btn-secondary');
+            document.getElementById('startBtn').classList.remove('btn-primary');
+
+            timerInterval = setInterval(() => {
+                updateMetrics();
+            }, 100);
+        }
+
+        function stopTimer() {
+            isTracking = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtn').textContent = '▶ Start Tracking';
+            document.getElementById('startBtn').classList.remove('btn-secondary');
+            document.getElementById('startBtn').classList.add('btn-primary');
+            document.getElementById('timerDisplay').textContent = 'Tracking paused';
+        }
+
+        function resetForm() {
+            stopTimer();
+            document.getElementById('model').value = 'haiku';
+            document.getElementById('inputTokens').value = '0';
+            document.getElementById('outputTokens').value = '0';
+            document.getElementById('duration').value = '0';
+            document.getElementById('timerDisplay').textContent = 'Not tracking';
+            updateMetrics();
+        }
+
+        // Event listeners
+        document.getElementById('model').addEventListener('change', updateMetrics);
+        document.getElementById('inputTokens').addEventListener('input', updateMetrics);
+        document.getElementById('outputTokens').addEventListener('input', updateMetrics);
+        document.getElementById('duration').addEventListener('input', () => {
+            if (!isTracking) updateMetrics();
+        });
+
+        // Initial calculation
+        updateMetrics();
+    </script>
+</body>
+</html>

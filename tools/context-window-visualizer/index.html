@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Context Window Visualizer</title>
+    <meta name="description" content="Visualize context window usage across Claude models. See token allocation for prompts, history, files, and more. Monitor capacity and get warnings.">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="canonical" href="https://claudhq.com/tools/context-window-visualizer">
+    <meta property="og:title" content="Claude Context Window Visualizer">
+    <meta property="og:description" content="Visualize context window token allocation and capacity">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claudhq.com/tools/context-window-visualizer">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Context Window Visualizer">
+    <meta name="twitter:description" content="Monitor context window usage in Claude">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Claude Context Window Visualizer",
+        "description": "Visual tool for monitoring context window usage across Claude models",
+        "url": "https://claudhq.com/tools/context-window-visualizer",
+        "applicationCategory": "DeveloperApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+        .controls {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #30363d;
+        }
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #58a6ff;
+            color: #0d1117;
+        }
+        .btn-primary:hover {
+            background: #79c0ff;
+        }
+        .btn-secondary {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #484f58;
+        }
+        .visualization {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .vis-title {
+            color: #c9d1d9;
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .context-bar {
+            position: relative;
+            background: #0d1117;
+            border-radius: 6px;
+            overflow: hidden;
+            height: 60px;
+            border: 1px solid #30363d;
+        }
+        .context-segment {
+            position: absolute;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0d1117;
+            font-weight: 600;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+        .segment-system {
+            background: #da3633;
+        }
+        .segment-user {
+            background: #3fb950;
+        }
+        .segment-history {
+            background: #d29922;
+        }
+        .segment-files {
+            background: #79c0ff;
+        }
+        .segment-tools {
+            background: #a371f7;
+        }
+        .segment-remaining {
+            background: #30363d;
+            color: #8b949e;
+        }
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #30363d;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .legend-info {
+            flex: 1;
+        }
+        .legend-label {
+            color: #c9d1d9;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        .legend-value {
+            color: #8b949e;
+            font-size: 0.8em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #161b22;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            color: #58a6ff;
+            font-size: 1.6em;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        .stat-percent {
+            color: #8b949e;
+            font-size: 0.75em;
+            margin-top: 5px;
+        }
+        .warning {
+            background: #161b22;
+            border-left: 3px solid #d29922;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .warning.active {
+            display: block;
+        }
+        .warning-title {
+            color: #d29922;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .warning-message {
+            color: #c9d1d9;
+            font-size: 0.9em;
+        }
+        .model-info {
+            background: #0d1117;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 2px solid #58a6ff;
+        }
+        .model-info-text {
+            color: #8b949e;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8b949e;
+            font-size: 0.85em;
+            border-top: 1px solid #30363d;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Context Window Visualizer</h1>
+            <p class="subtitle">Monitor token allocation and context capacity</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="model">Model</label>
+                    <select id="model" onchange="updateModel()">
+                        <option value="haiku">Claude 3.5 Haiku (200K)</option>
+                        <option value="sonnet">Claude 3.5 Sonnet (200K)</option>
+                        <option value="opus">Claude Opus 4.6 (200K)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="systemPrompt">System Prompt Size (tokens)</label>
+                    <input type="number" id="systemPrompt" placeholder="0" value="500" min="0" oninput="updateVisualization()">
+                </div>
+            </div>
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="userPrompt">User Prompt (tokens)</label>
+                    <input type="number" id="userPrompt" placeholder="0" value="1000" min="0" oninput="updateVisualization()">
+                </div>
+                <div class="control-group">
+                    <label for="history">Conversation History (tokens)</label>
+                    <input type="number" id="history" placeholder="0" value="5000" min="0" oninput="updateVisualization()">
+                </div>
+            </div>
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="files">File Contents (tokens)</label>
+                    <input type="number" id="files" placeholder="0" value="10000" min="0" oninput="updateVisualization()">
+                </div>
+                <div class="control-group">
+                    <label for="tools">Tool Schemas (tokens)</label>
+                    <input type="number" id="tools" placeholder="0" value="2000" min="0" oninput="updateVisualization()">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="updateVisualization()">Update Visualization</button>
+                <button class="btn-secondary" onclick="resetForm()">Reset</button>
+            </div>
+        </div>
+
+        <div class="warning" id="warningBox">
+            <div class="warning-title">⚠ Context Exceeded</div>
+            <div class="warning-message" id="warningText"></div>
+        </div>
+
+        <div class="model-info" id="modelInfo"></div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="visualization">
+            <div class="vis-title">Token Allocation</div>
+            <div class="context-bar" id="contextBar"></div>
+            <div class="legend" id="legend"></div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 claudhq.com — Claude Code Resources
+    </footer>
+
+    <script>
+        const models = {
+            haiku: { name: 'Claude 3.5 Haiku', capacity: 200000 },
+            sonnet: { name: 'Claude 3.5 Sonnet', capacity: 200000 },
+            opus: { name: 'Claude Opus 4.6', capacity: 200000 }
+        };
+
+        function updateModel() {
+            updateVisualization();
+        }
+
+        function updateVisualization() {
+            const model = document.getElementById('model').value;
+            const system = parseInt(document.getElementById('systemPrompt').value) || 0;
+            const user = parseInt(document.getElementById('userPrompt').value) || 0;
+            const history = parseInt(document.getElementById('history').value) || 0;
+            const files = parseInt(document.getElementById('files').value) || 0;
+            const tools = parseInt(document.getElementById('tools').value) || 0;
+
+            const modelInfo = models[model];
+            const total = system + user + history + files + tools;
+            const remaining = Math.max(0, modelInfo.capacity - total);
+            const isExceeded = total > modelInfo.capacity;
+
+            // Update model info
+            document.getElementById('modelInfo').innerHTML = `
+                <div class="model-info-text">
+                    <strong>${modelInfo.name}</strong> — ${modelInfo.capacity.toLocaleString()} token capacity
+                </div>
+            `;
+
+            // Update warning
+            const warningBox = document.getElementById('warningBox');
+            if (isExceeded) {
+                warningBox.classList.add('active');
+                document.getElementById('warningText').textContent =
+                    `Total usage (${total.toLocaleString()} tokens) exceeds ${modelInfo.name} capacity (${modelInfo.capacity.toLocaleString()} tokens). Remove context or switch to larger model.`;
+            } else {
+                warningBox.classList.remove('active');
+            }
+
+            // Update stats
+            updateStats(system, user, history, files, tools, remaining, modelInfo.capacity);
+
+            // Update visualization
+            updateContextBar(system, user, history, files, tools, remaining, modelInfo.capacity);
+        }
+
+        function updateStats(system, user, history, files, tools, remaining, capacity) {
+            const total = system + user + history + files + tools;
+            const usagePercent = ((total / capacity) * 100).toFixed(1);
+
+            const html = `
+                <div class="stat-card">
+                    <div class="stat-label">System Prompt</div>
+                    <div class="stat-value">${system.toLocaleString()}</div>
+                    <div class="stat-percent">${((system / capacity) * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">User Prompt</div>
+                    <div class="stat-value">${user.toLocaleString()}</div>
+                    <div class="stat-percent">${((user / capacity) * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">History</div>
+                    <div class="stat-value">${history.toLocaleString()}</div>
+                    <div class="stat-percent">${((history / capacity) * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Files</div>
+                    <div class="stat-value">${files.toLocaleString()}</div>
+                    <div class="stat-percent">${((files / capacity) * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tool Schemas</div>
+                    <div class="stat-value">${tools.toLocaleString()}</div>
+                    <div class="stat-percent">${((tools / capacity) * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Remaining</div>
+                    <div class="stat-value">${remaining.toLocaleString()}</div>
+                    <div class="stat-percent">${((remaining / capacity) * 100).toFixed(1)}%</div>
+                </div>
+            `;
+
+            document.getElementById('statsGrid').innerHTML = html;
+        }
+
+        function updateContextBar(system, user, history, files, tools, remaining, capacity) {
+            const total = system + user + history + files + tools;
+
+            const segments = [
+                { label: 'System Prompt', value: system, class: 'segment-system' },
+                { label: 'User Prompt', value: user, class: 'segment-user' },
+                { label: 'History', value: history, class: 'segment-history' },
+                { label: 'Files', value: files, class: 'segment-files' },
+                { label: 'Tools', value: tools, class: 'segment-tools' },
+                { label: 'Remaining', value: remaining, class: 'segment-remaining' }
+            ];
+
+            let barHtml = '';
+            let position = 0;
+
+            segments.forEach(seg => {
+                if (seg.value > 0) {
+                    const percent = (seg.value / (total + remaining)) * 100;
+                    const displayPercent = percent < 3 ? 0 : percent;
+                    const displayLabel = percent < 5 ? '' : `${seg.label}`;
+
+                    barHtml += `
+                        <div class="context-segment ${seg.class}"
+                             style="left: ${position}%; width: ${percent}%;"
+                             title="${seg.label}: ${seg.value.toLocaleString()} tokens (${displayPercent.toFixed(1)}%)">
+                            ${displayLabel}
+                        </div>
+                    `;
+                    position += percent;
+                }
+            });
+
+            document.getElementById('contextBar').innerHTML = barHtml;
+
+            // Update legend
+            let legendHtml = '';
+            segments.forEach(seg => {
+                if (seg.value > 0) {
+                    legendHtml += `
+                        <div class="legend-item">
+                            <div class="legend-color ${seg.class}"></div>
+                            <div class="legend-info">
+                                <div class="legend-label">${seg.label}</div>
+                                <div class="legend-value">${seg.value.toLocaleString()} tokens</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('legend').innerHTML = legendHtml;
+        }
+
+        function resetForm() {
+            document.getElementById('model').value = 'sonnet';
+            document.getElementById('systemPrompt').value = '500';
+            document.getElementById('userPrompt').value = '1000';
+            document.getElementById('history').value = '5000';
+            document.getElementById('files').value = '10000';
+            document.getElementById('tools').value = '2000';
+            updateVisualization();
+        }
+
+        // Initial render
+        updateVisualization();
+    </script>
+</body>
+</html>

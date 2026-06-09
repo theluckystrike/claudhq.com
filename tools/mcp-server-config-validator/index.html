@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Config Validator</title>
+    <meta name="description" content="Validate MCP server configuration JSON files. Check structure, paths, environment variables, and transport settings. Get detailed error reports.">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="canonical" href="https://claudhq.com/tools/mcp-server-config-validator">
+    <meta property="og:title" content="MCP Server Config Validator">
+    <meta property="og:description" content="Validate MCP server configuration files for correct syntax and settings">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claudhq.com/tools/mcp-server-config-validator">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MCP Config Validator">
+    <meta name="twitter:description" content="Validate your MCP server configurations">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MCP Server Config Validator",
+        "description": "Validation tool for MCP (Model Context Protocol) server configuration files",
+        "url": "https://claudhq.com/tools/mcp-server-config-validator",
+        "applicationCategory": "DeveloperApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .editor-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+        .editor-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            background: #0d1117;
+            padding: 12px 15px;
+            border-bottom: 1px solid #30363d;
+            color: #8b949e;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-help {
+            color: #58a6ff;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        textarea {
+            flex: 1;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: none;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            min-height: 400px;
+        }
+        textarea:focus {
+            outline: none;
+        }
+        .results-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 600px;
+        }
+        .results-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .result-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #0d1117;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid;
+        }
+        .result-status.pass {
+            border-left-color: #3fb950;
+        }
+        .result-status.fail {
+            border-left-color: #da3633;
+        }
+        .status-icon {
+            font-size: 1.5em;
+        }
+        .status-text {
+            flex: 1;
+        }
+        .status-title {
+            color: #c9d1d9;
+            font-weight: 600;
+        }
+        .status-message {
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+        .error-item {
+            background: #0d1117;
+            border-left: 3px solid #da3633;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .error-item.warning {
+            border-left-color: #d29922;
+        }
+        .error-item.info {
+            border-left-color: #58a6ff;
+        }
+        .error-type {
+            color: #da3633;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .error-item.warning .error-type {
+            color: #d29922;
+        }
+        .error-item.info .error-type {
+            color: #58a6ff;
+        }
+        .error-message {
+            color: #c9d1d9;
+            font-size: 0.9em;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #30363d;
+            background: #0d1117;
+        }
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #58a6ff;
+            color: #0d1117;
+            flex: 1;
+        }
+        .btn-primary:hover {
+            background: #79c0ff;
+        }
+        .btn-secondary {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #484f58;
+        }
+        .template {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .template h3 {
+            color: #58a6ff;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+        .template-code {
+            background: #0d1117;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85em;
+            color: #c9d1d9;
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+        .template-button {
+            padding: 8px 12px;
+            background: #30363d;
+            color: #c9d1d9;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .template-button:hover {
+            background: #484f58;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8b949e;
+            font-size: 0.85em;
+            border-top: 1px solid #30363d;
+            margin-top: 40px;
+        }
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 17, 23, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .help-modal.active {
+            display: flex;
+        }
+        .help-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .help-close {
+            float: right;
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .help-close:hover {
+            color: #c9d1d9;
+        }
+        .help-section {
+            margin-bottom: 15px;
+        }
+        .help-section h4 {
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+        .help-section p {
+            color: #c9d1d9;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MCP Server Config Validator</h1>
+            <p class="subtitle">Validate your Model Context Protocol server configuration</p>
+        </header>
+
+        <div class="template">
+            <h3>MCP Configuration Template</h3>
+            <div class="template-code" id="templateCode">{
+  "mcpServers": {
+    "example-server": {
+      "command": "/path/to/server",
+      "args": [],
+      "env": {
+        "API_KEY": "your-key-here"
+      }
+    }
+  }
+}</div>
+            <button class="template-button" onclick="loadTemplate()">Load Template</button>
+            <button class="template-button" onclick="copyTemplate()">Copy Template</button>
+        </div>
+
+        <div class="editor-wrapper">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    Paste your MCP config.json
+                    <span class="panel-help" onclick="showHelp()">?</span>
+                </div>
+                <textarea id="configInput" placeholder="Paste your MCP config.json file content here..."></textarea>
+                <div class="controls">
+                    <button class="btn-primary" onclick="validateConfig()">Validate Config</button>
+                    <button class="btn-secondary" onclick="resetValidator()">Clear</button>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div class="panel-header">Validation Results</div>
+                <div class="results-content" id="resultsContent">
+                    <div style="text-align: center; color: #8b949e; padding: 40px 20px;">
+                        Paste config and click "Validate Config"
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <button class="help-close" onclick="closeHelp()">✕</button>
+            <h3 style="color: #58a6ff; margin-bottom: 15px;">MCP Configuration Help</h3>
+
+            <div class="help-section">
+                <h4>File Structure</h4>
+                <p>MCP configs are JSON files with a "mcpServers" object containing server definitions.</p>
+            </div>
+
+            <div class="help-section">
+                <h4>Required Fields</h4>
+                <p><strong>command:</strong> Full path to the server executable</p>
+                <p><strong>args:</strong> Array of command-line arguments</p>
+            </div>
+
+            <div class="help-section">
+                <h4>Optional Fields</h4>
+                <p><strong>env:</strong> Environment variables for the server</p>
+                <p><strong>transport:</strong> "stdio" (default) or "sse"</p>
+            </div>
+
+            <div class="help-section">
+                <h4>Common Paths</h4>
+                <p>Linux/Mac: ~/.config/claude/claude.config.json</p>
+                <p>Windows: %APPDATA%/Claude/claude.config.json</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 claudhq.com — Claude Code Resources
+    </footer>
+
+    <script>
+        const issues = [];
+
+        function validateConfig() {
+            issues.length = 0;
+            const input = document.getElementById('configInput').value.trim();
+
+            if (!input) {
+                showResults([{ type: 'error', message: 'No configuration provided' }]);
+                return;
+            }
+
+            let config;
+            try {
+                config = JSON.parse(input);
+            } catch (e) {
+                showResults([{
+                    type: 'error',
+                    message: `JSON Parse Error: ${e.message}`
+                }]);
+                return;
+            }
+
+            validateStructure(config);
+            validateServers(config);
+
+            showResults(issues);
+        }
+
+        function validateStructure(config) {
+            if (!config.mcpServers) {
+                addIssue('error', 'Missing "mcpServers" object', 'Config must contain a "mcpServers" property');
+                return;
+            }
+
+            if (typeof config.mcpServers !== 'object' || Array.isArray(config.mcpServers)) {
+                addIssue('error', '"mcpServers" must be an object', 'Use { "serverName": {...} } format');
+                return;
+            }
+
+            if (Object.keys(config.mcpServers).length === 0) {
+                addIssue('warning', 'No servers defined', 'Add at least one server to mcpServers');
+            }
+        }
+
+        function validateServers(config) {
+            const servers = config.mcpServers;
+            if (!servers || typeof servers !== 'object') return;
+
+            Object.entries(servers).forEach(([name, server]) => {
+                validateServer(name, server);
+            });
+
+            if (issues.filter(i => i.type === 'error').length === 0) {
+                addIssue('pass', 'Configuration valid', `${Object.keys(servers).length} server(s) configured correctly`);
+            }
+        }
+
+        function validateServer(name, server) {
+            if (!server || typeof server !== 'object') {
+                addIssue('error', `Server "${name}" is not an object`, 'Each server must be a JSON object');
+                return;
+            }
+
+            // Check command
+            if (!server.command) {
+                addIssue('error', `Server "${name}": missing "command"`, 'Required: full path to server executable');
+            } else {
+                if (typeof server.command !== 'string') {
+                    addIssue('error', `Server "${name}": "command" must be a string`, `Got ${typeof server.command}`);
+                } else {
+                    if (!server.command.startsWith('/') && !server.command.match(/^[a-zA-Z]:/)) {
+                        addIssue('warning', `Server "${name}": relative path detected`, 'Use absolute paths for reliability');
+                    }
+                }
+            }
+
+            // Check args
+            if (server.args !== undefined) {
+                if (!Array.isArray(server.args)) {
+                    addIssue('error', `Server "${name}": "args" must be an array`, `Got ${typeof server.args}`);
+                }
+            }
+
+            // Check env
+            if (server.env !== undefined) {
+                if (typeof server.env !== 'object' || Array.isArray(server.env)) {
+                    addIssue('error', `Server "${name}": "env" must be an object`, `Got ${typeof server.env}`);
+                } else {
+                    Object.entries(server.env).forEach(([key, value]) => {
+                        if (typeof value !== 'string') {
+                            addIssue('warning', `Server "${name}": env["${key}"] is not a string`, `Convert to string: "${value}"`);
+                        }
+                        if (key === 'API_KEY' && value === 'your-key-here') {
+                            addIssue('warning', `Server "${name}": placeholder API_KEY detected`, 'Replace with actual API key');
+                        }
+                    });
+                }
+            }
+
+            // Check transport
+            if (server.transport !== undefined) {
+                if (!['stdio', 'sse'].includes(server.transport)) {
+                    addIssue('warning', `Server "${name}": unknown transport "${server.transport}"`, 'Use "stdio" or "sse"');
+                }
+            }
+        }
+
+        function addIssue(type, message, detail = '') {
+            issues.push({ type, message, detail });
+        }
+
+        function showResults(items) {
+            let html = '';
+
+            items.forEach(item => {
+                let className = item.type;
+                let icon = item.type === 'pass' ? '✓' : item.type === 'error' ? '✕' : '⚠';
+
+                if (item.type === 'pass') {
+                    html += `
+                        <div class="result-status pass">
+                            <span class="status-icon">${icon}</span>
+                            <div class="status-text">
+                                <div class="status-title">${item.message}</div>
+                                ${item.detail ? `<div class="status-message">${item.detail}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="error-item ${className}">
+                            <div class="error-type">${item.type}</div>
+                            <div class="error-message">${item.message}</div>
+                            ${item.detail ? `<div style="color: #8b949e; font-size: 0.85em; margin-top: 4px;">${item.detail}</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('resultsContent').innerHTML = html;
+        }
+
+        function resetValidator() {
+            document.getElementById('configInput').value = '';
+            document.getElementById('resultsContent').innerHTML = `
+                <div style="text-align: center; color: #8b949e; padding: 40px 20px;">
+                    Paste config and click "Validate Config"
+                </div>
+            `;
+            issues.length = 0;
+        }
+
+        function loadTemplate() {
+            const template = `{
+  "mcpServers": {
+    "my-server": {
+      "command": "/path/to/server/binary",
+      "args": [],
+      "env": {
+        "API_KEY": "your-api-key"
+      }
+    }
+  }
+}`;
+            document.getElementById('configInput').value = template;
+            document.getElementById('configInput').focus();
+        }
+
+        function copyTemplate() {
+            const template = document.getElementById('templateCode').textContent;
+            navigator.clipboard.writeText(template).then(() => {
+                alert('Template copied to clipboard');
+            });
+        }
+
+        function showHelp() {
+            document.getElementById('helpModal').classList.add('active');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').classList.remove('active');
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeHelp();
+        });
+    </script>
+</body>
+</html>

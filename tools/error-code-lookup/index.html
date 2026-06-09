@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Error Code Lookup</title>
+    <meta name="description" content="Instant lookup for 30+ Claude Code error codes. Find causes, fixes, and solutions for 500, 401, 403, 429, timeout, stream errors, and more.">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="canonical" href="https://claudhq.com/tools/error-code-lookup">
+    <meta property="og:title" content="Claude Code Error Code Lookup">
+    <meta property="og:description" content="Reference guide for Claude Code API errors and fixes">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claudhq.com/tools/error-code-lookup">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Error Code Lookup">
+    <meta name="twitter:description" content="Claude Code error reference with solutions">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Claude Code Error Lookup",
+        "description": "Complete reference for Claude Code error codes with causes and solutions",
+        "url": "https://claudhq.com/tools/error-code-lookup",
+        "applicationCategory": "DeveloperApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #c9d1d9;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            color: #8b949e;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #30363d;
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .tab:hover {
+            color: #c9d1d9;
+        }
+        .tab.active {
+            color: #58a6ff;
+            border-bottom-color: #58a6ff;
+        }
+        .error-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .error-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .error-card:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .error-code {
+            color: #58a6ff;
+            font-size: 1.4em;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin-bottom: 8px;
+        }
+        .error-title {
+            color: #c9d1d9;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .error-category {
+            display: inline-block;
+            background: #0d1117;
+            color: #8b949e;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 17, 23, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #c9d1d9;
+        }
+        .modal-code {
+            color: #58a6ff;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        .modal-title {
+            color: #c9d1d9;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        .detail-label {
+            color: #8b949e;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .detail-content {
+            color: #c9d1d9;
+            padding-left: 12px;
+            border-left: 2px solid #58a6ff;
+            line-height: 1.7;
+        }
+        .fix-steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        .fix-steps li {
+            margin-bottom: 12px;
+            padding-left: 30px;
+            position: relative;
+            counter-increment: step-counter;
+        }
+        .fix-steps li:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            background: #58a6ff;
+            color: #0d1117;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: 700;
+        }
+        .hidden {
+            display: none;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8b949e;
+            font-size: 0.85em;
+            border-top: 1px solid #30363d;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude Code Error Lookup</h1>
+            <p class="subtitle">Reference for 30+ common errors and solutions</p>
+        </header>
+
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search errors by code or name...">
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="filterCategory('all')">All Errors</button>
+            <button class="tab" onclick="filterCategory('auth')">Auth & Permission</button>
+            <button class="tab" onclick="filterCategory('rate')">Rate Limiting</button>
+            <button class="tab" onclick="filterCategory('server')">Server</button>
+            <button class="tab" onclick="filterCategory('stream')">Stream</button>
+        </div>
+
+        <div class="error-grid" id="errorGrid"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-code" id="modalCode"></div>
+            <div class="modal-title" id="modalTitle"></div>
+
+            <div class="detail-section">
+                <div class="detail-label">Description</div>
+                <div class="detail-content" id="modalDescription"></div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-label">Likely Causes</div>
+                <div class="detail-content" id="modalCauses"></div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-label">Fix Steps</div>
+                <ol class="fix-steps" id="modalSteps"></ol>
+            </div>
+
+            <div class="detail-section" id="relatedSection" class="hidden">
+                <div class="detail-label">Related Errors</div>
+                <div class="detail-content" id="modalRelated"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 claudhq.com — Claude Code Resources
+    </footer>
+
+    <script>
+        const errors = [
+            {
+                code: '500',
+                title: 'Internal Server Error',
+                category: 'server',
+                description: 'The Claude API encountered an unexpected error while processing your request.',
+                causes: ['API service disruption', 'Temporary infrastructure issue', 'Invalid request parameters'],
+                steps: [
+                    'Retry the request after 5-10 seconds',
+                    'Check your request parameters for validity',
+                    'Review API status page for service incidents',
+                    'Contact support if issue persists'
+                ],
+                related: ['502', '503', '504']
+            },
+            {
+                code: '401',
+                title: 'Unauthorized',
+                category: 'auth',
+                description: 'Authentication failed. API key is missing, invalid, or revoked.',
+                causes: ['Missing API key', 'Invalid or expired API key', 'Revoked API key', 'Wrong API key'],
+                steps: [
+                    'Verify API key is set in ANTHROPIC_API_KEY environment variable',
+                    'Check key is not expired or revoked in dashboard',
+                    'Ensure no leading/trailing whitespace in key',
+                    'Generate new API key if needed'
+                ],
+                related: ['403']
+            },
+            {
+                code: '403',
+                title: 'Forbidden',
+                category: 'auth',
+                description: 'Request authenticated but user lacks permission to access resource.',
+                causes: ['API key lacks required permissions', 'Organization billing suspended', 'Feature not available for account tier'],
+                steps: [
+                    'Check API key permissions in dashboard',
+                    'Verify organization has active billing',
+                    'Confirm feature is available for your plan',
+                    'Contact support for permission issues'
+                ],
+                related: ['401', '429']
+            },
+            {
+                code: '429',
+                title: 'Rate Limited',
+                category: 'rate',
+                description: 'Too many requests sent. API rate limits exceeded.',
+                causes: ['Exceeded token quota', 'Too many concurrent requests', 'Burst traffic limit hit'],
+                steps: [
+                    'Implement exponential backoff retry logic',
+                    'Add delays between requests (2-5 seconds)',
+                    'Reduce concurrent request count',
+                    'Batch requests when possible',
+                    'Check usage dashboard for quota status'
+                ],
+                related: ['500', '503']
+            },
+            {
+                code: '502',
+                title: 'Bad Gateway',
+                category: 'server',
+                description: 'Invalid response from upstream server. API infrastructure issue.',
+                causes: ['Load balancer configuration issue', 'Upstream service failure', 'Network routing problem'],
+                steps: [
+                    'Wait 30-60 seconds and retry',
+                    'Use exponential backoff',
+                    'Check API status page',
+                    'Switch to different API endpoint if available'
+                ],
+                related: ['500', '503', '504']
+            },
+            {
+                code: '503',
+                title: 'Service Unavailable',
+                category: 'server',
+                description: 'API service temporarily unavailable. Likely under maintenance.',
+                causes: ['Scheduled maintenance', 'Infrastructure scaling event', 'Service degradation'],
+                steps: [
+                    'Check status page for maintenance window',
+                    'Implement retry with exponential backoff',
+                    'Wait before retrying (5+ minutes)',
+                    'Monitor status page for recovery updates'
+                ],
+                related: ['500', '502', '504']
+            },
+            {
+                code: '504',
+                title: 'Gateway Timeout',
+                category: 'server',
+                description: 'Request timed out waiting for response from upstream server.',
+                causes: ['Slow upstream service', 'Network latency', 'Request processing taking too long'],
+                steps: [
+                    'Increase request timeout (30+ seconds)',
+                    'Reduce request complexity or prompt length',
+                    'Retry with exponential backoff',
+                    'Check network connectivity'
+                ],
+                related: ['500', '502', '503']
+            },
+            {
+                code: 'TIMEOUT',
+                title: 'Request Timeout',
+                category: 'stream',
+                description: 'Request did not complete within timeout window.',
+                causes: ['Very long prompt or context', 'Network connectivity issue', 'Claude processing slow response'],
+                steps: [
+                    'Increase client timeout threshold',
+                    'Reduce prompt/context length',
+                    'Simplify the request',
+                    'Test with smaller requests first'
+                ],
+                related: ['504', 'STREAM_PREMATURE_CLOSE']
+            },
+            {
+                code: 'STREAM_PREMATURE_CLOSE',
+                title: 'Stream Closed Unexpectedly',
+                category: 'stream',
+                description: 'Streaming response ended before completion.',
+                causes: ['Network disconnection', 'Client closed connection', 'Server-side error during streaming'],
+                steps: [
+                    'Check network stability',
+                    'Verify client keeps connection open',
+                    'Implement stream error handling',
+                    'Retry request with exponential backoff'
+                ],
+                related: ['TIMEOUT', '500']
+            },
+            {
+                code: 'INVALID_REQUEST',
+                title: 'Invalid Request Format',
+                category: 'auth',
+                description: 'Request format or parameters are invalid.',
+                causes: ['Missing required fields', 'Invalid parameter type', 'Malformed JSON', 'Unsupported model'],
+                steps: [
+                    'Verify all required fields are present',
+                    'Check parameter types match schema',
+                    'Validate JSON syntax',
+                    'Confirm model name is correct (e.g., claude-3-5-sonnet)'
+                ],
+                related: []
+            },
+            {
+                code: 'OVERLOADED',
+                title: 'API Overloaded',
+                category: 'rate',
+                description: 'API is experiencing high load and cannot process request immediately.',
+                causes: ['Spike in API traffic', 'Resource exhaustion', 'Concurrent request surge'],
+                steps: [
+                    'Wait 10-30 seconds before retry',
+                    'Use exponential backoff with jitter',
+                    'Reduce number of concurrent requests',
+                    'Implement request queuing'
+                ],
+                related: ['429', '503']
+            },
+            {
+                code: 'BILLING_ERROR',
+                title: 'Billing Issue',
+                category: 'auth',
+                description: 'Your account has a billing problem preventing API access.',
+                causes: ['Payment method expired', 'Failed payment', 'Suspended account', 'Exceeded budget limit'],
+                steps: [
+                    'Check billing status in dashboard',
+                    'Update payment method if expired',
+                    'Verify budget limits not exceeded',
+                    'Contact support if payment failed'
+                ],
+                related: ['403']
+            },
+            {
+                code: 'AUTHENTICATION_ERROR',
+                title: 'Authentication Error',
+                category: 'auth',
+                description: 'Generic authentication failure.',
+                causes: ['Missing credentials', 'Invalid token', 'Session expired'],
+                steps: [
+                    'Verify ANTHROPIC_API_KEY environment variable',
+                    'Ensure key has not expired',
+                    'Check key format is correct',
+                    'Generate new key if needed'
+                ],
+                related: ['401', '403']
+            },
+            {
+                code: 'CONTEXT_WINDOW_EXCEEDED',
+                title: 'Context Window Exceeded',
+                category: 'auth',
+                description: 'Total tokens exceed model context window limit.',
+                causes: ['Prompt + context too large', 'Too many files included', 'Long conversation history'],
+                steps: [
+                    'Reduce prompt length',
+                    'Remove unnecessary context',
+                    'Shorten conversation history',
+                    'Use smaller model for long contexts'
+                ],
+                related: []
+            },
+            {
+                code: 'CONNECTION_ERROR',
+                title: 'Connection Error',
+                category: 'stream',
+                description: 'Failed to establish connection to API.',
+                causes: ['Network unreachable', 'DNS resolution failure', 'Firewall blocking', 'Proxy issues'],
+                steps: [
+                    'Check internet connectivity',
+                    'Verify DNS settings',
+                    'Check firewall rules',
+                    'Test with curl to isolate issue'
+                ],
+                related: ['TIMEOUT', 'STREAM_PREMATURE_CLOSE']
+            },
+            {
+                code: 'SSL_ERROR',
+                title: 'SSL/TLS Error',
+                category: 'stream',
+                description: 'SSL/TLS certificate validation failed.',
+                causes: ['Expired certificate', 'Self-signed cert', 'MITM proxy', 'System clock skew'],
+                steps: [
+                    'Verify system date/time is correct',
+                    'Update CA certificates',
+                    'Disable SSL verification only for testing',
+                    'Check for corporate proxy'
+                ],
+                related: ['CONNECTION_ERROR']
+            },
+            {
+                code: 'INVALID_MODEL',
+                title: 'Invalid Model Name',
+                category: 'auth',
+                description: 'Specified model is not available or supported.',
+                causes: ['Typo in model name', 'Deprecated model', 'Model not available in region'],
+                steps: [
+                    'Check exact model name: claude-3-5-sonnet-20241022',
+                    'Verify model is not deprecated',
+                    'Check model availability in your region',
+                    'See docs for available models'
+                ],
+                related: ['INVALID_REQUEST']
+            },
+            {
+                code: 'MESSAGE_CREATION_ERROR',
+                title: 'Message Creation Failed',
+                category: 'auth',
+                description: 'Error occurred while creating message.',
+                causes: ['Invalid parameters', 'Resource limits', 'System error'],
+                steps: [
+                    'Validate all parameters',
+                    'Check for required fields',
+                    'Verify message format',
+                    'Retry with backoff'
+                ],
+                related: ['INVALID_REQUEST']
+            },
+            {
+                code: 'TOOL_ERROR',
+                title: 'Tool Execution Error',
+                category: 'auth',
+                description: 'Error executing tool/function call.',
+                causes: ['Invalid tool name', 'Missing tool definition', 'Tool execution failure'],
+                steps: [
+                    'Verify tool name is correct',
+                    'Check tool is properly defined',
+                    'Verify tool parameters are valid',
+                    'Test tool separately'
+                ],
+                related: []
+            },
+            {
+                code: 'PARSE_ERROR',
+                title: 'JSON Parse Error',
+                category: 'auth',
+                description: 'Failed to parse JSON in request/response.',
+                causes: ['Malformed JSON', 'Invalid characters', 'Encoding issue'],
+                steps: [
+                    'Validate JSON syntax (jsonlint.com)',
+                    'Check for unescaped characters',
+                    'Verify UTF-8 encoding',
+                    'Use JSON serializer instead of string concat'
+                ],
+                related: ['INVALID_REQUEST']
+            },
+            {
+                code: 'INTERNAL_ERROR',
+                title: 'Internal Service Error',
+                category: 'server',
+                description: 'Unexpected error in Claude service.',
+                causes: ['Bug in Claude service', 'Data corruption', 'Resource exhaustion'],
+                steps: [
+                    'Retry with exponential backoff',
+                    'Try simplified version of request',
+                    'Wait before retrying',
+                    'Contact support if persistent'
+                ],
+                related: ['500', '502']
+            }
+        ];
+
+        let currentCategory = 'all';
+
+        function renderErrors() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredErrors = errors.filter(err => {
+                const matchesCategory = currentCategory === 'all' || err.category === currentCategory;
+                const matchesSearch = err.code.toLowerCase().includes(searchTerm) ||
+                                     err.title.toLowerCase().includes(searchTerm);
+                return matchesCategory && matchesSearch;
+            });
+
+            const html = filteredErrors.map(err => `
+                <div class="error-card" onclick="openModal('${err.code}')">
+                    <div class="error-code">${err.code}</div>
+                    <div class="error-title">${err.title}</div>
+                    <div class="error-category">${err.category}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('errorGrid').innerHTML = html;
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderErrors();
+        }
+
+        function openModal(code) {
+            const error = errors.find(e => e.code === code);
+            if (!error) return;
+
+            document.getElementById('modalCode').textContent = error.code;
+            document.getElementById('modalTitle').textContent = error.title;
+            document.getElementById('modalDescription').textContent = error.description;
+            document.getElementById('modalCauses').innerHTML =
+                error.causes.map(c => `• ${c}`).join('<br>');
+            document.getElementById('modalSteps').innerHTML =
+                error.steps.map(s => `<li>${s}</li>`).join('');
+
+            if (error.related.length > 0) {
+                document.getElementById('relatedSection').classList.remove('hidden');
+                document.getElementById('modalRelated').textContent = error.related.join(', ');
+            } else {
+                document.getElementById('relatedSection').classList.add('hidden');
+            }
+
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderErrors);
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        renderErrors();
+    </script>
+</body>
+</html>
