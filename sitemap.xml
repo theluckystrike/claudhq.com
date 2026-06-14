@@ -119,4 +119,34 @@
   <url><loc>https://claudhq.com/claude-code-login-auth-redirect-loop-fix/</loc><lastmod>2026-06-01</lastmod><priority>0.8</priority></url>
   <url><loc>https://claudhq.com/claude-api-503-service-unavailable-fix/</loc><lastmod>2026-06-01</lastmod><priority>0.8</priority></url>
   <url><loc>https://claudhq.com/claude-code-apple-silicon-rosetta-crash-fix/</loc><lastmod>2026-06-01</lastmod><priority>0.8</priority></url>
+  <url>
+    <loc>https://claudhq.com/tools/context-window-visualizer/</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://claudhq.com/tools/claude-md-linter/</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://claudhq.com/tools/mcp-server-config-validator/</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://claudhq.com/tools/claude-code-session-cost-tracker/</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://claudhq.com/tools/error-code-lookup/</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
