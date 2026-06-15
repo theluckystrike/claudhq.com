@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Token Counter — Free Tool | ClaudHQ</title>
+    <meta name="description" content="Count tokens in text for Claude models instantly. Estimate API costs before sending requests.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://claudhq.com/tools/token-counter/">
+    <meta property="og:title" content="Claude Token Counter — Free Tool | ClaudHQ">
+    <meta property="og:description" content="Count tokens in text for Claude models instantly. Estimate API costs before sending requests.">
+    <meta property="og:url" content="https://claudhq.com/tools/token-counter/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "WebApplication",
+        "name": "Claude Token Counter",
+        "url": "https://claudhq.com/tools/token-counter/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        }
+    }
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            color: #e8e8e8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+        .tool-wrapper {
+            background: #111111;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            margin-bottom: 30px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #cbd5e1;
+            display: block;
+            font-size: 0.95rem;
+        }
+        textarea {
+            width: 100%;
+            padding: 16px;
+            background: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            color: #e8e8e8;
+            font-family: "Monaco", "Menlo", "Courier New", monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #0f1419;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #0f1419;
+            border: 1px solid #1a3a3a;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .stat-value {
+            color: #3b82f6;
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: "Monaco", "Menlo", "Courier New", monospace;
+        }
+        .stat-subtext {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+        .model-breakdown {
+            background: #0f1419;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .model-breakdown h2 {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.95rem;
+        }
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+        .breakdown-model {
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        .breakdown-cost {
+            color: #10b981;
+            font-weight: 700;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 20px;
+            background: #3b82f6;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        button.secondary {
+            background: #1a1a1a;
+            color: #3b82f6;
+            border: 1px solid #2d2d2d;
+        }
+        button.secondary:hover {
+            background: #2d2d2d;
+            border-color: #3b82f6;
+        }
+        .info-box {
+            background: #1a3a3a;
+            border-left: 4px solid #5eead4;
+            padding: 14px;
+            border-radius: 4px;
+            color: #a8f5d1;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+        .info-box strong {
+            color: #5eead4;
+        }
+        .success-msg {
+            background: #1a3a2a;
+            border-left: 4px solid #10b981;
+            color: #a8f5d1;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .success-msg.show {
+            display: block;
+        }
+        .partner-div {
+            margin: 30px auto;
+            max-width: 728px;
+            text-align: center;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid #334155;
+            border-radius: 10px;
+        }
+        .partner-label {
+            margin: 0 0 6px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .partner-link {
+            color: #38bdf8;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .partner-link:hover {
+            text-decoration: underline;
+        }
+        .partner-desc {
+            margin: 6px 0 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .ad-unit {
+            margin: 20px auto;
+            max-width: 728px;
+            text-align: center;
+            min-height: 100px;
+        }
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude Token Counter</h1>
+            <p class="subtitle">Estimate tokens and costs before sending API requests</p>
+        </header>
+
+        <div class="tool-wrapper">
+            <div class="input-section">
+                <label for="textInput">Paste your text here:</label>
+                <textarea id="textInput" placeholder="Paste the text you want to analyze for token count..."></textarea>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Tokens</div>
+                    <div class="stat-value" id="tokenCount">0</div>
+                    <div class="stat-subtext">~4 chars/token</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Characters</div>
+                    <div class="stat-value" id="charCount">0</div>
+                    <div class="stat-subtext">Including spaces</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Words</div>
+                    <div class="stat-value" id="wordCount">0</div>
+                    <div class="stat-subtext">Approximate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Lines</div>
+                    <div class="stat-value" id="lineCount">0</div>
+                    <div class="stat-subtext">Paragraph breaks</div>
+                </div>
+            </div>
+
+            <div class="model-breakdown">
+                <h2>Estimated Costs (Input Only)</h2>
+                <div class="breakdown-row">
+                    <span class="breakdown-model">Opus 4.6</span>
+                    <span class="breakdown-cost" id="costOpus">$0.00</span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-model">Sonnet 4</span>
+                    <span class="breakdown-cost" id="costSonnet">$0.00</span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-model">Haiku 4.5</span>
+                    <span class="breakdown-cost" id="costHaiku">$0.00</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="clearBtn">Clear Text</button>
+                <button class="secondary" id="copyBtn">Copy Stats</button>
+            </div>
+
+            <div class="success-msg" id="successMsg"></div>
+
+            <div class="info-box">
+                <strong>Note:</strong> Token counting uses ~4 characters per token as an estimation. Actual token counts may vary slightly. Use this tool for rough budgeting before production API calls.
+            </div>
+        </div>
+
+        <div class="partner-div">
+            <p class="partner-label">Recommended by our team</p>
+            <a href="https://www.belikenative.com?ref=satellite" target="_blank" rel="noopener" class="partner-link">BeLikeNative.com</a>
+            <p class="partner-desc">The #1 AI writing tool for freelancers — perfect grammar in any language, instantly.</p>
+        </div>
+
+        <div class="ad-unit">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2241192243363112" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ClaudHQ. All rights reserved. | <a href="https://claudhq.com/tools/">Back to Tools</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const tokenCount = document.getElementById('tokenCount');
+        const charCount = document.getElementById('charCount');
+        const wordCount = document.getElementById('wordCount');
+        const lineCount = document.getElementById('lineCount');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const successMsg = document.getElementById('successMsg');
+
+        const pricingModel = {
+            opus: { input: 3 },
+            sonnet: { input: 3 },
+            haiku: { input: 0.80 }
+        };
+
+        function countTokens(text) {
+            return Math.ceil(text.length / 4);
+        }
+
+        function updateStats() {
+            const text = textInput.value;
+            const chars = text.length;
+            const words = text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
+            const lines = text.trim().length === 0 ? 0 : text.split('\n').length;
+            const tokens = countTokens(text);
+
+            tokenCount.textContent = tokens.toLocaleString();
+            charCount.textContent = chars.toLocaleString();
+            wordCount.textContent = words.toLocaleString();
+            lineCount.textContent = lines.toLocaleString();
+
+            const costOpus = (tokens / 1000000) * pricingModel.opus.input;
+            const costSonnet = (tokens / 1000000) * pricingModel.sonnet.input;
+            const costHaiku = (tokens / 1000000) * pricingModel.haiku.input;
+
+            document.getElementById('costOpus').textContent = '$' + costOpus.toFixed(6);
+            document.getElementById('costSonnet').textContent = '$' + costSonnet.toFixed(6);
+            document.getElementById('costHaiku').textContent = '$' + costHaiku.toFixed(6);
+        }
+
+        function clearText() {
+            textInput.value = '';
+            updateStats();
+            showSuccess('Text cleared');
+        }
+
+        function copyStats() {
+            const stats = `Tokens: ${tokenCount.textContent}
+Characters: ${charCount.textContent}
+Words: ${wordCount.textContent}
+Lines: ${lineCount.textContent}
+
+Estimated Costs (Input):
+Opus 4.6: ${document.getElementById('costOpus').textContent}
+Sonnet 4: ${document.getElementById('costSonnet').textContent}
+Haiku 4.5: ${document.getElementById('costHaiku').textContent}`;
+
+            navigator.clipboard.writeText(stats).then(() => {
+                showSuccess('Stats copied to clipboard');
+            });
+        }
+
+        function showSuccess(msg) {
+            successMsg.textContent = msg;
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 2000);
+        }
+
+        textInput.addEventListener('input', updateStats);
+        clearBtn.addEventListener('click', clearText);
+        copyBtn.addEventListener('click', copyStats);
+
+        updateStats();
+    </script>
+</body>
+</html>

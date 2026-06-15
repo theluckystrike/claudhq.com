@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Prompt Generator — Free Tool | ClaudHQ</title>
+    <meta name="description" content="Generate professional system prompts for Claude. Define role, tone, constraints, and format instantly.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://claudhq.com/tools/system-prompt-generator/">
+    <meta property="og:title" content="System Prompt Generator — Free Tool | ClaudHQ">
+    <meta property="og:description" content="Generate professional system prompts for Claude. Define role, tone, constraints, and format instantly.">
+    <meta property="og:url" content="https://claudhq.com/tools/system-prompt-generator/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "WebApplication",
+        "name": "System Prompt Generator",
+        "url": "https://claudhq.com/tools/system-prompt-generator/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        }
+    }
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            color: #e8e8e8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+        .generator-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) {
+            .generator-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            background: #111111;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 18px;
+            color: #cbd5e1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        select, input[type="text"], textarea {
+            padding: 10px 12px;
+            background: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            border-radius: 6px;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        select:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #0f1419;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: "Monaco", "Menlo", "Courier New", monospace;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+        .checkbox-item label {
+            margin-bottom: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+        .preview-box {
+            background: #0f1419;
+            border: 1px solid #1a3a3a;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 16px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .preview-content {
+            color: #cbd5e1;
+            font-family: "Monaco", "Menlo", "Courier New", monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 16px;
+            background: #3b82f6;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        button.secondary {
+            background: #1a1a1a;
+            color: #3b82f6;
+            border: 1px solid #2d2d2d;
+        }
+        button.secondary:hover {
+            background: #2d2d2d;
+            border-color: #3b82f6;
+        }
+        .section-divider {
+            height: 1px;
+            background: #1a1a1a;
+            margin: 20px 0;
+        }
+        .success-msg {
+            background: #1a3a2a;
+            border-left: 4px solid #10b981;
+            color: #a8f5d1;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 12px 0;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .success-msg.show {
+            display: block;
+        }
+        .info-box {
+            background: #1a3a3a;
+            border-left: 4px solid #5eead4;
+            padding: 12px;
+            border-radius: 4px;
+            color: #a8f5d1;
+            font-size: 0.85rem;
+            margin-top: 16px;
+        }
+        .template-picker {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 768px) {
+            .template-picker {
+                grid-template-columns: 1fr;
+            }
+        }
+        .template-btn {
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .template-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #0f1419;
+        }
+        .partner-div {
+            margin: 30px auto;
+            max-width: 728px;
+            text-align: center;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid #334155;
+            border-radius: 10px;
+        }
+        .partner-label {
+            margin: 0 0 6px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .partner-link {
+            color: #38bdf8;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .partner-link:hover {
+            text-decoration: underline;
+        }
+        .partner-desc {
+            margin: 6px 0 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .ad-unit {
+            margin: 20px auto;
+            max-width: 728px;
+            text-align: center;
+            min-height: 100px;
+        }
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>System Prompt Generator</h1>
+            <p class="subtitle">Build powerful system prompts with role, tone, and constraints</p>
+        </header>
+
+        <div class="generator-wrapper">
+            <div class="panel">
+                <h2>Generate Your Prompt</h2>
+
+                <div class="form-group">
+                    <label for="role">Primary Role</label>
+                    <select id="role">
+                        <option value="">Select a role...</option>
+                        <option value="expert">Expert Consultant</option>
+                        <option value="teacher">Educator/Teacher</option>
+                        <option value="analyst">Data Analyst</option>
+                        <option value="developer">Software Developer</option>
+                        <option value="writer">Content Writer</option>
+                        <option value="researcher">Research Assistant</option>
+                        <option value="creative">Creative Director</option>
+                        <option value="customer">Customer Support Agent</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tone">Tone</label>
+                    <select id="tone">
+                        <option value="professional">Professional</option>
+                        <option value="friendly">Friendly & Conversational</option>
+                        <option value="formal">Formal & Academic</option>
+                        <option value="technical">Technical & Precise</option>
+                        <option value="casual">Casual & Approachable</option>
+                        <option value="creative">Creative & Imaginative</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="domain">Domain/Industry</label>
+                    <input type="text" id="domain" placeholder="e.g., Healthcare, Finance, Education">
+                </div>
+
+                <div class="section-divider"></div>
+
+                <label style="margin-bottom: 12px;">Capabilities & Constraints</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="code" value="code">
+                        <label for="code">Generate Code</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="json" value="json">
+                        <label for="json">Output JSON</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="longform" value="longform">
+                        <label for="longform">Long-form Content</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="citations" value="citations">
+                        <label for="citations">Cite Sources</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="multilang" value="multilang">
+                        <label for="multilang">Multilingual Support</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="stepwise" value="stepwise">
+                        <label for="stepwise">Step-by-Step Reasoning</label>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="form-group">
+                    <label for="customConstraints">Additional Constraints</label>
+                    <textarea id="customConstraints" placeholder="e.g., Avoid technical jargon, keep responses under 200 words, focus on practical examples..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button id="generateBtn">Generate Prompt</button>
+                    <button class="secondary" id="clearBtn">Reset</button>
+                </div>
+
+                <div id="successMsg" class="success-msg"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Live Preview</h2>
+
+                <div class="preview-box">
+                    <div class="preview-content" id="previewContent">You are a helpful assistant. Configure options on the left to generate a system prompt.</div>
+                </div>
+
+                <div class="button-group">
+                    <button id="copyBtn">Copy Prompt</button>
+                    <button class="secondary" id="downloadBtn">Download</button>
+                </div>
+
+                <h2 style="margin-top: 24px;">Quick Templates</h2>
+                <div class="template-picker">
+                    <button class="template-btn" data-template="qa">Q&A Assistant</button>
+                    <button class="template-btn" data-template="coder">Code Reviewer</button>
+                    <button class="template-btn" data-template="marketer">Marketer</button>
+                    <button class="template-btn" data-template="translator">Translator</button>
+                    <button class="template-btn" data-template="editor">Editor</button>
+                    <button class="template-btn" data-template="researcher">Researcher</button>
+                </div>
+
+                <div class="info-box">
+                    <strong>Tip:</strong> Copy this prompt into your API calls as the system message. Customize it further based on your specific needs.
+                </div>
+            </div>
+        </div>
+
+        <div class="partner-div">
+            <p class="partner-label">Recommended by our team</p>
+            <a href="https://www.belikenative.com?ref=satellite" target="_blank" rel="noopener" class="partner-link">BeLikeNative.com</a>
+            <p class="partner-desc">The #1 AI writing tool for freelancers — perfect grammar in any language, instantly.</p>
+        </div>
+
+        <div class="ad-unit">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2241192243363112" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ClaudHQ. All rights reserved. | <a href="https://claudhq.com/tools/">Back to Tools</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const roleDescriptions = {
+            expert: 'You are an expert consultant with deep knowledge',
+            teacher: 'You are an experienced educator dedicated to clear explanations',
+            analyst: 'You are a data analyst skilled at identifying patterns and insights',
+            developer: 'You are an experienced software developer',
+            writer: 'You are a skilled content writer and editor',
+            researcher: 'You are a thorough research assistant',
+            creative: 'You are a creative director with innovative thinking',
+            customer: 'You are a customer support specialist'
+        };
+
+        const templates = {
+            qa: { role: 'expert', tone: 'professional', capabilities: ['citations', 'stepwise'] },
+            coder: { role: 'developer', tone: 'technical', capabilities: ['code', 'json', 'stepwise'] },
+            marketer: { role: 'creative', tone: 'friendly', capabilities: ['longform'] },
+            translator: { role: 'writer', tone: 'professional', capabilities: ['multilang'] },
+            editor: { role: 'writer', tone: 'formal', capabilities: ['citations'] },
+            researcher: { role: 'researcher', tone: 'formal', capabilities: ['citations', 'stepwise'] }
+        };
+
+        document.getElementById('generateBtn').addEventListener('click', generatePrompt);
+        document.getElementById('clearBtn').addEventListener('click', clearAll);
+        document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+        document.getElementById('downloadBtn').addEventListener('click', downloadPrompt);
+
+        document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                loadTemplate(this.dataset.template);
+            });
+        });
+
+        ['role', 'tone', 'domain', 'customConstraints'].forEach(id => {
+            document.getElementById(id).addEventListener('change', generatePrompt);
+            document.getElementById(id).addEventListener('input', generatePrompt);
+        });
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', generatePrompt);
+        });
+
+        function generatePrompt() {
+            const role = document.getElementById('role').value;
+            const tone = document.getElementById('tone').value;
+            const domain = document.getElementById('domain').value;
+            const customConstraints = document.getElementById('customConstraints').value;
+
+            const capabilities = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                capabilities.push(cb.value);
+            });
+
+            let prompt = '';
+
+            if (role) {
+                prompt += roleDescriptions[role] + '. ';
+            }
+
+            if (domain) {
+                prompt += `Your expertise focuses on ${domain}. `;
+            }
+
+            prompt += `You communicate in a ${tone} manner. `;
+
+            if (capabilities.length > 0) {
+                const capMap = {
+                    code: 'Generate clean, well-documented code',
+                    json: 'Output structured JSON when appropriate',
+                    longform: 'Provide detailed, comprehensive responses',
+                    citations: 'Cite sources and provide attribution',
+                    multilang: 'Support multiple languages',
+                    stepwise: 'Break down complex problems step by step'
+                };
+                prompt += 'Your capabilities include: ' + capabilities.map(c => capMap[c]).join(', ') + '. ';
+            }
+
+            if (customConstraints) {
+                prompt += `Important constraints: ${customConstraints}`;
+            } else {
+                prompt += 'Always aim to be helpful, accurate, and concise.';
+            }
+
+            document.getElementById('previewContent').textContent = prompt;
+        }
+
+        function loadTemplate(templateName) {
+            const template = templates[templateName];
+            if (!template) return;
+
+            document.getElementById('role').value = template.role;
+            document.getElementById('tone').value = template.tone;
+
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = template.capabilities.includes(cb.value);
+            });
+
+            generatePrompt();
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('previewContent').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('Prompt copied to clipboard');
+            });
+        }
+
+        function downloadPrompt() {
+            const text = document.getElementById('previewContent').textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'system-prompt.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            showSuccess('Prompt downloaded');
+        }
+
+        function clearAll() {
+            document.getElementById('role').value = '';
+            document.getElementById('tone').value = 'professional';
+            document.getElementById('domain').value = '';
+            document.getElementById('customConstraints').value = '';
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            generatePrompt();
+            showSuccess('Cleared');
+        }
+
+        function showSuccess(msg) {
+            const div = document.getElementById('successMsg');
+            div.textContent = msg;
+            div.classList.add('show');
+            setTimeout(() => { div.classList.remove('show'); }, 2000);
+        }
+
+        generatePrompt();
+    </script>
+</body>
+</html>

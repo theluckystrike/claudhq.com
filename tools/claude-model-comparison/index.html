@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Model Comparison — Free Tool | ClaudHQ</title>
+    <meta name="description" content="Compare all Claude models side-by-side. Speed, cost, context window, and capabilities.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://claudhq.com/tools/claude-model-comparison/">
+    <meta property="og:title" content="Claude Model Comparison — Free Tool | ClaudHQ">
+    <meta property="og:description" content="Compare all Claude models side-by-side. Speed, cost, context window, and capabilities.">
+    <meta property="og:url" content="https://claudhq.com/tools/claude-model-comparison/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "WebApplication",
+        "name": "Claude Model Comparison",
+        "url": "https://claudhq.com/tools/claude-model-comparison/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        }
+    }
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            color: #e8e8e8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .filter-tab {
+            padding: 8px 16px;
+            background: #1a1a1a;
+            border: 2px solid #2d2d2d;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .filter-tab:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .filter-tab.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #0a0a0a;
+        }
+        .comparison-wrapper {
+            background: #111111;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        th {
+            background: #0f1419;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #cbd5e1;
+            border-bottom: 2px solid #2d2d2d;
+            font-size: 0.95rem;
+        }
+        th:first-child {
+            width: 150px;
+            position: sticky;
+            left: 0;
+            background: #0f1419;
+            z-index: 1;
+        }
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.95rem;
+        }
+        td:first-child {
+            font-weight: 600;
+            color: #cbd5e1;
+            background: #0f1419;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+        }
+        tr:hover td {
+            background: #0f1419;
+        }
+        tr:hover td:first-child {
+            background: #1a1a1a;
+        }
+        .best-value {
+            color: #10b981;
+            font-weight: 700;
+        }
+        .premium {
+            color: #f59e0b;
+        }
+        .budget {
+            color: #5eead4;
+        }
+        .capability-yes {
+            color: #10b981;
+            font-weight: 600;
+        }
+        .capability-no {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .section-label {
+            background: #1a1a1a;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .model-header {
+            background: #3b82f6;
+            color: #0a0a0a;
+            font-weight: 700 !important;
+        }
+        .recommended-badge {
+            display: inline-block;
+            background: #10b981;
+            color: #0a0a0a;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .use-case-section {
+            background: #111111;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+        .use-case {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .use-case:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .use-case-title {
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+        .use-case-model {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .use-case-reason {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .partner-div {
+            margin: 30px auto;
+            max-width: 728px;
+            text-align: center;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid #334155;
+            border-radius: 10px;
+        }
+        .partner-label {
+            margin: 0 0 6px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .partner-link {
+            color: #38bdf8;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .partner-link:hover {
+            text-decoration: underline;
+        }
+        .partner-desc {
+            margin: 6px 0 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .ad-unit {
+            margin: 20px auto;
+            max-width: 728px;
+            text-align: center;
+            min-height: 100px;
+        }
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .comparison-wrapper {
+                padding: 12px;
+            }
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude Model Comparison</h1>
+            <p class="subtitle">Compare all Claude models by speed, cost, context, and capabilities</p>
+        </header>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All Models</button>
+            <button class="filter-tab" data-filter="latest">Latest</button>
+            <button class="filter-tab" data-filter="budget">Budget</button>
+            <button class="filter-tab" data-filter="performance">Performance</button>
+        </div>
+
+        <div class="comparison-wrapper">
+            <table id="comparisonTable">
+                <thead>
+                    <tr>
+                        <th>Specification</th>
+                        <th class="model-header">Opus 4.6<span class="recommended-badge">LATEST</span></th>
+                        <th class="model-header">Sonnet 4</th>
+                        <th class="model-header">Haiku 4.5<span class="recommended-badge">BUDGET</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="section-label" colspan="4">Pricing (per 1M tokens)</td>
+                    </tr>
+                    <tr>
+                        <td>Input Cost</td>
+                        <td class="premium">$3.00</td>
+                        <td class="premium">$3.00</td>
+                        <td class="best-value">$0.80</td>
+                    </tr>
+                    <tr>
+                        <td>Output Cost</td>
+                        <td class="premium">$15.00</td>
+                        <td class="premium">$15.00</td>
+                        <td class="best-value">$4.00</td>
+                    </tr>
+                    <tr>
+                        <td>Batch Discount</td>
+                        <td>50%</td>
+                        <td>50%</td>
+                        <td>50%</td>
+                    </tr>
+                    <tr>
+                        <td class="section-label" colspan="4">Capabilities</td>
+                    </tr>
+                    <tr>
+                        <td>Context Window</td>
+                        <td class="best-value">200K tokens</td>
+                        <td class="best-value">200K tokens</td>
+                        <td class="best-value">200K tokens</td>
+                    </tr>
+                    <tr>
+                        <td>Vision (Images)</td>
+                        <td class="capability-yes">Yes</td>
+                        <td class="capability-yes">Yes</td>
+                        <td class="capability-yes">Yes</td>
+                    </tr>
+                    <tr>
+                        <td>JSON Mode</td>
+                        <td class="capability-yes">Yes</td>
+                        <td class="capability-yes">Yes</td>
+                        <td class="capability-yes">Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Tool Use</td>
+                        <td class="capability-yes">Yes</td>
+                        <td class="capability-yes">Yes</td>
+                        <td class="capability-yes">Yes</td>
+                    </tr>
+                    <tr>
+                        <td class="section-label" colspan="4">Performance</td>
+                    </tr>
+                    <tr>
+                        <td>Speed</td>
+                        <td class="best-value">Fastest</td>
+                        <td class="budget">Fast</td>
+                        <td class="budget">Very Fast</td>
+                    </tr>
+                    <tr>
+                        <td>Reasoning Ability</td>
+                        <td class="best-value">Advanced</td>
+                        <td class="best-value">Advanced</td>
+                        <td class="budget">Good</td>
+                    </tr>
+                    <tr>
+                        <td>Code Generation</td>
+                        <td class="best-value">Expert</td>
+                        <td class="best-value">Expert</td>
+                        <td class="budget">Capable</td>
+                    </tr>
+                    <tr>
+                        <td class="section-label" colspan="4">Best Use Cases</td>
+                    </tr>
+                    <tr>
+                        <td>Recommended For</td>
+                        <td>Complex analysis, research, agentic tasks</td>
+                        <td>General-purpose, content, analysis</td>
+                        <td>Simple tasks, high volume, cost-sensitive</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="use-case-section">
+            <h2 style="margin-bottom: 20px; color: #e8e8e8;">When to Use Each Model</h2>
+
+            <div class="use-case">
+                <div class="use-case-title">Complex Research & Analysis</div>
+                <div class="use-case-model">Recommended: Opus 4.6</div>
+                <div class="use-case-reason">Best-in-class reasoning for intricate problems, multi-step analysis, and sophisticated document processing</div>
+            </div>
+
+            <div class="use-case">
+                <div class="use-case-title">General Content Creation & QA</div>
+                <div class="use-case-model">Recommended: Sonnet 4</div>
+                <div class="use-case-reason">Perfect balance of quality and speed for content, copywriting, translations, and most API use cases</div>
+            </div>
+
+            <div class="use-case">
+                <div class="use-case-title">High-Volume Batch Processing</div>
+                <div class="use-case-model">Recommended: Haiku 4.5</div>
+                <div class="use-case-reason">Extremely fast and cost-effective for simple summarization, classification, data extraction, and bulk operations</div>
+            </div>
+
+            <div class="use-case">
+                <div class="use-case-title">Agentic AI Systems</div>
+                <div class="use-case-model">Recommended: Opus 4.6</div>
+                <div class="use-case-reason">Superior reasoning for multi-turn conversations, tool use orchestration, and autonomous decision-making</div>
+            </div>
+        </div>
+
+        <div class="partner-div">
+            <p class="partner-label">Recommended by our team</p>
+            <a href="https://www.belikenative.com?ref=satellite" target="_blank" rel="noopener" class="partner-link">BeLikeNative.com</a>
+            <p class="partner-desc">The #1 AI writing tool for freelancers — perfect grammar in any language, instantly.</p>
+        </div>
+
+        <div class="ad-unit">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2241192243363112" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ClaudHQ. All rights reserved. | <a href="https://claudhq.com/tools/">Back to Tools</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const filters = {
+            all: () => true,
+            latest: (row) => {
+                const cells = row.querySelectorAll('td, th');
+                return !row.querySelector('.section-label');
+            },
+            budget: (row) => {
+                const cells = row.querySelectorAll('td');
+                return !row.querySelector('.section-label');
+            },
+            performance: (row) => {
+                const cells = row.querySelectorAll('td');
+                return !row.querySelector('.section-label');
+            }
+        };
+
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

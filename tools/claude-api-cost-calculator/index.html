@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude API Cost Calculator — Free Tool | ClaudHQ</title>
+    <meta name="description" content="Calculate Claude API costs by model. Compare Opus, Sonnet, Haiku pricing with batch discounts.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://claudhq.com/tools/claude-api-cost-calculator/">
+    <meta property="og:title" content="Claude API Cost Calculator — Free Tool | ClaudHQ">
+    <meta property="og:description" content="Calculate Claude API costs by model. Compare Opus, Sonnet, Haiku pricing with batch discounts.">
+    <meta property="og:url" content="https://claudhq.com/tools/claude-api-cost-calculator/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "WebApplication",
+        "name": "Claude API Cost Calculator",
+        "url": "https://claudhq.com/tools/claude-api-cost-calculator/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        }
+    }
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            color: #e8e8e8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+        .tool-wrapper {
+            background: #111111;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+        select, input[type="number"] {
+            padding: 10px 12px;
+            background: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            border-radius: 6px;
+            color: #e8e8e8;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #0f1419;
+        }
+        .model-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .model-btn {
+            padding: 12px;
+            background: #1a1a1a;
+            border: 2px solid #2d2d2d;
+            border-radius: 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .model-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .model-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #0a0a0a;
+        }
+        .results {
+            background: #0f1419;
+            border: 1px solid #1a3a3a;
+            border-radius: 10px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            color: #94a3b8;
+        }
+        .result-value {
+            color: #3b82f6;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #0f1419;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .comparison-table th {
+            background: #1a1a1a;
+            padding: 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #cbd5e1;
+            border-bottom: 1px solid #2d2d2d;
+        }
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .comparison-table tr:hover {
+            background: #0f1419;
+        }
+        .price-highlight {
+            color: #10b981;
+            font-weight: 700;
+        }
+        .batch-note {
+            background: #1a3a2a;
+            border-left: 4px solid #10b981;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            color: #a8f5d1;
+            font-size: 0.9rem;
+        }
+        .partner-div {
+            margin: 30px auto;
+            max-width: 728px;
+            text-align: center;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid #334155;
+            border-radius: 10px;
+        }
+        .partner-label {
+            margin: 0 0 6px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .partner-link {
+            color: #38bdf8;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .partner-link:hover {
+            text-decoration: underline;
+        }
+        .partner-desc {
+            margin: 6px 0 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .ad-unit {
+            margin: 20px auto;
+            max-width: 728px;
+            text-align: center;
+            min-height: 100px;
+        }
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude API Cost Calculator</h1>
+            <p class="subtitle">Calculate costs for any Claude model with real-time pricing</p>
+        </header>
+
+        <div class="tool-wrapper">
+            <div style="margin-bottom: 25px;">
+                <p style="color: #cbd5e1; margin-bottom: 15px;">Select Model:</p>
+                <div class="model-selector">
+                    <button class="model-btn active" data-model="opus" data-input="3" data-output="15">Opus 4.6</button>
+                    <button class="model-btn" data-model="sonnet" data-input="3" data-output="15">Sonnet 4</button>
+                    <button class="model-btn" data-model="haiku" data-input="0.80" data-output="4">Haiku 4.5</button>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label for="inputTokens">Input Tokens</label>
+                    <input type="number" id="inputTokens" value="10000" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label for="outputTokens">Output Tokens</label>
+                    <input type="number" id="outputTokens" value="5000" min="0" step="100">
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label for="callCount">Number of API Calls</label>
+                    <input type="number" id="callCount" value="100" min="1" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="useBatch">
+                        <input type="checkbox" id="useBatch" style="margin-right: 8px; cursor: pointer;">
+                        Use Batch API (50% discount)
+                    </label>
+                </div>
+            </div>
+
+            <div class="results">
+                <div class="result-row">
+                    <span class="result-label">Cost per API Call</span>
+                    <span class="result-value" id="costPerCall">$0.045</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Cost (All Calls)</span>
+                    <span class="result-value" id="totalCost">$4.50</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Input Tokens</span>
+                    <span class="result-value" id="totalInput">1,000,000</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Output Tokens</span>
+                    <span class="result-value" id="totalOutput">500,000</span>
+                </div>
+                <div id="batchInfo" class="batch-note" style="display: none;">
+                    Batch API reduces costs by 50% and processes jobs in 24 hours. Ideal for non-urgent bulk operations.
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-wrapper">
+            <h2 style="margin-bottom: 20px; color: #e8e8e8;">Claude Model Pricing (per 1M tokens)</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Input</th>
+                        <th>Output</th>
+                        <th>Context</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Opus 4.6</strong></td>
+                        <td class="price-highlight">$3.00</td>
+                        <td class="price-highlight">$15.00</td>
+                        <td>200K tokens</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sonnet 4</strong></td>
+                        <td class="price-highlight">$3.00</td>
+                        <td class="price-highlight">$15.00</td>
+                        <td>200K tokens</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Haiku 4.5</strong></td>
+                        <td class="price-highlight">$0.80</td>
+                        <td class="price-highlight">$4.00</td>
+                        <td>200K tokens</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="partner-div">
+            <p class="partner-label">Recommended by our team</p>
+            <a href="https://www.belikenative.com?ref=satellite" target="_blank" rel="noopener" class="partner-link">BeLikeNative.com</a>
+            <p class="partner-desc">The #1 AI writing tool for freelancers — perfect grammar in any language, instantly.</p>
+        </div>
+
+        <div class="ad-unit">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2241192243363112" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ClaudHQ. All rights reserved. | <a href="https://claudhq.com/tools/">Back to Tools</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const models = {
+            opus: { input: 3, output: 15, name: 'Opus 4.6' },
+            sonnet: { input: 3, output: 15, name: 'Sonnet 4' },
+            haiku: { input: 0.80, output: 4, name: 'Haiku 4.5' }
+        };
+
+        let selectedModel = 'opus';
+
+        document.querySelectorAll('.model-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedModel = this.dataset.model;
+                calculate();
+            });
+        });
+
+        ['inputTokens', 'outputTokens', 'callCount', 'useBatch'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculate);
+        });
+
+        function calculate() {
+            const inputTokens = parseFloat(document.getElementById('inputTokens').value) || 0;
+            const outputTokens = parseFloat(document.getElementById('outputTokens').value) || 0;
+            const callCount = parseInt(document.getElementById('callCount').value) || 1;
+            const useBatch = document.getElementById('useBatch').checked;
+
+            const model = models[selectedModel];
+            const inputCost = (inputTokens / 1000000) * model.input;
+            const outputCost = (outputTokens / 1000000) * model.output;
+            const costPerCall = inputCost + outputCost;
+            let totalCost = costPerCall * callCount;
+
+            if (useBatch) {
+                totalCost *= 0.5;
+            }
+
+            document.getElementById('costPerCall').textContent = '$' + costPerCall.toFixed(6);
+            document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(2);
+            document.getElementById('totalInput').textContent = (inputTokens * callCount).toLocaleString();
+            document.getElementById('totalOutput').textContent = (outputTokens * callCount).toLocaleString();
+            document.getElementById('batchInfo').style.display = useBatch ? 'block' : 'none';
+        }
+
+        calculate();
+    </script>
+</body>
+</html>

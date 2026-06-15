@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Template Builder — Free Tool | ClaudHQ</title>
+    <meta name="description" content="Visual prompt template builder with variables, roles, and JSON export. Create reusable Claude prompts instantly.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://claudhq.com/tools/prompt-template-builder/">
+    <meta property="og:title" content="Prompt Template Builder — Free Tool | ClaudHQ">
+    <meta property="og:description" content="Visual prompt template builder with variables, roles, and JSON export. Create reusable Claude prompts instantly.">
+    <meta property="og:url" content="https://claudhq.com/tools/prompt-template-builder/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "WebApplication",
+        "name": "Prompt Template Builder",
+        "url": "https://claudhq.com/tools/prompt-template-builder/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        }
+    }
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2241192243363112" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            color: #e8e8e8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.05rem;
+        }
+        .builder-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) {
+            .builder-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            background: #111111;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            color: #cbd5e1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        select, input[type="text"], textarea {
+            padding: 10px 12px;
+            background: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            border-radius: 6px;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        select:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #0f1419;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: "Monaco", "Menlo", "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+        .role-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .role-tab {
+            padding: 8px 14px;
+            background: #1a1a1a;
+            border: 2px solid #2d2d2d;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .role-tab:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .role-tab.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #0a0a0a;
+        }
+        .variable-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1a3a3a;
+            color: #5eead4;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin: 4px;
+            font-size: 0.85rem;
+            border: 1px solid #2d5a5a;
+        }
+        .variable-chip button {
+            background: none;
+            border: none;
+            color: #5eead4;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0;
+        }
+        .variable-chip button:hover {
+            color: #f87171;
+        }
+        .variables-list {
+            background: #0f1419;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+            min-height: 60px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 16px;
+            background: #3b82f6;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        button.secondary {
+            background: #1a1a1a;
+            color: #3b82f6;
+            border: 1px solid #2d2d2d;
+        }
+        button.secondary:hover {
+            background: #2d2d2d;
+            border-color: #3b82f6;
+        }
+        .preview-section {
+            background: #0f1419;
+            border: 1px solid #1a3a3a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .preview-section h3 {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .preview-content {
+            color: #cbd5e1;
+            font-family: "Monaco", "Menlo", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success-msg {
+            background: #1a3a2a;
+            border-left: 4px solid #10b981;
+            color: #a8f5d1;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        .partner-div {
+            margin: 30px auto;
+            max-width: 728px;
+            text-align: center;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid #334155;
+            border-radius: 10px;
+        }
+        .partner-label {
+            margin: 0 0 6px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .partner-link {
+            color: #38bdf8;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .partner-link:hover {
+            text-decoration: underline;
+        }
+        .partner-desc {
+            margin: 6px 0 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .ad-unit {
+            margin: 20px auto;
+            max-width: 728px;
+            text-align: center;
+            min-height: 100px;
+        }
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prompt Template Builder</h1>
+            <p class="subtitle">Create reusable prompt templates with variables and role management</p>
+        </header>
+
+        <div class="builder-wrapper">
+            <div class="panel">
+                <h2>Template Configuration</h2>
+
+                <div class="form-group">
+                    <label>Role</label>
+                    <div class="role-tabs">
+                        <button class="role-tab active" data-role="system">System</button>
+                        <button class="role-tab" data-role="user">User</button>
+                        <button class="role-tab" data-role="assistant">Assistant</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="templateName">Template Name</label>
+                    <input type="text" id="templateName" placeholder="e.g., Customer Support Bot">
+                </div>
+
+                <div class="form-group">
+                    <label for="templateContent">Prompt Content</label>
+                    <textarea id="templateContent" placeholder="You are a helpful assistant...&#10;&#10;Use {variable_name} for dynamic values"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="variableName">Add Variable</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="variableName" placeholder="e.g., customer_name" style="flex: 1;">
+                        <button id="addVarBtn" style="padding: 10px 16px;">Add</button>
+                    </div>
+                </div>
+
+                <div class="variables-list" id="variablesList">
+                    <div style="color: #64748b; font-size: 0.9rem;">No variables added yet</div>
+                </div>
+
+                <div class="button-group">
+                    <button id="exportBtn">Export JSON</button>
+                    <button class="secondary" id="clearBtn">Clear All</button>
+                    <button class="secondary" id="copyBtn">Copy to Clipboard</button>
+                </div>
+
+                <div id="successMsg"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Live Preview</h2>
+
+                <div class="preview-section">
+                    <h3>Role: <span id="previewRole">system</span></h3>
+                    <div class="preview-content" id="previewContent">You are a helpful assistant...</div>
+                </div>
+
+                <h2 style="margin-top: 24px;">Variables Reference</h2>
+                <div class="preview-section">
+                    <div id="variablesPreview" style="color: #94a3b8; font-size: 0.85rem;">
+                        <span style="color: #64748b;">Variables will appear here</span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 24px;">JSON Output</h2>
+                <div class="preview-section" style="max-height: 400px;">
+                    <div class="preview-content" id="jsonOutput">{
+  "role": "system",
+  "name": "Untitled Template",
+  "content": "",
+  "variables": []
+}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="partner-div">
+            <p class="partner-label">Recommended by our team</p>
+            <a href="https://www.belikenative.com?ref=satellite" target="_blank" rel="noopener" class="partner-link">BeLikeNative.com</a>
+            <p class="partner-desc">The #1 AI writing tool for freelancers — perfect grammar in any language, instantly.</p>
+        </div>
+
+        <div class="ad-unit">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2241192243363112" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ClaudHQ. All rights reserved. | <a href="https://claudhq.com/tools/">Back to Tools</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let currentRole = 'system';
+        let variables = [];
+
+        document.querySelectorAll('.role-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentRole = this.dataset.role;
+                updatePreview();
+            });
+        });
+
+        document.getElementById('templateName').addEventListener('input', updatePreview);
+        document.getElementById('templateContent').addEventListener('input', updatePreview);
+
+        document.getElementById('addVarBtn').addEventListener('click', addVariable);
+        document.getElementById('variableName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addVariable();
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', exportJSON);
+        document.getElementById('clearBtn').addEventListener('click', clearAll);
+        document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+
+        function addVariable() {
+            const input = document.getElementById('variableName');
+            const varName = input.value.trim();
+            if (!varName) return;
+            if (variables.includes(varName)) {
+                showSuccess('Variable already exists');
+                return;
+            }
+            variables.push(varName);
+            input.value = '';
+            updateVariablesDisplay();
+            updatePreview();
+            showSuccess('Variable added');
+        }
+
+        function removeVariable(varName) {
+            variables = variables.filter(v => v !== varName);
+            updateVariablesDisplay();
+            updatePreview();
+        }
+
+        function updateVariablesDisplay() {
+            const list = document.getElementById('variablesList');
+            if (variables.length === 0) {
+                list.innerHTML = '<div style="color: #64748b; font-size: 0.9rem;">No variables added yet</div>';
+                return;
+            }
+            list.innerHTML = variables.map(v => `
+                <div class="variable-chip">
+                    {${v}}
+                    <button onclick="removeVariable('${v}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('templateName').value || 'Untitled Template';
+            const content = document.getElementById('templateContent').value || '(empty)';
+
+            document.getElementById('previewRole').textContent = currentRole;
+            document.getElementById('previewContent').textContent = content;
+
+            const varRef = variables.length > 0
+                ? variables.map((v, i) => `${i + 1}. {${v}}`).join('\n')
+                : '(no variables)';
+            document.getElementById('variablesPreview').innerHTML = varRef.replace(/\n/g, '<br>');
+
+            const jsonObj = {
+                role: currentRole,
+                name: name,
+                content: content,
+                variables: variables
+            };
+            document.getElementById('jsonOutput').textContent = JSON.stringify(jsonObj, null, 2);
+        }
+
+        function exportJSON() {
+            const name = document.getElementById('templateName').value || 'template';
+            const jsonObj = {
+                role: currentRole,
+                name: name,
+                content: document.getElementById('templateContent').value,
+                variables: variables
+            };
+            const json = JSON.stringify(jsonObj, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name.replace(/\s+/g, '-').toLowerCase()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showSuccess('JSON exported');
+        }
+
+        function copyToClipboard() {
+            const json = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(json).then(() => {
+                showSuccess('Copied to clipboard');
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateContent').value = '';
+            variables = [];
+            updateVariablesDisplay();
+            updatePreview();
+            showSuccess('Cleared');
+        }
+
+        function showSuccess(msg) {
+            const div = document.getElementById('successMsg');
+            div.innerHTML = `<div class="success-msg">${msg}</div>`;
+            setTimeout(() => { div.innerHTML = ''; }, 2000);
+        }
+
+        updatePreview();
+    </script>
+</body>
+</html>
