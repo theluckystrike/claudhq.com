@@ -179,4 +179,8 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url><loc>https://claudhq.com/tools/claude-api-retry-budget-calculator.html</loc></url>
+  <url><loc>https://claudhq.com/tools/claude-code-hooks-simulator.html</loc></url>
+  <url><loc>https://claudhq.com/tools/claude-code-usage-limit-planner.html</loc></url>
+  <url><loc>https://claudhq.com/tools/mcp-tool-context-overhead-calculator.html</loc></url>
 </urlset>

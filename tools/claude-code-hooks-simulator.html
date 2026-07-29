@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code Hooks Simulator &amp; Matcher Tester</title>
+<meta name="description" content="Paste your settings.json hooks block, pick an event and tool, and see exactly which matchers fire, in what order, and the decision Claude ends up with.">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://claudhq.com/tools/claude-code-hooks-simulator">
+<meta property="og:title" content="Claude Code Hooks Simulator &amp; Matcher Tester">
+<meta property="og:description" content="Simulate Claude Code hook matching, firing order, exit-code precedence, and latency budget from a real settings.json hooks block.">
+<meta property="og:url" content="https://claudhq.com/tools/claude-code-hooks-simulator">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code Hooks Simulator">
+<meta name="twitter:description" content="Test hook matchers, firing order, and decision precedence in your browser.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "Claude Code Hooks Simulator & Matcher Tester",
+      "url": "https://claudhq.com/tools/claude-code-hooks-simulator",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "description": "Paste a settings.json hooks block, pick an event and tool, and see which matchers fire, the firing order, the resolved decision, and the added latency budget.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "Michael Lip", "url": "https://zovo.one" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://claudhq.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://claudhq.com/tools/" },
+        { "@type": "ListItem", "position": 3, "name": "Claude Code Hooks Simulator & Matcher Tester", "item": "https://claudhq.com/tools/claude-code-hooks-simulator" }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+:root{
+  --bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--border:#2b3440;
+  --fg:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--ok:#3fb950;--bad:#f85149;--warn:#d29922;--info:#a371f7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6;font-size:16px}
+nav{display:flex;gap:20px;padding:14px 22px;background:var(--panel);border-bottom:1px solid var(--border);font-size:14px}
+nav a{color:var(--accent);text-decoration:none;font-weight:600}
+nav a:hover{text-decoration:underline}
+main{max-width:1000px;margin:0 auto;padding:26px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:.3em 0 .2em}
+h2{font-size:1.3rem;margin:1.6em 0 .5em;border-bottom:1px solid var(--border);padding-bottom:.3em}
+h3{font-size:1.05rem;margin:1.2em 0 .4em}
+.lede{color:var(--muted);font-size:1.05rem;margin:.4em 0 1.4em}
+section#tool{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin:10px 0 24px}
+label{display:block;font-weight:600;font-size:.9rem;margin:14px 0 5px;color:var(--fg)}
+.hint{font-weight:400;color:var(--muted);font-size:.8rem}
+select,textarea,input[type=text],input[type=number]{
+  width:100%;background:var(--panel2);color:var(--fg);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;font-size:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+select{font-family:inherit}
+textarea{resize:vertical;min-height:70px}
+textarea#hooksInput{min-height:230px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.row>div{flex:1;min-width:200px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{padding:9px 14px;border:1px solid var(--border);background:var(--panel2);color:var(--fg);border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit}
+button:hover{background:#26303f}
+button.primary{background:var(--accent);color:#0d1117;border-color:var(--accent)}
+button.primary:hover{background:#79c0ff}
+.out{margin-top:22px}
+.card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:12px 0}
+.card h3{margin-top:0}
+.verdict{padding:16px 18px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);margin-top:12px}
+.verdict h3{margin:0 0 6px;font-size:1.15rem}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.78rem;font-weight:700;letter-spacing:.03em}
+.b-ok{background:rgba(63,185,80,.15);color:var(--ok);border:1px solid var(--ok)}
+.b-bad{background:rgba(248,81,73,.15);color:var(--bad);border:1px solid var(--bad)}
+.b-warn{background:rgba(210,153,34,.15);color:var(--warn);border:1px solid var(--warn)}
+.b-info{background:rgba(163,113,247,.15);color:var(--info);border:1px solid var(--info)}
+.b-mute{background:rgba(139,148,158,.13);color:var(--muted);border:1px solid var(--border)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{text-align:left;padding:8px 8px;border-top:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;border-top:none}
+.tablewrap{overflow-x:auto}
+.kv div{padding:6px 0;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;font-size:13px}
+.kv .k{color:var(--muted);min-width:210px;font-weight:600}
+.kv .v{flex:1;min-width:180px}
+.hookrow{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:10px 0;background:var(--panel)}
+.hookrow .top{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.hookrow .cmd{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--muted);word-break:break-all;margin:4px 0 0}
+.hookrow select{max-width:280px}
+.hookrow textarea{min-height:56px;margin-top:8px;font-size:12.5px}
+.lint{border-left:3px solid var(--warn);padding:8px 12px;margin:8px 0;background:var(--panel);border-radius:0 6px 6px 0}
+.lint.err{border-left-color:var(--bad)}
+.lint.inf{border-left-color:var(--info)}
+.lint .lt{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--warn)}
+.lint.err .lt{color:var(--bad)}
+.lint.inf .lt{color:var(--info)}
+.lint .lm{font-size:.9rem}
+.lint .ld{font-size:.83rem;color:var(--muted);margin-top:3px}
+pre{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px;overflow-x:auto;font-size:12.5px;margin:8px 0}
+code{background:var(--panel2);padding:2px 6px;border-radius:5px;font-size:.85em;font-family:ui-monospace,monospace}
+.prose p{margin:.7em 0}
+.prose a{color:var(--accent)}
+.prose ul{margin:.6em 0 .6em 1.1em;padding:0}
+.prose li{margin:.35em 0}
+.err-box{border:1px solid var(--bad);background:rgba(248,81,73,.08);border-radius:8px;padding:12px;font-size:.9rem}
+.muted{color:var(--muted)}
+.small{font-size:.83rem}
+footer{border-top:1px solid var(--border);margin-top:40px;padding:22px 20px;color:var(--muted);font-size:14px;text-align:center}
+footer a{color:var(--accent);text-decoration:none;margin:0 8px}
+.related a{color:var(--accent);text-decoration:none}
+.related li{margin:5px 0}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/tools/">All Tools</a>
+  <a href="/guides/">Guides</a>
+</nav>
+<main>
+<h1>Claude Code Hooks Simulator and Matcher Tester</h1>
+<p class="lede">Paste the <code>hooks</code> block out of your <code>settings.json</code>, choose an event and a tool, and this page compiles every matcher the way Claude Code does, works out which hooks fire and how long the CLI waits for them, resolves the exit-code and JSON precedence into a single verdict, and lints the config. Everything runs locally in your browser.</p>
+
+<section id="tool">
+  <label for="hooksInput">1. Your <code>hooks</code> block <span class="hint">paste the whole settings.json or just the hooks object</span></label>
+  <textarea id="hooksInput" spellcheck="false"></textarea>
+  <div class="btnrow">
+    <button type="button" id="btnSample">Load example config</button>
+    <button type="button" id="btnClear">Clear</button>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="evt">2. Simulated event</label>
+      <select id="evt">
+        <option value="PreToolUse">PreToolUse</option>
+        <option value="PostToolUse">PostToolUse</option>
+        <option value="UserPromptSubmit">UserPromptSubmit</option>
+        <option value="Stop">Stop</option>
+        <option value="SubagentStop">SubagentStop</option>
+        <option value="SessionStart">SessionStart</option>
+        <option value="PreCompact">PreCompact</option>
+        <option value="Notification">Notification</option>
+      </select>
+    </div>
+    <div id="toolWrap">
+      <label for="toolName">Tool name <span class="hint">what the matcher is tested against</span></label>
+      <input id="toolName" type="text" list="toolList" spellcheck="false" value="Edit">
+      <datalist id="toolList">
+        <option value="Bash"></option><option value="Edit"></option><option value="Write"></option>
+        <option value="Read"></option><option value="Glob"></option><option value="Grep"></option>
+        <option value="WebFetch"></option><option value="WebSearch"></option><option value="Task"></option>
+        <option value="NotebookEdit"></option><option value="TodoWrite"></option>
+        <option value="mcp__github__create_issue"></option><option value="mcp__memory__search_nodes"></option>
+      </datalist>
+    </div>
+    <div id="srcWrap" style="display:none">
+      <label for="srcVal">Matcher target <span class="hint" id="srcHint"></span></label>
+      <select id="srcVal"></select>
+    </div>
+  </div>
+
+  <label for="toolInput">3. Tool input JSON <span class="hint">the <code>tool_input</code> object the hook receives on stdin; also drives <code>if</code> filters</span></label>
+  <textarea id="toolInput" spellcheck="false">{ "file_path": "/repo/src/api/client.ts", "old_string": "a", "new_string": "b" }</textarea>
+
+  <div id="hookResults"></div>
+
+  <div class="out" id="out" aria-live="polite"></div>
+</section>
+
+<div class="prose">
+<h2>How Claude Code actually routes a hook event</h2>
+
+<h3>Step 1 &mdash; matcher compilation</h3>
+<p>Each entry under an event is a <em>group</em>: one <code>matcher</code> plus an array of <code>hooks</code>. For the tool events (<code>PreToolUse</code>, <code>PostToolUse</code>), the matcher is tested against the <strong>tool name</strong> as a regular expression, and it is anchored &mdash; <code>Edit</code> matches only <code>Edit</code>, not <code>NotebookEdit</code> or <code>MultiEdit</code>. This page shows the anchored form it applies, <code>^(?:matcher)$</code>. Matching is case sensitive. A matcher of <code>*</code>, an empty string, or a missing <code>matcher</code> key matches every tool. Alternation works exactly as you would expect: <code>Edit|Write|MultiEdit</code> compiles to <code>^(?:Edit|Write|MultiEdit)$</code>.</p>
+<p>MCP tools are exposed as <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>, so a matcher for a whole server has to be written as a regex &mdash; <code>mcp__github__.*</code>. Writing <code>mcp__github__*</code> is the single most common hook bug: in regex, <code>*</code> is a quantifier applied to the preceding character, so that pattern means "<code>mcp__github_</code> followed by zero or more underscores" and it will never match a real MCP tool name. The simulator prints both readings so you can see the failure.</p>
+<p>Not every event matches on tool names. <code>Stop</code>, <code>SubagentStop</code>, and <code>UserPromptSubmit</code> have no matcher target at all &mdash; every group under them fires and any matcher string you write is inert. <code>SessionStart</code> matches the session <em>source</em> (<code>startup</code>, <code>resume</code>, <code>clear</code>, <code>compact</code>), <code>PreCompact</code> matches the compaction <em>trigger</em> (<code>manual</code>, <code>auto</code>), and <code>Notification</code> matches the notification type. Putting <code>Edit|Write</code> on any of those is a silent no-op or a silent match-everything, which is why the linter calls it out.</p>
+
+<h3>Step 2 &mdash; firing order and the wait</h3>
+<p>There is no ordering guarantee. Every group whose matcher hits runs concurrently, and every hook inside a group runs in parallel with its siblings, so the number of processes spawned is the total count of matching hook entries, not the number of groups. Because they are parallel, the wall-clock the CLI spends is the <strong>maximum</strong> of the individual timeouts, not the sum:</p>
+<pre>wait(event) = max( timeout_i )  over every matching hook i
+timeout_i   = hook.timeout  or  60 seconds when unset</pre>
+<p>60 seconds is the per-command default. A timeout applies to one command only &mdash; one slow hook does not extend the budget of the others, it just becomes the critical path. The simulator marks which hook is on that critical path.</p>
+
+<h3>Step 3 &mdash; decision precedence</h3>
+<p>A hook communicates back in two ways, and the richer one wins. The simple channel is the exit code:</p>
+<ul>
+<li><strong>Exit 0</strong> &mdash; success. <code>stdout</code> is shown in the transcript (Ctrl-R) and Claude never sees it, with two exceptions: for <code>UserPromptSubmit</code> and <code>SessionStart</code>, stdout is injected into the model's context.</li>
+<li><strong>Exit 2</strong> &mdash; blocking error, and <code>stderr</code> is fed back to Claude. What it blocks depends on the event: <code>PreToolUse</code> blocks the tool call, <code>Stop</code> and <code>SubagentStop</code> block Claude from stopping, <code>UserPromptSubmit</code> erases the prompt (and there the stderr goes to the user, not the model). On <code>PostToolUse</code> the tool has already run and cannot be undone, so the stderr is feedback rather than a block. On <code>SessionStart</code>, <code>PreCompact</code>, and <code>Notification</code>, exit 2 blocks nothing.</li>
+<li><strong>Any other non-zero exit</strong> &mdash; non-blocking error. stderr is surfaced to the user, and execution continues as if the hook had not spoken.</li>
+</ul>
+<p>The richer channel is structured JSON on stdout. If stdout parses as JSON, it overrides the exit code. <code>hookSpecificOutput.permissionDecision</code> on <code>PreToolUse</code> takes <code>allow</code>, <code>deny</code>, or <code>ask</code>; <code>decision: "block"</code> with a <code>reason</code> is the equivalent on <code>PostToolUse</code>, <code>Stop</code>, and <code>UserPromptSubmit</code>; <code>hookSpecificOutput.additionalContext</code> injects text into the model's context; and <code>continue: false</code> with a <code>stopReason</code> halts the whole turn and outranks every other field. If stdout does not parse as JSON, it is treated as plain text and the exit code governs after all.</p>
+<p>When several hooks answer at once, the resolution is <strong>deny &gt; ask &gt; allow</strong>. One denial from any hook blocks the call no matter how many others allowed it, and an <code>allow</code> from a hook bypasses the normal permission prompt rather than merely permitting it. If no hook expresses a decision, the call falls through to the usual permission system.</p>
+
+<h3>Step 4 &mdash; the latency you actually pay</h3>
+<p>A tool call is wrapped by two hook events, so the worst-case added wall clock per call is:</p>
+<pre>added_latency = max(PreToolUse timeouts that match the tool)
+              + max(PostToolUse timeouts that match the tool)</pre>
+<p>The panel computes this from your config for the tool you selected. It is a ceiling, not a measurement &mdash; hooks that finish fast cost nothing &mdash; but it is the number that matters when a hook hangs, because that is exactly how long every single matching tool call will stall before the CLI gives up on it. Two 60-second defaults on a tool Claude calls forty times in a session is a 40-minute worst case, which is why explicit short timeouts on frequently matched tools are worth the keystrokes.</p>
+
+<h3>What the linter checks</h3>
+<ul>
+<li>Permission-rule syntax (<code>Bash(npm run build)</code>) used where a matcher belongs &mdash; the parentheses are regex groups, not a literal command, and matchers only ever see a tool name.</li>
+<li>Glob-style <code>*</code> used as a wildcard after a literal character, the <code>mcp__server__*</code> trap.</li>
+<li>Matchers that fail to compile as a regex at all.</li>
+<li>Matchers set on events that ignore them, or set to a tool name on events that match a source or trigger instead.</li>
+<li>Missing <code>"type"</code> &mdash; command hooks require <code>"type": "command"</code> alongside <code>"command"</code>.</li>
+<li>Relative script paths, which resolve against whatever the CLI's working directory happens to be. Use <code>$CLAUDE_PROJECT_DIR</code>, which Claude Code sets to the project root for every hook process.</li>
+<li>Timeouts that are absent, zero, negative, or non-numeric, plus timeouts long enough to dominate the budget.</li>
+<li>Self-modifying hooks: a <code>PostToolUse</code> hook on <code>Edit</code> or <code>Write</code> that writes files itself.</li>
+</ul>
+
+<h2>Related Tools</h2>
+<ul class="related">
+  <li><a href="/tools/mcp-server-config-validator">MCP Server Config Validator</a> &mdash; check server definitions before you hook them.</li>
+  <li><a href="/tools/claude-md-linter">CLAUDE.md Linter</a> &mdash; audit project instruction files.</li>
+  <li><a href="/tools/claude-code-session-cost-tracker">Session Cost Tracker</a> &mdash; see what a long session actually costs.</li>
+</ul>
+</div>
+
+<footer>
+  <div>
+    <a href="/">Home</a>
+    <a href="/tools/">All Tools</a>
+    <a href="/tools/mcp-server-config-validator">MCP Config Validator</a>
+    <a href="https://zovo.one">Zovo</a>
+  </div>
+  <p>&copy; 2026 claudhq.com &mdash; runs entirely in your browser.</p>
+</footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+var DEFAULT_TIMEOUT = 60;
+
+var KNOWN_TOOLS = ["Task","Bash","BashOutput","KillShell","Glob","Grep","Read","Edit","Write","NotebookEdit",
+  "WebFetch","WebSearch","TodoWrite","SlashCommand","ExitPlanMode","AskUserQuestion"];
+
+var TOOL_EVENTS = {PreToolUse:1, PostToolUse:1, PostToolUseFailure:1, PermissionRequest:1};
+var NO_MATCHER_EVENTS = {Stop:1, SubagentStop:1, UserPromptSubmit:1, SessionEnd:1};
+var SOURCE_EVENTS = {
+  SessionStart: {label:"session source", opts:["startup","resume","clear","compact"]},
+  PreCompact:   {label:"compact trigger", opts:["manual","auto"]},
+  Notification: {label:"notification type", opts:["permission_request","idle","other"]}
+};
+
+var SAMPLE = JSON.stringify({
+  hooks: {
+    PreToolUse: [
+      { matcher: "Bash",
+        hooks: [ {type:"command", command:"$CLAUDE_PROJECT_DIR/.claude/hooks/audit-bash.sh", timeout:10} ] },
+      { matcher: "Edit|Write|MultiEdit",
+        hooks: [ {type:"command", command:"./scripts/guard-protected-paths.sh"},
+                 {type:"command", command:"python3 $CLAUDE_PROJECT_DIR/.claude/hooks/secret_scan.py", timeout:20} ] },
+      { matcher: "mcp__github__*",
+        hooks: [ {type:"command", command:"$CLAUDE_PROJECT_DIR/.claude/hooks/gh-guard.sh", timeout:5} ] }
+    ],
+    PostToolUse: [
+      { matcher: "Edit|Write",
+        hooks: [ {type:"command", command:"npx prettier --write \"$CLAUDE_PROJECT_DIR/$f\"", timeout:45} ] }
+    ],
+    Stop: [
+      { matcher: "Bash(npm run build)",
+        hooks: [ {command:"npm test"} ] }
+    ]
+  }
+}, null, 2);
+
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){
+  return String(s === undefined || s === null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function truncate(s, n){ s = String(s||""); return s.length > n ? s.slice(0, n-1) + "…" : s; }
+
+/* ---------- parsing ---------- */
+
+function parseHooks(text){
+  var t = (text||"").trim();
+  if(!t) return {ok:false, empty:true, error:"No configuration pasted yet."};
+  var obj;
+  try { obj = JSON.parse(t); }
+  catch(e){ return {ok:false, error:"JSON parse error: " + e.message}; }
+  if(obj === null || typeof obj !== "object" || Array.isArray(obj))
+    return {ok:false, error:"Top level must be a JSON object."};
+  var hooks = (obj.hooks && typeof obj.hooks === "object" && !Array.isArray(obj.hooks)) ? obj.hooks : obj;
+  if(hooks === null || typeof hooks !== "object" || Array.isArray(hooks))
+    return {ok:false, error:'The "hooks" value must be an object keyed by event name.'};
+  var events = {}, keys = Object.keys(hooks), bad = [];
+  for(var i=0;i<keys.length;i++){
+    var k = keys[i], v = hooks[k];
+    if(!Array.isArray(v)){ bad.push(k); continue; }
+    var groups = [];
+    for(var g=0; g<v.length; g++){
+      var grp = v[g];
+      if(grp === null || typeof grp !== "object" || Array.isArray(grp)){
+        groups.push({matcher:undefined, hooks:[], malformed:true});
+        continue;
+      }
+      groups.push({
+        matcher: grp.matcher,
+        hasMatcherKey: Object.prototype.hasOwnProperty.call(grp, "matcher"),
+        hooks: Array.isArray(grp.hooks) ? grp.hooks : [],
+        missingHooksArray: !Array.isArray(grp.hooks)
+      });
+    }
+    events[k] = groups;
+  }
+  return {ok:true, events:events, nonArrayEvents:bad};
+}
+
+/* ---------- matcher engine ---------- */
+
+function compileMatcher(m){
+  if(m === undefined || m === null || m === "" || m === "*")
+    return {kind:"all", display:"(matches every tool)", raw:(m===undefined?"(absent)":String(m))};
+  if(typeof m !== "string")
+    return {kind:"error", raw:String(m), error:"matcher must be a string"};
+  var src = "^(?:" + m + ")$";
+  try { return {kind:"regex", raw:m, display:src, re:new RegExp(src)}; }
+  catch(e){ return {kind:"error", raw:m, display:src, error:e.message}; }
+}
+
+function matchTarget(event, comp, target){
+  if(NO_MATCHER_EVENTS[event]) return {fires:true, why:"event has no matcher target — every group fires"};
+  if(comp.kind === "all") return {fires:true, why:"wildcard matcher"};
+  if(comp.kind === "error") return {fires:false, why:"matcher failed to compile: " + comp.error};
+  var hit = comp.re.test(String(target||""));
+  return {fires:hit, why: hit ? "regex matched" : "regex did not match"};
+}
+
+/* ---------- if-filter (permission rule syntax) ---------- */
+
+function evalIfFilter(rule, toolName, toolInput){
+  if(typeof rule !== "string" || !rule.trim()) return null;
+  var m = /^([A-Za-z_][A-Za-z0-9_]*)(?:\((.*)\))?$/.exec(rule.trim());
+  if(!m) return {ok:false, fires:true, note:"unparseable rule — treated as matching"};
+  var tool = m[1], arg = m[2];
+  if(tool !== toolName) return {ok:true, fires:false, note:"rule targets " + tool + ", tool is " + toolName};
+  if(arg === undefined) return {ok:true, fires:true, note:"tool-level rule, no argument"};
+  var subject = "";
+  if(toolName === "Bash") subject = (toolInput && toolInput.command) || "";
+  else subject = (toolInput && (toolInput.file_path || toolInput.path || toolInput.url)) || "";
+  subject = String(subject);
+  if(/\s\*$/.test(arg) || /\*$/.test(arg)){
+    var prefix = arg.replace(/\*$/,"");
+    var fires = subject.indexOf(prefix) === 0;
+    return {ok:true, fires:fires, note:'prefix rule "' + prefix + '" vs "' + truncate(subject,60) + '"'};
+  }
+  return {ok:true, fires: subject === arg, note:'exact rule vs "' + truncate(subject,60) + '"'};
+}
+
+/* ---------- timeouts ---------- */
+
+function timeoutOf(h){
+  if(h && typeof h.timeout === "number" && isFinite(h.timeout) && h.timeout > 0)
+    return {sec:h.timeout, explicit:true, valid:true};
+  if(h && h.timeout !== undefined)
+    return {sec:DEFAULT_TIMEOUT, explicit:true, valid:false};
+  return {sec:DEFAULT_TIMEOUT, explicit:false, valid:true};
+}
+
+function collectMatching(events, event, target, toolName, toolInput){
+  var out = [];
+  var groups = (events && events[event]) || [];
+  for(var g=0; g<groups.length; g++){
+    var grp = groups[g];
+    var comp = compileMatcher(grp.matcher);
+    var res = matchTarget(event, comp, target);
+    var entry = {gi:g, group:grp, comp:comp, fires:res.fires, why:res.why, hooks:[]};
+    if(res.fires){
+      for(var h=0; h<grp.hooks.length; h++){
+        var hk = grp.hooks[h] || {};
+        var f = evalIfFilter(hk["if"], toolName, toolInput);
+        var t = timeoutOf(hk);
+        entry.hooks.push({hi:h, def:hk, timeout:t, filter:f, skipped: !!(f && f.fires === false)});
+      }
+    }
+    out.push(entry);
+  }
+  return out;
+}
+
+function activeHooks(entries){
+  var list = [];
+  for(var i=0;i<entries.length;i++){
+    if(!entries[i].fires) continue;
+    for(var j=0;j<entries[i].hooks.length;j++){
+      if(entries[i].hooks[j].skipped) continue;
+      list.push({gi:entries[i].gi, matcher:entries[i].comp.raw, h:entries[i].hooks[j]});
+    }
+  }
+  return list;
+}
+
+function maxTimeout(list){
+  var m = 0, crit = null;
+  for(var i=0;i<list.length;i++){
+    var s = list[i].h.timeout.sec;
+    if(s > m){ m = s; crit = list[i]; }
+  }
+  return {sec:m, critical:crit};
+}
+
+/* ---------- hook result state ---------- */
+
+var results = {};   /* key -> {mode, text} */
+function keyFor(event, gi, hi){ return event + ":" + gi + ":" + hi; }
+
+function describeHook(h){
+  var d = h.def || {};
+  if(d.type === "prompt" || d.type === "agent") return (d.type + ": " + truncate(d.prompt || "(no prompt)", 90));
+  if(d.type === "http") return "http: " + truncate(d.url || "(no url)", 90);
+  if(d.type === "mcp_tool") return "mcp_tool: " + (d.server||"?") + "/" + (d.tool||"?");
+  return truncate(d.command || "(no command)", 120);
+}
+
+/* ---------- decision resolution ---------- */
+
+function readResult(event, gi, hi){
+  var st = results[keyFor(event, gi, hi)] || {mode:"0", text:""};
+  var r = {mode:st.mode, text:st.text, json:null, jsonError:null};
+  if(st.mode === "json"){
+    var t = (st.text||"").trim();
+    if(!t){ r.jsonError = "empty stdout"; }
+    else {
+      try {
+        var parsed = JSON.parse(t);
+        if(parsed === null || typeof parsed !== "object" || Array.isArray(parsed))
+          r.jsonError = "stdout is JSON but not an object — treated as plain text";
+        else r.json = parsed;
+      } catch(e){ r.jsonError = "stdout is not valid JSON — treated as plain text, exit code governs"; }
+    }
+  }
+  return r;
+}
+
+function resolve(event, list){
+  var res = {
+    decisions: [],       /* per hook */
+    deny:[], ask:[], allow:[],
+    blockingExit:[], nonBlockingExit:[],
+    context:[], transcript:[], userOnly:[], systemMessages:[],
+    continueFalse:null
+  };
+  for(var i=0;i<list.length;i++){
+    var it = list[i];
+    var r = readResult(event, it.gi, it.h.hi);
+    var label = "group " + it.gi + " / hook " + it.h.hi;
+    var d = {label:label, cmd:describeHook(it.h), mode:r.mode, jsonError:r.jsonError, notes:[]};
+
+    var j = r.json;
+    if(j){
+      if(j.continue === false){
+        res.continueFalse = res.continueFalse || {label:label, reason: j.stopReason || "(no stopReason given)"};
+        d.notes.push("continue:false — halts the whole turn, outranks every other field");
+      }
+      if(typeof j.systemMessage === "string" && j.systemMessage) res.systemMessages.push(j.systemMessage);
+      var hso = (j.hookSpecificOutput && typeof j.hookSpecificOutput === "object") ? j.hookSpecificOutput : {};
+      var pd = hso.permissionDecision;
+      if(event === "PreToolUse" && (pd === "deny" || pd === "ask" || pd === "allow")){
+        var reason = hso.permissionDecisionReason || j.reason || "(no reason given)";
+        res[pd].push({label:label, reason:reason});
+        d.notes.push("permissionDecision: " + pd);
+        d.verdict = pd;
+      } else if(pd !== undefined && event === "PreToolUse"){
+        d.notes.push('permissionDecision "' + esc(String(pd)) + '" is not one of allow/deny/ask — ignored');
+      } else if(pd !== undefined){
+        d.notes.push("permissionDecision is only honoured on PreToolUse — ignored here");
+      }
+      if(j.decision === "block"){
+        var why = j.reason || "(no reason given)";
+        if(event === "PreToolUse"){
+          res.deny.push({label:label, reason:why});
+          d.verdict = d.verdict || "deny";
+          d.notes.push('decision:"block" is the deprecated PreToolUse form — treated as deny; prefer hookSpecificOutput.permissionDecision');
+        } else if(event === "PostToolUse" || event === "Stop" || event === "SubagentStop" || event === "UserPromptSubmit"){
+          res.deny.push({label:label, reason:why});
+          d.verdict = d.verdict || "block";
+          d.notes.push('decision:"block" with a reason');
+        } else {
+          d.notes.push('decision:"block" has no effect on ' + event);
+        }
+      }
+      if(typeof hso.additionalContext === "string" && hso.additionalContext){
+        if(event === "UserPromptSubmit" || event === "SessionStart" || event === "PostToolUse"){
+          res.context.push({label:label, text:hso.additionalContext});
+          d.notes.push("additionalContext injected into the model context");
+        } else {
+          d.notes.push("additionalContext is not honoured on " + event + " — ignored");
+        }
+      }
+      if(hso.updatedInput !== undefined){
+        d.notes.push(event === "PreToolUse"
+          ? "updatedInput rewrites the tool input before the call runs"
+          : "updatedInput is PreToolUse only — ignored here");
+      }
+      if(!d.verdict && !res.continueFalse) d.notes.push("JSON parsed but expressed no decision — hook is silent");
+    } else {
+      /* exit-code channel */
+      if(r.jsonError) d.notes.push(r.jsonError);
+      var txt = (r.text||"").trim();
+      if(r.mode === "2"){
+        res.blockingExit.push({label:label, text: txt || "(empty stderr)"});
+        d.verdict = "exit2";
+        if(event === "PreToolUse") d.notes.push("exit 2 blocks the tool call; stderr goes to Claude");
+        else if(event === "PostToolUse") d.notes.push("exit 2 cannot undo the tool; stderr is fed back to Claude as feedback");
+        else if(event === "Stop" || event === "SubagentStop") d.notes.push("exit 2 blocks stopping; stderr tells Claude how to continue");
+        else if(event === "UserPromptSubmit") d.notes.push("exit 2 erases the prompt; stderr is shown to the user only");
+        else d.notes.push("exit 2 is non-blocking on " + event + "; stderr is shown to the user only");
+      } else if(r.mode === "1"){
+        res.nonBlockingExit.push({label:label, text: txt || "(empty stderr)"});
+        d.verdict = "err";
+        d.notes.push("non-zero, non-2 exit — non-blocking error, stderr surfaced to the user, execution continues");
+      } else {
+        d.verdict = "ok";
+        if(txt){
+          if(event === "UserPromptSubmit" || event === "SessionStart"){
+            res.context.push({label:label, text:txt});
+            d.notes.push("exit 0 stdout is injected into the model context on " + event);
+          } else {
+            res.transcript.push({label:label, text:txt});
+            d.notes.push("exit 0 stdout goes to the transcript (Ctrl-R) only — Claude does not see it");
+          }
+        } else {
+          d.notes.push("exit 0, no output — hook passes silently");
+        }
+      }
+    }
+    res.decisions.push(d);
+  }
+  return res;
+}
+
+function finalVerdict(event, res, fired){
+  if(res.continueFalse){
+    return {cls:"b-bad", tag:"TURN HALTED",
+      text:"A hook returned continue:false, which outranks every other field. Claude stops processing immediately after the hooks finish.",
+      claude:"stopReason shown to the user: " + res.continueFalse.reason};
+  }
+  var denies = res.deny.concat(res.blockingExit.map(function(b){ return {label:b.label, reason:b.text}; }));
+  if(event === "PreToolUse"){
+    if(denies.length)
+      return {cls:"b-bad", tag:"TOOL BLOCKED",
+        text:"deny wins over ask and allow. " + denies.length + " hook(s) denied the call, so the tool never runs.",
+        claude: denies.map(function(d){ return "[" + d.label + "] " + d.reason; }).join("\n")};
+    if(res.ask.length)
+      return {cls:"b-warn", tag:"USER IS ASKED",
+        text:"No denial, but " + res.ask.length + " hook(s) returned ask, so the permission prompt is forced even if a rule would have auto-allowed it.",
+        claude: res.ask.map(function(d){ return "[" + d.label + "] " + d.reason; }).join("\n")};
+    if(res.allow.length)
+      return {cls:"b-ok", tag:"TOOL RUNS (PROMPT BYPASSED)",
+        text:"An allow decision bypasses the permission system entirely — the tool runs without a prompt.",
+        claude: res.allow.map(function(d){ return "[" + d.label + "] " + d.reason; }).join("\n")};
+    return {cls: fired ? "b-mute" : "b-ok", tag:"TOOL RUNS (NORMAL FLOW)",
+      text: fired ? "No hook expressed a decision, so the call falls through to the usual permission rules."
+                  : "No hook matched this tool, so nothing intercepts the call.",
+      claude:""};
+  }
+  if(event === "PostToolUse"){
+    if(denies.length)
+      return {cls:"b-warn", tag:"TOOL ALREADY RAN — FEEDBACK SENT",
+        text:"PostToolUse cannot undo the call. The tool result stands and the reason is fed back to Claude, which typically triggers a corrective follow-up.",
+        claude: denies.map(function(d){ return "[" + d.label + "] " + d.reason; }).join("\n")};
+    return {cls:"b-ok", tag:"NO INTERVENTION", text:"The tool result is passed through unchanged.", claude:""};
+  }
+  if(event === "Stop" || event === "SubagentStop"){
+    if(denies.length)
+      return {cls:"b-warn", tag:"STOPPING BLOCKED",
+        text:"Claude is not allowed to stop and must keep working. Guard against loops — the hook input carries stop_hook_active:true on the re-entry, and a hook that always exits 2 will spin forever.",
+        claude: denies.map(function(d){ return "[" + d.label + "] " + d.reason; }).join("\n")};
+    return {cls:"b-ok", tag:"CLAUDE STOPS NORMALLY", text:"No hook objected to stopping.", claude:""};
+  }
+  if(event === "UserPromptSubmit"){
+    if(denies.length)
+      return {cls:"b-bad", tag:"PROMPT BLOCKED",
+        text:"The prompt is erased before Claude ever sees it. The reason is shown to the user, not to the model.",
+        claude:"(nothing reaches the model)\nUser sees: " + denies.map(function(d){ return d.reason; }).join(" / ")};
+    return {cls:"b-ok", tag:"PROMPT SUBMITTED",
+      text: res.context.length ? "The prompt goes through with " + res.context.length + " injected context block(s) prepended."
+                               : "The prompt goes through unchanged.", claude:""};
+  }
+  return {cls:"b-ok", tag:"NON-BLOCKING EVENT",
+    text: event + " hooks cannot block. Exit 2 here only surfaces stderr to the user."
+      + (res.context.length ? " " + res.context.length + " context block(s) are injected." : ""),
+    claude:""};
+}
+
+/* ---------- linting ---------- */
+
+var WRITE_PATTERNS = [
+  /--write\b/, /\bsed\s+-i\b/, /\bgofmt\s+-w\b/, /\bblack\b/, /\bruff\s+format\b/,
+  /\btee\b/, />>/, /\s>\s*[^|&\s]/, /\brustfmt\b/, /\bclang-format\s+-i\b/, /\bdotnet\s+format\b/
+];
+
+function lintConfig(parsed){
+  var L = [];
+  function add(sev, msg, det){ L.push({sev:sev, msg:msg, det:det||""}); }
+  if(!parsed.ok) return L;
+  if(parsed.nonArrayEvents && parsed.nonArrayEvents.length)
+    add("err", "Event value is not an array: " + parsed.nonArrayEvents.join(", "),
+        "Every event key maps to an array of {matcher, hooks} groups.");
+
+  var events = parsed.events, evNames = Object.keys(events);
+  for(var e=0; e<evNames.length; e++){
+    var ev = evNames[e], groups = events[ev];
+    for(var g=0; g<groups.length; g++){
+      var grp = groups[g], where = ev + "[" + g + "]";
+      if(grp.malformed){ add("err", where + " is not an object.", "Each entry must be {\"matcher\": ..., \"hooks\": [...]}."); continue; }
+      if(grp.missingHooksArray) add("err", where + ' has no "hooks" array.', "The hooks array is required even for a single command.");
+
+      var m = grp.matcher;
+      if(typeof m === "string" && m !== "" && m !== "*"){
+        if(/^[A-Za-z_][A-Za-z0-9_]*\(.*\)$/.test(m.trim()))
+          add("err", where + ': matcher "' + m + '" is permission-rule syntax, not a matcher.',
+              "Matchers only ever see a tool name. Those parentheses compile to a regex group, so this can never match. Use \"matcher\": \"Bash\" and filter the command inside the hook, or with the hook-level \"if\" field.");
+        else if(/[()\[\]{}]/.test(m) && !/\|/.test(m))
+          add("warn", where + ': matcher "' + m + '" contains unescaped regex metacharacters.',
+              "Brackets and braces are regex syntax. Escape them with a backslash if you meant them literally.");
+        if(/[^.\)\]\*]\*$/.test(m))
+          add("err", where + ': matcher "' + m + '" uses * as a glob, but matchers are regexes.',
+              'In a regex, * repeats the preceding character. "' + m + '" means "' + m.slice(0,-2) + '" followed by zero or more "' + m.charAt(m.length-2) + '". Write "' + m.slice(0,-1) + '.*" instead.');
+        if(/\s/.test(m))
+          add("warn", where + ": matcher contains whitespace.", "Tool names never contain spaces, so this matcher cannot match anything.");
+        var comp = compileMatcher(m);
+        if(comp.kind === "error")
+          add("err", where + ': matcher "' + m + '" is not a valid regex.', comp.error + " — the group will never fire.");
+        if(NO_MATCHER_EVENTS[ev])
+          add("warn", where + ": " + ev + " ignores matchers.",
+              'The "' + m + '" matcher is inert. Every group under ' + ev + ' fires on every occurrence of the event.');
+        else if(SOURCE_EVENTS[ev]){
+          var looksLikeTool = /^[A-Z]/.test(m) || m.indexOf("mcp__") === 0;
+          if(looksLikeTool)
+            add("err", where + ": " + ev + " matches the " + SOURCE_EVENTS[ev].label + ", not a tool name.",
+                'Valid values here are ' + SOURCE_EVENTS[ev].opts.join(", ") + '. "' + m + '" will never match, so this group is dead.');
+        }
+        else if(!TOOL_EVENTS[ev] && !SOURCE_EVENTS[ev] && !NO_MATCHER_EVENTS[ev])
+          add("inf", where + ": matcher on the less common event " + ev + ".", "Double-check what this event matches against in your Claude Code version.");
+        if(TOOL_EVENTS[ev] && /^[A-Za-z]+$/.test(m) && KNOWN_TOOLS.indexOf(m) === -1)
+          add("inf", where + ': "' + m + '" is not a built-in tool name.',
+              "Built-ins include " + KNOWN_TOOLS.slice(0,10).join(", ") + ". MCP tools are named mcp__<server>__<tool>. Fine if it is from a plugin, dead config if it is a typo.");
+      } else if(typeof m !== "string" && m !== undefined){
+        add("err", where + ": matcher must be a string.", "Got " + (m === null ? "null" : typeof m) + ".");
+      }
+
+      for(var h=0; h<(grp.hooks||[]).length; h++){
+        var hk = grp.hooks[h] || {}, hw = where + ".hooks[" + h + "]";
+        if(typeof hk !== "object" || hk === null){ add("err", hw + " is not an object."); continue; }
+        if(hk.type === undefined){
+          if(hk.command !== undefined)
+            add("err", hw + ' is missing "type": "command".', "Both type and command are required; without type the entry fails schema validation and the whole settings file can be dropped.");
+          else if(hk.url !== undefined) add("err", hw + ' is missing "type": "http".');
+          else if(hk.prompt !== undefined) add("err", hw + ' is missing "type": "prompt" or "agent".');
+          else add("err", hw + ' has no "type".');
+        } else if(["command","prompt","agent","http","mcp_tool"].indexOf(hk.type) === -1){
+          add("err", hw + ': unknown hook type "' + esc(String(hk.type)) + '".', "Valid types: command, prompt, agent, http, mcp_tool.");
+        }
+        if(hk.type === "command" && (typeof hk.command !== "string" || !hk.command.trim()))
+          add("err", hw + ': type "command" requires a non-empty "command" string.');
+        if((hk.type === "prompt" || hk.type === "agent") && TOOL_EVENTS[ev] !== 1)
+          add("err", hw + ": " + hk.type + " hooks are only available on tool events.", "PreToolUse, PostToolUse, and PermissionRequest only.");
+
+        if(typeof hk.command === "string"){
+          var c = hk.command.trim();
+          if(/^(\.\/|\.\.\/)/.test(c) || (/^[A-Za-z0-9_\-]+\.(sh|py|js|ts|rb)\b/.test(c)))
+            add("warn", hw + ": relative script path.",
+                "Hook commands run with an unspecified working directory. Prefix with $CLAUDE_PROJECT_DIR, which Claude Code sets to the project root for every hook process.");
+          if(ev === "PostToolUse" && typeof m === "string" && /Edit|Write/.test(m)){
+            for(var w=0; w<WRITE_PATTERNS.length; w++){
+              if(WRITE_PATTERNS[w].test(c)){
+                add("warn", hw + ": this PostToolUse hook writes files itself.",
+                    "Hook writes are not tool calls, so this will not recurse — but the file on disk now differs from what Claude just wrote, and Claude's cached view goes stale. The classic symptom is the next Edit failing with \"string not found\". Make the hook idempotent, or have it report instead of rewrite.");
+                break;
+              }
+            }
+            if(/\bclaude\b/.test(c))
+              add("err", hw + ": the hook invokes the claude CLI.", "A hook that starts another Claude Code run inside a PostToolUse handler can genuinely recurse. Guard it with an environment flag.");
+          }
+          if(/\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/.test(c) && !/CLAUDE_PROJECT_DIR|CLAUDE_PLUGIN_ROOT/.test(c) && !/jq|read|\$f\b/.test(c))
+            add("inf", hw + ": command interpolates a shell variable.", "Hook processes get a minimal environment. Confirm the variable is exported, or read the value from the stdin JSON with jq instead.");
+        }
+
+        if(hk.timeout !== undefined){
+          if(typeof hk.timeout !== "number" || !isFinite(hk.timeout))
+            add("err", hw + ": timeout must be a number of seconds.", "Got " + (typeof hk.timeout) + ". The schema rejects this and the settings file may be discarded.");
+          else if(hk.timeout <= 0)
+            add("err", hw + ": timeout must be greater than zero.", "Got " + hk.timeout + ". Remove the key to accept the 60 second default.");
+          else if(hk.timeout > 120)
+            add("warn", hw + ": timeout of " + hk.timeout + "s is long.", "This becomes the critical path for every matching call. A hanging hook stalls each one for the full " + hk.timeout + " seconds.");
+        } else if(hk.type === "command" && TOOL_EVENTS[ev]){
+          add("inf", hw + ": no explicit timeout, so it inherits the 60 second default.", "Frequently matched tool hooks are worth pinning to a short explicit value.");
+        }
+        if(hk.async === true && ev === "PreToolUse")
+          add("warn", hw + ": async on PreToolUse cannot block.", "An async hook returns immediately, so its exit code and JSON are never consulted for the permission decision.");
+      }
+    }
+  }
+  return L;
+}
+
+/* ---------- rendering ---------- */
+
+function badge(cls, txt){ return '<span class="badge ' + cls + '">' + esc(txt) + '</span>'; }
+
+function currentTarget(){
+  var ev = $("evt").value;
+  if(SOURCE_EVENTS[ev]) return $("srcVal").value;
+  return $("toolName").value.trim();
+}
+
+function syncTargetControls(){
+  var ev = $("evt").value;
+  var isSrc = !!SOURCE_EVENTS[ev];
+  var noMatch = !!NO_MATCHER_EVENTS[ev];
+  $("srcWrap").style.display = isSrc ? "" : "none";
+  $("toolWrap").style.display = isSrc ? "none" : "";
+  if(isSrc){
+    var cfg = SOURCE_EVENTS[ev];
+    $("srcHint").textContent = cfg.label;
+    var cur = $("srcVal").value, html = "";
+    for(var i=0;i<cfg.opts.length;i++) html += '<option value="' + esc(cfg.opts[i]) + '">' + esc(cfg.opts[i]) + '</option>';
+    $("srcVal").innerHTML = html;
+    if(cfg.opts.indexOf(cur) !== -1) $("srcVal").value = cur;
+  } else if(noMatch){
+    $("toolWrap").querySelector("label").innerHTML =
+      'Tool name <span class="hint">' + ev + ' ignores matchers; this is used for the latency estimate only</span>';
+  } else {
+    $("toolWrap").querySelector("label").innerHTML =
+      'Tool name <span class="hint">what the matcher is tested against</span>';
+  }
+}
+
+function renderHookControls(event, entries){
+  var host = $("hookResults");
+  var any = false, html = "";
+  for(var i=0;i<entries.length;i++){
+    if(!entries[i].fires) continue;
+    for(var j=0;j<entries[i].hooks.length;j++){
+      var h = entries[i].hooks[j];
+      if(h.skipped) continue;
+      any = true;
+      var k = keyFor(event, entries[i].gi, h.hi);
+      var st = results[k] || {mode:"0", text:""};
+      var labels = {
+        "0":"exit 0 — success (stdout below)",
+        "1":"exit 1 — non-blocking error (stderr below)",
+        "2":"exit 2 — blocking error (stderr below)",
+        "json":"exit 0 with JSON stdout (below)"
+      };
+      var opts = "";
+      for(var mk in labels) if(Object.prototype.hasOwnProperty.call(labels, mk))
+        opts += '<option value="' + mk + '"' + (st.mode === mk ? " selected" : "") + ">" + esc(labels[mk]) + "</option>";
+      var ph = st.mode === "json"
+        ? '{"hookSpecificOutput":{"hookEventName":"' + esc(event) + '","permissionDecision":"deny","permissionDecisionReason":"..."}}'
+        : (st.mode === "0" ? "stdout (optional)" : "stderr message");
+      html += '<div class="hookrow" data-key="' + esc(k) + '">'
+        + '<div class="top"><strong class="small">group ' + entries[i].gi + ' / hook ' + h.hi + '</strong>'
+        + '<select data-role="mode">' + opts + "</select></div>"
+        + '<p class="cmd">' + esc(describeHook(h)) + "</p>"
+        + '<textarea data-role="text" spellcheck="false" placeholder="' + esc(ph) + '">' + esc(st.text) + "</textarea>"
+        + "</div>";
+    }
+  }
+  host.innerHTML = any
+    ? '<label>4. Simulated result of each firing hook <span class="hint">JSON on stdout overrides the exit code</span></label>' + html
+    : "";
+}
+
+function stdinPreview(event, toolName, toolInputRaw){
+  var payload = {
+    session_id: "e4f1c2a0-simulated",
+    transcript_path: "~/.claude/projects/demo/e4f1c2a0.jsonl",
+    cwd: "/repo",
+    permission_mode: "default",
+    hook_event_name: event
+  };
+  if(TOOL_EVENTS[event]){
+    payload.tool_name = toolName;
+    var ti;
+    try { ti = JSON.parse(toolInputRaw); } catch(e){ ti = "(tool input JSON did not parse)"; }
+    payload.tool_input = ti;
+    if(event === "PostToolUse") payload.tool_response = {success:true};
+  } else if(event === "UserPromptSubmit"){
+    payload.prompt = "refactor the client module";
+  } else if(event === "Stop" || event === "SubagentStop"){
+    payload.stop_hook_active = false;
+  } else if(SOURCE_EVENTS[event]){
+    payload[event === "SessionStart" ? "source" : (event === "PreCompact" ? "trigger" : "notification_type")] = currentTarget();
+  }
+  return JSON.stringify(payload, null, 2);
+}
+
+function compute(){
+  var out = $("out");
+  var parsed = parseHooks($("hooksInput").value);
+  if(!parsed.ok){
+    $("hookResults").innerHTML = "";
+    out.innerHTML = parsed.empty
+      ? '<div class="card muted small">Paste a hooks block above, or load the example, to see the routing analysis.</div>'
+      : '<div class="err-box"><strong>Cannot analyse this config.</strong><br>' + esc(parsed.error) + "</div>";
+    return;
+  }
+
+  var event = $("evt").value;
+  var toolName = $("toolName").value.trim();
+  var target = currentTarget();
+  var toolInputRaw = $("toolInput").value;
+  var toolInput = null, toolInputErr = null;
+  try { toolInput = toolInputRaw.trim() ? JSON.parse(toolInputRaw) : {}; }
+  catch(e){ toolInputErr = e.message; toolInput = {}; }
+
+  var entries = collectMatching(parsed.events, event, target, toolName, toolInput);
+  renderHookControls(event, entries);
+  var fired = activeHooks(entries);
+  var wait = maxTimeout(fired);
+
+  /* latency budget always uses the tool name */
+  var preEntries  = collectMatching(parsed.events, "PreToolUse",  toolName, toolName, toolInput);
+  var postEntries = collectMatching(parsed.events, "PostToolUse", toolName, toolName, toolInput);
+  var preFired  = activeHooks(preEntries),  postFired  = activeHooks(postEntries);
+  var preMax = maxTimeout(preFired), postMax = maxTimeout(postFired);
+  var addedLatency = preMax.sec + postMax.sec;
+
+  var html = "";
+
+  /* --- matcher table --- */
+  html += '<div class="card"><h3>Matcher evaluation — ' + esc(event)
+       + (NO_MATCHER_EVENTS[event] ? " (no matcher target)" : ' against <span class="mono">' + esc(target || "(empty)") + "</span>") + "</h3>";
+  var groups = parsed.events[event] || [];
+  if(!groups.length){
+    html += '<p class="muted small">No groups are configured for ' + esc(event) + ", so nothing fires.</p>";
+  } else {
+    html += '<div class="tablewrap"><table><thead><tr><th>#</th><th>matcher</th><th>regex applied</th><th>hooks</th><th>result</th></tr></thead><tbody>';
+    for(var i=0;i<entries.length;i++){
+      var en = entries[i];
+      var applied = en.comp.kind === "all" ? "&mdash; matches everything"
+                  : en.comp.kind === "error" ? '<span class="b-bad badge">invalid</span> ' + esc(en.comp.error)
+                  : esc(en.comp.display);
+      if(NO_MATCHER_EVENTS[event]) applied = "&mdash; not evaluated on this event";
+      var nHooks = (en.group.hooks || []).length;
+      var skipped = 0;
+      for(var q=0;q<en.hooks.length;q++) if(en.hooks[q].skipped) skipped++;
+      var resTxt = en.fires
+        ? badge("b-ok","FIRES") + ' <span class="muted small">' + esc(en.why) + (skipped ? " — " + skipped + " skipped by if-filter" : "") + "</span>"
+        : badge("b-mute","no match") + ' <span class="muted small">' + esc(en.why) + "</span>";
+      html += "<tr><td>" + en.gi + '</td><td class="mono">' + esc(en.comp.raw)
+            + '</td><td class="mono">' + applied + "</td><td>" + nHooks + "</td><td>" + resTxt + "</td></tr>";
+    }
+    html += "</tbody></table></div>";
+    for(var i2=0;i2<entries.length;i2++){
+      for(var j2=0;j2<entries[i2].hooks.length;j2++){
+        var hh = entries[i2].hooks[j2];
+        if(hh.filter)
+          html += '<p class="small muted">group ' + entries[i2].gi + " / hook " + hh.hi + ' <code>if: ' + esc(String(hh.def["if"])) + "</code> → "
+                + (hh.filter.fires ? "runs" : "skipped") + " (" + esc(hh.filter.note) + ")</p>";
+      }
+    }
+  }
+  html += "</div>";
+
+  /* --- firing plan --- */
+  html += '<div class="card"><h3>Firing plan</h3>';
+  if(!fired.length){
+    html += '<p class="muted small">No hooks fire for this event and target. The event proceeds untouched.</p>';
+  } else {
+    var groupsFiring = 0;
+    for(var gf=0; gf<entries.length; gf++) if(entries[gf].fires && entries[gf].hooks.length) groupsFiring++;
+    html += '<div class="kv">'
+      + '<div><span class="k">Matching groups</span><span class="v">' + groupsFiring + " — all concurrent, no ordering guarantee</span></div>"
+      + '<div><span class="k">Processes spawned</span><span class="v">' + fired.length + " — hooks inside a group run in parallel too</span></div>"
+      + '<div><span class="k">Aggregate wait</span><span class="v">max(timeout) = <strong>' + wait.sec + "s</strong>"
+      + (wait.critical ? ' — critical path is group ' + wait.critical.gi + " / hook " + wait.critical.h.hi : "") + "</span></div>"
+      + '<div><span class="k">If run serially instead</span><span class="v">' + fired.reduce(function(a,b){ return a + b.h.timeout.sec; }, 0) + "s — what parallelism saves you</span></div>"
+      + "</div>";
+    html += '<div class="tablewrap"><table><thead><tr><th>group / hook</th><th>type</th><th>timeout</th><th>command</th></tr></thead><tbody>';
+    for(var f=0; f<fired.length; f++){
+      var ff = fired[f], tt = ff.h.timeout;
+      var tlabel = tt.sec + "s" + (tt.explicit ? (tt.valid ? "" : " (invalid value, 60s default applied)") : " (default)");
+      var isCrit = wait.critical && wait.critical.gi === ff.gi && wait.critical.h.hi === ff.h.hi;
+      html += "<tr><td>" + ff.gi + " / " + ff.h.hi + "</td><td>" + esc((ff.h.def && ff.h.def.type) || "(missing)")
+            + "</td><td>" + esc(tlabel) + (isCrit ? " " + badge("b-warn","critical path") : "")
+            + '</td><td class="mono">' + esc(truncate(describeHook(ff.h), 70)) + "</td></tr>";
+    }
+    html += "</tbody></table></div>";
+  }
+  html += "</div>";
+
+  /* --- decision --- */
+  var res = resolve(event, fired);
+  var v = finalVerdict(event, res, fired.length > 0);
+  html += '<div class="verdict"><h3>' + badge(v.cls, v.tag) + "</h3><p>" + esc(v.text) + "</p>";
+  var claudeSees = [];
+  if(v.claude) claudeSees.push(v.claude);
+  for(var c=0;c<res.context.length;c++) claudeSees.push("[context from " + res.context[c].label + "] " + res.context[c].text);
+  if(event === "PostToolUse")
+    for(var nb=0; nb<res.blockingExit.length; nb++) claudeSees.push("[stderr from " + res.blockingExit[nb].label + "] " + res.blockingExit[nb].text);
+  html += "<h3>What Claude actually sees</h3><pre>" + esc(claudeSees.length ? claudeSees.join("\n\n") : "(nothing from these hooks reaches the model)") + "</pre>";
+  if(res.transcript.length){
+    var tl = [];
+    for(var t2=0;t2<res.transcript.length;t2++) tl.push("[" + res.transcript[t2].label + "] " + res.transcript[t2].text);
+    html += '<p class="small muted">Transcript only (Ctrl-R), invisible to the model:</p><pre>' + esc(tl.join("\n")) + "</pre>";
+  }
+  if(res.systemMessages.length)
+    html += '<p class="small muted">systemMessage shown to the user:</p><pre>' + esc(res.systemMessages.join("\n")) + "</pre>";
+  if(res.nonBlockingExit.length)
+    html += '<p class="small muted">' + res.nonBlockingExit.length + " non-blocking error(s): stderr goes to the user, execution continues.</p>";
+  if(res.decisions.length){
+    html += '<div class="tablewrap"><table><thead><tr><th>hook</th><th>channel</th><th>effect</th></tr></thead><tbody>';
+    for(var d2=0; d2<res.decisions.length; d2++){
+      var dd = res.decisions[d2];
+      var chan = dd.mode === "json" ? "JSON stdout" : ("exit " + dd.mode);
+      html += "<tr><td>" + esc(dd.label) + "</td><td>" + esc(chan) + '</td><td class="small">' + esc(dd.notes.join(" • ")) + "</td></tr>";
+    }
+    html += "</tbody></table></div>";
+  }
+  html += "</div>";
+
+  /* --- latency --- */
+  html += '<div class="card"><h3>Latency budget for <span class="mono">' + esc(toolName || "(no tool)") + "</span></h3>";
+  html += '<div class="kv">'
+    + '<div><span class="k">PreToolUse wait</span><span class="v">' + preMax.sec + "s across " + preFired.length + " hook(s)"
+    + (preMax.critical ? " — set by group " + preMax.critical.gi + " / hook " + preMax.critical.h.hi : "") + "</span></div>"
+    + '<div><span class="k">PostToolUse wait</span><span class="v">' + postMax.sec + "s across " + postFired.length + " hook(s)"
+    + (postMax.critical ? " — set by group " + postMax.critical.gi + " / hook " + postMax.critical.h.hi : "") + "</span></div>"
+    + '<div><span class="k">Worst case per call</span><span class="v"><strong>' + addedLatency + "s</strong> added wall clock</span></div>"
+    + '<div><span class="k">Over 40 tool calls</span><span class="v">' + (addedLatency * 40) + "s = " + (Math.round(addedLatency * 40 / 6) / 10) + " minutes worst case</span></div>"
+    + "</div>";
+  html += '<p class="small muted">A ceiling, not a measurement: hooks that return quickly cost nothing. It is what you pay when one hangs, because every matching call stalls for the full timeout before the CLI abandons it.</p>';
+  if(addedLatency >= 100)
+    html += '<p class="small">' + badge("b-warn","heavy") + " Over 100s of worst-case overhead on a single tool. Pin explicit timeouts of a few seconds on guard hooks.</p>";
+  html += "</div>";
+
+  /* --- stdin --- */
+  html += '<div class="card"><h3>What each hook receives on stdin</h3>';
+  if(toolInputErr) html += '<p class="small" style="color:var(--warn)">Tool input JSON did not parse: ' + esc(toolInputErr) + "</p>";
+  html += "<pre>" + esc(stdinPreview(event, toolName, toolInputRaw)) + "</pre></div>";
+
+  /* --- lints --- */
+  var lints = lintConfig(parsed);
+  html += '<div class="card"><h3>Config lint — ' + lints.length + " finding" + (lints.length === 1 ? "" : "s") + "</h3>";
+  if(!lints.length) html += '<p class="small">' + badge("b-ok","clean") + " No structural or matcher problems found across the whole config.</p>";
+  else {
+    var order = {err:0, warn:1, inf:2};
+    lints.sort(function(a,b){ return order[a.sev] - order[b.sev]; });
+    for(var l=0; l<lints.length; l++){
+      var li = lints[l];
+      var cls = li.sev === "err" ? "err" : (li.sev === "inf" ? "inf" : "");
+      var tag = li.sev === "err" ? "error" : (li.sev === "inf" ? "info" : "warning");
+      html += '<div class="lint ' + cls + '"><div class="lt">' + tag + '</div><div class="lm">' + esc(li.msg) + "</div>"
+            + (li.det ? '<div class="ld">' + esc(li.det) + "</div>" : "") + "</div>";
+    }
+  }
+  html += "</div>";
+
+  out.innerHTML = html;
+}
+
+/* ---------- wiring ---------- */
+
+$("hookResults").addEventListener("change", function(e){
+  var row = e.target.closest ? e.target.closest(".hookrow") : null;
+  if(!row) return;
+  var k = row.getAttribute("data-key");
+  var st = results[k] || {mode:"0", text:""};
+  if(e.target.getAttribute("data-role") === "mode") st.mode = e.target.value;
+  if(e.target.getAttribute("data-role") === "text") st.text = e.target.value;
+  results[k] = st;
+  compute();
+});
+$("hookResults").addEventListener("input", function(e){
+  if(e.target.getAttribute("data-role") !== "text") return;
+  var row = e.target.closest ? e.target.closest(".hookrow") : null;
+  if(!row) return;
+  var k = row.getAttribute("data-key");
+  var st = results[k] || {mode:"0", text:""};
+  st.text = e.target.value;
+  results[k] = st;
+  compute();
+});
+
+["hooksInput","toolName","toolInput"].forEach(function(id){
+  $(id).addEventListener("input", compute);
+});
+$("srcVal").addEventListener("change", compute);
+$("evt").addEventListener("change", function(){ syncTargetControls(); compute(); });
+
+$("btnSample").addEventListener("click", function(){
+  $("hooksInput").value = SAMPLE;
+  $("evt").value = "PreToolUse";
+  $("toolName").value = "Edit";
+  results = {};
+  syncTargetControls();
+  compute();
+});
+$("btnClear").addEventListener("click", function(){
+  $("hooksInput").value = "";
+  results = {};
+  compute();
+});
+
+$("hooksInput").value = SAMPLE;
+syncTargetControls();
+compute();
+
+})();
+</script>
+</body>
+</html>

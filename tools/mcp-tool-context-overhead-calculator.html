@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Tool Context Overhead Calculator</title>
+<meta name="description" content="Measure the fixed context tax MCP servers charge on every request. Get token totals, turns until auto-compact, and a ranked disable-these-servers verdict.">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://claudhq.com/tools/mcp-tool-context-overhead-calculator">
+<meta property="og:title" content="MCP Tool Context Overhead Calculator">
+<meta property="og:description" content="Count the tokens your MCP servers burn on every request, see turns until auto-compact, and rank which servers to disable.">
+<meta property="og:url" content="https://claudhq.com/tools/mcp-tool-context-overhead-calculator">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MCP Tool Context Overhead Calculator">
+<meta name="twitter:description" content="Token accounting for MCP tool schemas: fixed overhead, usable context, and turns until auto-compact.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "MCP Tool Context Overhead Calculator",
+      "url": "https://claudhq.com/tools/mcp-tool-context-overhead-calculator",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "description": "Token accounting for MCP server tool schemas: fixed context overhead, usable working context, turns until auto-compact, and a ranked payoff table for disabling servers.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "Michael Lip", "url": "https://zovo.one" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://claudhq.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://claudhq.com/tools/" },
+        { "@type": "ListItem", "position": 3, "name": "MCP Tool Context Overhead Calculator", "item": "https://claudhq.com/tools/mcp-tool-context-overhead-calculator" }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#0d1117; --line:#30363d;
+    --ink:#c9d1d9; --mut:#8b949e; --dim:#6e7681; --acc:#58a6ff; --acc2:#d29922;
+    --red:#da3633; --grn:#3fb950; --pur:#a371f7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;font-size:16px}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  nav{display:flex;gap:18px;padding:14px 20px;border-bottom:1px solid var(--line);
+    font-size:14px;background:#010409;position:sticky;top:0;z-index:5}
+  .wrap{max-width:1040px;margin:0 auto;padding:22px 20px 60px}
+  h1{font-size:1.8rem;line-height:1.2;margin:18px 0 8px;color:var(--acc)}
+  h2{font-size:1.2rem;margin:34px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  h3{font-size:1rem;margin:22px 0 8px}
+  .lede{color:var(--mut);max-width:74ch}
+  section.tool{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:20px;margin-top:22px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+  label{display:block;font-size:11px;color:var(--mut);margin-bottom:5px;font-weight:600;
+    letter-spacing:.03em;text-transform:uppercase}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:8px;padding:9px 10px;font-size:15px;font-family:inherit}
+  textarea{font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:12.5px;
+    line-height:1.45;min-height:130px;resize:vertical;white-space:pre}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);
+    box-shadow:0 0 0 3px rgba(88,166,255,.12)}
+  .fieldnote{font-size:11px;color:var(--dim);margin-top:4px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
+  .tab{padding:7px 13px;border:1px solid var(--line);background:var(--panel2);color:var(--mut);
+    border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  .tab[aria-selected="true"]{background:rgba(88,166,255,.13);border-color:var(--acc);color:var(--acc)}
+  .pane{display:none}
+  .pane.on{display:block}
+  button.act{padding:9px 15px;border:1px solid var(--line);border-radius:8px;font-size:13px;
+    font-weight:600;cursor:pointer;font-family:inherit;background:#21262d;color:var(--ink)}
+  button.act:hover{background:#30363d}
+  button.act.primary{background:var(--acc);border-color:var(--acc);color:#0d1117}
+  button.act.primary:hover{background:#79c0ff}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .tablewrap{overflow-x:auto;margin-top:8px}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  th,td{text-align:right;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th:first-child,td:first-child{text-align:left;white-space:normal}
+  th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  td input[type=number]{width:92px;padding:5px 7px;font-size:13px;text-align:right}
+  td input[type=checkbox]{width:auto}
+  .src{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.03em}
+  .x{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:0 4px;
+    font-family:inherit}
+  .x:hover{color:var(--red)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px;margin-top:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 15px}
+  .card h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--mut);font-weight:600}
+  .big{font-size:1.55rem;font-weight:700;line-height:1.15;
+    font-family:'SFMono-Regular',Consolas,Menlo,monospace}
+  .sub{font-size:12px;color:var(--mut);margin-top:4px}
+  .c-acc{color:var(--acc)} .c-red{color:var(--red)} .c-grn{color:var(--grn)} .c-amb{color:var(--acc2)}
+  .barwrap{margin-top:20px}
+  .bar{display:flex;height:52px;border-radius:8px;overflow:hidden;border:1px solid var(--line);
+    background:var(--panel2)}
+  .seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+    color:#0d1117;overflow:hidden;transition:width .25s ease}
+  .s-sys{background:var(--red);color:#fff} .s-bi{background:var(--acc2)}
+  .s-mcp{background:var(--pur);color:#fff} .s-md{background:var(--acc)}
+  .s-free{background:#21262d;color:var(--mut)}
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:13px}
+  .li{display:flex;align-items:center;gap:9px;font-size:13px}
+  .sw{width:14px;height:14px;border-radius:4px;flex:none}
+  .li b{font-weight:600;color:var(--ink)}
+  .li span{color:var(--mut);font-size:12px}
+  .verdict{margin-top:18px;background:var(--panel2);border:1px solid var(--line);
+    border-left:3px solid var(--acc);border-radius:8px;padding:14px 16px}
+  .verdict strong{color:var(--acc)}
+  .note{margin-top:14px;background:var(--panel2);border:1px solid var(--line);
+    border-left:3px solid var(--acc2);border-radius:8px;padding:12px 14px;font-size:13.5px;
+    color:var(--mut)}
+  .note.bad{border-left-color:var(--red)}
+  .note.ok{border-left-color:var(--grn)}
+  .note.hide{display:none}
+  .prose{max-width:76ch;color:var(--ink)}
+  .prose p{margin:0 0 12px}
+  .prose ul{margin:0 0 12px;padding-left:20px;color:var(--ink)}
+  .prose li{margin-bottom:6px}
+  code{background:#010409;border:1px solid var(--line);border-radius:5px;padding:1px 6px;
+    font-size:.88em;color:var(--acc2);
+    font-family:'SFMono-Regular',Consolas,Menlo,monospace}
+  .fml{display:block;background:#010409;border:1px solid var(--line);border-radius:8px;
+    padding:11px 14px;margin:0 0 13px;overflow-x:auto;color:var(--acc2);font-size:13px;
+    font-family:'SFMono-Regular',Consolas,Menlo,monospace;white-space:pre}
+  footer{border-top:1px solid var(--line);margin-top:46px;padding:22px 20px;color:var(--mut);
+    font-size:14px;text-align:center}
+  footer a{margin:0 9px}
+  .rel a{display:inline-block;margin-right:16px;margin-bottom:6px}
+  @media(max-width:600px){ .big{font-size:1.3rem} h1{font-size:1.45rem} }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/tools/">Tools</a>
+  <a href="/guides/">Guides</a>
+</nav>
+<div class="wrap">
+
+<h1>MCP Tool Context Overhead Calculator</h1>
+<p class="lede">Every MCP server you connect injects its full tool schemas into the prefix of <em>every single request</em> — before you have typed a word. This calculator turns that invisible tax into numbers: total fixed overhead, how much working context is actually left, how many turns you get before auto-compact fires, and a ranked list of which servers to disable for the biggest gain.</p>
+
+<section class="tool">
+  <h3 style="margin-top:0">1. Session parameters</h3>
+  <div class="grid">
+    <div>
+      <label for="ctx">Context window (tokens)</label>
+      <select id="ctx">
+        <option value="200000" selected>200,000 (standard)</option>
+        <option value="500000">500,000</option>
+        <option value="1000000">1,000,000 (long context)</option>
+        <option value="custom">Custom</option>
+      </select>
+      <div class="fieldnote">Model context limit C.</div>
+    </div>
+    <div id="ctxCustomWrap" style="display:none">
+      <label for="ctxCustom">Custom window (tokens)</label>
+      <input id="ctxCustom" type="number" min="1000" step="1000" value="200000">
+    </div>
+    <div>
+      <label for="sysBase">System prompt baseline (tokens)</label>
+      <input id="sysBase" type="number" min="0" step="100" value="2300">
+      <div class="fieldnote">Run <code>/context</code> to read yours.</div>
+    </div>
+    <div>
+      <label for="builtin">Built-in tool schemas (tokens)</label>
+      <input id="builtin" type="number" min="0" step="100" value="11700">
+      <div class="fieldnote">Read, Write, Bash, Grep, Task, etc.</div>
+    </div>
+    <div>
+      <label for="mdChars">CLAUDE.md size (characters)</label>
+      <input id="mdChars" type="number" min="0" step="100" value="6000">
+      <div class="fieldnote"><code>wc -c CLAUDE.md</code>. Prose, so divided by 4.</div>
+    </div>
+    <div>
+      <label for="perTurn">Average tokens per turn</label>
+      <input id="perTurn" type="number" min="1" step="100" value="4000">
+      <div class="fieldnote">User message + reply + tool results.</div>
+    </div>
+    <div>
+      <label for="planned">Planned turns in session</label>
+      <input id="planned" type="number" min="1" step="1" value="60">
+    </div>
+    <div>
+      <label for="kJson">JSON chars per token (k)</label>
+      <input id="kJson" type="number" min="1" max="8" step="0.05" value="3.6">
+      <div class="fieldnote">Schemas tokenize denser than prose.</div>
+    </div>
+    <div>
+      <label for="thresh">Auto-compact threshold (%)</label>
+      <input id="thresh" type="number" min="10" max="100" step="1" value="92">
+      <div class="fieldnote">Claude Code compacts near the ceiling.</div>
+    </div>
+  </div>
+</section>
+
+<section class="tool">
+  <h3 style="margin-top:0">2. Your MCP servers</h3>
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tab-lib" role="tab" aria-selected="true" data-pane="pane-lib">Pick from library</button>
+    <button class="tab" id="tab-cfg" role="tab" aria-selected="false" data-pane="pane-cfg">Paste .mcp.json</button>
+    <button class="tab" id="tab-tl" role="tab" aria-selected="false" data-pane="pane-tl">Paste tools/list (exact)</button>
+  </div>
+
+  <div class="pane on" id="pane-lib">
+    <p class="fieldnote" style="font-size:12.5px;margin:0 0 10px">Tick the servers you have enabled. Tool counts and token totals below are <strong>approximate typical values</strong> that vary a lot by version and enabled toolsets &mdash; every cell is editable, and pasting a real <code>tools/list</code> response gives exact numbers.</p>
+  </div>
+
+  <div class="pane" id="pane-cfg">
+    <label for="cfgIn">Paste <code>.mcp.json</code>, <code>claude_desktop_config.json</code>, or a VS Code <code>mcp.json</code></label>
+    <textarea id="cfgIn" spellcheck="false" placeholder='{
+  "mcpServers": {
+    "github": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] },
+    "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] }
+  }
+}'></textarea>
+    <div class="row">
+      <button class="act primary" id="btnCfg" type="button">Parse config</button>
+      <span class="fieldnote" id="cfgMsg" style="margin-top:0"></span>
+    </div>
+    <p class="fieldnote" style="font-size:12px">A config file lists server <em>names</em> only &mdash; it contains no schemas. Recognised names are matched to the library; anything unknown is added with a placeholder estimate you should correct.</p>
+  </div>
+
+  <div class="pane" id="pane-tl">
+    <label for="tlIn">Paste a raw MCP <code>tools/list</code> JSON-RPC response</label>
+    <textarea id="tlIn" spellcheck="false" placeholder='{"jsonrpc":"2.0","id":1,"result":{"tools":[
+  {"name":"create_issue","description":"Create a new issue in a repository",
+   "inputSchema":{"type":"object","properties":{"owner":{"type":"string"}},"required":["owner"]}}
+]}}'></textarea>
+    <div class="row">
+      <input id="tlName" type="text" placeholder="Server label (optional)" style="max-width:230px">
+      <button class="act primary" id="btnTl" type="button">Measure schemas</button>
+      <span class="fieldnote" id="tlMsg" style="margin-top:0"></span>
+    </div>
+    <p class="fieldnote" style="font-size:12px">Exact mode. Each tool costs <code>ceil((len(name)+len(description)+len(JSON(inputSchema)))/k)</code> tokens. Also accepts a bare <code>{"tools":[...]}</code> object, a bare array, or a map of server name to tools.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table id="srvTable">
+      <thead>
+        <tr>
+          <th style="text-align:left">On</th>
+          <th style="text-align:left">Server</th>
+          <th>Tools</th>
+          <th>Tokens (T<sub>s</sub>)</th>
+          <th>Tokens / tool</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="srvBody"></tbody>
+    </table>
+  </div>
+  <div class="row">
+    <button class="act" id="btnAdd" type="button">Add custom server</button>
+    <button class="act" id="btnNone" type="button">Disable all</button>
+    <button class="act" id="btnReset" type="button">Reset library</button>
+  </div>
+</section>
+
+<h2>Results</h2>
+<div class="cards" id="cards"></div>
+
+<div class="note hide" id="warn"></div>
+
+<section class="tool barwrap">
+  <h3 style="margin-top:0">Context occupancy at turn zero</h3>
+  <div class="bar" id="bar"></div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section class="tool">
+  <h3 style="margin-top:0">Payoff table &mdash; what each server costs you</h3>
+  <div class="tablewrap">
+    <table id="payTable">
+      <thead>
+        <tr>
+          <th style="text-align:left">Server</th>
+          <th>Tokens re-sent / turn</th>
+          <th>Tokens / tool</th>
+          <th>Share of window</th>
+          <th>Turns gained if disabled</th>
+        </tr>
+      </thead>
+      <tbody id="payBody"></tbody>
+    </table>
+  </div>
+  <div class="verdict" id="verdict"></div>
+</section>
+
+<h2>How the arithmetic works</h2>
+<div class="prose">
+<p>An MCP tool is not free the moment you call it &mdash; it is charged the moment it is <em>available</em>. Tool definitions live in the request prefix, so the full JSON schema of every tool on every connected server is serialised into every API call for the entire session. Twenty servers you never invoke still cost you the same tokens as twenty servers you use constantly.</p>
+
+<h3>Per-tool cost</h3>
+<p>Each tool definition is a name, a natural-language description, and a JSON Schema for its arguments. Its serialised length in characters, divided by the tokenizer's characters-per-token ratio, gives the token cost:</p>
+<span class="fml">tokens(tool) = ceil( ( len(name) + len(description) + len(JSON(inputSchema)) ) / k )</span>
+<p>The default <code>k = 3.6</code> reflects that JSON is <em>denser</em> than prose: braces, quotes, colons and repeated keys such as <code>"type"</code> and <code>"properties"</code> break into many short tokens, so a schema yields more tokens per character than English text, which sits nearer 4 characters per token for Claude's tokenizer. That is why CLAUDE.md is divided by 4 here while schemas are divided by 3.6. Both are estimates &mdash; the only exact figure comes from Anthropic's token counting endpoint, or from running <code>/context</code> inside Claude Code, which prints the real live breakdown.</p>
+
+<h3>Server and total overhead</h3>
+<span class="fml">T_s = sum of tokens(tool) over all tools on server s
+
+F   = system_baseline + builtin_tool_schemas + sum(T_s) + ceil(len(CLAUDE.md) / 4)</span>
+<p><code>F</code> is fixed overhead: it is present before the first user message and it never shrinks during the session. Two numbers follow immediately:</p>
+<span class="fml">overhead_share = F / C
+usable_context = C - F</span>
+
+<h3>Turns until auto-compact</h3>
+<p>Claude Code watches how full the transcript is and triggers auto-compact as it approaches the ceiling &mdash; the threshold here defaults to 92 percent of the window and is adjustable, because the exact trip point moves between releases. Conversation grows by roughly a constant <code>a</code> tokens per turn (your message, the reply, and any tool results), so compaction happens on the first turn where:</p>
+<span class="fml">F + turns * a  &gt;=  threshold * C
+
+turns_until_compact = floor( (threshold * C - F) / a )</span>
+<p>Because <code>F</code> sits in the numerator, every token of tool schema is a token stolen directly from your turn budget. Disabling a server with <code>T_s</code> tokens hands those tokens back, and the turns you regain are approximately <code>T_s / a</code> &mdash; the payoff table computes the exact integer difference by re-solving the equation with and without each server.</p>
+
+<h3>Compactions over a session</h3>
+<span class="fml">compactions = ceil( turns_planned / turns_until_compact )</span>
+<p>This is the number that actually hurts. Every compaction is a summarisation pass that discards detail, loses file contents you had already loaded, and frequently makes the model repeat work it has already done. Cutting fixed overhead is the cheapest way to reduce it: it costs nothing but a config edit.</p>
+
+<h3>Ranking, and what to do about it</h3>
+<ul>
+  <li><strong>Tokens per tool</strong> exposes verbose schemas. A server averaging 800 tokens per tool is spending them on long descriptions and deeply nested argument objects; one averaging 200 is lean. High per-tool cost is the signal to trim, not necessarily to remove.</li>
+  <li><strong>Total <code>T_s</code></strong> is what you actually pay. A 90-tool server dwarfs everything else even with modest per-tool cost, which is why the largest integrations ship toolset flags &mdash; enabling only the toolsets you need is usually a bigger win than dropping the server.</li>
+  <li><strong>Prompt caching</strong> makes this prefix cheap in dollars, since a stable tool block is a cache hit on every request. It does <em>not</em> make it cheap in context: cached tokens still occupy the window. Cost and capacity are separate problems, and this calculator is about capacity.</li>
+  <li>Practical levers, in order of payoff: turn off servers you are not using this session; enable narrow toolsets instead of all of them; shorten tool descriptions in servers you control; and keep CLAUDE.md tight, since it is re-sent on every request too.</li>
+</ul>
+<p class="fieldnote" style="font-size:12.5px">Verify against reality: run <code>/context</code> in Claude Code for the live breakdown, and use each server's own <code>tools/list</code> output in the exact mode above rather than the library estimates.</p>
+</div>
+
+<h2>Related Tools</h2>
+<p class="rel">
+  <a href="/tools/context-window-visualizer">Context Window Visualizer</a>
+  <a href="/tools/mcp-server-config-validator">MCP Server Config Validator</a>
+  <a href="/tools/token-counter">Token Counter</a>
+  <a href="/tools/claude-code-session-cost-tracker">Session Cost Tracker</a>
+  <a href="/tools/claude-md-linter">CLAUDE.md Linter</a>
+</p>
+
+</div>
+
+<footer>
+  <div>
+    <a href="/">Home</a>
+    <a href="/tools/">All Tools</a>
+    <a href="/tools/context-window-visualizer">Context Window Visualizer</a>
+    <a href="https://zovo.one">More by Michael Lip</a>
+  </div>
+  <div style="margin-top:10px">&copy; 2026 claudhq.com &mdash; Claude Code Resources</div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* Library values are APPROXIMATE typical observations. They vary by server
+     version and by which toolsets are enabled. Every row is user-editable and
+     the tools/list mode replaces them with exact measurements. */
+  var LIB = [
+    { key:"github",              label:"GitHub (all toolsets)",        tools:90, tokens:45000, on:true  },
+    { key:"playwright",          label:"Playwright",                   tools:21, tokens:11000, on:true  },
+    { key:"supabase",            label:"Supabase",                     tools:27, tokens:14000, on:false },
+    { key:"filesystem",          label:"Filesystem (reference)",       tools:14, tokens:5200,  on:true  },
+    { key:"slack",               label:"Slack",                        tools:11, tokens:4200,  on:false },
+    { key:"sentry",              label:"Sentry",                       tools:16, tokens:9000,  on:false },
+    { key:"postgres",            label:"Postgres (reference)",         tools:1,  tokens:220,   on:false },
+    { key:"notion",              label:"Notion",                       tools:19, tokens:12000, on:false },
+    { key:"linear",              label:"Linear",                       tools:24, tokens:13000, on:false },
+    { key:"atlassian",           label:"Atlassian / Jira",             tools:25, tokens:15000, on:false },
+    { key:"stripe",              label:"Stripe",                       tools:21, tokens:9500,  on:false },
+    { key:"git",                 label:"Git (reference)",              tools:13, tokens:4600,  on:false },
+    { key:"memory",              label:"Memory (knowledge graph)",     tools:9,  tokens:3400,  on:false },
+    { key:"puppeteer",           label:"Puppeteer",                    tools:7,  tokens:2200,  on:false },
+    { key:"brave-search",        label:"Brave Search",                 tools:2,  tokens:700,   on:false },
+    { key:"context7",            label:"Context7 (docs)",              tools:2,  tokens:900,   on:false },
+    { key:"fetch",               label:"Fetch (reference)",            tools:1,  tokens:350,   on:false },
+    { key:"sequential-thinking", label:"Sequential Thinking",          tools:1,  tokens:1100,  on:false }
+  ];
+
+  var UNKNOWN_TOOLS = 12, UNKNOWN_TOKENS = 5000;
+  var servers = [];
+
+  function cloneLib(){
+    return LIB.map(function(r){
+      return { key:r.key, label:r.label, tools:r.tools, tokens:r.tokens, on:r.on, src:"estimate" };
+    });
+  }
+
+  /* ---------- helpers ---------- */
+  function numOf(el, min, fallback){
+    if(!el) return fallback;
+    var v = parseFloat(el.value);
+    if(!isFinite(v)) v = fallback;
+    if(v < min) v = min;
+    return v;
+  }
+  function fmt(n){
+    if(!isFinite(n)) return "—";
+    return Math.round(n).toLocaleString("en-US");
+  }
+  function pct(x){
+    if(!isFinite(x)) return "—";
+    return (x*100).toFixed(1) + "%";
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function slug(s){
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  }
+
+  /* ---------- tabs ---------- */
+  var tabs = [$("tab-lib"), $("tab-cfg"), $("tab-tl")];
+  tabs.forEach(function(t){
+    if(!t) return;
+    t.addEventListener("click", function(){
+      tabs.forEach(function(o){
+        var on = (o === t);
+        o.setAttribute("aria-selected", on ? "true" : "false");
+        var p = $(o.getAttribute("data-pane"));
+        if(p) p.className = on ? "pane on" : "pane";
+      });
+    });
+  });
+
+  /* ---------- server table ---------- */
+  function renderServers(){
+    var body = $("srvBody");
+    if(!body) return;
+    if(!servers.length){
+      body.innerHTML = '<tr><td colspan="6" style="color:#6e7681">No servers. Add one, or reset the library.</td></tr>';
+      return;
+    }
+    var html = "";
+    for(var i=0;i<servers.length;i++){
+      var s = servers[i];
+      var per = s.tools > 0 ? (s.tokens / s.tools) : 0;
+      html += '<tr>'
+        + '<td style="text-align:left"><input type="checkbox" data-i="'+i+'" data-f="on"'+(s.on?" checked":"")+' aria-label="Enable '+esc(s.label)+'"></td>'
+        + '<td>'+esc(s.label)+'<div class="src">'+esc(s.src)+'</div></td>'
+        + '<td><input type="number" min="0" step="1" value="'+s.tools+'" data-i="'+i+'" data-f="tools" aria-label="Tool count"></td>'
+        + '<td><input type="number" min="0" step="100" value="'+s.tokens+'" data-i="'+i+'" data-f="tokens" aria-label="Token total"></td>'
+        + '<td>'+(s.tools>0?fmt(per):"—")+'</td>'
+        + '<td><button class="x" type="button" data-i="'+i+'" data-f="del" aria-label="Remove '+esc(s.label)+'">&times;</button></td>'
+        + '</tr>';
+    }
+    body.innerHTML = html;
+  }
+
+  var srvBody = $("srvBody");
+  if(srvBody){
+    srvBody.addEventListener("input", function(e){
+      var t = e.target, i = parseInt(t.getAttribute("data-i"),10), f = t.getAttribute("data-f");
+      if(!(i>=0) || !servers[i] || !f) return;
+      if(f === "tools" || f === "tokens"){
+        var v = parseFloat(t.value);
+        if(!isFinite(v) || v < 0) v = 0;
+        servers[i][f] = v;
+        renderServers();
+        compute();
+      }
+    });
+    srvBody.addEventListener("change", function(e){
+      var t = e.target, i = parseInt(t.getAttribute("data-i"),10), f = t.getAttribute("data-f");
+      if(!(i>=0) || !servers[i] || f !== "on") return;
+      servers[i].on = !!t.checked;
+      compute();
+    });
+    srvBody.addEventListener("click", function(e){
+      var t = e.target, i = parseInt(t.getAttribute("data-i"),10);
+      if(t.getAttribute("data-f") !== "del" || !(i>=0) || !servers[i]) return;
+      servers.splice(i,1);
+      renderServers();
+      compute();
+    });
+  }
+
+  function upsert(entry){
+    for(var i=0;i<servers.length;i++){
+      if(servers[i].key === entry.key){
+        servers[i].label  = entry.label || servers[i].label;
+        servers[i].tools  = entry.tools;
+        servers[i].tokens = entry.tokens;
+        servers[i].src    = entry.src;
+        servers[i].on     = true;
+        return;
+      }
+    }
+    entry.on = true;
+    servers.push(entry);
+  }
+
+  /* ---------- config parsing ---------- */
+  function libMatch(name){
+    var n = String(name).toLowerCase();
+    for(var i=0;i<LIB.length;i++){
+      var k = LIB[i].key;
+      if(n === k || n.indexOf(k) !== -1 || k.indexOf(n) !== -1) return LIB[i];
+    }
+    return null;
+  }
+
+  var btnCfg = $("btnCfg");
+  if(btnCfg) btnCfg.addEventListener("click", function(){
+    var msg = $("cfgMsg"), raw = ($("cfgIn").value || "").trim();
+    if(!raw){ msg.textContent = "Nothing pasted."; return; }
+    var data;
+    try { data = JSON.parse(raw); }
+    catch(err){ msg.textContent = "Invalid JSON: " + err.message; return; }
+    var map = null;
+    if(data && typeof data === "object"){
+      map = data.mcpServers || data.servers || data.mcp_servers || null;
+      if(!map){
+        // Maybe the object IS the server map already.
+        var ks = Object.keys(data), looksLikeMap = ks.length > 0;
+        for(var a=0;a<ks.length;a++){
+          var v = data[ks[a]];
+          if(!v || typeof v !== "object" || Array.isArray(v)){ looksLikeMap = false; break; }
+        }
+        if(looksLikeMap) map = data;
+      }
+    }
+    if(!map || typeof map !== "object"){ msg.textContent = "No mcpServers block found."; return; }
+    var names = Object.keys(map), added = 0, guessed = 0;
+    for(var j=0;j<names.length;j++){
+      var nm = names[j], hit = libMatch(nm);
+      if(hit){
+        upsert({ key:hit.key, label:hit.label, tools:hit.tools, tokens:hit.tokens, src:"config + library estimate" });
+      } else {
+        upsert({ key:slug(nm) || ("srv"+j), label:nm, tools:UNKNOWN_TOOLS, tokens:UNKNOWN_TOKENS, src:"config, unknown — edit me" });
+        guessed++;
+      }
+      added++;
+    }
+    msg.textContent = added + " server(s) loaded" + (guessed ? ", " + guessed + " need manual token estimates." : ".");
+    renderServers();
+    compute();
+  });
+
+  /* ---------- tools/list parsing ---------- */
+  function toolsOf(obj){
+    if(Array.isArray(obj)) return obj;
+    if(obj && typeof obj === "object"){
+      if(Array.isArray(obj.tools)) return obj.tools;
+      if(obj.result && Array.isArray(obj.result.tools)) return obj.result.tools;
+    }
+    return null;
+  }
+  function measure(list, k){
+    var tokens = 0, count = 0;
+    for(var i=0;i<list.length;i++){
+      var t = list[i];
+      if(!t || typeof t !== "object") continue;
+      var chars = String(t.name || "").length + String(t.description || "").length;
+      var sch = t.inputSchema || t.input_schema || t.parameters || null;
+      if(sch){
+        try { chars += JSON.stringify(sch).length; } catch(e2){ /* cyclic, skip */ }
+      }
+      tokens += Math.ceil(chars / k);
+      count++;
+    }
+    return { tools:count, tokens:tokens };
+  }
+
+  var btnTl = $("btnTl");
+  if(btnTl) btnTl.addEventListener("click", function(){
+    var msg = $("tlMsg"), raw = ($("tlIn").value || "").trim();
+    if(!raw){ msg.textContent = "Nothing pasted."; return; }
+    var data;
+    try { data = JSON.parse(raw); }
+    catch(err){ msg.textContent = "Invalid JSON: " + err.message; return; }
+    var k = numOf($("kJson"), 1, 3.6);
+    var label = ($("tlName").value || "").trim();
+    var groups = [], direct = toolsOf(data);
+    if(direct){
+      groups.push({ name: label || "pasted server", list: direct });
+    } else if(data && typeof data === "object"){
+      Object.keys(data).forEach(function(kk){
+        var sub = toolsOf(data[kk]);
+        if(sub) groups.push({ name: kk, list: sub });
+      });
+    }
+    if(!groups.length){ msg.textContent = "No tools array found in that JSON."; return; }
+    var total = 0, n = 0;
+    for(var g=0; g<groups.length; g++){
+      var m = measure(groups[g].list, k);
+      if(!m.tools) continue;
+      upsert({ key: slug(groups[g].name) || ("exact"+g), label: groups[g].name, tools:m.tools, tokens:m.tokens, src:"tools/list (exact)" });
+      total += m.tokens; n += m.tools;
+    }
+    if(!n){ msg.textContent = "Tools array was empty."; return; }
+    msg.textContent = n + " tool(s), " + fmt(total) + " tokens measured.";
+    renderServers();
+    compute();
+  });
+
+  /* ---------- buttons ---------- */
+  var btnAdd = $("btnAdd");
+  if(btnAdd) btnAdd.addEventListener("click", function(){
+    servers.push({ key:"custom-"+Date.now(), label:"Custom server", tools:UNKNOWN_TOOLS, tokens:UNKNOWN_TOKENS, on:true, src:"manual" });
+    renderServers();
+    compute();
+  });
+  var btnNone = $("btnNone");
+  if(btnNone) btnNone.addEventListener("click", function(){
+    servers.forEach(function(s){ s.on = false; });
+    renderServers();
+    compute();
+  });
+  var btnReset = $("btnReset");
+  if(btnReset) btnReset.addEventListener("click", function(){
+    servers = cloneLib();
+    renderServers();
+    compute();
+  });
+
+  /* ---------- context window selector ---------- */
+  var ctxSel = $("ctx");
+  if(ctxSel) ctxSel.addEventListener("change", function(){
+    $("ctxCustomWrap").style.display = (ctxSel.value === "custom") ? "" : "none";
+    compute();
+  });
+
+  function windowSize(){
+    if(!ctxSel) return 200000;
+    if(ctxSel.value === "custom") return numOf($("ctxCustom"), 1000, 200000);
+    var v = parseFloat(ctxSel.value);
+    return isFinite(v) && v > 0 ? v : 200000;
+  }
+
+  /* ---------- core computation ---------- */
+  function turnsFor(F, C, thr, a){
+    if(a <= 0) return Infinity;
+    var room = thr * C - F;
+    if(room <= 0) return 0;
+    return Math.floor(room / a);
+  }
+
+  function compute(){
+    var C    = windowSize();
+    var sys  = numOf($("sysBase"), 0, 0);
+    var bi   = numOf($("builtin"), 0, 0);
+    var mdC  = numOf($("mdChars"), 0, 0);
+    var a    = numOf($("perTurn"), 1, 1);
+    var plan = Math.max(1, Math.round(numOf($("planned"), 1, 1)));
+    var thr  = Math.min(1, Math.max(0.1, numOf($("thresh"), 10, 92) / 100));
+
+    var mdTok = Math.ceil(mdC / 4);
+
+    var active = servers.filter(function(s){ return s.on && s.tokens > 0; });
+    var mcpTok = 0;
+    active.forEach(function(s){ mcpTok += s.tokens; });
+
+    var F = sys + bi + mcpTok + mdTok;
+    var usable = C - F;
+    var share = C > 0 ? F / C : 0;
+
+    var turns = turnsFor(F, C, thr, a);
+    var comps = (turns > 0 && isFinite(turns)) ? Math.ceil(plan / turns) : (plan > 0 ? Infinity : 0);
+
+    /* cards */
+    var overCls = share >= 0.35 ? "c-red" : (share >= 0.2 ? "c-amb" : "c-grn");
+    var turnCls = (turns === 0) ? "c-red" : (turns < 10 ? "c-amb" : "c-grn");
+    $("cards").innerHTML =
+      card("Fixed overhead F", fmt(F) + " tok", pct(share) + " of the window", overCls) +
+      card("Usable working context", (usable > 0 ? fmt(usable) : "0") + " tok", (usable > 0 ? pct(usable/C) : "0%") + " left for work", usable > 0 ? "c-acc" : "c-red") +
+      card("MCP tool schemas", fmt(mcpTok) + " tok", active.length + " server(s), " + fmt(active.reduce(function(x,s){return x+s.tools;},0)) + " tools", "c-acc") +
+      card("Turns until auto-compact", (isFinite(turns) ? fmt(turns) : "∞"), "at " + fmt(a) + " tok/turn, " + Math.round(thr*100) + "% trip", turnCls) +
+      card("Compactions this session", (isFinite(comps) ? fmt(comps) : "∞"), "over " + fmt(plan) + " planned turns", comps > 1 ? "c-amb" : "c-grn");
+
+    /* warning */
+    var warn = $("warn"), wtxt = "", wcls = "note";
+    if(usable <= 0){
+      wtxt = "Fixed overhead exceeds the entire context window. Nothing is left for conversation — disable servers before doing anything else.";
+      wcls = "note bad";
+    } else if(turns === 0){
+      wtxt = "Overhead already sits above the " + Math.round(thr*100) + "% compaction threshold. Auto-compact would fire on or before the very first exchange.";
+      wcls = "note bad";
+    } else if(share >= 0.35){
+      wtxt = "Over a third of the window is gone before you type. Cutting the two largest servers is usually worth more than any prompt tuning.";
+      wcls = "note";
+    } else if(share <= 0.12){
+      wtxt = "Overhead is lean. Fixed context is not your bottleneck — conversation length is.";
+      wcls = "note ok";
+    }
+    warn.className = wtxt ? wcls : "note hide";
+    warn.textContent = wtxt;
+
+    /* stacked bar */
+    var free = Math.max(0, usable);
+    var denom = Math.max(F + free, 1);
+    var segs = [
+      { l:"System prompt", v:sys,    c:"s-sys"  },
+      { l:"Built-in tools", v:bi,    c:"s-bi"   },
+      { l:"MCP tools",      v:mcpTok,c:"s-mcp"  },
+      { l:"CLAUDE.md",      v:mdTok, c:"s-md"   },
+      { l:"Free",           v:free,  c:"s-free" }
+    ];
+    var bar = "", leg = "";
+    segs.forEach(function(s){
+      var p = (s.v / denom) * 100;
+      if(s.v > 0){
+        bar += '<div class="seg '+s.c+'" style="width:'+p.toFixed(3)+'%" title="'+esc(s.l)+': '+fmt(s.v)+' tokens ('+p.toFixed(1)+'%)">'
+             + (p >= 9 ? p.toFixed(0)+"%" : "") + '</div>';
+      }
+      leg += '<div class="li"><span class="sw '+s.c+'"></span><span><b>'+esc(s.l)+'</b><br>'+fmt(s.v)+' tok &middot; '+ (p>=0?p.toFixed(1):"0.0") +'%</span></div>';
+    });
+    $("bar").innerHTML = bar || '<div class="seg s-free" style="width:100%">empty</div>';
+    $("legend").innerHTML = leg;
+
+    /* payoff table */
+    var rows = active.map(function(s){
+      var without = turnsFor(F - s.tokens, C, thr, a);
+      var gain = (isFinite(without) && isFinite(turns)) ? (without - turns) : 0;
+      return {
+        label: s.label,
+        tokens: s.tokens,
+        per: s.tools > 0 ? s.tokens / s.tools : 0,
+        share: C > 0 ? s.tokens / C : 0,
+        gain: gain
+      };
+    }).sort(function(x,y){ return y.gain - x.gain || y.tokens - x.tokens; });
+
+    var pb = "";
+    if(!rows.length){
+      pb = '<tr><td colspan="5" style="color:#6e7681">No MCP servers enabled — overhead is baseline only.</td></tr>';
+    } else {
+      rows.forEach(function(r){
+        pb += '<tr><td>'+esc(r.label)+'</td>'
+            + '<td>'+fmt(r.tokens)+'</td>'
+            + '<td>'+(r.per>0?fmt(r.per):"—")+'</td>'
+            + '<td>'+pct(r.share)+'</td>'
+            + '<td class="'+(r.gain>0?"c-grn":"")+'">'+(r.gain>0?"+"+fmt(r.gain):"0")+'</td></tr>';
+      });
+    }
+    $("payBody").innerHTML = pb;
+
+    /* verdict */
+    var v = $("verdict");
+    if(!rows.length){
+      v.innerHTML = "<strong>Nothing to cut.</strong> With no MCP servers enabled your fixed overhead is "
+        + fmt(F) + " tokens (" + pct(share) + "), leaving " + fmt(Math.max(0,usable)) + " tokens of working context.";
+    } else {
+      var top = rows.slice(0, Math.min(3, rows.length));
+      var sumTok = 0;
+      top.forEach(function(r){ sumTok += r.tokens; });
+      var newF = F - sumTok;
+      var newTurns = turnsFor(newF, C, thr, a);
+      var dTurns = (isFinite(newTurns) && isFinite(turns)) ? newTurns - turns : 0;
+      var names = top.map(function(r){ return esc(r.label); }).join(", ");
+      var newComps = (newTurns > 0 && isFinite(newTurns)) ? Math.ceil(plan / newTurns) : Infinity;
+      v.innerHTML = "<strong>Verdict:</strong> disable <strong>" + names + "</strong> to reclaim "
+        + fmt(sumTok) + " tokens per request. Fixed overhead drops from " + fmt(F) + " to " + fmt(newF)
+        + " (" + pct(share) + " &rarr; " + pct(C>0?newF/C:0) + "), and you gain <strong>"
+        + (dTurns > 0 ? "+" + fmt(dTurns) : fmt(dTurns)) + " turns</strong> before auto-compact ("
+        + (isFinite(turns)?fmt(turns):"∞") + " &rarr; " + (isFinite(newTurns)?fmt(newTurns):"∞") + "). "
+        + "Compactions over " + fmt(plan) + " planned turns: " + (isFinite(comps)?fmt(comps):"∞")
+        + " &rarr; " + (isFinite(newComps)?fmt(newComps):"∞") + ".";
+    }
+  }
+
+  function card(title, big, sub, cls){
+    return '<div class="card"><h4>'+title+'</h4><div class="big '+(cls||"")+'">'+big+'</div><div class="sub">'+sub+'</div></div>';
+  }
+
+  /* ---------- wire inputs ---------- */
+  ["ctxCustom","sysBase","builtin","mdChars","perTurn","planned","kJson","thresh"].forEach(function(id){
+    var el = $(id);
+    if(el) el.addEventListener("input", compute);
+  });
+
+  /* ---------- init ---------- */
+  servers = cloneLib();
+  renderServers();
+  compute();
+})();
+</script>
+</body>
+</html>

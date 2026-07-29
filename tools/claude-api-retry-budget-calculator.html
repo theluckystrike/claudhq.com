@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Retry &amp; Timeout Budget Calculator (429/529)</title>
+<meta name="description" content="Size retries for Claude API 429 and 529 errors: success probability, expected and worst-case wall clock, deadline risk, and the backoff settings that fit.">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://claudhq.com/tools/claude-api-retry-budget-calculator">
+<meta property="og:title" content="Claude Retry &amp; Timeout Budget Calculator (429/529)">
+<meta property="og:description" content="Size retries for Claude API 429 and 529 errors: success probability, expected and worst-case wall clock, deadline risk, and the backoff settings that fit.">
+<meta property="og:url" content="https://claudhq.com/tools/claude-api-retry-budget-calculator">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "Claude Retry & Timeout Budget Calculator (429/529)",
+      "url": "https://claudhq.com/tools/claude-api-retry-budget-calculator",
+      "description": "Closed-form retry math for the Claude API: success probability within N retries, expected and worst-case wall clock, deadline-breach probability, and recommended max retries and delay cap.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "Michael Lip", "url": "https://zovo.one" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://claudhq.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://claudhq.com/tools/" },
+        { "@type": "ListItem", "position": 3, "name": "Claude Retry & Timeout Budget Calculator", "item": "https://claudhq.com/tools/claude-api-retry-budget-calculator" }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2b3240;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#58a6ff; --good:#3fb950;
+    --warn:#d29922; --bad:#f85149; --chip:#21262d;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; font-size:16px;
+  }
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  nav{
+    display:flex; gap:18px; padding:14px 20px; border-bottom:1px solid var(--border);
+    background:var(--panel); font-size:14px; position:sticky; top:0; z-index:5;
+  }
+  .wrap{max-width:940px; margin:0 auto; padding:24px 20px 60px}
+  h1{font-size:1.7rem; line-height:1.25; margin:.4em 0 .3em}
+  h2{font-size:1.25rem; margin:1.6em 0 .5em; border-bottom:1px solid var(--border); padding-bottom:.3em}
+  h3{font-size:1.02rem; margin:1.2em 0 .4em}
+  .intro{color:var(--muted); max-width:72ch}
+  section#tool{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:22px; margin:22px 0;
+  }
+  .grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px 20px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .field{display:flex; flex-direction:column; gap:6px}
+  .field label{font-size:.86rem; color:var(--muted); font-weight:600}
+  .field .hint{font-size:.74rem; color:#6e7a86; margin-top:-2px}
+  .field.wide{grid-column:1 / -1}
+  input[type=number],select{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:10px 12px; font-size:15px; font-family:inherit; width:100%;
+  }
+  input:focus,select:focus{outline:none; border-color:var(--accent)}
+  .check{display:flex; align-items:center; gap:9px; font-size:.9rem; color:var(--text)}
+  .check input{width:16px; height:16px; accent-color:var(--accent)}
+  .note{
+    margin-top:14px; background:rgba(88,166,255,.08); border:1px solid rgba(88,166,255,.32);
+    border-radius:8px; padding:10px 12px; font-size:.86rem; color:#c9d3dd;
+  }
+  .out{
+    margin-top:22px; background:var(--panel2); border:1px solid var(--border);
+    border-radius:10px; padding:20px;
+  }
+  .headline{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px}
+  .bignum{font-size:2.6rem; font-weight:800; line-height:1; color:var(--good)}
+  .bignum.warn{color:var(--warn)} .bignum.bad{color:var(--bad)}
+  .bigcap{font-size:.9rem; color:var(--muted)}
+  .cards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px}
+  @media(max-width:640px){.cards{grid-template-columns:1fr 1fr}}
+  .card{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:12px}
+  .card .k{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
+  .card .v{font-size:1.2rem; font-weight:700; margin-top:4px}
+  .verdict{margin-top:16px; padding:12px 14px; border-radius:8px; font-size:.95rem}
+  .verdict.ok{background:rgba(63,185,80,.12); border:1px solid rgba(63,185,80,.4)}
+  .verdict.warn{background:rgba(210,153,34,.12); border:1px solid rgba(210,153,34,.4)}
+  .verdict.bad{background:rgba(248,81,73,.12); border:1px solid rgba(248,81,73,.4)}
+  .chart{margin-top:20px; position:relative; border:1px solid var(--border); border-radius:8px; padding:14px 14px 10px; background:#0b0f14}
+  .chart .row{display:grid; grid-template-columns:96px 1fr 92px; align-items:center; gap:8px; margin-bottom:6px}
+  .chart .lbl{font-size:.72rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .chart .val{font-size:.72rem; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums}
+  .track{position:relative; height:14px; background:#11161d; border:1px solid var(--border); border-radius:4px; overflow:hidden}
+  .track > i{display:block; height:100%; background:var(--good)}
+  .track > i.over{background:var(--bad)}
+  .track > i.lat{background:var(--accent); opacity:.55}
+  .deadline{position:absolute; top:10px; bottom:26px; width:0; border-left:2px dashed var(--bad); pointer-events:none}
+  .dlabel{position:absolute; bottom:2px; font-size:.68rem; color:var(--bad); transform:translateX(-50%); white-space:nowrap}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:.72rem; color:var(--muted); margin-top:10px}
+  .legend span{display:inline-flex; align-items:center; gap:5px}
+  .sw{width:10px; height:10px; border-radius:2px; display:inline-block}
+  .tablewrap{overflow-x:auto; margin-top:16px}
+  table{width:100%; border-collapse:collapse; font-size:.85rem; min-width:520px}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:right; font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted); font-weight:600; text-transform:uppercase; font-size:.7rem; letter-spacing:.04em}
+  code{background:var(--chip); padding:2px 6px; border-radius:5px; font-size:.86em}
+  pre{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-size:.82rem; line-height:1.5}
+  pre code{background:none; padding:0}
+  .prose{max-width:76ch; color:#c9d3dd}
+  .prose ul{padding-left:20px}
+  .prose li{margin:.3em 0}
+  .related{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+  .related a{background:var(--chip); border:1px solid var(--border); padding:8px 12px; border-radius:8px; font-size:.9rem}
+  footer{border-top:1px solid var(--border); margin-top:40px; padding:22px 20px; color:var(--muted); font-size:.85rem}
+  footer .links{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:8px}
+  .split{color:#6e7a86}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/tools/">Tools</a>
+  <span class="split">/ Retry &amp; Timeout Budget</span>
+</nav>
+<div class="wrap">
+  <h1>Claude Retry &amp; Timeout Budget Calculator</h1>
+  <p class="intro">
+    A retry policy is a probability model, not a vibe. Given a per-attempt failure rate for
+    <code>429 rate_limit_error</code>, <code>529 overloaded_error</code>, <code>500 api_error</code> or a dropped
+    stream, this tool computes the exact odds of succeeding within <em>n</em> retries, the expected and
+    worst-case wall clock the schedule burns, the retry at which you cross your hard deadline, and the
+    probability of blowing that deadline. It then inverts the same equations to recommend the minimum
+    retry count for your SLO and the largest delay cap that still fits the budget.
+  </p>
+
+  <section id="tool" aria-label="Retry and timeout budget calculator">
+    <div class="grid">
+      <div class="field wide">
+        <label for="errClass">Error class being retried</label>
+        <select id="errClass">
+          <option value="429" selected>429 rate_limit_error (retry-after header)</option>
+          <option value="529">529 overloaded_error</option>
+          <option value="500">500 api_error (internal)</option>
+          <option value="503">503 service unavailable (gateway/proxy)</option>
+          <option value="stream">ERR_STREAM_PREMATURE_CLOSE (stream dropped)</option>
+          <option value="timeout">Connection / request timeout</option>
+        </select>
+        <span class="hint">Sets sensible defaults; every number below stays editable.</span>
+      </div>
+
+      <div class="field">
+        <label for="p">Observed per-attempt failure probability (%)</label>
+        <input id="p" type="number" min="0" max="100" step="0.5" value="25">
+        <span class="hint">Share of attempts that return this error. 25 = 1 in 4 attempts fails.</span>
+      </div>
+      <div class="field">
+        <label for="n">Max retries n (attempts = n + 1)</label>
+        <input id="n" type="number" min="0" max="50" step="1" value="4">
+        <span class="hint">Anthropic SDK default is 2.</span>
+      </div>
+      <div class="field">
+        <label for="L">Per-attempt request latency L (s)</label>
+        <input id="L" type="number" min="0" step="0.1" value="3">
+        <span class="hint">Wall clock burned by an attempt before it fails or returns.</span>
+      </div>
+
+      <div class="field">
+        <label for="b">Base delay b (s)</label>
+        <input id="b" type="number" min="0" step="0.1" value="0.5">
+        <span class="hint">Delay before the first retry, pre-jitter.</span>
+      </div>
+      <div class="field">
+        <label for="m">Backoff multiplier m</label>
+        <input id="m" type="number" min="1" step="0.1" value="2">
+        <span class="hint">2 = classic exponential doubling.</span>
+      </div>
+      <div class="field">
+        <label for="cap">Delay cap (s)</label>
+        <input id="cap" type="number" min="0" step="0.5" value="20">
+        <span class="hint">Ceiling on any single backoff delay.</span>
+      </div>
+
+      <div class="field">
+        <label for="jitter">Jitter mode</label>
+        <select id="jitter">
+          <option value="none">None &mdash; d_i exactly</option>
+          <option value="full" selected>Full &mdash; U(0, d_i)</option>
+          <option value="equal">Equal &mdash; d_i/2 + U(0, d_i/2)</option>
+          <option value="decorrelated">Decorrelated &mdash; min(cap, U(b, 3&middot;prev))</option>
+        </select>
+        <span class="hint">Full jitter halves expected wait and de-syncs retry storms.</span>
+      </div>
+      <div class="field">
+        <label for="D">Hard deadline D (s)</label>
+        <input id="D" type="number" min="0.1" step="1" value="60">
+        <span class="hint">Total wall clock the caller will tolerate.</span>
+      </div>
+      <div class="field">
+        <label for="slo">Target success SLO (%)</label>
+        <input id="slo" type="number" min="0" max="99.9999" step="0.1" value="99.9">
+        <span class="hint">Probability the call eventually succeeds.</span>
+      </div>
+
+      <div class="field">
+        <label class="check" for="honorRA">
+          <input type="checkbox" id="honorRA" checked>
+          Honor server <code>retry-after</code>
+        </label>
+        <span class="hint">When present, the header replaces the computed backoff.</span>
+      </div>
+      <div class="field">
+        <label for="ra">retry-after value (s)</label>
+        <input id="ra" type="number" min="0" step="0.5" value="10">
+        <span class="hint">Seconds the server asks you to wait.</span>
+      </div>
+    </div>
+
+    <div class="note" id="classNote"></div>
+
+    <div class="out" id="out" aria-live="polite"><!-- filled by JS --></div>
+  </section>
+
+  <h2>Ready-to-paste configuration</h2>
+  <div class="prose">
+    <p>Generated from the inputs above. <code>MAX_RETRIES</code> and <code>API_TIMEOUT_MS</code> are read as
+    environment variables by the wrapper below; the equivalent Anthropic SDK client options are
+    <code>max_retries</code> and <code>timeout</code>.</p>
+  </div>
+  <pre><code id="snippet"></code></pre>
+
+  <h2>How the calculation works</h2>
+  <div class="prose">
+    <h3>1. The delay schedule</h3>
+    <p>
+      Retry <em>i</em> (indexed from 0) waits a nominal exponential delay, clamped by the cap:
+    </p>
+    <pre><code>d_i = min(cap, b &times; m^i)      for i = 0 .. n-1</code></pre>
+    <p>
+      Jitter then transforms each <code>d_i</code> into a random variable. Because the distributions are
+      uniform, the expectations are closed-form &mdash; no simulation needed:
+    </p>
+    <ul>
+      <li><strong>None:</strong> E[delay] = <code>d_i</code>, worst case <code>d_i</code>.</li>
+      <li><strong>Full jitter</strong> &mdash; <code>U(0, d_i)</code>: E[delay] = <code>d_i / 2</code>, worst case <code>d_i</code>.</li>
+      <li><strong>Equal jitter</strong> &mdash; <code>d_i/2 + U(0, d_i/2)</code>: E[delay] = <code>3&middot;d_i / 4</code>, worst case <code>d_i</code>.</li>
+      <li><strong>Decorrelated jitter</strong> &mdash; <code>min(cap, U(b, 3&middot;prev))</code> seeded with <code>prev = b</code>:
+        the worst case follows <code>min(cap, 3&middot;prev_max)</code>, and the expectation is the mean of the
+        cap-truncated uniform, <code>[(cap&sup2; &minus; b&sup2;)/2 + cap(3prev &minus; cap)] / (3prev &minus; b)</code> when the cap
+        bites, else <code>(b + 3prev)/2</code>. The recursion is propagated through the mean, which is exact while
+        the cap is inactive and a close approximation once it binds.</li>
+    </ul>
+    <p>
+      When <strong>retry-after is honored</strong> and the server supplies it, the header value replaces
+      <code>d_i</code> entirely for every retry &mdash; jitter and multiplier stop mattering, and the whole schedule
+      becomes <code>n &times; retry-after</code> of pure waiting.
+    </p>
+
+    <h3>2. Reliability</h3>
+    <p>
+      Treat attempts as independent Bernoulli trials with failure probability <code>p</code>. You make one
+      initial attempt plus <em>n</em> retries, so <code>n+1</code> attempts total. The call fails only if every
+      attempt fails:
+    </p>
+    <pre><code>P(success within n retries) = 1 &minus; p^(n+1)
+E[attempts made]            = (1 &minus; p^(n+1)) / (1 &minus; p)      (= n+1 when p = 1)</code></pre>
+    <p>
+      The expected-attempts formula is the truncated geometric sum <code>&Sigma; p^k</code> for
+      <code>k = 0 .. n</code>: attempt <em>k</em> happens exactly when the previous <em>k</em> attempts all failed,
+      which has probability <code>p^k</code>.
+    </p>
+
+    <h3>3. Timing</h3>
+    <p>
+      The same <code>p^k</code> weights price the schedule. Attempt <em>k</em> costs latency <code>L</code> and
+      happens with probability <code>p^k</code>; delay <code>d_i</code> is only paid if attempt <em>i</em> failed,
+      which has probability <code>p^(i+1)</code>:
+    </p>
+    <pre><code>E[T]    = &Sigma;(k=0..n)   p^k     &middot; L
+        + &Sigma;(i=0..n-1) p^(i+1) &middot; E[d_i]
+
+worst T = (n+1) &middot; L + &Sigma;(i=0..n-1) d_i^max</code></pre>
+    <p>
+      Worst case assumes every attempt fails and every jittered delay lands at its upper bound &mdash; the number
+      your timeout configuration actually has to survive.
+    </p>
+
+    <h3>4. Deadline risk</h3>
+    <p>
+      Walk the cumulative timeline and find <code>k*</code>, the last attempt that finishes at or before the
+      deadline <code>D</code>. If all <code>n+1</code> attempts fit, the deadline is never the binding constraint and
+      the breach probability is zero (you simply exhaust retries first). Otherwise you breach exactly when the
+      first <code>k*+1</code> attempts all fail:
+    </p>
+    <pre><code>P(deadline exceeded) = p^(k*+1)     if k* &lt; n
+                     = 0             if the whole schedule fits inside D</code></pre>
+    <p>If even the first attempt cannot finish inside <code>D</code> (<code>L &gt; D</code>), the breach probability is 1.</p>
+
+    <h3>5. Inverting for recommendations</h3>
+    <p>
+      To hit a target success probability <code>S</code>, solve <code>1 &minus; p^(n+1) &ge; S</code>. Taking logs and
+      flipping the inequality (because <code>ln p &lt; 0</code>):
+    </p>
+    <pre><code>n &ge; ceil( ln(1 &minus; S) / ln(p) ) &minus; 1</code></pre>
+    <p>
+      The largest safe cap comes from the worst-case equation. The delay budget is
+      <code>S<sub>delay</sub> = D &minus; (n+1)&middot;L</code>; if that is negative, no cap value helps &mdash; you must cut
+      retries or latency. Otherwise worst-case total delay is monotonically non-decreasing in the cap, so a
+      bisection over <code>cap</code> finds the largest value with
+      <code>&Sigma; min(cap, b&middot;m^i) &le; S<sub>delay</sub></code>. If the uncapped schedule already fits, no cap is
+      required at all.
+    </p>
+
+    <h3>Assumptions worth knowing</h3>
+    <ul>
+      <li>Attempts are independent and identically distributed. During a sustained rate-limit or capacity
+        incident they are strongly correlated, so treat the computed success probability as an optimistic
+        upper bound and lean on the worst-case column.</li>
+      <li><code>L</code> is a single figure for every attempt. A request that fails at the connect stage is much
+        cheaper than one that times out after ten minutes; model those separately.</li>
+      <li>The deadline crossing point is computed on the expected-delay timeline. The worst-case total is
+        reported alongside it so you can size timeouts against the pessimistic number.</li>
+    </ul>
+
+    <h3>Claude API specifics</h3>
+    <ul>
+      <li><strong>Which statuses are retryable:</strong> the official Anthropic SDKs automatically retry
+        <code>408</code>, <code>409</code>, <code>429</code>, and all <code>5xx</code> responses, plus connection
+        errors, using exponential backoff. Non-retryable client errors &mdash; <code>400</code>,
+        <code>401</code>, <code>403</code>, <code>404</code>, <code>413</code> &mdash; should never enter a retry loop.</li>
+      <li><strong>SDK defaults:</strong> <code>max_retries</code> is <strong>2</strong> and the request
+        <code>timeout</code> is <strong>10 minutes</strong>. Units differ by SDK: Python and Ruby take seconds,
+        TypeScript takes milliseconds, Go takes a <code>time.Duration</code>, Java a <code>Duration</code>,
+        C# a <code>TimeSpan</code>.</li>
+      <li><strong>Timeouts are themselves retried</strong>, so total wall clock can reach
+        <code>timeout &times; (max_retries + 1)</code>. That product, not the timeout alone, is what your caller
+        experiences &mdash; size it against the worst case above.</li>
+      <li><strong>429 carries <code>retry-after</code>.</strong> Rate-limited responses tell you how many seconds
+        to wait; honoring the header beats any locally computed backoff. Rate-limit responses also expose
+        <code>x-ratelimit-remaining-*</code> headers you can use to throttle before you get rejected.</li>
+      <li><strong>529 <code>overloaded_error</code></strong> means the API is temporarily at capacity. Back off,
+        spread load over time, or shift some traffic to a less contended model.</li>
+      <li><strong>Streaming:</strong> a dropped stream discards the partial output, so every retry re-pays the
+        full input and output cost. Prefer streaming for long or large-<code>max_tokens</code> requests
+        precisely because it avoids hitting the request timeout in the first place.</li>
+    </ul>
+  </div>
+
+  <h2>Related Tools</h2>
+  <div class="related">
+    <a href="/tools/claude-api-cost-calculator/">Claude API Cost Calculator</a>
+    <a href="/tools/error-code-lookup/">Claude Error Code Lookup</a>
+    <a href="/tools/token-counter/">Token Counter</a>
+    <a href="/tools/claude-model-comparison/">Model Comparison</a>
+  </div>
+</div>
+
+<footer>
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/tools/">All Tools</a>
+    <a href="/tools/error-code-lookup/">Error Code Lookup</a>
+    <a href="https://zovo.one">Author</a>
+  </div>
+  <div>Reliability math for Claude API integrations. &copy; 2026 ClaudHQ.</div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var CLASSES = {
+    "429": {
+      p: 25, ra: true, raVal: 10,
+      note: "<strong>429 rate_limit_error</strong> &mdash; requests-per-minute, tokens-per-minute or tokens-per-day bucket exhausted. The response carries a <code>retry-after</code> header giving the seconds to wait; honoring it is strictly better than a locally guessed backoff. Retryable."
+    },
+    "529": {
+      p: 30, ra: false, raVal: 10,
+      note: "<strong>529 overloaded_error</strong> &mdash; the API is temporarily at capacity. Retryable with exponential backoff. Spreading requests over time or shifting part of the load to a less contended model helps more than shortening the delays."
+    },
+    "500": {
+      p: 8, ra: false, raVal: 5,
+      note: "<strong>500 api_error</strong> &mdash; an internal server error. Retryable with exponential backoff. If it persists across many attempts, it is an incident rather than a transient blip, and more retries will not fix it."
+    },
+    "503": {
+      p: 8, ra: false, raVal: 5,
+      note: "<strong>503 service unavailable</strong> &mdash; not an Anthropic error type; it comes from an intermediate gateway, proxy or load balancer. Treat it as a retryable transport failure and check your own network path as well as the upstream."
+    },
+    "stream": {
+      p: 15, ra: false, raVal: 5,
+      note: "<strong>ERR_STREAM_PREMATURE_CLOSE</strong> &mdash; the streaming connection dropped before the message completed. Retryable, but the partial output is discarded, so every retry re-pays the full input and output token cost. Budget cost as well as time."
+    },
+    "timeout": {
+      p: 12, ra: false, raVal: 5,
+      note: "<strong>Connection / request timeout</strong> &mdash; no response inside the client timeout. The SDKs retry these, so total wall clock can reach <code>timeout &times; (max_retries + 1)</code>. Raising <code>API_TIMEOUT_MS</code> is often a better fix than adding retries."
+    }
+  };
+
+  var ids = ["errClass","p","n","L","b","m","cap","jitter","D","slo","honorRA","ra"];
+  var el = {};
+  ids.forEach(function(k){ el[k] = document.getElementById(k); });
+  var out = document.getElementById("out");
+  var snippet = document.getElementById("snippet");
+  var classNote = document.getElementById("classNote");
+
+  function num(v, min, max, fallback){
+    var x = parseFloat(v);
+    if(!isFinite(x)) x = (fallback === undefined ? 0 : fallback);
+    if(min !== undefined && x < min) x = min;
+    if(max !== undefined && x > max) x = max;
+    return x;
+  }
+
+  function fmtS(x){
+    if(!isFinite(x)) return "n/a";
+    if(x >= 1000) return x.toFixed(0) + "s";
+    if(x >= 100)  return x.toFixed(1) + "s";
+    if(x >= 10)   return x.toFixed(2) + "s";
+    return x.toFixed(2) + "s";
+  }
+  function fmtPct(x){
+    if(!isFinite(x)) return "—";
+    if(x >= 99.999 && x < 100) return "99.999%";
+    if(x > 0 && x < 0.001) return "<0.001%";
+    if(x >= 10) return x.toFixed(2) + "%";
+    return x.toFixed(3) + "%";
+  }
+  function esc(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // Expected value of min(cap, U(b, 3*prev)) with deterministic prev.
+  function decorrMean(b, prev, cap){
+    var hi = 3 * prev;
+    if(cap <= b) return cap;
+    if(hi <= b)  return Math.min(cap, b);
+    if(cap >= hi) return (b + hi) / 2;
+    return (((cap*cap - b*b) / 2) + cap * (hi - cap)) / (hi - b);
+  }
+
+  // Build the delay schedule: arrays of expected and worst-case delays.
+  function buildSchedule(cfg, capOverride){
+    var cap = (capOverride === undefined) ? cfg.cap : capOverride;
+    var means = [], maxes = [];
+    var prevMean = cfg.b, prevMax = cfg.b;
+    for(var i = 0; i < cfg.n; i++){
+      var mean, mx;
+      if(cfg.useRA){
+        mean = cfg.ra; mx = cfg.ra;
+      } else if(cfg.jitter === "decorrelated"){
+        mean = decorrMean(cfg.b, prevMean, cap);
+        mx   = Math.min(cap, 3 * prevMax);
+        prevMean = mean; prevMax = mx;
+      } else {
+        var d = Math.min(cap, cfg.b * Math.pow(cfg.m, i));
+        mx = d;
+        if(cfg.jitter === "full")       mean = d / 2;
+        else if(cfg.jitter === "equal") mean = 0.75 * d;
+        else                            mean = d;
+      }
+      means.push(mean); maxes.push(mx);
+    }
+    return { means: means, maxes: maxes };
+  }
+
+  function sum(a){ var s = 0; for(var i=0;i<a.length;i++) s += a[i]; return s; }
+
+  function compute(){
+    var cfg = {
+      p:      num(el.p.value, 0, 100, 0) / 100,
+      n:      Math.round(num(el.n.value, 0, 50, 0)),
+      L:      num(el.L.value, 0, undefined, 0),
+      b:      num(el.b.value, 0, undefined, 0),
+      m:      num(el.m.value, 1, 100, 1),
+      cap:    num(el.cap.value, 0, undefined, 0),
+      jitter: el.jitter.value,
+      D:      num(el.D.value, 0.0001, undefined, 1),
+      slo:    num(el.slo.value, 0, 99.999999, 0) / 100,
+      ra:     num(el.ra.value, 0, undefined, 0)
+    };
+    var cls = CLASSES[el.errClass.value] || CLASSES["429"];
+    cfg.useRA = !!(el.honorRA.checked && cls.ra);
+    el.ra.disabled = !cls.ra;
+
+    classNote.innerHTML = cls.note +
+      (cls.ra ? "" : " <em>This error class does not supply a <code>retry-after</code> header, so the computed backoff is used.</em>");
+
+    var sch = buildSchedule(cfg);
+    var p = cfg.p, n = cfg.n, L = cfg.L;
+
+    // ---- Reliability ----
+    var pFailAll  = Math.pow(p, n + 1);
+    var pSuccess  = 1 - pFailAll;
+    var expAttempts = (p >= 1) ? (n + 1) : (1 - pFailAll) / (1 - p);
+
+    // ---- Timing ----
+    var eT = 0;
+    for(var k = 0; k <= n; k++) eT += Math.pow(p, k) * L;
+    for(var i = 0; i < n; i++)  eT += Math.pow(p, i + 1) * sch.means[i];
+    var worstT = (n + 1) * L + sum(sch.maxes);
+    var meanTotalAll = (n + 1) * L + sum(sch.means); // all attempts, expected delays
+
+    // ---- Cumulative timelines ----
+    var cumMean = [], cumWorst = [], cm = 0, cw = 0;
+    for(var k2 = 0; k2 <= n; k2++){
+      if(k2 > 0){ cm += sch.means[k2-1]; cw += sch.maxes[k2-1]; }
+      cm += L; cw += L;
+      cumMean.push(cm); cumWorst.push(cw);
+    }
+
+    // ---- Deadline crossing (expected timeline) ----
+    var kStar = -1;
+    for(var k3 = 0; k3 <= n; k3++){ if(cumMean[k3] <= cfg.D) kStar = k3; else break; }
+    var pExceed, crossLabel;
+    if(kStar < 0){
+      pExceed = 1;
+      crossLabel = "attempt 0";
+    } else if(kStar >= n){
+      pExceed = 0;
+      crossLabel = "never";
+    } else {
+      pExceed = Math.pow(p, kStar + 1);
+      crossLabel = (kStar + 1 === 1) ? "retry 1" : ("retry " + (kStar + 1));
+    }
+
+    // ---- Recommendation: minimum retries for the SLO ----
+    var recN, recNText;
+    if(p <= 0){
+      recN = 0; recNText = "0";
+    } else if(p >= 1){
+      recN = Infinity; recNText = "unreachable (p = 100%)";
+    } else if(cfg.slo >= 1){
+      recN = Infinity; recNText = "unreachable (SLO = 100%)";
+    } else if(cfg.slo <= 0){
+      recN = 0; recNText = "0";
+    } else {
+      recN = Math.max(0, Math.ceil(Math.log(1 - cfg.slo) / Math.log(p)) - 1);
+      recNText = String(recN);
+    }
+
+    // ---- Recommendation: largest cap fitting the deadline (worst case) ----
+    var delayBudget = cfg.D - (n + 1) * L;
+    var recCapText;
+    if(n === 0){
+      recCapText = "n/a (no retries)";
+    } else if(cfg.useRA){
+      recCapText = "n/a (retry-after honored)";
+    } else if(delayBudget < 0){
+      recCapText = "impossible — latency alone exceeds D";
+    } else {
+      var worstDelays = function(c){ return sum(buildSchedule(cfg, c).maxes); };
+      var hi = Math.max(cfg.b * Math.pow(cfg.m, Math.max(0, n - 1)), delayBudget, cfg.b) + 1;
+      if(worstDelays(hi) <= delayBudget){
+        recCapText = "no cap needed";
+      } else {
+        var lo = 0;
+        for(var it = 0; it < 80; it++){
+          var mid = (lo + hi) / 2;
+          if(worstDelays(mid) <= delayBudget) lo = mid; else hi = mid;
+        }
+        recCapText = fmtS(lo);
+      }
+    }
+
+    // ---- retry-after budget share ----
+    var raShare = null;
+    if(cfg.useRA && n > 0 && cfg.D > 0) raShare = (n * cfg.ra) / cfg.D * 100;
+
+    // ---- Verdict ----
+    var cls2, vcls, verdict;
+    var sloMet = pSuccess >= cfg.slo - 1e-12;
+    var fitsWorst = worstT <= cfg.D;
+    if(pExceed === 0 && sloMet && fitsWorst){
+      cls2 = ""; vcls = "ok";
+      verdict = "This schedule meets the " + fmtPct(cfg.slo * 100) + " SLO and its worst case (" +
+        fmtS(worstT) + ") fits inside the " + fmtS(cfg.D) + " deadline. Nothing to change.";
+    } else if(pExceed === 0 && sloMet){
+      cls2 = "warn"; vcls = "warn";
+      verdict = "The SLO is met and the typical run finishes in time, but the worst case (" + fmtS(worstT) +
+        ") overruns the " + fmtS(cfg.D) + " deadline. Cap single delays at " + recCapText +
+        " so even an all-fail run stays inside the budget.";
+    } else if(!sloMet && pExceed === 0){
+      cls2 = "warn"; vcls = "warn";
+      verdict = "Timing is fine, but " + fmtPct(pSuccess * 100) + " success falls short of the " +
+        fmtPct(cfg.slo * 100) + " target. You need at least <strong>" + recNText +
+        "</strong> retries at p = " + fmtPct(p * 100) + ".";
+    } else {
+      cls2 = "bad"; vcls = "bad";
+      verdict = "The deadline binds before the retries run out: cumulative time crosses " + fmtS(cfg.D) +
+        " at <strong>" + crossLabel + "</strong>, so " + fmtPct(pExceed * 100) +
+        " of calls will be cut off mid-schedule. Either raise D, cut per-attempt latency L, or shorten the " +
+        "backoff (largest cap that fits: " + recCapText + ").";
+    }
+    if(raShare !== null){
+      verdict += " Honoring <code>retry-after</code> at " + fmtS(cfg.ra) + " consumes " +
+        raShare.toFixed(1) + "% of the deadline in pure waiting.";
+    }
+
+    // ---- Chart ----
+    var scale = Math.max(worstT, cfg.D, cumMean[cumMean.length - 1] || 0, 0.001) * 1.06;
+    var rows = "";
+    for(var k4 = 0; k4 <= n; k4++){
+      var wPct = Math.min(100, cumMean[k4] / scale * 100);
+      var over = cumMean[k4] > cfg.D;
+      var name = (k4 === 0) ? "initial call" : ("retry " + k4);
+      rows += '<div class="row">' +
+        '<span class="lbl">' + esc(name) + '</span>' +
+        '<span class="track"><i class="' + (over ? "over" : "") + '" style="width:' + wPct.toFixed(2) + '%"></i></span>' +
+        '<span class="val">' + fmtS(cumMean[k4]) + '</span>' +
+        '</div>';
+    }
+    var dPct = Math.min(100, cfg.D / scale * 100);
+    // Deadline overlay is positioned inside the bar column: 96px label + 8px gap.
+    var chart =
+      '<div class="chart">' +
+        '<div style="position:relative">' + rows +
+          '<div class="deadline" style="left:calc(96px + 8px + (100% - 96px - 92px - 16px) * ' + (dPct/100).toFixed(4) + ')"></div>' +
+        '</div>' +
+        '<div class="legend">' +
+          '<span><i class="sw" style="background:var(--good)"></i>cumulative time within deadline</span>' +
+          '<span><i class="sw" style="background:var(--bad)"></i>past deadline</span>' +
+          '<span><i class="sw" style="background:transparent;border-left:2px dashed var(--bad)"></i>deadline D = ' + fmtS(cfg.D) + '</span>' +
+        '</div>' +
+      '</div>';
+
+    // ---- Schedule table ----
+    var trs = "";
+    for(var k5 = 0; k5 <= n; k5++){
+      var reachP = Math.pow(p, k5) * 100;
+      var dMean = (k5 === 0) ? 0 : sch.means[k5-1];
+      var dMax  = (k5 === 0) ? 0 : sch.maxes[k5-1];
+      trs += "<tr>" +
+        "<td>" + (k5 === 0 ? "initial call" : "retry " + k5) + "</td>" +
+        "<td>" + (k5 === 0 ? "—" : fmtS(dMean)) + "</td>" +
+        "<td>" + (k5 === 0 ? "—" : fmtS(dMax)) + "</td>" +
+        "<td>" + fmtS(cumMean[k5]) + "</td>" +
+        "<td>" + fmtS(cumWorst[k5]) + "</td>" +
+        "<td>" + fmtPct(reachP) + "</td>" +
+        "</tr>";
+    }
+    var table =
+      '<div class="tablewrap"><table>' +
+        '<thead><tr><th>Attempt</th><th>Delay before (mean)</th><th>Delay before (max)</th>' +
+        '<th>Cumulative (mean)</th><th>Cumulative (worst)</th><th>P(reached)</th></tr></thead>' +
+        '<tbody>' + trs + '</tbody>' +
+      '</table></div>';
+
+    out.innerHTML =
+      '<div class="headline">' +
+        '<span class="bignum ' + cls2 + '">' + fmtPct(pSuccess * 100) + '</span>' +
+        '<span class="bigcap">probability of success within ' + n + ' retr' + (n === 1 ? "y" : "ies") +
+          ' &middot; ' + (n + 1) + ' attempt' + (n === 0 ? "" : "s") + ' total</span>' +
+      '</div>' +
+      '<div class="cards">' +
+        '<div class="card"><div class="k">Expected wall clock</div><div class="v">' + fmtS(eT) + '</div></div>' +
+        '<div class="card"><div class="k">Worst-case wall clock</div><div class="v">' + fmtS(worstT) + '</div></div>' +
+        '<div class="card"><div class="k">Expected attempts</div><div class="v">' + expAttempts.toFixed(2) + '</div></div>' +
+        '<div class="card"><div class="k">P(deadline exceeded)</div><div class="v">' + fmtPct(pExceed * 100) + '</div></div>' +
+      '</div>' +
+      '<div class="cards" style="margin-top:12px">' +
+        '<div class="card"><div class="k">Deadline crossed at</div><div class="v">' + crossLabel + '</div></div>' +
+        '<div class="card"><div class="k">Min retries for SLO</div><div class="v">' + recNText + '</div></div>' +
+        '<div class="card"><div class="k">Largest safe cap</div><div class="v">' + recCapText + '</div></div>' +
+        '<div class="card"><div class="k">Total delay (all retries, mean)</div><div class="v">' + fmtS(sum(sch.means)) + '</div></div>' +
+      '</div>' +
+      chart +
+      '<div class="verdict ' + vcls + '">' + verdict + '</div>' +
+      table;
+
+    renderSnippet(cfg, worstT, recN, recNText);
+  }
+
+  function renderSnippet(cfg, worstT, recN, recNText){
+    var timeoutMs = Math.max(1000, Math.ceil((cfg.L * 1.5) * 1000));
+    var jitterLine;
+    if(cfg.jitter === "full")              jitterLine = "delay = Math.random() * d;                 // full jitter: U(0, d)";
+    else if(cfg.jitter === "equal")        jitterLine = "delay = d / 2 + Math.random() * (d / 2);    // equal jitter";
+    else if(cfg.jitter === "decorrelated") jitterLine = "delay = Math.min(CAP, BASE + Math.random() * (3 * prev - BASE)); // decorrelated";
+    else                                   jitterLine = "delay = d;                                  // no jitter";
+
+    var recLine = (recN === Infinity)
+      ? "# target SLO is unreachable at this per-attempt failure rate"
+      : ("# " + recNText + " retries needed for a " + (cfg.slo * 100).toFixed(3).replace(/0+$/,"").replace(/\.$/,"") + "% success SLO at p = " + (cfg.p * 100) + "%");
+
+    var s = "" +
+"# --- environment ---------------------------------------------------------\n" +
+"# Worst-case wall clock for this schedule: " + fmtS(worstT) + "  (deadline " + fmtS(cfg.D) + ")\n" +
+recLine + "\n" +
+"export MAX_RETRIES=" + cfg.n + "\n" +
+"export API_TIMEOUT_MS=" + timeoutMs + "        # per-attempt request timeout\n" +
+"\n" +
+"# Anthropic SDK defaults, for reference: max_retries = 2, timeout = 10 minutes.\n" +
+"# Timeouts are themselves retried, so worst-case wall clock reaches\n" +
+"#   timeout x (max_retries + 1) = " + ((timeoutMs / 1000) * (cfg.n + 1)).toFixed(1) + "s\n" +
+"\n" +
+"// --- equivalent retry loop ----------------------------------------------\n" +
+"const MAX_RETRIES = Number(process.env.MAX_RETRIES ?? " + cfg.n + ");\n" +
+"const TIMEOUT_MS  = Number(process.env.API_TIMEOUT_MS ?? " + timeoutMs + ");\n" +
+"const BASE = " + cfg.b + ", MULT = " + cfg.m + ", CAP = " + cfg.cap + ";   // seconds\n" +
+"const RETRYABLE = new Set([408, 409, 429, 500, 502, 503, 504, 529]);\n" +
+"\n" +
+"const sleep = (s) => new Promise(r => setTimeout(r, s * 1000));\n" +
+"\n" +
+"async function callClaude(client, params) {\n" +
+"  let prev = BASE;\n" +
+"  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {\n" +
+"    try {\n" +
+"      return await client.messages.create(params, { timeout: TIMEOUT_MS });\n" +
+"    } catch (err) {\n" +
+"      const status = err?.status;\n" +
+"      const retryable = status === undefined || RETRYABLE.has(status);\n" +
+"      if (!retryable || attempt === MAX_RETRIES) throw err;\n" +
+"\n" +
+"      const d = Math.min(CAP, BASE * Math.pow(MULT, attempt));\n" +
+"      let delay;\n" +
+"      " + jitterLine + "\n" +
+"      prev = delay;\n" +
+"\n" +
+(cfg.useRA
+? "      // 429 responses carry retry-after; the header wins over local backoff.\n" +
+  "      const ra = Number(err?.headers?.['retry-after']);\n" +
+  "      if (Number.isFinite(ra)) delay = ra;\n"
+: "      // This error class supplies no retry-after header; use the backoff.\n") +
+"\n" +
+"      await sleep(delay);\n" +
+"    }\n" +
+"  }\n" +
+"}\n";
+
+    snippet.textContent = s;
+  }
+
+  ids.forEach(function(k){
+    el[k].addEventListener("input", compute);
+    el[k].addEventListener("change", compute);
+  });
+
+  el.errClass.addEventListener("change", function(){
+    var c = CLASSES[el.errClass.value];
+    if(!c) return;
+    el.p.value = c.p;
+    el.ra.value = c.raVal;
+    el.honorRA.checked = c.ra;
+    compute();
+  });
+
+  compute();
+})();
+</script>
+</body>
+</html>

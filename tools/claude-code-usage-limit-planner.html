@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code Usage Limit Planner (5-Hour Window)</title>
+<meta name="description" content="Plan Claude Code usage against the rolling 5-hour window and weekly caps. Live countdown, Opus-weighted prompt budget, burn rate and binding constraint.">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://claudhq.com/tools/claude-code-usage-limit-planner">
+<meta property="og:title" content="Claude Code Usage Limit Planner (5-Hour Window)">
+<meta property="og:description" content="Live 5-hour window countdown, Opus-weighted prompt budget, burn-rate projection and weekly-cap analysis for Claude Code plans.">
+<meta property="og:url" content="https://claudhq.com/tools/claude-code-usage-limit-planner">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code Usage Limit Planner">
+<meta name="twitter:description" content="Rolling-window and weekly-cap math for Claude Code, computed live in your browser.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "Claude Code Usage Limit Planner (5-Hour Window)",
+      "url": "https://claudhq.com/tools/claude-code-usage-limit-planner",
+      "description": "Plan Claude Code usage against the rolling 5-hour window and weekly caps: live countdown, Opus-weighted prompt budget, burn rate and binding constraint.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "Michael Lip", "url": "https://zovo.one" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://claudhq.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://claudhq.com/tools/" },
+        { "@type": "ListItem", "position": 3, "name": "Claude Code Usage Limit Planner", "item": "https://claudhq.com/tools/claude-code-usage-limit-planner" }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2b3240;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#58a6ff; --good:#3fb950;
+    --warn:#d29922; --bad:#f85149; --chip:#21262d;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; font-size:16px;
+  }
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  nav{
+    display:flex; gap:18px; padding:14px 20px; border-bottom:1px solid var(--border);
+    background:var(--panel); font-size:14px; position:sticky; top:0; z-index:5;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:24px 20px 60px}
+  h1{font-size:1.7rem; line-height:1.25; margin:.4em 0 .3em}
+  h2{font-size:1.25rem; margin:1.6em 0 .5em; border-bottom:1px solid var(--border); padding-bottom:.3em}
+  h3{font-size:1.02rem; margin:1.4em 0 .4em; color:#cfe0f2}
+  .intro{color:var(--muted); max-width:70ch}
+  section#tool{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:22px; margin:22px 0;
+  }
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px 22px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .field{display:flex; flex-direction:column; gap:6px}
+  .field label{font-size:.86rem; color:var(--muted); font-weight:600}
+  .field .hint{font-size:.74rem; color:#6e7a86; margin-top:-2px}
+  input,select{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:10px 12px; font-size:15px; font-family:inherit; width:100%;
+  }
+  input[type=range]{padding:0; height:26px}
+  input:focus,select:focus{outline:none; border-color:var(--accent)}
+  fieldset{border:1px solid var(--border); border-radius:10px; padding:16px 18px 18px; margin:18px 0 0}
+  legend{font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:0 6px}
+  .out{
+    margin-top:22px; background:var(--panel2); border:1px solid var(--border);
+    border-radius:10px; padding:20px;
+  }
+  .headline{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px}
+  .bignum{font-size:2.6rem; font-weight:800; line-height:1; color:var(--good)}
+  .bignum.warn{color:var(--warn)} .bignum.bad{color:var(--bad)}
+  .bigcap{font-size:.9rem; color:var(--muted)}
+  .cards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px}
+  @media(max-width:640px){.cards{grid-template-columns:1fr 1fr}}
+  .card{background:var(--chip); border:1px solid var(--border); border-radius:8px; padding:12px}
+  .card .k{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
+  .card .v{font-size:1.25rem; font-weight:700; margin-top:4px}
+  .card .s{font-size:.72rem; color:#6e7a86; margin-top:2px}
+  .bar{height:12px; background:#0b0f14; border:1px solid var(--border); border-radius:6px; overflow:hidden; margin-top:14px; position:relative}
+  .bar > i{display:block; height:100%; background:var(--good)}
+  .band{position:relative; height:34px; background:#0b0f14; border:1px solid var(--border); border-radius:6px; margin-top:10px; overflow:hidden}
+  .band .fillband{position:absolute; top:0; bottom:0; background:rgba(88,166,255,.22); border-left:1px solid var(--accent); border-right:1px solid var(--accent)}
+  .band .marker{position:absolute; top:0; bottom:0; width:2px; background:var(--warn)}
+  .band .lab{position:absolute; font-size:.68rem; color:var(--muted); top:8px}
+  .timeline{position:relative; height:44px; background:#0b0f14; border:1px solid var(--border); border-radius:6px; margin-top:10px; overflow:hidden}
+  .timeline .seg{position:absolute; top:6px; bottom:6px; background:rgba(63,185,80,.16); border:1px solid rgba(63,185,80,.45); border-radius:4px}
+  .timeline .seg.active{background:rgba(88,166,255,.22); border-color:var(--accent)}
+  .timeline .nowline{position:absolute; top:0; bottom:0; width:2px; background:var(--warn); z-index:2}
+  .timeline .tick{position:absolute; top:0; bottom:0; width:1px; background:#20262f}
+  .timeline .tlab{position:absolute; bottom:1px; font-size:.6rem; color:#6e7a86}
+  .clock{font-family:"Monaco","Menlo",monospace; font-variant-numeric:tabular-nums}
+  .verdict{margin-top:16px; padding:12px 14px; border-radius:8px; font-size:.95rem}
+  .verdict.ok{background:rgba(63,185,80,.12); border:1px solid rgba(63,185,80,.4)}
+  .verdict.warn{background:rgba(210,153,34,.12); border:1px solid rgba(210,153,34,.4)}
+  .verdict.bad{background:rgba(248,81,73,.12); border:1px solid rgba(248,81,73,.4)}
+  .note{margin-top:12px; font-size:.82rem; color:#6e7a86}
+  code{background:var(--chip); padding:2px 6px; border-radius:5px; font-size:.86em}
+  pre{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-size:.86rem}
+  .prose{max-width:74ch; color:#c9d3dd}
+  .tablewrap{overflow-x:auto; margin-top:12px}
+  table{border-collapse:collapse; width:100%; font-size:.9rem; min-width:560px}
+  th,td{border:1px solid var(--border); padding:9px 11px; text-align:left}
+  th{background:var(--chip); color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.04em}
+  td.ok{color:var(--good)} td.bad{color:var(--bad)} td.warnc{color:var(--warn)}
+  .related{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+  .related a{background:var(--chip); border:1px solid var(--border); padding:8px 12px; border-radius:8px; font-size:.9rem}
+  footer{border-top:1px solid var(--border); margin-top:40px; padding:22px 20px; color:var(--muted); font-size:.85rem}
+  footer .links{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:8px}
+  .split{color:#6e7a86}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/tools/">Tools</a>
+  <span class="split">/ Usage Limit Planner</span>
+</nav>
+<div class="wrap">
+  <h1>Claude Code Usage Limit Planner: 5-Hour Window and Weekly Caps</h1>
+  <p class="intro">
+    Claude Code meters you on a <strong>rolling 5-hour window</strong> that opens with your first message
+    and expires exactly five hours later, plus a <strong>separate weekly allowance</strong> counted in
+    model-hours. This planner runs the constraint math: how long is left in the current window, how many
+    prompts your plan's published allowance is actually worth once Opus weighting and prompt size are
+    applied, when your current pace hits the ceiling, and <em>which</em> of the two limits binds first.
+    Everything is computed locally in your browser. No pricing, no currency, purely quota arithmetic.
+  </p>
+
+  <section id="tool" aria-label="Claude Code usage limit planner">
+    <div class="grid">
+      <div class="field">
+        <label for="plan">Plan</label>
+        <select id="plan">
+          <option value="pro">Pro</option>
+          <option value="max5" selected>Max 5x</option>
+          <option value="max20">Max 20x</option>
+          <option value="team">Team (premium seat)</option>
+        </select>
+        <span class="hint">Sets the published per-window and weekly allowance bands.</span>
+      </div>
+      <div class="field">
+        <label for="opus">Opus share of prompts: <span id="opusLab" class="clock">30%</span></label>
+        <input id="opus" type="range" min="0" max="100" step="1" value="30">
+        <span class="hint">Remainder runs on Sonnet. Pro has no Opus access in Claude Code.</span>
+      </div>
+      <div class="field">
+        <label for="avgTok">Average tokens per prompt</label>
+        <input id="avgTok" type="number" min="0" step="500" value="20000">
+        <span class="hint">Input + output + cached reads. Consumption scales with tokens, not message count.</span>
+      </div>
+      <div class="field">
+        <label for="refTok">Reference tokens per prompt (baseline)</label>
+        <input id="refTok" type="number" min="1" step="500" value="20000">
+        <span class="hint">Prompt size the published counts assume. Modeling knob, not a vendor constant.</span>
+      </div>
+      <div class="field">
+        <label for="wOpus">Opus weight (Sonnet prompts = 1)</label>
+        <input id="wOpus" type="number" min="1" step="0.5" value="5">
+        <span class="hint">Anthropic states Opus consumes the allowance roughly 5x faster than Sonnet.</span>
+      </div>
+      <div class="field">
+        <label for="target">Target prompts per 5-hour window</label>
+        <input id="target" type="number" min="0" step="5" value="120">
+        <span class="hint">What a heavy session looks like for you. Drives the crossover table.</span>
+      </div>
+      <div class="field">
+        <label for="hpd">Coding hours per day</label>
+        <input id="hpd" type="number" min="0" max="24" step="0.5" value="6">
+        <span class="hint">Active model time, not desk time.</span>
+      </div>
+      <div class="field">
+        <label for="dpw">Coding days per week</label>
+        <input id="dpw" type="number" min="0" max="7" step="1" value="5">
+        <span class="hint">Feeds the weekly Sonnet-hour and Opus-hour caps.</span>
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Current window state (optional)</legend>
+      <div class="grid">
+        <div class="field">
+          <label for="t0">Clock time of this window's first message</label>
+          <input id="t0" type="time" step="60">
+          <span class="hint">Leave blank to skip the live countdown. Times in the future are read as yesterday.</span>
+        </div>
+        <div class="field">
+          <label for="used">Prompts already used in this window</label>
+          <input id="used" type="number" min="0" step="1" value="0">
+          <span class="hint">Counted as sent messages, mixed across models at the share above.</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="out" id="out" aria-live="polite"></div>
+  </section>
+
+  <h2>Where the next tier stops throttling you</h2>
+  <p class="prose">
+    For your target volume and prompt size, this is the highest Opus share each tier can absorb inside one
+    5-hour window before the weighted demand exceeds the allowance, and the largest window a tier supports
+    at your <em>current</em> Opus share.
+  </p>
+  <div class="tablewrap"><table id="xover">
+    <thead><tr><th>Tier</th><th>Per-window band</th><th>Max prompts at your mix</th><th>Max Opus share at your volume</th><th>Verdict</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <p class="note" id="xnote"></p>
+
+  <h2>How the calculation works</h2>
+  <div class="prose">
+    <h3>1. The rolling 5-hour window</h3>
+    <p>
+      The window is not a fixed clock grid. It opens at <code>t0</code>, the timestamp of your first message
+      after the previous window expired, and it resets at <code>t0 + 5h</code>. So the time you have left is
+      simply
+    </p>
+    <pre>remaining = 5h - (now - t0)          reset = t0 + 5h</pre>
+    <p>
+      That is why two people starting at 09:10 and 09:40 have completely different reset points, and why
+      an idle gap does not extend anything: the clock runs from the first message, not from your last one.
+      The timeline above projects the day's successive windows assuming you keep working straight through.
+    </p>
+
+    <h3>2. Weighted consumption, as a band</h3>
+    <p>
+      Anthropic publishes the per-window allowance as a <em>range</em>, not a number, because the real meter
+      is token consumption. This tool keeps it a range and never invents a false midpoint precision. Two
+      corrections turn the published Sonnet-prompt band into your effective prompt count:
+    </p>
+    <pre>tokenMultiplier = avgTokens / referenceTokens
+weight          = (1 - o) + w * o          o = Opus share, w = Opus weight (~5)
+effectivePrompts = allowance / weight / tokenMultiplier</pre>
+    <p>
+      The weight term is a mixture: a prompt is Sonnet with probability <code>1 - o</code> costing 1 unit,
+      or Opus with probability <code>o</code> costing <code>w</code> units, so the expected cost per prompt
+      is <code>(1 - o) + w&middot;o</code>. At 30% Opus and <code>w = 5</code> that is 2.2, meaning each
+      prompt burns 2.2 Sonnet-equivalents and your effective prompt count is 1/2.2 of the published band.
+      The token multiplier is linear: doubling average prompt size halves how many prompts fit, which is
+      exactly why large-repo sessions hit limits far sooner than the headline numbers suggest.
+    </p>
+
+    <h3>3. Burn rate and projected cap time</h3>
+    <p>
+      Your pace is measured from the window itself, not assumed:
+    </p>
+    <pre>elapsed = now - t0
+rate    = promptsUsed / elapsed                (prompts per hour)
+capTime = now + (effectivePrompts - promptsUsed) / rate</pre>
+    <p>
+      If <code>capTime</code> lands after <code>t0 + 5h</code>, the window resets before you exhaust it and
+      the window is not your binding constraint. If it lands before the reset, the gap between the two is
+      dead time you will spend throttled.
+    </p>
+
+    <h3>4. Which constraint binds first</h3>
+    <p>
+      The weekly cap is denominated in <strong>model-hours</strong>, tracked separately for Sonnet and for
+      Opus, and it accumulates across your whole schedule rather than one session. With
+      <code>H = hoursPerDay &times; daysPerWeek</code>, weekly demand splits as
+      <code>H&middot;(1 - o)</code> Sonnet-hours and <code>H&middot;o</code> Opus-hours. Each is checked
+      against its own allowance, and the binding constraint is whichever runs out first in coding-hours
+      from now:
+    </p>
+    <pre>weeklyHoursLeft = min( sonnetAllowance / (1 - o), opusAllowance / o )
+windowHoursLeft = (effectivePrompts - promptsUsed) / rate
+binding         = min(windowHoursLeft, weeklyHoursLeft)</pre>
+    <p>
+      Heavy Opus users almost always bind on the weekly Opus-hour cap rather than the 5-hour window, because
+      the Opus weekly allowance is roughly a tenth of the Sonnet one. Sonnet-only users on a small plan
+      typically bind on the 5-hour window instead.
+    </p>
+
+    <h3>5. The crossover point</h3>
+    <p>
+      A tier stops throttling you when its allowance covers your weighted demand. Setting
+      <code>P &middot; ((1 - o) + w&middot;o) &middot; m &le; A</code> for target volume <code>P</code>,
+      token multiplier <code>m</code> and allowance <code>A</code>, and solving for the Opus share:
+    </p>
+    <pre>o* = ( A / (P * m) - 1 ) / (w - 1)       clamped to [0, 1]</pre>
+    <p>
+      Above <code>o*</code> that tier throttles you at your target volume; below it you fit. When
+      <code>A / (P&middot;m) &lt; 1</code> the tier cannot carry your volume even on pure Sonnet, so no Opus
+      share works and the answer is fewer or smaller prompts, a higher tier, or the API, which has no
+      5-hour window at all and is bounded only by per-minute request and token rate limits.
+    </p>
+
+    <h3>Allowance figures used</h3>
+    <p>
+      Per 5-hour window, expressed as Sonnet prompts at reference size: Pro 10 to 40, Max 5x 50 to 200,
+      Max 20x 200 to 800. Weekly: Pro 40 to 80 Sonnet-hours with no Opus access in Claude Code; Max 5x 140
+      to 280 Sonnet-hours plus 15 to 35 Opus-hours; Max 20x 240 to 480 Sonnet-hours plus 24 to 40
+      Opus-hours. These are Anthropic's published planning ranges, and they are estimates by design:
+      the underlying meter is tokens, so your mileage moves with repo size, context reuse and tool output.
+      Anthropic does not publish a distinct per-window band for Team premium seats, so this tool uses the
+      Max 5x band as an explicit proxy for that option. Treat every output here as a planning estimate,
+      not a guarantee.
+    </p>
+  </div>
+
+  <h2>Related Tools</h2>
+  <div class="related">
+    <a href="/tools/context-window-visualizer">Context Window Visualizer</a>
+    <a href="/tools/token-counter">Token Counter</a>
+    <a href="/tools/claude-model-comparison">Claude Model Comparison</a>
+    <a href="/tools/claude-code-session-cost-tracker">Session Tracker</a>
+  </div>
+</div>
+
+<footer>
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/tools/">All Tools</a>
+    <a href="/tools/context-window-visualizer">Context Window Visualizer</a>
+    <a href="https://zovo.one">Author</a>
+  </div>
+  <div>Claude Code planning tools and reference. &copy; 2026 claudhq.com</div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var WINDOW_H = 5;
+
+  // Published planning ranges. win = Sonnet prompts per 5h window at reference prompt size.
+  // sonnetWk / opusWk = weekly model-hours. Team premium seat uses the Max 5x band as a stated proxy.
+  var PLANS = {
+    pro:   {name:"Pro",                 win:[10,40],   sonnetWk:[40,80],   opusWk:[0,0],   opus:false, proxy:false},
+    max5:  {name:"Max 5x",              win:[50,200],  sonnetWk:[140,280], opusWk:[15,35], opus:true,  proxy:false},
+    max20: {name:"Max 20x",             win:[200,800], sonnetWk:[240,480], opusWk:[24,40], opus:true,  proxy:false},
+    team:  {name:"Team (premium seat)", win:[50,200],  sonnetWk:[140,280], opusWk:[15,35], opus:true,  proxy:true}
+  };
+  var TIER_ORDER = ["pro","max5","max20"];
+
+  var ids = ["plan","opus","avgTok","refTok","wOpus","target","hpd","dpw","t0","used"];
+  var el = {};
+  ids.forEach(function(k){ el[k] = document.getElementById(k); });
+  var out    = document.getElementById("out");
+  var xbody  = document.querySelector("#xover tbody");
+  var xnote  = document.getElementById("xnote");
+  var opusLab= document.getElementById("opusLab");
+
+  function num(v, min, max, dflt){
+    var n = parseFloat(v);
+    if(!isFinite(n)) n = (dflt === undefined ? 0 : dflt);
+    if(min !== undefined && n < min) n = min;
+    if(max !== undefined && n > max) n = max;
+    return n;
+  }
+  function fmt(n){
+    if(!isFinite(n) || isNaN(n)) return "n/a";
+    if(Math.abs(n) >= 1000) return n.toLocaleString("en-US",{maximumFractionDigits:0});
+    if(Math.abs(n) >= 100)  return n.toFixed(0);
+    if(Math.abs(n) >= 10)   return n.toFixed(1);
+    return n.toFixed(2);
+  }
+  function fmtInt(n){
+    if(!isFinite(n) || isNaN(n)) return "n/a";
+    return Math.max(0, Math.floor(n)).toLocaleString("en-US");
+  }
+  function pad(n){ return (n < 10 ? "0" : "") + n; }
+  function hhmm(d){ return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function hms(ms){
+    if(!isFinite(ms) || ms < 0) ms = 0;
+    var s = Math.floor(ms/1000);
+    return pad(Math.floor(s/3600)) + ":" + pad(Math.floor((s%3600)/60)) + ":" + pad(s%60);
+  }
+  function esc(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // Parse "HH:MM" into a Date today; if that is in the future, it belongs to yesterday.
+  function parseT0(str, now){
+    if(!str) return null;
+    var m = /^(\d{1,2}):(\d{2})/.exec(str);
+    if(!m) return null;
+    var h = parseInt(m[1],10), mi = parseInt(m[2],10);
+    if(!isFinite(h) || !isFinite(mi) || h < 0 || h > 23 || mi < 0 || mi > 59) return null;
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, mi, 0, 0);
+    if(d.getTime() > now.getTime() + 60000) d = new Date(d.getTime() - 86400000);
+    return d;
+  }
+
+  function effPrompts(allowance, weight, mult){
+    if(weight <= 0 || mult <= 0) return 0;
+    return allowance / weight / mult;
+  }
+
+  function buildTimeline(t0, now){
+    // Project successive 5h windows from t0 across a 24h track anchored at t0's day start.
+    var dayStart = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), 0,0,0,0);
+    var html = "";
+    var i;
+    for(i=0;i<=24;i+=4){
+      var p = (i/24)*100;
+      html += '<div class="tick" style="left:'+p+'%"></div>';
+      if(i < 24) html += '<div class="tlab" style="left:calc('+p+'% + 3px)">'+pad(i)+':00</div>';
+    }
+    var startMs = t0.getTime();
+    for(i=0;i<8;i++){
+      var s = startMs + i*WINDOW_H*3600000;
+      var e = s + WINDOW_H*3600000;
+      var relS = (s - dayStart.getTime())/3600000;
+      var relE = (e - dayStart.getTime())/3600000;
+      if(relS >= 24) break;
+      var clipE = Math.min(relE, 24);
+      var left = (relS/24)*100, w = ((clipE-relS)/24)*100;
+      if(w <= 0) continue;
+      var active = (now.getTime() >= s && now.getTime() < e) ? " active" : "";
+      html += '<div class="seg'+active+'" style="left:'+left+'%;width:'+w+'%"></div>';
+    }
+    var relNow = (now.getTime() - dayStart.getTime())/3600000;
+    if(relNow >= 0 && relNow <= 24){
+      html += '<div class="nowline" style="left:'+((relNow/24)*100)+'%"></div>';
+    }
+    return '<div class="timeline">'+html+'</div>';
+  }
+
+  function bandBar(loEff, hiEff, used){
+    if(!isFinite(loEff) || !isFinite(hiEff)){
+      return '<div class="band"><div class="lab" style="left:4px">allowance undefined at zero prompt size</div></div>';
+    }
+    var top = Math.max(hiEff, used, 1);
+    if(!isFinite(top) || top <= 0) top = 1;
+    var l = Math.max(0, Math.min(100, (loEff/top)*100));
+    var h = Math.max(l, Math.min(100, (hiEff/top)*100));
+    var u = Math.max(0, Math.min(100, (used/top)*100));
+    return '<div class="band">' +
+      '<div class="fillband" style="left:'+l+'%;width:'+Math.max(0.6,(h-l))+'%"></div>' +
+      '<div class="marker" style="left:'+u+'%"></div>' +
+      '<div class="lab" style="left:4px">0</div>' +
+      '<div class="lab" style="right:4px">'+fmtInt(top)+' prompts</div>' +
+      '</div>';
+  }
+
+  function compute(){
+    var now   = new Date();
+    var planK = el.plan.value in PLANS ? el.plan.value : "max5";
+    var plan  = PLANS[planK];
+
+    var o      = num(el.opus.value, 0, 100, 0) / 100;
+    var avgTok = num(el.avgTok.value, 0, 1e9, 0);
+    var refTok = num(el.refTok.value, 1, 1e9, 20000);
+    var w      = num(el.wOpus.value, 1, 100, 5);
+    var target = num(el.target.value, 0, 1e6, 0);
+    var hpd    = num(el.hpd.value, 0, 24, 0);
+    var dpw    = num(el.dpw.value, 0, 7, 0);
+    var used   = num(el.used.value, 0, 1e6, 0);
+
+    opusLab.textContent = Math.round(o*100) + "%";
+
+    var mult   = avgTok > 0 ? avgTok / refTok : 0;   // 0 means "no prompts of any size"
+    var weight = (1 - o) + w * o;
+    if(weight <= 0) weight = 1;
+
+    // --- 1. window allowance band -> effective prompts ---
+    var loEff = mult > 0 ? effPrompts(plan.win[0], weight, mult) : Infinity;
+    var hiEff = mult > 0 ? effPrompts(plan.win[1], weight, mult) : Infinity;
+    var typAllow = (plan.win[0] + plan.win[1]) / 2;
+    var typEff   = mult > 0 ? effPrompts(typAllow, weight, mult) : Infinity;
+    var finiteEff = isFinite(typEff);
+
+    // --- 2. rolling window state ---
+    var t0 = parseT0(el.t0.value, now);
+    var remainMs = null, resetAt = null, elapsedH = 0, expired = false;
+    if(t0){
+      resetAt  = new Date(t0.getTime() + WINDOW_H*3600000);
+      remainMs = resetAt.getTime() - now.getTime();
+      elapsedH = (now.getTime() - t0.getTime())/3600000;
+      if(remainMs <= 0){ expired = true; remainMs = 0; }
+    }
+
+    // --- 3. burn rate ---
+    var rate = 0, hoursToCap = Infinity, capAt = null;
+    if(t0 && elapsedH > 0.0167 && used > 0){          // need at least ~1 minute of history
+      rate = used / elapsedH;
+      var left = finiteEff ? (typEff - used) : Infinity;
+      if(left <= 0){ hoursToCap = 0; capAt = new Date(now.getTime()); }
+      else if(rate > 0 && isFinite(left)){
+        hoursToCap = left / rate;
+        capAt = new Date(now.getTime() + hoursToCap*3600000);
+      }
+    }
+
+    // --- 4. weekly caps ---
+    var weeklyH = hpd * dpw;
+    var sTyp = (plan.sonnetWk[0] + plan.sonnetWk[1]) / 2;
+    var oTyp = (plan.opusWk[0] + plan.opusWk[1]) / 2;
+    var sDem = weeklyH * (1 - o);
+    var oDem = weeklyH * o;
+    var sUtil = sTyp > 0 ? sDem / sTyp : (sDem > 0 ? Infinity : 0);
+    var oUtil = oTyp > 0 ? oDem / oTyp : (oDem > 0 ? Infinity : 0);
+
+    var hToSonnetCap = (1 - o) > 0 ? sTyp / (1 - o) : Infinity;      // coding hours until Sonnet cap
+    var hToOpusCap   = o > 0 ? (oTyp > 0 ? oTyp / o : 0) : Infinity; // coding hours until Opus cap
+    var weeklyHoursLeft = Math.min(hToSonnetCap, hToOpusCap);
+    var weeklyWho = hToOpusCap <= hToSonnetCap ? "weekly Opus-hour cap" : "weekly Sonnet-hour cap";
+    var weeklyDays = hpd > 0 ? weeklyHoursLeft / hpd : Infinity;
+
+    // --- binding constraint ---
+    var bindingName, bindingHours;
+    if(hoursToCap <= weeklyHoursLeft){ bindingName = "5-hour window prompt cap"; bindingHours = hoursToCap; }
+    else { bindingName = weeklyWho; bindingHours = weeklyHoursLeft; }
+    if(!isFinite(bindingHours)) bindingName = "no cap reached at this pace";
+
+    // --- verdict ---
+    var vCls = "ok", vTxt = "";
+    if(mult <= 0){
+      vCls = "warn";
+      vTxt = "Average tokens per prompt is zero, so there is nothing to meter. Enter a realistic prompt size, typically 10,000 to 60,000 tokens once file reads and tool output are included.";
+    } else if(!plan.opus && o > 0){
+      vCls = "bad";
+      vTxt = "Pro does not include Opus in Claude Code, so an Opus share above zero is not reachable on this plan. The window figures below still apply if you drop to Sonnet only; move to Max 5x or higher for Opus.";
+    } else if(t0 && expired){
+      vCls = "ok";
+      vTxt = "That window already expired at <strong>" + hhmm(resetAt) + "</strong>. Your next message opens a fresh 5-hour window with the full allowance below.";
+    } else if(isFinite(hoursToCap) && t0 && hoursToCap*3600000 < remainMs){
+      vCls = "bad";
+      vTxt = "At <strong>" + fmt(rate) + " prompts/hour</strong> you exhaust the typical allowance around <strong>" +
+             (capAt ? hhmm(capAt) : "now") + "</strong>, about <strong>" + fmt((remainMs/3600000) - hoursToCap) +
+             "h</strong> before the window resets at " + hhmm(resetAt) + ". Binding constraint: <strong>" + bindingName +
+             "</strong>. Slow the pace to " + fmtInt(finiteEff ? (typEff - used) / Math.max(0.01, remainMs/3600000) : 0) +
+             " prompts/hour, shrink prompts, or shift work to Sonnet.";
+    } else if(sUtil > 1 || oUtil > 1){
+      vCls = "warn";
+      vTxt = "Your session pace fits the 5-hour window, but the weekly schedule does not fit: " +
+             (oUtil > 1 ? "Opus demand is <strong>" + fmt(oUtil*100) + "%</strong> of the weekly Opus-hour allowance" :
+                          "Sonnet demand is <strong>" + fmt(sUtil*100) + "%</strong> of the weekly Sonnet-hour allowance") +
+             ". Binding constraint: <strong>" + bindingName + "</strong>, reached after roughly <strong>" +
+             fmt(weeklyDays) + " coding days</strong> into the week.";
+    } else if(!t0){
+      vCls = "ok";
+      vTxt = "Enter the clock time of this window's first message to get a live countdown and a burn-rate projection. Allowance figures below already reflect your Opus mix and prompt size.";
+    } else {
+      vCls = "ok";
+      vTxt = "Nothing binds at this pace. The window resets at <strong>" + hhmm(resetAt) + "</strong> and your weekly schedule uses " +
+             fmt(sUtil*100) + "% of Sonnet-hours" + (plan.opus ? " and " + fmt(oUtil*100) + "% of Opus-hours" : "") + ".";
+    }
+
+    var countdown = t0 ? (expired ? "window expired" : hms(remainMs)) : "not started";
+    var bigCls = t0 && !expired && remainMs < 45*60000 ? "warn" : (t0 && expired ? "bad" : "");
+
+    var html =
+      '<div class="headline">' +
+        '<span class="bignum clock ' + bigCls + '">' + countdown + '</span>' +
+        '<span class="bigcap">left in the rolling 5-hour window' +
+          (t0 ? ' &middot; opened ' + hhmm(t0) + ', resets ' + hhmm(resetAt) : ' &middot; enter a start time') +
+        '</span>' +
+      '</div>';
+
+    html += (t0 ? buildTimeline(t0, now) : '') +
+      '<div class="cards">' +
+        '<div class="card"><div class="k">Effective prompts / window</div><div class="v">' +
+          (finiteEff ? fmtInt(loEff) + " to " + fmtInt(hiEff) : "n/a") +
+          '</div><div class="s">published band ' + plan.win[0] + " to " + plan.win[1] + ', weighted</div></div>' +
+        '<div class="card"><div class="k">Cost per prompt</div><div class="v">' + fmt(weight * mult) +
+          '</div><div class="s">Sonnet-equivalents (weight ' + fmt(weight) + ' x size ' + fmt(mult) + ')</div></div>' +
+        '<div class="card"><div class="k">Used so far</div><div class="v">' + fmtInt(used) +
+          '</div><div class="s">' + (finiteEff && typEff > 0 ? fmt((used/typEff)*100) + '% of typical' : 'no baseline') + '</div></div>' +
+        '<div class="card"><div class="k">Burn rate</div><div class="v">' + (rate > 0 ? fmt(rate) : "n/a") +
+          '</div><div class="s">prompts / hour this window</div></div>' +
+      '</div>' +
+      bandBar(loEff, hiEff, used) +
+      '<div class="note">Blue band: low to high effective prompt allowance for ' + esc(plan.name) +
+        '. Amber marker: prompts used. The band is kept as a range because the meter is tokens, not messages.' +
+        (plan.proxy ? ' Team premium seats use the Max 5x band as a stated proxy.' : '') + '</div>';
+
+    html +=
+      '<div class="cards" style="margin-top:14px">' +
+        '<div class="card"><div class="k">Weekly Sonnet-hours</div><div class="v">' + fmt(sDem) + ' / ' + fmt(sTyp) +
+          '</div><div class="s">' + (isFinite(sUtil) ? fmt(sUtil*100) + '% of allowance' : 'no allowance') + '</div></div>' +
+        '<div class="card"><div class="k">Weekly Opus-hours</div><div class="v">' +
+          (plan.opus ? fmt(oDem) + ' / ' + fmt(oTyp) : 'not available') +
+          '</div><div class="s">' + (plan.opus ? (isFinite(oUtil) ? fmt(oUtil*100) + '% of allowance' : 'no allowance') : 'Pro is Sonnet-only here') + '</div></div>' +
+        '<div class="card"><div class="k">Binding constraint</div><div class="v" style="font-size:1rem">' + esc(bindingName) +
+          '</div><div class="s">' + (isFinite(bindingHours) ? 'in ' + fmt(bindingHours) + ' coding hours' : 'nothing binds') + '</div></div>' +
+        '<div class="card"><div class="k">Projected cap time</div><div class="v">' + (capAt ? hhmm(capAt) : 'n/a') +
+          '</div><div class="s">' + (capAt ? 'at current pace' : 'need a start time and usage') + '</div></div>' +
+      '</div>';
+
+    var wkPct = Math.max(isFinite(sUtil)?sUtil:0, isFinite(oUtil)?oUtil:0);
+    var wkBar = Math.max(0, Math.min(100, wkPct*100));
+    html += '<div class="bar"><i style="width:' + wkBar + '%;background:' +
+            (wkPct > 1 ? "var(--bad)" : (wkPct > 0.8 ? "var(--warn)" : "var(--good)")) + '"></i></div>' +
+            '<div class="note">Weekly utilisation against the tighter of the two model-hour caps.</div>';
+
+    html += '<div class="verdict ' + vCls + '">' + vTxt + '</div>';
+    out.innerHTML = html;
+
+    // --- 5. crossover table ---
+    var rows = "";
+    TIER_ORDER.forEach(function(k){
+      var p = PLANS[k];
+      var A = (p.win[0] + p.win[1]) / 2;
+      var maxPrompts = mult > 0 ? A / weight / mult : Infinity;
+      var oStar;
+      if(!p.opus){ oStar = 0; }
+      else if(mult <= 0 || target <= 0){ oStar = 1; }
+      else {
+        var ratio = A / (target * mult);
+        oStar = w > 1 ? (ratio - 1) / (w - 1) : (ratio >= 1 ? 1 : 0);
+        if(oStar > 1) oStar = 1;
+        if(oStar < 0) oStar = -1;   // sentinel: does not fit even on pure Sonnet
+      }
+      var fits = (mult <= 0) || (target <= 0) || (maxPrompts >= target && (p.opus || o === 0));
+      var cls = fits ? "ok" : "bad";
+      var verdictTxt;
+      if(!p.opus && o > 0) verdictTxt = "no Opus access";
+      else if(oStar < 0)   verdictTxt = "cannot carry your volume";
+      else if(fits)        verdictTxt = "fits your target";
+      else                 verdictTxt = "throttles you";
+      var oStarTxt = !p.opus ? "Sonnet only" : (oStar < 0 ? "none works" : fmt(oStar*100) + "%");
+      rows += '<tr><td>' + esc(p.name) + (k === planK ? ' <span class="split">(current)</span>' : '') + '</td>' +
+              '<td>' + p.win[0] + " to " + p.win[1] + '</td>' +
+              '<td>' + (isFinite(maxPrompts) ? fmtInt(maxPrompts) : "unbounded") + '</td>' +
+              '<td>' + oStarTxt + '</td>' +
+              '<td class="' + cls + '">' + verdictTxt + '</td></tr>';
+    });
+    rows += '<tr><td>API (no subscription window)</td><td>no 5-hour cap</td><td>unbounded</td><td>any</td>' +
+            '<td class="ok">rate-limited only</td></tr>';
+    xbody.innerHTML = rows;
+    xnote.innerHTML = "Computed at " + fmtInt(target) + " prompts per window, " + fmtInt(avgTok) +
+      " tokens each (size multiplier " + fmt(mult) + ") and Opus weight " + fmt(w) +
+      ". Max Opus share solves o* = (A / (P x m) - 1) / (w - 1) against each tier's midpoint allowance A.";
+  }
+
+  ids.forEach(function(k){
+    el[k].addEventListener("input", compute);
+    el[k].addEventListener("change", compute);
+  });
+  setInterval(compute, 1000);
+  compute();
+})();
+</script>
+</body>
+</html>
