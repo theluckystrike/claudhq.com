@@ -85,6 +85,9 @@
             border-color: #3b82f6;
             color: #0a0a0a;
         }
+        .col-hidden {
+            display: none;
+        }
         .comparison-wrapper {
             background: #111111;
             border: 1px solid #1a1a1a;
@@ -273,10 +276,10 @@
         </header>
 
         <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all">All Models</button>
-            <button class="filter-tab" data-filter="latest">Latest</button>
-            <button class="filter-tab" data-filter="budget">Budget</button>
-            <button class="filter-tab" data-filter="performance">Performance</button>
+            <button type="button" class="filter-tab active" data-filter="all" aria-pressed="true">All Models</button>
+            <button type="button" class="filter-tab" data-filter="latest" aria-pressed="false">Latest</button>
+            <button type="button" class="filter-tab" data-filter="budget" aria-pressed="false">Budget</button>
+            <button type="button" class="filter-tab" data-filter="performance" aria-pressed="false">Performance</button>
         </div>
 
         <div class="comparison-wrapper">
@@ -284,9 +287,9 @@
                 <thead>
                     <tr>
                         <th>Specification</th>
-                        <th class="model-header">Opus 4.6<span class="recommended-badge">LATEST</span></th>
-                        <th class="model-header">Sonnet 4</th>
-                        <th class="model-header">Haiku 4.5<span class="recommended-badge">BUDGET</span></th>
+                        <th class="model-header" data-model-tags="latest performance">Opus 4.6<span class="recommended-badge">LATEST</span></th>
+                        <th class="model-header" data-model-tags="performance">Sonnet 4</th>
+                        <th class="model-header" data-model-tags="budget">Haiku 4.5<span class="recommended-badge">BUDGET</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -375,25 +378,25 @@
         <div class="use-case-section">
             <h2 style="margin-bottom: 20px; color: #e8e8e8;">When to Use Each Model</h2>
 
-            <div class="use-case">
+            <div class="use-case" data-model-tags="latest performance">
                 <div class="use-case-title">Complex Research & Analysis</div>
                 <div class="use-case-model">Recommended: Opus 4.6</div>
                 <div class="use-case-reason">Best-in-class reasoning for intricate problems, multi-step analysis, and sophisticated document processing</div>
             </div>
 
-            <div class="use-case">
+            <div class="use-case" data-model-tags="performance">
                 <div class="use-case-title">General Content Creation & QA</div>
                 <div class="use-case-model">Recommended: Sonnet 4</div>
                 <div class="use-case-reason">Perfect balance of quality and speed for content, copywriting, translations, and most API use cases</div>
             </div>
 
-            <div class="use-case">
+            <div class="use-case" data-model-tags="budget">
                 <div class="use-case-title">High-Volume Batch Processing</div>
                 <div class="use-case-model">Recommended: Haiku 4.5</div>
                 <div class="use-case-reason">Extremely fast and cost-effective for simple summarization, classification, data extraction, and bulk operations</div>
             </div>
 
-            <div class="use-case">
+            <div class="use-case" data-model-tags="latest performance">
                 <div class="use-case-title">Agentic AI Systems</div>
                 <div class="use-case-model">Recommended: Opus 4.6</div>
                 <div class="use-case-reason">Superior reasoning for multi-turn conversations, tool use orchestration, and autonomous decision-making</div>
@@ -419,28 +422,91 @@
     </div>
 
     <script>
-        const filters = {
-            all: () => true,
-            latest: (row) => {
-                const cells = row.querySelectorAll('td, th');
-                return !row.querySelector('.section-label');
-            },
-            budget: (row) => {
-                const cells = row.querySelectorAll('td');
-                return !row.querySelector('.section-label');
-            },
-            performance: (row) => {
-                const cells = row.querySelectorAll('td');
-                return !row.querySelector('.section-label');
-            }
-        };
+        (function () {
+            'use strict';
 
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+            var MAX_COLUMNS = 16;
+            var table = document.getElementById('comparisonTable');
+            var tabs = document.querySelectorAll('.filter-tab');
+            var cards = document.querySelectorAll('.use-case');
+            if (!table || tabs.length === 0) { return; }
+
+            function tagsOf(el) {
+                var raw = el.getAttribute('data-model-tags') || '';
+                return raw.split(/\s+/).filter(Boolean);
+            }
+
+            /* Column 0 holds the specification label; model columns start at 1. */
+            var heads = table.querySelectorAll('thead th');
+            var columns = [];
+            for (var i = 1; i < heads.length && i <= MAX_COLUMNS; i++) {
+                columns.push({ index: i, tags: tagsOf(heads[i]) });
+            }
+            if (columns.length === 0) { return; }
+
+            function hasTag(name) {
+                return function (item) { return item.tags.indexOf(name) !== -1; };
+            }
+
+            var filters = {
+                all: function () { return true; },
+                latest: hasTag('latest'),
+                budget: hasTag('budget'),
+                performance: hasTag('performance')
+            };
+
+            function setHidden(el, hidden) {
+                if (hidden) { el.classList.add('col-hidden'); }
+                else { el.classList.remove('col-hidden'); }
+            }
+
+            function applyFilter(name) {
+                var test = filters[name] || filters.all;
+                var shown = {};
+                var visibleCount = 0;
+                var c;
+                for (c = 0; c < columns.length; c++) {
+                    if (test(columns[c])) {
+                        shown[columns[c].index] = true;
+                        visibleCount++;
+                    }
+                }
+                /* Never hide every model: an empty table is worse than no filter. */
+                if (visibleCount === 0) { return applyFilter('all'); }
+
+                var rows = table.rows;
+                for (var r = 0; r < rows.length; r++) {
+                    var cells = rows[r].cells;
+                    var label = rows[r].querySelector('.section-label');
+                    if (label) {
+                        label.colSpan = visibleCount + 1;
+                        continue;
+                    }
+                    for (var k = 1; k < cells.length && k <= MAX_COLUMNS; k++) {
+                        setHidden(cells[k], !shown[k]);
+                    }
+                }
+
+                for (var u = 0; u < cards.length; u++) {
+                    setHidden(cards[u], !test({ tags: tagsOf(cards[u]) }));
+                }
+                return visibleCount;
+            }
+
+            for (var t = 0; t < tabs.length; t++) {
+                tabs[t].addEventListener('click', function () {
+                    for (var n = 0; n < tabs.length; n++) {
+                        tabs[n].classList.remove('active');
+                        tabs[n].setAttribute('aria-pressed', 'false');
+                    }
+                    this.classList.add('active');
+                    this.setAttribute('aria-pressed', 'true');
+                    applyFilter(this.getAttribute('data-filter'));
+                });
+            }
+
+            applyFilter('all');
+        })();
     </script>
 </body>
 </html>
