@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get a Telegram Ping When Your Claude Code Session Finishes | ClaudHQ</title>
+  <meta name="description" content="A long Claude Code run can sit idle for an hour before you check back. Wire the Stop hook to a curl call and get pinged in Telegram the moment it's done.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-telegram-notifications/">
+  <meta property="og:title" content="Get a Telegram Ping When Your Claude Code Session Finishes | ClaudHQ">
+  <meta property="og:description" content="A long Claude Code run can sit idle for an hour before you check back. Wire the Stop hook to a curl call and get pinged in Telegram the moment it's done.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-telegram-notifications/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Get a Telegram Ping When Your Claude Code Session Finishes</h1>
+      <div class="article-meta"><time>September 2026</time> &middot; ClaudHQ</div>
+
+      <p>Claude Code sessions that touch a real codebase can run for a long time. You kick off a refactor, a migration, or a full test-and-fix loop, then switch to something else. An hour later you remember it's still running and go check, only to find it finished forty minutes ago. That gap between "done" and "you noticed" is dead time, and it adds up over a week of long sessions.
+      </p>
+
+      <p>The fix is small. Claude Code has a Stop hook that fires a shell command the moment a session ends. Point that command at the Telegram Bot API and you get a phone notification instead of a guessing game. This guide shows the exact call, how to wire it into a hook, and three small Telegram bots that make the notification actually useful once it lands.
+      </p>
+
+      <h2>The Telegram Bot API Call</h2>
+
+      <p>Telegram bots send messages through one HTTP endpoint. Create a bot with <a href="https://t.me/BotFather" rel="nofollow">@BotFather</a>, save the token it gives you, and find your own numeric chat id by messaging <a href="https://t.me/userinfobot" rel="nofollow">@userinfobot</a>. Then the call is a plain POST:
+      </p>
+
+      <pre><code class="language-bash">curl -s -X POST "https://api.telegram.org/bot&lt;YOUR_TOKEN&gt;/sendMessage" \
+  -d chat_id="&lt;YOUR_CHAT_ID&gt;" \
+  -d text="Claude Code session finished."</code></pre>
+
+      <p>That's the full <code>sendMessage</code> method: a <code>chat_id</code> and a <code>text</code> field, both required, sent as POST parameters to <code>https://api.telegram.org/bot&lt;token&gt;/sendMessage</code>. Run the command once from your terminal to confirm the message shows up, then you're ready to hook it in.
+      </p>
+
+      <h2>Wiring It to the Stop Hook</h2>
+
+      <p>Claude Code reads hooks from your settings file. Add a <code>Stop</code> hook that runs after a session ends, either in your project's <code>.claude/settings.json</code> or your user-level settings:
+      </p>
+
+      <pre><code class="language-json">{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s -X POST \"https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage\" -d chat_id=\"$TG_CHAT_ID\" -d text=\"Claude Code finished in $(basename \\\"$PWD\\\")\""
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+      <p>Keep the token and chat id out of the settings file itself. Export <code>TG_BOT_TOKEN</code> and <code>TG_CHAT_ID</code> in your shell profile instead, so the hook reads them from the environment and nothing sensitive sits in a file you might commit. Once this is in place, every session, whether it runs two minutes or two hours, ends with a message on your phone instead of a tab you keep re-checking.
+      </p>
+
+      <h2>Beyond the Ping: Bots That Make the Notification Useful</h2>
+
+      <p>A single "finished" message is a good start, but a working day has more moments than session-end. Three small bots, built for exactly this kind of workflow, cover what comes next. All three answer to an @-mention in any group without being added first, using Telegram's Guest Mode (Bot API 10.0), so you can try one without setting anything up. See the <a href="https://tg.zovo.one/guides/telegram-guest-mode-without-adding-bot/">guest-mode guide</a> for how that works.
+      </p>
+
+      <h3>Nudge: follow-up reminders</h3>
+
+      <p>A finished session often needs a follow-up: check the deploy in twenty minutes, review the PR after lunch, ping a teammate tomorrow. <a href="https://tg.zovo.one/bots/nudge/">NudgeRemindBot</a> takes that reminder in plain English, right in the chat where you're already working. Type <code>@NudgeRemindBot tomorrow 9am review the migration PR</code> in any group, even one the bot has never joined, and it shows the exact reminder before you confirm it. A one-minute background check delivers it back to that chat at the right time, in your own timezone.
+      </p>
+
+      <h3>HabitStreak: a daily shipping streak</h3>
+
+      <p>Long Claude Code sessions make it easy to lose track of whether you actually shipped something today. <a href="https://tg.zovo.one/bots/habit/">HabitStreakProBot</a> tracks a habit like "ship one thing" with a single tap, once a day, and keeps a running streak so you can see the pattern instead of guessing at it. Add the habit with <code>/add ship one thing</code>, then tap it done from the daily prompt or the bot's Mini App board.
+      </p>
+
+      <h3>WhisperLock: sharing a secret with a teammate</h3>
+
+      <p>Sessions that touch credentials or staging URLs sometimes need to pass a piece of text to one specific person without pasting it into open chat. <a href="https://tg.zovo.one/bots/whisper/">WhisperLockBot</a> posts a locked message card into any chat that only the person you tag can open. Type <code>@WhisperLockBot @teammate here's the staging key</code> and everyone else in the chat sees a sealed card; only your teammate (and you) can tap it open. No admin rights needed, and it works inline without adding the bot to the group first.
+      </p>
+
+      <h2>Putting It Together</h2>
+
+      <p>None of this requires a server. The Stop hook is a line in a settings file, and the three bots run entirely on Telegram's side. Set the hook once, and every long session ends with a ping instead of a guess. From there, Nudge catches the follow-up, HabitStreak keeps the daily count honest, and WhisperLock handles the one message you don't want sitting in open chat. Small pieces, but they close the gap between when Claude Code finishes and when you actually know it did.
+      </p>
+
+      <h2>FAQ</h2>
+
+      <h3>Do I need to keep a server running for the Telegram notification to work?</h3>
+      <p>No. The <code>curl</code> call in the Stop hook talks directly to Telegram's API from your own machine when the hook fires. There's no server to host or keep alive.
+      </p>
+
+      <h3>Will the Stop hook fire if I cancel a session early?</h3>
+      <p>The Stop hook runs when a session ends normally. Check Claude Code's hooks documentation for how it handles an interrupted or killed session in your version, since hook behavior on abnormal exits can change between releases.
+      </p>
+
+      <h3>Can I send the notification to a group instead of my own DM?</h3>
+      <p>Yes. Add the bot to a group, find that group's chat id, and use it in place of your personal chat id. Group chat ids are negative numbers.
+      </p>
+
+      <h3>Do Nudge, HabitStreak, and WhisperLock need to be added to my group first?</h3>
+      <p>No. All three answer an @-mention in any chat through Telegram's Guest Mode, so you can try them inline before deciding whether to add them properly. See the <a href="https://tg.zovo.one/guides/telegram-guest-mode-without-adding-bot/">guest-mode guide</a> for details.
+      </p>
+
+      <div class="tool-cta">
+        <strong>Try it:</strong> <a href="/diagnose/">Try the Error Diagnostic for instant fixes</a>
+      </div>
+
+      <div class="related-guides" style="margin-top:3rem;padding:1.5rem;background:oklch(0.18 0.01 250);border-radius:12px">
+        <h3 style="color:oklch(0.85 0 0);margin-bottom:1rem;font-size:1.1rem">Related Guides</h3>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:0.5rem">
+          <li><a href="/telegram-mcp-server-bot-automation-workflow/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; Telegram MCP Server Bot Automation Workflow</a></li>
+          <li><a href="/claude-md-best-practices-guide/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; CLAUDE.md Best Practices: Definitive Guide (2026)</a></li>
+          <li><a href="/how-to-use-claude-code-beginner-guide/" style="color:oklch(0.7 0.1 250);text-decoration:none">&rarr; How to Use Claude Code: Beginner Guide (2026)</a></li>
+        </ul>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a> &mdash; solo dev, Da Nang.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Get a Telegram Ping When Your Claude Code Session Finishes",
+    "description": "A long Claude Code run can sit idle for an hour before you check back. Wire the Stop hook to a curl call and get pinged in Telegram the moment it's done.",
+    "author": {"@type": "Person", "name": "Michael Lip"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-telegram-notifications/",
+    "datePublished": "2026-09-04",
+    "dateModified": "2026-09-04"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a></div>
+        <a href="/tools/">All Tools</a>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-api-timeout-error-handling-retry-guide/">API Timeout Fix</a></div>
+        <a href="/guides/">All Guides</a>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
