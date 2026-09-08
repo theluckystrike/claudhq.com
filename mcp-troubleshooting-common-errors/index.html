@@ -165,6 +165,8 @@
       <p><strong>Private registry configured.</strong> If your .npmrc points to a private registry, it may not have MCP packages:</p>
       <pre><code>npm config get registry  # Should be https://registry.npmjs.org/</code></pre>
 
+      <p><strong>The package was never published.</strong> Not every server named in a blog post has actually shipped to npm, so <code>npx</code> will return 404 no matter how the name is spelled. Check the publisher's own page for the install methods it supports; some catalogues, such as <a href="https://mcp.zovo.one">Zovo's MCP server list</a>, ship a hosted URL or a downloadable bundle instead of an npm package.</p>
+
       <h2>Error 10: Incompatible MCP Protocol Version</h2>
 
       <p><strong>Symptom:</strong> <code>Error: Incompatible MCP protocol version</code> or server connects but tools do not work correctly.</p>
