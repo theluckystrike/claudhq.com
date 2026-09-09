@@ -724,6 +724,8 @@
       <li><strong>Monitor resource usage.</strong> Each MCP server runs as a separate process. If you notice high memory usage or slow responses, check which servers are running and disable any you are not actively using.</li>
     </ul>
 
+    <p>The scope advice above avoids conflicts rather than resolving them, and nothing warns you when one happens. If the same server name is defined in more than one scope, Claude Code connects once using the highest-precedence definition and takes that entry whole; fields are not merged across scopes. <a href="https://mcp.zovo.one/guides/mcp-config-scopes-and-precedence">MCP config scopes and precedence</a> sets out the order, and the rule that plugins and connectors are matched by endpoint rather than by name, so one pointing at the same URL or command counts as a duplicate even under a different name.</p>
+
     <h2>Common Questions</h2>
 
     <details>
