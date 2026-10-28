@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <title>Claude Code Not Working in VS Code? Fix in 2 Minutes (2026)</title>
-  <meta name="description" content="Claude Code panel blank or frozen in VS Code? 8 fixes that work in under 2 minutes. PATH errors, terminal freezes, CLI issues. Tested June 2026.">
+  <meta name="description" content="Claude Code panel blank or frozen in VS Code? 8 fixes that work in under 2 minutes. PATH errors, terminal freezes, CLI issues. Tested October 2026.">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Claude Code VS Code Extension Not Working? 8 Fixes (2026)">
-  <meta property="og:description" content="Fix Claude Code VS Code extension not working or not loading — blank panels, terminal not responding, command not found errors. 8 proven fixes with step-by-step commands. Updated May 2026.">
+  <meta property="og:description" content="Fix Claude Code VS Code extension not working or not loading — blank panels, terminal not responding, command not found errors. 8 proven fixes with step-by-step commands. Updated October 2026.">
   <meta property="og:url" content="https://claudhq.com/claude-code-not-working-vscode/">
   <meta property="og:site_name" content="ClaudHQ">
   <meta name="twitter:card" content="summary">
@@ -18,17 +18,17 @@
   {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    "headline": "Claude Code VS Code Extension Not Working? 8 Fixes (2026)",
-    "description": "Fix Claude Code VS Code extension not working or not loading — blank panels, terminal not responding, command not found errors. 8 proven fixes with step-by-step commands. Updated May 2026.",
+    "headline": "Fix Claude Code VS Code Extension Not Working",
+    "description": "Fix Claude Code VS Code extension not working or not loading — blank panels, terminal not responding, command not found errors. 8 proven fixes with step-by-step commands. Updated October 2026.",
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "datePublished": "2026-04-14",
-    "dateModified": "2026-06-01",
+    "dateModified": "2026-10-28",
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://claudhq.com/claude-code-not-working-vscode/"}
   }
   </script>
   <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"HowTo","name":"Fix Claude Code Not Working in VS Code","description":"Step-by-step guide to fix Claude Code VS Code extension issues in under 2 minutes","step":[{"@type":"HowToStep","name":"Check Claude Code CLI works","text":"Open terminal and run 'claude --version' to verify CLI is functional outside VS Code"},{"@type":"HowToStep","name":"Restart VS Code Extension Host","text":"Press Cmd+Shift+P, type 'Restart Extension Host', and press Enter"},{"@type":"HowToStep","name":"Clear VS Code extension cache","text":"Delete ~/.vscode/extensions/anthropic.claude-code-* folder and reinstall"},{"@type":"HowToStep","name":"Fix PATH issues","text":"Ensure Node.js 18+ is on PATH: run 'which node' and verify version with 'node --version'"},{"@type":"HowToStep","name":"Reinstall Claude Code","text":"Run 'npm uninstall -g @anthropic-ai/claude-code && npm install -g @anthropic-ai/claude-code'"}],"totalTime":"PT2M"}
+{"@context":"https://schema.org","@type":"HowTo","name":"Fix Claude Code VS Code Extension Not Working","description":"Step-by-step guide to fix Claude Code VS Code extension issues in under 2 minutes","step":[{"@type":"HowToStep","name":"Check Claude Code CLI works","text":"Open terminal and run 'claude --version' to verify CLI is functional outside VS Code"},{"@type":"HowToStep","name":"Restart VS Code Extension Host","text":"Press Cmd+Shift+P, type 'Restart Extension Host', and press Enter"},{"@type":"HowToStep","name":"Clear VS Code extension cache","text":"Delete ~/.vscode/extensions/anthropic.claude-code-* folder and reinstall"},{"@type":"HowToStep","name":"Fix PATH issues","text":"Ensure Node.js 18+ is on PATH: run 'which node' and verify version with 'node --version'"},{"@type":"HowToStep","name":"Reinstall Claude Code","text":"Run 'npm uninstall -g @anthropic-ai/claude-code && npm install -g @anthropic-ai/claude-code'"}],"totalTime":"PT2M"}
   </script>
 </head>
 <body>
@@ -55,10 +55,13 @@
 
   <main class="page-content">
     <div class="article-meta">
-      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-06-01
+      <time datetime="2026-04-14">April 14, 2026</time> &middot; Last tested 2026-10-28
     </div>
 
     <h1>Fix Claude Code VS Code Extension Not Working</h1>
+    <div style="margin:1.25rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent,#e05d38);background:var(--bg-2,#faf7f2);font-size:0.98rem;line-height:1.6;">
+      <p style="margin:0;"><strong>Updated October 28, 2026.</strong> When the Claude Code extension fails in VS Code, first run claude --version in a terminal to prove the CLI works. Then restart the Extension Host, clear the extension cache, check that Node.js 18+ is on PATH, and reinstall the extension. Most blank-panel and command-not-found errors clear in under two minutes.</p>
+    </div>
 
     <blockquote><p><strong>TL;DR:</strong> Verify the CLI is installed and on PATH, check the extension version, restart VS Code, and inspect the output channel for errors.</p></blockquote>
 

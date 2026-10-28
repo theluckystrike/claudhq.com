@@ -38,6 +38,9 @@
     <article class="page-content">
       <h1>Fix &ldquo;Command Not Found: Claude&rdquo; &mdash; zsh, bash &amp; npm PATH Fix</h1>
       <div class="article-meta"><time datetime="2026-05-22">May 2026</time> &middot; ClaudHQ</div>
+      <div style="margin:1.25rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent,#e05d38);background:var(--bg-2,#faf7f2);font-size:0.98rem;line-height:1.6;">
+        <p style="margin:0;"><strong>Updated October 28, 2026.</strong> A “command not found: claude” error means the shell cannot find the claude binary, not that npm failed. Run npm list -g @anthropic-ai/claude-code to confirm the install, find the global bin directory with npm bin -g, add it to PATH in ~/.zshrc or ~/.bashrc, then reload the profile.</p>
+      </div>
 
       <h2>TL;DR &mdash; Quick Fix</h2>
 
@@ -347,13 +350,13 @@ lrwxr-xr-x  1 you  staff  ... claude -&gt; ../lib/node_modules/@anthropic-ai/cla
   {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    "headline": "Fix 'Command Not Found: Claude' — zsh/bash/npm Path Fix (2026)",
+    "headline": "Fix “Command Not Found: Claude” — zsh, bash & npm PATH Fix",
     "description": "Fix 'zsh: command not found: claude' and 'claude: command not found' errors. Step-by-step PATH configuration, npm global install fix, and shell profile setup.",
     "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
     "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
     "url": "https://claudhq.com/claude-code-command-not-found-fix/",
     "datePublished": "2026-05-22",
-    "dateModified": "2026-05-22"
+      "dateModified": "2026-10-28"
   }
   </script>
 

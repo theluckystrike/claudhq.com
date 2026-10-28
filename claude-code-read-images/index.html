@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Can Claude Code Read Images? Formats and Limits</title>
+  <meta name="description" content="Yes. Claude Code reads PNG, JPEG, GIF, and WebP images as visual content. Learn how to add an image, the 128 MB limit, and when to crop.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-read-images/">
+  <meta property="og:title" content="Can Claude Code Read Images? Formats and Limits">
+  <meta property="og:description" content="Yes. Claude Code reads PNG, JPEG, GIF, and WebP images as visual content. Learn how to add an image, the 128 MB limit, and when to crop.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-read-images/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Can Claude Code Read Images?</h1>
+      <div class="article-meta"><time datetime="2026-10-28">October 28, 2026</time> &middot; ClaudHQ</div>
+
+      <div style="margin:1.25rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent,#e05d38);background:var(--bg-2,#faf7f2);font-size:0.98rem;line-height:1.6;">
+        <p style="margin:0;"><strong>Updated October 28, 2026.</strong> Yes. Claude Code reads PNG, JPEG, GIF, and WebP files and returns them to the model as visual content, not raw bytes. Drag or paste an image into the session, or give Claude the file path. Images larger than 128 MB are refused, and large screenshots may be downscaled.</p>
+      </div>
+
+      <p>People ask whether Claude Code can look at screenshots, mockups, and diagrams. It can. The Read tool treats image files as visual content that the model can see, so you can ask questions about a screenshot instead of describing it in words.</p>
+
+      <h2>Supported image formats</h2>
+
+      <p>The Read tool accepts four image formats:</p>
+
+      <ul>
+        <li>PNG</li>
+        <li>JPEG</li>
+        <li>GIF</li>
+        <li>WebP</li>
+      </ul>
+
+      <p>Other image formats and binary files are refused. If Claude cannot read a file, it receives the path but not the contents. A refusal message usually suggests a shell command or script that can convert the file.</p>
+
+      <h2>How to give Claude an image</h2>
+
+      <p>There are three practical ways to add an image to a session:</p>
+
+      <ul>
+        <li><strong>File path:</strong> mention the image with <code>@</code> or give the path in your prompt, such as <code>@screenshots/checkout-error.png</code>.</li>
+        <li><strong>Drag and drop:</strong> drag an image file into the Claude Code window.</li>
+        <li><strong>Paste:</strong> copy an image and paste it into the session.</li>
+      </ul>
+
+      <p>Then ask a direct question: <em>What error is shown in this screenshot?</em> or <em>Does this mockup match the layout in our CSS?</em> You can include several images in one conversation, which helps when you compare a design against an implementation.</p>
+
+      <h2>Size limits and downscaling</h2>
+
+      <p>Claude Code resizes and recompresses large images before sending them to the model. On a big screenshot, Claude may see a downscaled copy and miss fine pixel-level detail. The Read tool refuses any image file larger than 128 MB and tells Claude to resize the image or export a smaller copy.</p>
+
+      <p>If detail matters, crop the region you care about first. For example, use ImageMagick from Bash to cut the exact area, then read the crop. A smaller crop keeps the pixels you need and stays under the size limit.</p>
+
+      <h2>What image analysis is good for</h2>
+
+      <ul>
+        <li><strong>Error screenshots:</strong> read a stack trace or dialog text and propose a fix.</li>
+        <li><strong>UI review:</strong> compare a design mockup with the current page and list spacing or color gaps.</li>
+        <li><strong>Diagrams:</strong> explain an architecture drawing or a database schema.</li>
+        <li><strong>Charts:</strong> summarize a graph and point out outliers.</li>
+      </ul>
+
+      <p>Image analysis is not OCR for every document, and it does not replace a real browser test. Treat the answer as a second pair of eyes, then confirm the result in code or in the browser.</p>
+
+      <p>For PDF documents, use the <a href="/claude-code-read-pdfs/">PDF page-range guide</a> instead. For install and shell setup, see <a href="/claude-code-on-windows/">Claude Code on Windows</a>.</p>
+
+      <div style="margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);font-size:0.95rem;">
+        <p><strong>Related reading:</strong> <a href="/claude-code-tips-for-absolute-beginners-2026/">Claude Code tips for absolute beginners: files, context, and prompts</a></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a>, solo dev in Warsaw.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Can Claude Code Read Images?",
+    "description": "Yes. Claude Code reads PNG, JPEG, GIF, and WebP images as visual content. Learn how to add an image, the 128 MB limit, and when to crop.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-read-images/",
+    "datePublished": "2026-10-28",
+    "dateModified": "2026-10-28"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a><a href="/tools/">All Tools</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-code-command-not-found-fix/">Command Not Found Fix</a><a href="/claude-code-not-working-vscode/">VS Code Fix</a><a href="/guides/">All Guides</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>
