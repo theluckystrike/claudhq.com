@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Can Claude Code Read PDFs? Page Ranges and Setup</title>
+  <meta name="description" content="Yes. Claude Code reads short PDFs whole and long PDFs in page ranges of up to 20 pages. Page-range reads need pdftoppm from poppler-utils on PATH.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-read-pdfs/">
+  <meta property="og:title" content="Can Claude Code Read PDFs? Page Ranges and Setup">
+  <meta property="og:description" content="Yes. Claude Code reads short PDFs whole and long PDFs in page ranges of up to 20 pages. Page-range reads need pdftoppm from poppler-utils on PATH.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-read-pdfs/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Can Claude Code Read PDFs?</h1>
+      <div class="article-meta"><time datetime="2026-10-28">October 28, 2026</time> &middot; ClaudHQ</div>
+
+      <div style="margin:1.25rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent,#e05d38);background:var(--bg-2,#faf7f2);font-size:0.98rem;line-height:1.6;">
+        <p style="margin:0;"><strong>Updated October 28, 2026.</strong> Yes. Claude Code reads short PDF files whole. For PDFs longer than 10 pages it reads page ranges, up to 20 pages at a time, with a pages parameter. Page-range reads need pdftoppm from poppler-utils installed and on your PATH.</p>
+      </div>
+
+      <p>Claude Code can read PDF files, but long documents work differently from short ones. The Read tool reads a short PDF whole. For a long PDF, it reads page ranges so the model does not receive the entire document at once.</p>
+
+      <h2>Short PDFs compared with long PDFs</h2>
+
+      <p>A short <code>.pdf</code> file is read in one call. A PDF longer than 10 pages is read in ranges with a <code>pages</code> parameter, for example <code>"1-5"</code>, and each read returns up to 20 pages at a time.</p>
+
+      <p>This range behavior is useful for large specs, contracts, and research papers. Ask for the section you need instead of the whole file, and the context stays smaller and more focused.</p>
+
+      <h2>Install poppler for page-range reads</h2>
+
+      <p>Page-range reads render pages with <code>pdftoppm</code> from poppler-utils. Install poppler before you read a long PDF:</p>
+
+      <pre><code class="language-bash"># macOS
+brew install poppler
+
+# Debian and Ubuntu
+apt-get install poppler-utils</code></pre>
+
+      <p>On Windows and other platforms, install a poppler build that puts <code>pdftoppm</code> on your PATH. Without it, a page-range read fails with the message <code>pdftoppm is not installed</code>.</p>
+
+      <p>Check the install from the same shell Claude Code uses:</p>
+
+      <pre><code class="language-bash">pdftoppm -v</code></pre>
+
+      <p>If the command is not found, reopen the terminal or add the poppler <code>bin</code> directory to PATH. The <a href="/claude-code-command-not-found-fix/">command not found guide</a> explains the PATH steps for zsh, bash, and Windows shells.</p>
+
+      <h2>How to read a PDF in Claude Code</h2>
+
+      <p>Reference the file in your prompt and name the pages you need:</p>
+
+      <pre><code class="language-text">Read pages 1-5 of @docs/api-spec.pdf and list the required request headers.</code></pre>
+
+      <p>Then narrow the request. Ask Claude to quote the exact clause, table row, or figure caption you need to verify. A page range plus a specific question gives a more reliable answer than a request to summarize the whole document.</p>
+
+      <h2>Limits and failure modes</h2>
+
+      <ul>
+        <li><strong>Short file read whole:</strong> good for one or two pages of notes or a single invoice.</li>
+        <li><strong>More than 10 pages:</strong> read in ranges; request the pages you need.</li>
+        <li><strong>No poppler:</strong> long PDFs fail until <code>pdftoppm</code> is on PATH.</li>
+        <li><strong>Scanned pages:</strong> a page-range read renders an image. Blurry scans can still lose small text, so request a tighter page range or a higher-quality source file.</li>
+        <li><strong>Very large files:</strong> the Read tool has size limits. If a read is refused, split the PDF or extract the pages you need first.</li>
+      </ul>
+
+      <p>PDF support is for reading, not editing. Claude can summarize a document, pull requirements, or compare two versions, but it cannot rewrite the PDF file itself without another tool.</p>
+
+      <p>If you only need to look at a screenshot or diagram, see <a href="/claude-code-read-images/">can Claude Code read images</a>. For Windows setup, see <a href="/claude-code-on-windows/">Claude Code on Windows</a>.</p>
+
+      <div style="margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);font-size:0.95rem;">
+        <p><strong>Related reading:</strong> <a href="/claude-code-tips-for-absolute-beginners-2026/">Claude Code tips for absolute beginners: files, context, and prompts</a></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a>, solo dev in Warsaw.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Can Claude Code Read PDFs?",
+    "description": "Yes. Claude Code reads short PDFs whole and long PDFs in page ranges of up to 20 pages. Page-range reads need pdftoppm from poppler-utils on PATH.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-read-pdfs/",
+    "datePublished": "2026-10-28",
+    "dateModified": "2026-10-28"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a><a href="/tools/">All Tools</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-code-command-not-found-fix/">Command Not Found Fix</a><a href="/claude-code-not-working-vscode/">VS Code Fix</a><a href="/guides/">All Guides</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

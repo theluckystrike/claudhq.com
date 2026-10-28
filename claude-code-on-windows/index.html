@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Does Claude Code Work on Windows? Requirements and Install</title>
+  <meta name="description" content="Yes. Claude Code runs natively on Windows 10 1809+ and Windows Server 2019+. Check requirements, install with PowerShell, or use WSL.">
+  <link rel="canonical" href="https://claudhq.com/claude-code-on-windows/">
+  <meta property="og:title" content="Does Claude Code Work on Windows? Requirements and Install">
+  <meta property="og:description" content="Yes. Claude Code runs natively on Windows 10 1809+ and Windows Server 2019+. Check requirements, install with PowerShell, or use WSL.">
+  <meta property="og:url" content="https://claudhq.com/claude-code-on-windows/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ClaudHQ">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="/" class="brand"><span class="brand-mark">&#936;</span><span class="brand-word">Claud<i>HQ</i></span></a>
+      <div class="nav-links">
+        <a href="/errors/">Errors</a>
+        <a href="/guides/">Guides</a>
+        <a href="/tools/">Tools</a>
+        <a href="/diagnose/">Diagnose</a>
+        <a href="/calculator/">Calculator</a>
+        <a href="/generator/">Generator</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=nav" class="nav-cta">Get Lifetime <span class="star">&#10022;</span></a>
+      </div>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.nav-links').classList.toggle('show-mobile')">&#9776;</button>
+    </nav>
+  </header>
+
+  <main class="wrap-tight">
+    <article class="page-content">
+      <h1>Does Claude Code Work on Windows?</h1>
+      <div class="article-meta"><time datetime="2026-10-28">October 28, 2026</time> &middot; ClaudHQ</div>
+
+      <div style="margin:1.25rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent,#e05d38);background:var(--bg-2,#faf7f2);font-size:0.98rem;line-height:1.6;">
+        <p style="margin:0;"><strong>Updated October 28, 2026.</strong> Yes. Claude Code runs natively on Windows 10 1809+ and Windows Server 2019+. You need 4 GB of RAM and an x64 or ARM64 processor. Install it from PowerShell with the Anthropic install script, or run it inside WSL if your toolchain is Linux-based.</p>
+      </div>
+
+      <p>Claude Code is Anthropic's command-line coding agent. It started on macOS and Linux, and people often ask whether Windows is supported. The answer is yes, and you have two ways to run it: native Windows or Windows Subsystem for Linux (WSL).</p>
+
+      <h2>System requirements for Windows</h2>
+
+      <p>The official setup documentation lists these minimums for native Windows:</p>
+
+      <ul>
+        <li><strong>Operating system:</strong> Windows 10 version 1809 or later, or Windows Server 2019 or later.</li>
+        <li><strong>Hardware:</strong> 4 GB or more of RAM and an x64 or ARM64 processor.</li>
+        <li><strong>Network:</strong> an internet connection for installation and authentication.</li>
+      </ul>
+
+      <p>Windows 10 versions older than 1809 and Windows 8.1 are not supported. If you are on an older build, update Windows first or use WSL with a current Linux distribution.</p>
+
+      <h2>Install Claude Code natively on Windows</h2>
+
+      <p>Anthropic recommends the native install on Windows. Open PowerShell and run the install script:</p>
+
+      <pre><code class="language-powershell">irm https://claude.ai/install.ps1 | iex</code></pre>
+
+      <p>Anthropic's documentation also lists WinGet as a native install option on Windows. After the install finishes, open a new terminal and check the version:</p>
+
+      <pre><code class="language-powershell">claude --version</code></pre>
+
+      <p>If PowerShell returns <code>command not found</code> or <code>not recognized</code>, the install directory is not on your PATH yet. Close and reopen the terminal first. If the error stays, follow the <a href="/claude-code-command-not-found-fix/">command not found fix</a> and add the install directory to your user PATH.</p>
+
+      <h2>Native Windows compared with WSL</h2>
+
+      <p>Native Windows runs Claude Code directly in PowerShell or Windows Terminal. Your prompt shows <code>PS C:\</code> in PowerShell and <code>C:\</code> without the <code>PS</code> in Command Prompt. Paths use backslashes, and PowerShell commands and quoting rules apply.</p>
+
+      <p>WSL runs a Linux environment inside Windows. Install Claude Code there with the macOS and Linux command:</p>
+
+      <pre><code class="language-bash">curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+
+      <p>Choose WSL when your project already uses Linux tools, shell scripts, or a Linux Node.js setup. Choose native Windows when you want the simplest path and your project builds with PowerShell or cross-platform tools.</p>
+
+      <h2>Common Windows problems</h2>
+
+      <ul>
+        <li><strong>Command not found after install:</strong> reopen the terminal, then fix PATH as described in the linked guide.</li>
+        <li><strong>Wrong shell profile:</strong> PowerShell reads a different profile than Git Bash or WSL. Add the PATH entry to the profile of the shell you actually use.</li>
+        <li><strong>Line ending and encoding errors:</strong> Git on Windows can convert CRLF and LF. Set <code>core.autocrlf</code> deliberately for the repository instead of changing files by hand.</li>
+        <li><strong>Extension panel blank in VS Code:</strong> the <a href="/claude-code-not-working-vscode/">VS Code extension fix</a> covers the restart and cache steps.</li>
+      </ul>
+
+      <p>Both install paths use the same Claude Code binary and the same settings files inside your home directory. You can move a project between native Windows and WSL without reinstalling Claude Code, but run the install once in each environment.</p>
+
+      <p>If Claude Code itself starts but a request fails, see <a href="/claude-not-working-right-now-fix/">Claude not working right now</a> for outage, limit, and login checks.</p>
+
+      <div style="margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);font-size:0.95rem;">
+        <p><strong>Related reading:</strong> <a href="/claude-code-command-not-found-fix/">Fix &ldquo;command not found: claude&rdquo; after installing on Windows or macOS</a></p>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);font-size:0.85rem;color:var(--ink-3);">
+        Built by <a href="https://github.com/theluckystrike" style="color:var(--accent);">Michael Lip</a>, solo dev in Warsaw.
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Does Claude Code Work on Windows?",
+    "description": "Yes. Claude Code runs natively on Windows 10 1809+ and Windows Server 2019+. Check requirements, install with PowerShell, or use WSL.",
+    "author": {"@type": "Person", "name": "Michael Lip", "url": "https://github.com/theluckystrike"},
+    "publisher": {"@type": "Organization", "name": "ClaudHQ", "url": "https://claudhq.com"},
+    "url": "https://claudhq.com/claude-code-on-windows/",
+    "datePublished": "2026-10-28",
+    "dateModified": "2026-10-28"
+  }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-top wrap">
+      <div class="footer-brand-col"><div class="footer-logo">C<i>H</i></div><p class="footer-tagline">Claude Code tools &amp; production guides</p></div>
+      <div class="foot-col"><h4>Tools</h4><a href="/diagnose/">Error Diagnostic</a><a href="/calculator/">Cost Calculator</a><a href="/generator/">CLAUDE.md Generator</a><a href="/tools/">All Tools</a></div>
+      <div class="foot-col"><h4>Guides</h4><a href="/errors/">Error Hub</a><a href="/claude-code-command-not-found-fix/">Command Not Found Fix</a><a href="/claude-code-not-working-vscode/">VS Code Fix</a><a href="/guides/">All Guides</a></div>
+      <div class="foot-col"><h4>More</h4><a href="/about.html">About</a><a href="https://zovo.one/lifetime?utm_source=claudhq&amp;utm_medium=footer">Get Lifetime</a><a href="https://github.com/theluckystrike">GitHub</a></div>
+    </div>
+    <div class="footer-bottom wrap"><span>&copy; 2026 ClaudHQ</span><span>Built by <a href="https://github.com/theluckystrike">Michael Lip</a></span></div>
+  </footer>
+</body>
+</html>

@@ -184,4 +184,22 @@
   <url><loc>https://claudhq.com/tools/claude-code-hooks-simulator.html</loc></url>
   <url><loc>https://claudhq.com/tools/claude-code-usage-limit-planner.html</loc></url>
   <url><loc>https://claudhq.com/tools/mcp-tool-context-overhead-calculator.html</loc></url>
+  <url>
+    <loc>https://claudhq.com/claude-code-on-windows/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://claudhq.com/claude-code-read-images/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://claudhq.com/claude-code-read-pdfs/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
